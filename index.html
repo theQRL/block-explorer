@@ -1,0 +1,119 @@
+<!doctype html><html><head> <meta charset="utf-8"> <meta name="keywords" content=""> <meta name="description" content=""> <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0"> <link rel="shortcut icon" type="image/png" href="favicon.png"> <link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css"><link rel="stylesheet" type="text/css" href="style.css"><link rel="stylesheet" href="./css/font-awesome.min.css"><link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro&subset=latin,latin-ext' rel='stylesheet' type='text/css'> <script src="./js/jquery-2.1.0.min.js"></script><script src="./js/bootstrap.min.js"></script><script src="./js/blocs.min.js"></script><script src="./js/jqBootstrapValidation.js"></script><script src="./js/formHandler.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script> <title>Home</title>   <style>
+   table {border-collapse:collapse; table-layout:fixed;}
+   table td { word-wrap:break-word;}
+   </style> <!-- Google Analytics --> <!-- Google Analytics END --> </head><body><!-- Main container --><div class="page-container"> <!-- bloc-0 --><div class="bloc bgc-rich-electric-blue d-bloc" id="bloc-0"><div class="container bloc-sm"><nav class="navbar row"><div class="navbar-header"><a class="navbar-brand ltc-white" href="index.html">QRL block explorer (Testnet)</a><button id="nav-toggle" type="button" class="ui-navbar-toggle navbar-toggle" data-toggle="collapse" data-target=".navbar-1"><span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button></div><div class="collapse navbar-collapse navbar-1"><ul class="site-navigation nav navbar-nav "><li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="white-paper.html">White Paper</a></li><li><a href="api.html">API</a></li></ul></div></nav></div></div><!-- bloc-0 END --><!-- bloc-1 --><div class="bloc bgc-white l-bloc" id="bloc-1"><div class="container bloc-lg"><div class="row"><div class="col-sm-12"><form id="form_305" novalidate class="searchform"><div class="form-group"><a onclick="doSearch();" class="btn btn-lg searchbutton btn-dark-tangerine">Search</a><input class="form-control searchbox" placeholder="by tx hash, address, block height" id="input_1704" /></div></form></div></div>
+   <div class="row  object-hidden" id="searchres" style="margin-left: 20px">
+       <div class="col-sm-12">
+       SEARCH RESULTS HERE
+       </div>
+   </div>
+   <div class="row voffset"><div class="col-sm-6"><h3 class="mg-md  tc-rich-electric-blue"><span class="fa fa-star"></span>&nbsp;Latest blocks</h3><div></div>
+<table class="table table-responsive" id="block-table">
+  <thead>
+    <th>Timestamp</th>
+    <th>Transactions</th>
+    <th>Blockhash</th>
+    <th>Block number</th>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+</div><div class="col-sm-6"><h3 class="mg-md  tc-rich-electric-blue"><span class="fa fa-star"></span> Latest Tx</h3><div></div>
+<table class="table" id="tx-table">
+  <thead>
+    <th>Timestamp</th>
+    <th>Amount</th>
+    <th>Txhash</th>
+    <th>Block</th>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+</div></div></div></div><!-- bloc-1 END --><!-- ScrollToTop Button --><a class="bloc-button btn btn-d scrollToTop" onclick="scrollToTarget('1')"><span class="fa fa-chevron-up"></span></a><!-- ScrollToTop Button END--></div><!-- Main container END --> <script>
+
+refreshData();
+
+window.setInterval(function(){
+refreshData();
+}, 5000);
+
+function refreshData() {
+    $.ajax({
+        url: 'http://104.251.219.215:8080/api/last_tx/5',
+        success: function(data, textStatus, jqXHR) {
+            drawTxTable(data);
+        }
+    });
+    $.ajax({
+        url: 'http://104.251.219.215:8080/api/last_block/5',
+        success: function(data, textStatus, jqXHR) {
+            drawBlockTable(data);
+        }
+    });
+}
+
+function drawTxTable(data) {
+    var a = toArray(data.transactions)
+    a.reverse();
+    for (let i = 0, l = a.length; i < l; i++) {
+        drawTxRow(a[i]);
+    }
+}
+function drawBlockTable(data) {
+    var a = toArray(data.blocks);
+    a.reverse();
+    for (let i = 0, l = a.length; i < l; i++) {
+        drawBlockRow(a[i]);
+    }
+}
+function drawTxRow(rowData) {
+    var row = $("<tr />")
+    $("#tx-table").append(row);
+    var x = moment.unix(rowData[0]);
+    row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
+    row.append($("<td>" + rowData[1] + "</td>"));
+    row.append($("<td onclick=\"doSearch('" + rowData[2] + "')\">" + rowData[2] + "</td>"));
+    row.append($("<td onclick=\"doSearch('" + rowData[3] + "')\">" + rowData[3] + "</td>"));
+}
+function drawBlockRow(rowData) {
+    var row = $("<tr />")
+    $("#block-table").append(row);
+    var x = moment.unix(rowData[0]);
+    row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
+    row.append($("<td>" + rowData[1] + "</td>"));
+    row.append($("<td onclick=\"doSearch('" + rowData[2] + "')\">" + rowData[2] + "</td>"));
+    row.append($("<td onclick=\"doSearch('" + rowData[3] + "')\">" + rowData[3] + "</td>"));
+}
+
+function toArray(obj) {
+    const result = [];
+    for (const prop in obj) {
+        const value = obj[prop];
+        if (typeof value === 'object') {
+            result.push(toArray(value)); // <- recursive call
+        }
+        else {
+            result.push(value);
+        }
+    }
+    return result;
+}
+
+function doSearch(ee) {
+    if (!ee) {
+      var x = $('#input_1704').val();  
+    } else {
+        var x = ee;
+    }
+    
+    
+    if (!x) {
+        $('#searchres').text('INVALID SEARCH STRING');
+        $('#searchres').show();
+    } else {
+        $('#searchres').text('SEARCHING FOR ' + x + '...');
+        $('#searchres').show();
+    }
+}
+
+</script></body></html>
