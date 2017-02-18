@@ -8,25 +8,25 @@
        </div>
    </div>
    <div class="row voffset"><div class="col-sm-6"><h3 class="mg-md  tc-rich-electric-blue"><span class="fa fa-star"></span>&nbsp;Latest blocks</h3><div></div>
-<table class="table table-responsive" id="block-table">
+<table class="table table-responsive">
   <thead>
     <th>Timestamp</th>
     <th>Transactions</th>
     <th>Blockhash</th>
     <th>Block number</th>
   </thead>
-  <tbody>
+  <tbody id="block-table">
   </tbody>
 </table>
 </div><div class="col-sm-6"><h3 class="mg-md  tc-rich-electric-blue"><span class="fa fa-star"></span> Latest Tx</h3><div></div>
-<table class="table" id="tx-table">
+<table class="table">
   <thead>
     <th>Timestamp</th>
     <th>Amount</th>
     <th>Txhash</th>
     <th>Block</th>
   </thead>
-  <tbody>
+  <tbody id="tx-table">
   </tbody>
 </table>
 </div></div></div></div><!-- bloc-1 END --><!-- ScrollToTop Button --><a class="bloc-button btn btn-d scrollToTop" onclick="scrollToTarget('1')"><span class="fa fa-chevron-up"></span></a><!-- ScrollToTop Button END--></div><!-- Main container END --> <script>
@@ -53,6 +53,8 @@ function refreshData() {
 }
 
 function drawTxTable(data) {
+  var row = $("<tr />");
+  $("#tx-table").empty(row);
     var a = toArray(data.transactions)
     a.reverse();
     for (let i = 0, l = a.length; i < l; i++) {
@@ -60,6 +62,8 @@ function drawTxTable(data) {
     }
 }
 function drawBlockTable(data) {
+  var row = $("<tr />");
+  $("#block-table").empty(row);
     var a = toArray(data.blocks);
     a.reverse();
     for (let i = 0, l = a.length; i < l; i++) {
@@ -67,7 +71,7 @@ function drawBlockTable(data) {
     }
 }
 function drawTxRow(rowData) {
-    var row = $("<tr />")
+    var row = $("<tr />");
     $("#tx-table").append(row);
     var x = moment.unix(rowData[0]);
     row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
@@ -76,7 +80,7 @@ function drawTxRow(rowData) {
     row.append($("<td onclick=\"doSearch('" + rowData[3] + "')\">" + rowData[3] + "</td>"));
 }
 function drawBlockRow(rowData) {
-    var row = $("<tr />")
+    var row = $("<tr />");
     $("#block-table").append(row);
     var x = moment.unix(rowData[0]);
     row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
