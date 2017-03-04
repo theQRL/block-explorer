@@ -3,6 +3,7 @@ $(document).ready(function() {
     
     var BlT = $('#BlT').DataTable({
         paging: false,
+        info: false,
         searching: false,
         lengthChange: false,
         "order": [[ 0, 'dec' ], [ 1, 'dec' ]]
@@ -40,9 +41,10 @@ function drawStats(data){
     var x = moment.duration(data.network_uptime,'seconds').format("d[d] h[h] mm[min]");
     $('#uptime').text(x);
     $('#nodes').text(data.nodes);
-    var x = moment.duration(data.block_time_variance,'seconds').format("ss[s]");
-    $('#variance').text(x);
-    var x = moment.duration(data.block_time,'seconds').format("ss[s]");
+    var x = moment.duration(data.block_time_variance,'seconds');
+    x = Math.round(x/10)/100;
+    $('#variance').text(x + 's');
+    var x = moment.duration(data.block_time,'seconds').format("s[s]");
     $('#blocktime').text(x);
     $('#blockheight').text(data.blockheight);
     $('#validators').text(data.stake_validators);
@@ -67,8 +69,8 @@ function drawTxTable(data) {
 }
 
 function drawBlockTable(data) {
-    var row = $("<tr />");
-    $("#block-table").empty(row);
+   var BlT = $('#BlT').DataTable();
+   BlT.clear();
     _.each(data.blocks, function(object) {
         drawBlockRow(object.timestamp, object.number_transactions, object.blockhash, object.blocknumber);
     });
@@ -78,22 +80,26 @@ function drawTxRow(a, b, c, d) {
     var row = $("<tr />");
     $("#tx-table").append(row);
     var x = moment.unix(a);
+    if (x.isValid()) {
     row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
+} else {
+    row.append($("<td>unconfirmed</td>"));
+}
     row.append($("<td>" + b + "</td>"));
     row.append($("<td onclick=\"doSearch('" + c + "')\">" + c + "</td>"));
     row.append($("<td onclick=\"doSearch('" + d + "')\">" + d + "</td>"));
 }
 
 function drawBlockRow(a, b, c, d) {
-    var row = $("<tr />");
-    $("#block-table").append(row);
+    // var row = $("<tr />");
+    // $("#block-table").append(row);
     var x = moment.unix(a);
     // row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
     // row.append($("<td>" + b + "</td>"));
     // row.append($("<td onclick=\"doSearch('" + c + "')\">" + c + "</td>"));
     // row.append($("<td onclick=\"doSearch('" + d + "')\">" + d + "</td>"));
 var BlT = $('#BlT').DataTable();
-BlT.row.add(['a','b','c','d']).draw( false );
+BlT.row.add([moment(x).format("HH:mm D MMM YYYY"),b,c,d]).draw( true );
 }
 
 function toArray(obj) {
@@ -109,19 +115,4 @@ function toArray(obj) {
     return result;
 }
 
-function doSearch(ee) {
-    if (!ee) {
-        var x = $('#input_1704').val();
-    } else {
-        var x = ee;
-    }
 
-
-    if (!x) {
-        $('#searchres').text('Invalid search string');
-        $('#searchres').show();
-    } else {
-        $('#searchres').text('Searching for ' + x + '...');
-        $('#searchres').show();
-    }
-}

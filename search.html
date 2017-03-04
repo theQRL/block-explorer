@@ -8,6 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
     <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
     <script src="js/JPL.dataTables.semanticui.js"></script>
+    <script src="js/qrcode.min.js"></script>
+    <script src="js/json-formatter.js"></script>
     <style type="text/css">
         body {
         background-color: #FFFFFF;
@@ -44,6 +46,12 @@
     }
     #searchres {
         margin-left:1em;
+    }
+    #petefix > .item {
+      margin-right: 2em;
+    }
+    #petefix2 > .item {
+      margin-right: 2em;
     }
     </style>
 </head>
@@ -100,166 +108,164 @@
         </div>
     </div>
     <div class="main container">
-    <!-- <div class="ui icon message"><div class="ui active inline loader"></div><div class="content" id="searchres">Ping</div></div> -->
-<div class="ui stackable grid">
-<div class="six wide column">
-<div class="ui fluid card">
-  <div class="content">
-    <div class="header">Network</div>
-  </div>
-  <div class="content">
-  <div class="ui divided selection list">
-  <a class="item">
-    <strong style="color:#000;">:</strong><strong style="color:#000;" id="network"></strong>
-  </a>
-  <a class="item">
-    <div class="ui purple horizontal label" id="uptime"></div>
-    network uptime
-  </a>
-  <a class="item">
-    <div class="ui blue horizontal label" id="nodes"></div>
-    nodes
-  </a>
+    <div class="ui stackable grid">
+    <div class="two wide column">
+      <div id="qrcode"></div>
+    </div>
+    <div class="twelve wide column">
+      <h3 id="searchID"></h3>
+    </div>
+    </div>
+      
+
+      
+
+
+<div id="Saddress">
+      <div class="ui active dimmer">
+        <div class="ui loader"></div>
+      </div>
+   <div class="ui divided horizontal selection list" id="petefix">
+     <a class="item">
+       <div class="ui green horizontal label" id="balance"></div>
+       Balance
+     </a>
+     <a class="item">
+       <div class="ui purple horizontal label" id="nonce"></div>
+       Nonce
+     </a>
+     <a class="item">
+       <div class="ui blue horizontal label" id="transactions"></div>
+       Transactions
+     </a>
 </div>
-  </div>
+
+      <div class="ui top attached tabular menu">
+        <a class="active item" data-tab="first">Transactions</a>
+        <a class="item" data-tab="second">Staked blocks</a>
+      </div>
+      <div class="ui bottom attached active tab segment" data-tab="first">
+
+      <div class="ui stackable grid">
+      <div class="sixteen wide column">
+
+          <table id="TransT" class="ui celled table">
+              <thead><tr>
+                  <th>Txhash</th>
+                  <th>Block</th>
+                  <th>Timestamp</th>
+                  <th>From</th>
+                  <th>&nbsp;</th>
+                  <th>To</th>
+                  <th>Value</th>
+                  <th>Fee</th></tr>
+              </thead>
+              <tbody id="TransT-table">
+              </tbody>
+          </table>
+      </div>
+      </div>
+
+        
+      </div>
+      <div class="ui bottom attached tab segment" data-tab="second">
+        Staked blocks
+      </div>
+    </div>
 </div>
-<div class="ui fluid card">
-<div class="content">
-<div class="header">Proof-of-stake</div>
+
+<div id="Shash">
+
+<div class="ui active dimmer">
+  <div class="ui loader"></div>
 </div>
-<div class="content">
-<div class="ui divided selection list">
-  <a class="item">
-    <div class="ui red horizontal label" id="validators"></div>
-    stake validators
-  </a>
-  <a class="item">
-    <div class="ui purple horizontal label" id="PCemission"></div>
-    staked percentage emission
-  </a>
-  <a class="item">
-    <div class="ui blue horizontal label" id="epoch"></div>
-    epoch
-  </a>
-</div>
-</div>
-</div>
-</div>
-<div class="six wide column">
-<div class="ui fluid card">
-<div class="content">
-<div class="header">Blocks</div>
-</div>
-<div class="content">
-<div class="ui divided selection list">
-  <a class="item">
-    <div class="ui red horizontal label" id="variance"></div>
-    block time variance
-  </a>
-  <a class="item">
-    <div class="ui purple horizontal label" id="blocktime"></div>
-    block time
-  </a>
-  <a class="item">
-    <div class="ui blue horizontal label" id="blockheight"></div>
-    blockheight
-  </a>
-</div>
-</div>
-</div>
-<div class="ui fluid card">
-<div class="content">
-<div class="header">Coin supply</div>
-</div>
-<div class="content">
-<div class="ui divided selection list">
-  <a class="item">
-    <div class="ui red horizontal label" id="emission"></div>
-    emission
-  </a>
-  <a class="item">
-    <div class="ui purple horizontal label" id="unmined"></div>
-    unmined
-  </a>
-  <a class="item">
-    <div class="ui blue horizontal label" id="reward"></div>
-    block reward
-  </a>
-</div>
-</div>
-</div>
-</div>
+<!-- <div class="row">
 <div class="four wide column">
-<div class="ui fluid card" style="display: none; ">
-  <div class="content">
-    <div class="header">Richlist</div>
-  </div>
-  <div class="content">
-    <h4 class="ui sub header dash_header">Nodes</h4>
-    <div class="ui small feed">
-      <div class="event">
-        <div class="content">
-          <div class="summary">
-             <a>Alpha</a> is up
-          </div>
-        </div>
-      </div>
-      <div class="event">
-        <div class="content">
-          <div class="summary">
-             <a>Bravo</a> is down
-          </div>
-        </div>
-      </div>
-      <div class="event">
-        <div class="content">
-          <div class="summary">
-             <a>Charlie</a> is up
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="extra content">
-    <button class="ui button">Test</button>
-  </div>
+Timestamp <strong id="Txtime"></strong>
 </div>
+<div class="three wide column">
+Block <a class="ui purple label" id="Txblock"></a>
+</div>
+<div class="three wide column">
+Type <a class="ui red label" id="Txtype"></a>
+</div>
+<div class="three wide column">
+Amount <a class="ui blue label" id="Txamount"></a>
+</div>
+<div class="three wide column">
+Fee <a class="ui green label" id="Txfee"></a>
 </div>
 </div>
 
 
-        <div class="ui stackable grid">
-                <div class="eight wide column">
-                    <h3><span class="fa fa-star"></span>&nbsp;Latest blocks</h3>
-                    <div></div>
-                    <table id="BlT" class="ui single line fixed unstackable celled table">
-                        <thead>
-                            <th>Timestamp</th>
-                            <th>Transactions</th>
-                            <th>Blockhash</th>
-                            <th>Block number</th>
-                        </thead>
-                        <tbody id="block-table">
-                        </tbody>
-                    </table>
-                </div>
-                <div class="eight wide column">
-                    <h3><span class="fa fa-star"></span> Latest Tx</h3>
-                    <div></div>
-                    <table id="TxT" class="ui single line fixed unstackable celled table">
-                        <thead>
-                            <th>Timestamp</th>
-                            <th>Amount</th>
-                            <th>Txhash</th>
-                            <th>Block</th>
-                        </thead>
-                        <tbody id="tx-table">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+
+<div class="ui raised segment">
+  <div class="content">
+  <h4 class="ui sub header dash_header">From</h4>
+  <span id="PartiesFrom"></span>
+
+<h4 class="ui sub header dash_header">To</h4>
+
+  <span id="PartiesTo"></span>
+</div>
+</div>
+
+
+
+<div class="ui segment" id="PK" style="margin-left:1em;">
+</div> -->
+<div style="margin-left:1em;">
+<div class="ui top attached tabular menu">
+  <a class="active item" data-tab="demo">Transfer</a>
+  <a class="item" data-tab="keys">Keys</a>
+</div>
+<div class="ui bottom attached active tab segment" data-tab="demo">
+<div class="ui stackable grid">
+  <div class="two wide column"><table class="table" style="font-size: 1em; padding:5px;"><tr>
+  <td colspan="2" class="item"><strong id="Txtime"></strong></td></tr>
+  <tr><td class="item" style="padding-right: 20px">Block </td><td><span class="" id="Txblock"></span></td></tr>
+  <tr><td class="item" style="padding-right: 20px">Type </td><td><span class="ui blue label" id="Txtype"></span></td></tr>
+  <tr><td class="item" style="padding-right: 20px">Amount </td><td><span class="" id="Txamount"></span></td></tr>
+  <tr><td class="item" style="padding-right: 20px">Fee </td><td><span class="" id="Txfee"></span></td></tr>
+</table></div>
+  <div class="ten wide column">
+    <div class="column"><h4 class="ui sub header dash_header">From</h4>
+<span id="PartiesFrom"></span>
+   <h4 class="ui sub header dash_header">To</h4>
+
+     <span id="PartiesTo"></span></div>
+   
+ </div>
+</div>
+
+<!-- <div class="ui divided selection list" id="petefix2">
+     <a class="item">
+     <strong id="Txtime"></strong>
+     </a>
+     <a class="item">
+     Block <a class="ui purple label" id="Txblock"></a>
+     </a>
+     <a class="item">
+     Type <a class="ui red label" id="Txtype"></a>
+     </a>
+     <a class="item">
+     Amount <a class="ui blue label" id="Txamount"></a>
+     </a>
+     <a class="item">
+     Fee <a class="ui green label" id="Txfee"></a>
+     </a>
+</div> -->
+
+
+
+  
+</div>
+<div class="ui bottom attached tab segment" data-tab="keys" id='PK'>
+  Keys
+</div>
+</div>
+</div>
+
     <div class="ui inverted vertical footer segment">
         <!-- <div class="ui center aligned container">
             <div class="ui stackable inverted divided grid">
@@ -310,7 +316,7 @@
     </div>
     <script src="js/moment.min.js"></script>
     <script src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>
-    <script src="js/qrl.js"></script>
+    <script src="js/search.js"></script>
 </body>
 
 </html>
