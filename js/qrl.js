@@ -8,7 +8,17 @@ $(document).ready(function() {
         lengthChange: false,
         "order": [[ 0, 'dec' ], [ 1, 'dec' ]]
     });
-    refreshData();
+   $('.table').on('mouseenter','tr', function(){
+             console.log($(this).text());
+
+         });
+   $('#BlT table td')
+     .popup({
+       popup : $('.custom.popup'),
+       hoverable: true
+     })
+   ;
+         refreshData();
 } );
 
 window.setInterval(function() {
@@ -19,6 +29,7 @@ function refreshData() {
     $.ajax({
         url: 'http://104.251.219.215:8080/api/last_tx/5',
         success: function(data, textStatus, jqXHR) {
+            $('.dimmer').hide();
             drawTxTable(data);
         }
     });

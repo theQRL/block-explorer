@@ -1,7 +1,9 @@
 <html>
 
+
 <head>
     <link rel="stylesheet" href="bower_components/semantic/dist/semantic.css">
+    <link rel="stylesheet" href="css/styles.css">
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="js/dosearch.js"></script>
     <script src="bower_components/semantic/dist/semantic.js"></script>
@@ -10,54 +12,12 @@
     <script src="js/JPL.dataTables.semanticui.js"></script>
     <script src="js/qrcode.min.js"></script>
     <script src="js/json-formatter.js"></script>
-    <style type="text/css">
-        body {
-        background-color: #FFFFFF;
-    }
-    
-    .ui.menu .item img.logo {
-        margin-right: 1.5em;
-    }
-    
-    .main.container {
-        margin-top: 4.5em;
-        margin-left: 1em;
-        margin-right: 1em;
-    }
-    
-    .wireframe {
-        margin-top: 2em;
-    }
-    
-    .ui.footer.segment {
-        margin: 5em 0em 0em;
-        padding: 5em 0em;
-    }
-    
-    .ui.table tr {
-        font-size: 0.7em;
-    }
-    
-    .hidden {
-        display: none;
-    }
-    .ui.menu .item > .input input {
-    width: 20em;
-    }
-    #searchres {
-        margin-left:1em;
-    }
-    #petefix > .item {
-      margin-right: 2em;
-    }
-    #petefix2 > .item {
-      margin-right: 2em;
-    }
-    </style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 
 <body>
-    <div class="ui tiny fixed inverted menu">
+    <div class="ui tiny fixed inverted menu" id="menu">
         <div class="ui container">
             <a href="index.html" class="header item">
                 <img class="logo" src="assets/Q@2x.png"><!-- QRL -->
@@ -107,6 +67,29 @@
               </div>
         </div>
     </div>
+
+    <div class="ui sidebar inverted vertical menu">
+        <a class="item header" href="index.html"><img class="logo" src="assets/Q@2x.png" style="max-width: 50px; padding-bottom: 10px;"> QRL explorer</a>
+            <a class="item" href="http://theqrl.org/">theQRL.org</a>
+            <a class="item" href="http://theqrl.org/whitepaper/QRL_whitepaper.pdf">White Paper</a>
+            <a class="item" href="https://github.com/surg0r/qrl">Github</a>
+            <div class="item">
+              <div class="ui icon input">
+                <input id="input_1704" type="text" placeholder="tx, address, block height">
+                <i onclick="doSearch();" class="search link icon"></i>
+              </div>
+              </div>
+      </div>
+      <div class="pusher">
+        <div class="ui fixed inverted menu" id="m_menu">
+            <div class="ui container" id="m_btn">
+
+                <div class="icon item">
+                  <a id="hamburger"><i class="content icon"></i> Menu</a>
+                </div>
+            </div>
+        </div>
+
     <div class="main container">
     <div class="ui stackable grid">
     <div class="two wide column">
@@ -149,7 +132,7 @@
       <div class="ui stackable grid">
       <div class="sixteen wide column">
 
-          <table id="TransT" class="ui celled table">
+          <table id="TransT" class="ui single line fixed unstackable celled table">
               <thead><tr>
                   <th>Txhash</th>
                   <th>Block</th>
@@ -158,7 +141,7 @@
                   <th>&nbsp;</th>
                   <th>To</th>
                   <th>Value</th>
-                  <th>Fee</th></tr>
+                  <th style="max-width: 30px">Fee</th></tr>
               </thead>
               <tbody id="TransT-table">
               </tbody>
@@ -314,9 +297,14 @@ Fee <a class="ui green label" id="Txfee"></a>
         </div>
         </div>
     </div>
+    </div>
     <script src="js/moment.min.js"></script>
     <script src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>
     <script src="js/search.js"></script>
+    <script>
+            $('.ui.dropdown').dropdown();
+           $('.sidebar').first().sidebar('attach events', '#hamburger', 'show');
+    </script>
 </body>
 
 </html>
