@@ -46,6 +46,19 @@
     .ui.table th {
       overflow: auto;
     }
+
+    .ui .event .content .summary a {
+    word-wrap: break-word;
+    word-break: break-all;
+    }
+
+    #searchID {
+        word-wrap: break-word;
+        word-break: break-all;
+    }
+
+
+
     @media all and (max-width:519px) {
         /* First, hide the main menu */
             #menu {

@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    $('.tabular.menu .item').tab();
+    // $('.tabular.menu .item').tab();
     $('#Saddress').hide();
     $('#Shash').hide();
     var s = window.location.href;
