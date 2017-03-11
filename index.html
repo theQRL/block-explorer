@@ -98,7 +98,7 @@
     <div class="header">Network</div>
   </div>
   <div class="content">
-  <div class="ui divided selection list">
+  <div class="ui divided list">
   <a class="item">
     <strong style="color:#000;">:</strong><strong style="color:#000;" id="network"></strong>
   </a>
@@ -118,7 +118,7 @@
 <div class="header">Proof-of-stake</div>
 </div>
 <div class="content">
-<div class="ui divided selection list">
+<div class="ui divided list">
   <a class="item">
     <div class="ui red horizontal label" id="validators"></div>
     stake validators
@@ -141,7 +141,7 @@
 <div class="header">Blocks</div>
 </div>
 <div class="content">
-<div class="ui divided selection list">
+<div class="ui divided list">
   <a class="item">
     <div class="ui red horizontal label" id="variance"></div>
     block time variance
@@ -162,7 +162,7 @@
 <div class="header">Coin supply</div>
 </div>
 <div class="content">
-<div class="ui divided selection list">
+<div class="ui divided list">
   <a class="item">
     <div class="ui red horizontal label" id="emission"></div>
     emission
@@ -243,12 +243,13 @@
                     <div class="ui custom popup">
                        I'm not on the same level as the button, but i can still be found.
                      </div>
-                    <table id="BlT" class="ui single line fixed unstackable celled table">
+                    <table id="BlT" class="ui single line fixed unstackable celled selectable table">
                         <thead>
                             <th>Timestamp</th>
                             <th>Transactions</th>
                             <th>Blockhash</th>
                             <th>Block number</th>
+                            <th>Unix</th>
                         </thead>
                         <tbody id="block-table">
                         </tbody>
@@ -258,7 +259,7 @@
                 <div class="eight wide column">
                     <h3><span class="fa fa-star"></span> Latest Tx</h3>
                     <div></div>
-                    <table id="TxT" class="ui single line fixed unstackable celled table">
+                    <table id="TxT" class="ui single line fixed unstackable celled selectable table">
                         <thead>
                             <th>Timestamp</th>
                             <th>Amount</th>
@@ -271,7 +272,7 @@
                 </div>
             </div>
         </div>
-    </div>
+ 
     <div class="ui inverted vertical footer segment">
         <!-- <div class="ui center aligned container">
             <div class="ui stackable inverted divided grid">
@@ -320,6 +321,20 @@
         </div>
         </div>
     </div>
+    </div>
+    <div class="ui modal" id="domModal">
+      <i class="close icon"></i>
+      <div class="header" id="domModalTitle">
+        
+      </div>
+      <div class="content">
+        <div class="description" id="domModalBody">
+          
+        </div>
+      </div>
+      <div class="actions">
+        <div class="ui cancel button">Ok</div>
+      </div>
     </div>
     <script src="js/moment.min.js"></script>
     <script src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>

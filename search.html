@@ -197,26 +197,27 @@ Fee <a class="ui green label" id="Txfee"></a>
 
 <div class="ui segment" id="PK" style="margin-left:1em;">
 </div> -->
-<div style="margin-left:1em;">
+<div style="margin:1em;">
 <div class="ui top attached tabular menu">
   <a class="active item" data-tab="demo">Transfer</a>
   <a class="item" data-tab="keys">Keys</a>
 </div>
 <div class="ui bottom attached active tab segment" data-tab="demo">
-<div class="ui stackable grid">
-  <div class="two wide column"><table class="table" style="font-size: 1em; padding:5px;"><tr>
+<div class="ui equal width stackable grid">
+  <div class="four wide column"><table class="table" style="font-size: 1em; padding:5px;"><tr>
   <td colspan="2" class="item"><strong id="Txtime"></strong></td></tr>
   <tr><td class="item" style="padding-right: 20px">Block </td><td><span class="" id="Txblock"></span></td></tr>
   <tr><td class="item" style="padding-right: 20px">Type </td><td><span class="ui blue label" id="Txtype"></span></td></tr>
   <tr><td class="item" style="padding-right: 20px">Amount </td><td><span class="" id="Txamount"></span></td></tr>
   <tr><td class="item" style="padding-right: 20px">Fee </td><td><span class="" id="Txfee"></span></td></tr>
 </table></div>
-  <div class="ten wide column">
-    <div class="column"><h4 class="ui sub header dash_header">From</h4>
+
+  
+    <div class="column" id="TxError"><h4 class="ui sub header dash_header">From</h4>
 <span id="PartiesFrom"></span>
    <h4 class="ui sub header dash_header">To</h4>
 
-     <span id="PartiesTo"></span></div>
+     <span id="PartiesTo"></span>
    
  </div>
 </div>

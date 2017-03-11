@@ -1,36 +1,4 @@
 
-$(document).ready(function() {
-      $('.tabular.menu .item').tab();
-
-    
-    var BlT = $('#BlT').DataTable({
-        paging: false,
-        info: false,
-        searching: false,
-        lengthChange: false,
-        "order": [[ 0, 'dec' ], [ 1, 'dec' ]]
-    });
-   $('.table').on('mouseenter','tr', function(){
-             console.log($(this).text());
-
-         });
-   $('#BlT table td')
-     .popup({
-       popup : $('.custom.popup'),
-       hoverable: true
-     })
-   ;
-         refreshData();
-         refreshRich();
-} );
-
-window.setInterval(function() {
-    refreshData();
-}, 5000);
-
-window.setInterval(function() {
-    refreshRich();
-}, 20000);
 
 function refreshRich() {
     $.ajax({
@@ -103,8 +71,8 @@ function drawStats(data){
 }
 
 function drawTxTable(data) {
-    var row = $("<tr />");
-    $("#tx-table").empty(row);
+    var TxT = $('#TxT').DataTable();
+    TxT.clear();
     _.each(data.transactions, function(object) {
         drawTxRow(object.timestamp, object.amount, object.txhash, object.block);
     });
@@ -119,17 +87,28 @@ function drawBlockTable(data) {
 }
 
 function drawTxRow(a, b, c, d) {
-    var row = $("<tr />");
-    $("#tx-table").append(row);
+   // var row = $("<tr />");
+    //$("#tx-table").append(row);
     var x = moment.unix(a);
-    if (x.isValid()) {
-    row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
+    // console.log(x.fromNow());
+  //  if (x.isValid()) {
+// "x epoch ago" instead of this:
+//row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
+   // row.append($("<td>" + x.fromNow() + "</td>"));
+// } else {
+    // row.append($("<td>unconfirmed</td>"));
+// }
+    // row.append($("<td>" + b + "</td>"));
+    // row.append($("<td onclick=\"doSearch('" + c + "')\">" + c + "</td>"));
+    // row.append($("<td onclick=\"doSearch('" + d + "')\">" + d + "</td>"));
+
+var TxT = $('#TxT').DataTable();
+if (x.isValid()) {
+    TxT.row.add([x.fromNow(),b,c,d,a]).draw(true);
 } else {
-    row.append($("<td>unconfirmed</td>"));
+    TxT.row.add(['unconfirmed',b,c,d,a]).draw(true);
 }
-    row.append($("<td>" + b + "</td>"));
-    row.append($("<td onclick=\"doSearch('" + c + "')\">" + c + "</td>"));
-    row.append($("<td onclick=\"doSearch('" + d + "')\">" + d + "</td>"));
+
 }
 
 function drawBlockRow(a, b, c, d) {
@@ -141,20 +120,111 @@ function drawBlockRow(a, b, c, d) {
     // row.append($("<td onclick=\"doSearch('" + c + "')\">" + c + "</td>"));
     // row.append($("<td onclick=\"doSearch('" + d + "')\">" + d + "</td>"));
 var BlT = $('#BlT').DataTable();
-BlT.row.add([moment(x).format("HH:mm D MMM YYYY"),b,c,d]).draw( true );
+// "[epoch]" ago instead of this...
+//BlT.row.add([moment(x).format("HH:mm D MMM YYYY"),b,c,d]).draw( true );
+BlT.row.add([x.fromNow(),b,c,d,a]).draw(true);
 }
 
-function toArray(obj) {
-    const result = [];
-    for (const prop in obj) {
-        const value = obj[prop];
-        if (typeof value === 'object') {
-            result.push(toArray(value)); // <- recursive call
-        } else {
-            result.push(value);
-        }
-    }
-    return result;
-}
+// function toArray(obj) {
+//     const result = [];
+//     for (const prop in obj) {
+//         const value = obj[prop];
+//         if (typeof value === 'object') {
+//             result.push(toArray(value)); // <- recursive call
+//         } else {
+//             result.push(value);
+//         }
+//     }
+//     return result;
+// }
 
 
+$(document).ready(function() {
+      $('.tabular.menu .item').tab();
+
+    
+    $('#BlT').DataTable({
+        select: true,
+        paging: false,
+        info: false,
+        searching: false,
+        lengthChange: false,
+        "order": [[ 4, 'dec' ], [ 3, 'dec' ]],
+        "columnDefs": [
+                    { "orderable": false, "targets": 0 },
+                    { "orderable": false, "targets": 1 },
+                    { "orderable": false, "targets": 2 },
+                    { "orderable": false, "targets": 3 },
+                    {
+                        "targets": [ 4 ],
+                        "visible": false,
+                        "searchable": false
+                    },
+                ],
+            rowReorder: {
+        enable: false
+    } 
+    });
+    $('#TxT').DataTable({
+        select: true,
+        paging: false,
+        info: false,
+        searching: false,
+        lengthChange: false,
+        "order": [[ 4, 'dec' ], [ 3, 'dec' ]],
+        "columnDefs": [
+        { "orderable": false, "targets": 0 },
+        { "orderable": false, "targets": 1 },
+        { "orderable": false, "targets": 2 },
+        { "orderable": false, "targets": 3 },
+                    {
+                        "targets": [ 4 ],
+                        "visible": false,
+                        "searchable": false
+                    },
+                ],
+            rowReorder: {
+        enable: false
+    }      
+    });
+
+
+   // $('.table').on('mouseenter','tr', function(){
+   //           console.log($(this).text());
+
+   //       });
+   // $('#BlT table td')
+   //   .popup({
+   //     popup : $('.custom.popup'),
+   //     hoverable: true
+   //   });
+
+   $('.table')
+       .on( 'click', function ( e ) {
+           var table = $(this).DataTable();
+           // console.log('row = ' + e.target._DT_CellIndex.row);
+           // console.log('col = ' + e.target._DT_CellIndex.column);
+           var rowData = table.rows( e.target._DT_CellIndex.row ).data();
+           if (e.currentTarget.id == 'BlT') {
+            $('#domModalTitle').text('Blockhash clicked');
+            $('#domModalBody').text('Blockhash: '+rowData[0][2]);
+            $('#domModal').modal('show');
+           } else {
+           doSearch(rowData[0][2]);
+       }
+       } );
+
+
+         refreshData();
+         refreshRich();
+});
+
+
+
+window.setInterval(function() {
+    refreshData();
+}, 5000);
+
+window.setInterval(function() {
+    refreshRich();
+}, 20000);

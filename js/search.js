@@ -23,7 +23,10 @@ $(document).ready(function() {
 
         url: 'http://104.251.219.215:8080/api/txhash/' + s,
         success: function(data, textStatus, jqXHR) {
-            console.log(data);
+            if (data.status == 'Error') {
+                console.log('Error: ' + data.error);
+                $('#searchID').append('<br><br><small>Error: ' + data.error + '</small>');
+            } else {
             $('#PartiesTo').text(data.txto);
             $('#PartiesTo').click(function(){
                 doSearch($(this).text());
@@ -47,6 +50,7 @@ $(document).ready(function() {
             $('.dimmer').hide();
             $('#Shash').show();
         }
+    }
     });
     }
 
