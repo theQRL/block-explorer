@@ -1,6 +1,12 @@
 body {
   background-color: #FFFFFF; }
 
+.ui.menu.inverted {
+  background-color: #1D2951; }
+
+.ui.inverted.footer {
+  background-color: #1D2951; }
+
 .ui.menu .item img.logo {
   margin-right: 1.5em; }
 
@@ -61,10 +67,10 @@ body {
   word-break: break-all; }
 
 .ui.list .list > a.item, .ui.list > a.item, a.item {
-  color: #000; }
+  color: #1D2951; }
 
 .ui.list .list > a.item:hover, .ui.list > a.item:hover {
-  color: #000; }
+  color: #1D2951; }
 
 @media all and (max-width: 519px) {
   /* First, hide the main menu */

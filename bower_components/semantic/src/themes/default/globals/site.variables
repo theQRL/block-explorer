@@ -47,8 +47,8 @@
     Brand Colors
 --------------------*/
 
-@primaryColor        : @blue;
-@secondaryColor      : @black;
+@primaryColor        : #1D2951;
+@secondaryColor      : #D8D8D8;
 
 @lightPrimaryColor   : @lightBlue;
 @lightSecondaryColor : @lightBlack;
@@ -191,15 +191,15 @@
 --------------------*/
 
 /*---  Colors  ---*/
-@red              : #DB2828;
+@red              : #A50B5E;
 @orange           : #F2711C;
 @yellow           : #FBBD08;
 @olive            : #B5CC18;
 @green            : #21BA45;
 @teal             : #00B5AD;
-@blue             : #2185D0;
+@blue             : #EAA221;
 @violet           : #6435C9;
-@purple           : #A333C8;
+@purple           : #339D6C;
 @pink             : #E03997;
 @brown            : #A5673F;
 @grey             : #767676;
