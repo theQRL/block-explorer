@@ -206,7 +206,8 @@ $(document).ready(function() {
            if (e.currentTarget.id == 'BlT') {
             $('#domModalTitle').text('Blockhash clicked');
             $('#domModalBody').text('Blockhash: '+rowData[0][2]);
-            $('#domModal').modal('show');
+            window.location.href = 'search.html#'+rowData[0][3];
+            // $('#domModal').modal('show');
            } else {
            doSearch(rowData[0][2]);
        }
