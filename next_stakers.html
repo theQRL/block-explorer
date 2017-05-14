@@ -32,9 +32,9 @@
                     <a class="item" href="richlist.html">Richlist</a>
                     <div class="divider"></div>
                     <div class="header">Stakers</div>
-                    <a class="item active" href="#">
+                    <a class="item" href="current_stakers.html">
                     Current epoch</a>
-                    <a class="item" href="next_stakers.html">Next epoch
+                    <a class="active item" href="#">Next epoch
                     </a>
                     
                 </div>
@@ -72,8 +72,8 @@
 
             <a class="item header" href="richlist.html">Richlist</a>
                         <div class="item header">Stakers</div>
-            <a class="item active" href="#">&raquo; Current epoch</a>
-            <a class="item" href="next_stakers.html">&raquo; Next epoch</a>
+            <a class="item" href="#">&raquo; Current epoch</a>
+            <a class="item active">&raquo; Next epoch</a>
 
             <div class="item header">About</div>
             <a class="item" href="http://theqrl.org/">&raquo; theQRL.org</a>
@@ -104,21 +104,21 @@
     <!-- <div class="ui icon message"><div class="ui active inline loader"></div><div class="content" id="searchres">Ping</div></div> -->
 <div class="ui stackable grid">
 <div class="eleven wide column">
-<h3>Current Stakers</h3>
+<h3>Next Stakers</h3>
 
 
 
 
 
 <div class="content">
-  <table id="Stakers" class="ui single line unstackable celled selectable table">
+  <table id="NextStakers" class="ui single line unstackable celled selectable table">
       <thead>
           <th>Address</th>
           <th>Balance</th>
           <th>Nonce</th>
           <th>Hash terminator</th>
       </thead>
-      <tbody id="stakers-table">
+      <tbody id="nextstakers-table">
       </tbody>
   </table>
 </div>
@@ -131,41 +131,6 @@
         </div>
  
     <div class="ui inverted vertical footer segment">
-        <!-- <div class="ui center aligned container">
-            <div class="ui stackable inverted divided grid">
-                <div class="three wide column">
-                    <h4 class="ui inverted header">Group 1</h4>
-                    <div class="ui inverted link list">
-                        <a href="#" class="item">Link One</a>
-                        <a href="#" class="item">Link Two</a>
-                        <a href="#" class="item">Link Three</a>
-                        <a href="#" class="item">Link Four</a>
-                    </div>
-                </div>
-                <div class="three wide column">
-                    <h4 class="ui inverted header">Group 2</h4>
-                    <div class="ui inverted link list">
-                        <a href="#" class="item">Link One</a>
-                        <a href="#" class="item">Link Two</a>
-                        <a href="#" class="item">Link Three</a>
-                        <a href="#" class="item">Link Four</a>
-                    </div>
-                </div>
-                <div class="three wide column">
-                    <h4 class="ui inverted header">Group 3</h4>
-                    <div class="ui inverted link list">
-                        <a href="#" class="item">Link One</a>
-                        <a href="#" class="item">Link Two</a>
-                        <a href="#" class="item">Link Three</a>
-                        <a href="#" class="item">Link Four</a>
-                    </div>
-                </div>
-                <div class="seven wide column">
-                    <h4 class="ui inverted header">Footer Header</h4>
-                    <p>Extra space for a call to action inside the footer that could help re-engage users.</p>
-                </div>
-            </div> -->
-            <!-- <div class="ui inverted section divider"></div> -->
             <div class="ui center aligned container">
                 <a href="#"><img width="91" src="assets/ringedQ@2x.png"></a>
                 <p></p>
@@ -174,7 +139,6 @@
                 <a class="item" href="http://theqrl.org/">theQRL.org</a>
                 <a class="item" href="http://theqrl.org/whitepaper/QRL_whitepaper.pdf">White Paper</a>
                 <a class="item" href="https://github.com/theQRL/QRL">Github</a>
-                <!-- <a class="item" href="#">Credits</a> -->
             </div>
         </div>
         </div>
@@ -196,7 +160,7 @@
     </div>
     <script src="js/moment.min.js"></script>
     <script src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>
-    <script src="js/stakers.js"></script>
+    <script src="js/nextstakers.js"></script>
     <script>
             $('.ui.dropdown').dropdown();
            $('.sidebar').first().sidebar('attach events', '#hamburger', 'show');
