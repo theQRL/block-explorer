@@ -112,8 +112,7 @@ if (x.isValid()) {
 function drawBlockRow(a, b, c, d) {
     // var row = $("<tr />");
     // $("#block-table").append(row);
-    var x = moment.unix(a/1000);
-    console.log(x);
+    var x = moment.unix(a);
     // row.append($("<td>" + moment(x).format("HH:mm D MMM YYYY") + "</td>"));
     // row.append($("<td>" + b + "</td>"));
     // row.append($("<td onclick=\"doSearch('" + c + "')\">" + c + "</td>"));
