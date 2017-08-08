@@ -1,7 +1,9 @@
+<!DOCTYPE html>
 <html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <head>
+    <title>QRL Blockchain Explorer</title>
     <link rel="stylesheet" href="bower_components/semantic/dist/semantic.css">
     <link rel="stylesheet" href="css/styles.css">
     <script src="bower_components/jquery/dist/jquery.js"></script>
@@ -82,7 +84,7 @@
 
           <div class="item">
             <div class="ui icon input">
-              <input id="input_1704" type="text" placeholder="tx, address, block height">
+              <input id="input_1705" type="text" placeholder="tx, address, block height">
               <i onclick="doSearch();" class="search link icon"></i>
             </div>
             </div>
@@ -123,7 +125,7 @@
       <div class="event">
         <div class="content">
           <div class="summary">
-             <div class="ui horizontal label" style="background-color:#b7b7b7;"">2</div> <b style="font-size:1.3em" id="richA2"></b><br><a id="richB2"></a>
+             <div class="ui horizontal label" style="background-color:#b7b7b7;">2</div> <b style="font-size:1.3em" id="richA2"></b><br><a id="richB2"></a>
           </div>
         </div>
       </div>
@@ -131,7 +133,7 @@
       <div class="event">
         <div class="content">
           <div class="summary">
-             <div class="ui horizontal label" style="background-color:#a17419;"">3</div> <b style="font-size:1.1em" id="richA3"></b><br><a id="richB3"></a>
+             <div class="ui horizontal label" style="background-color:#a17419;">3</div> <b style="font-size:1.1em" id="richA3"></b><br><a id="richB3"></a>
           </div>
         </div>
       </div>
@@ -194,10 +196,15 @@
     </div>
     <script src="js/moment.min.js"></script>
     <script src="bower_components/moment-duration-format/lib/moment-duration-format.js"></script>
-    <script src="js/richlist.js"></script>
+    <!-- <script src="js/richlist.js"></script> -->
     <script>
             $('.ui.dropdown').dropdown();
            $('.sidebar').first().sidebar('attach events', '#hamburger', 'show');
+           // richlist disabled on current version of node
+           $('.modal').modal('show');
+           $('#domModalTitle').text('Richlist disabled');
+           $('#domModalBody').text('The richlist is not available on this version of the QRL node.');
+           $('.dimmer').hide();
     </script>
 </body>
 
