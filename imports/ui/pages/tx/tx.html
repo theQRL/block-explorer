@@ -1,0 +1,23 @@
+<template name="tx">
+  <h1>Tx</h1>
+  {{#with txhash}}
+    <!-- if txhash has an error property, display it -->
+    {{#if error}}
+      <p>There was an error: {{error.error}} {{error.reason}}</p>
+    {{else}}
+    <ul>
+      <li>nonce: {{txhash.nonce}}</li>
+      <li>fee: {{txhash.fee}}</li>
+      <li>timestamp: {{txhash.timestamp}}</li>
+      <li>txto: {{txhash.txto}}</li>
+      <li>amount: {{txhash.amount}}</li>
+      <li>txhash: {{txhash.txhash}}</li>
+      <li>status: {{txhash.status}}</li>
+      <li>confirmations: {{txhash.confirmations}}</li>
+      <li>type: {{txhash.type}}</li>
+      <li>txfrom: {{txhash.txfrom}}</li>
+      <li>block: {{txhash.block}}</li>
+    </ul>
+    {{/if}} 
+  {{/with}}
+</template>
