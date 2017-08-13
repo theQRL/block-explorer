@@ -1,6 +1,6 @@
-import './hello.html';
+import './status.html';
 
-Template.hello.onCreated(function helloOnCreated() {
+Template.status.onCreated(function statusOnCreated() {
     Session.set("status",{});
     Meteor.call('status', function(err, res) {
     // The method call sets the Session variable to the callback value
@@ -12,13 +12,13 @@ Template.hello.onCreated(function helloOnCreated() {
     });
   });
 
-Template.hello.helpers({
+Template.status.helpers({
     status() {
         return Session.get("status");
     },
 });
 
-Template.hello.events({
+Template.status.events({
   'click button' (event, instance) {
     Meteor.call('status', function(err, res) {
     // The method call sets the Session variable to the callback value

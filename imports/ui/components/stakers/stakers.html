@@ -1,0 +1,18 @@
+<template name="stakers">
+  <h3>Stakers</h3><button class="ui mini button"><i class="ui refresh icon"></i> Refresh</button>
+  {{#with stakers}}
+  {{#if error}}
+    <p>There was an error: {{error.error}} {{error.reason}}</p>
+  {{else}}
+    <!-- if stakers has an error property, display it -->
+    {{#each stakers.stake_list}}
+    <ul>
+      <li>address: {{this.address}}</li>
+      <li>balance: {{this.balance}}</li>
+      <li>nonce: {{this.nonce}}</li>
+      <li>hash_terminator: {{this.hash_terminator}}</li>
+    </ul>
+    {{/each}}
+    {{/if}} 
+  {{/with}}
+</template>

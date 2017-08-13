@@ -1,9 +1,9 @@
-<template name="hello">
+<template name="status">
   <h3>Network info</h3><button class="ui mini button"><i class="ui refresh icon"></i> Refresh</button>
   {{#with status}}
     <!-- if status has an error property, display it -->
     {{#if error}}
-      <p>There was an error: {{error.errorType}} {{error.message}}!</p>
+      <p>There was an error: {{error.error}} {{error.reason}}</p>
     {{else}}
     <ul>
       <li>status: {{status.status}}</li>

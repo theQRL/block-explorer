@@ -12,18 +12,8 @@ const apiCall = function (apiUrl, callback) {
     // but the contents from the JSON response
     callback(null, response);
   } catch (error) {
-    // If the API responded with an error message and a payload 
-    if (error.response) {
-      const errorCode = error.response.data.code;
-      const errorMessage = error.response.data.message;
-    // Otherwise use a generic error message
-    } else {
-      const errorCode = 500;
-      const errorMessage = 'Cannot access the API';
-    }
-    // Create an Error object and return it via callback
-    const myError = new Meteor.Error(errorCode, errorMessage);
-    callback(myError, null);
+      const myError = new Meteor.Error(500, 'Cannot access the API');
+      callback(myError, null);
   }
 };
 
@@ -33,6 +23,33 @@ Meteor.methods({
     // avoid blocking other method calls from the same client - *** may need to remove for production ***
     this.unblock();
     const apiUrl = 'http://104.251.219.215:8080/api/stats';
+    // asynchronous call to the dedicated API calling function
+    const response = Meteor.wrapAsync(apiCall)(apiUrl);
+    return response;
+  },
+
+  'lastblocks': function () {
+    // avoid blocking other method calls from the same client - *** may need to remove for production ***
+    this.unblock();
+    const apiUrl = 'http://104.251.219.215:8080/api/last_block/5';
+    // asynchronous call to the dedicated API calling function
+    const response = Meteor.wrapAsync(apiCall)(apiUrl);
+    return response;
+  },
+
+  'stakers': function () {
+    // avoid blocking other method calls from the same client - *** may need to remove for production ***
+    this.unblock();
+    const apiUrl = 'http://104.251.219.215:8080/api/stakers';
+    // asynchronous call to the dedicated API calling function
+    const response = Meteor.wrapAsync(apiCall)(apiUrl);
+    return response;
+  },
+
+  'nextstakers': function () {
+    // avoid blocking other method calls from the same client - *** may need to remove for production ***
+    this.unblock();
+    const apiUrl = 'http://104.251.219.215:8080/api/next_stakers';
     // asynchronous call to the dedicated API calling function
     const response = Meteor.wrapAsync(apiCall)(apiUrl);
     return response;
