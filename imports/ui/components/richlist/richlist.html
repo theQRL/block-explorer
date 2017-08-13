@@ -1,0 +1,17 @@
+<template name="richlist">
+  <h3>Richlist</h3><button class="ui mini button"><i class="ui refresh icon"></i> Refresh</button>
+  {{#with richlist}}
+    <!-- if richlist has an error property, display it -->
+    {{#if error}}
+      <p>There was an error: {{error.error}} {{error.reason}}</p>
+    {{else}}
+    <ul>
+      <li>1: {{first.address}} ({{first.balance}})</li>
+      <li>2: {{second.address}} ({{second.balance}})</li>
+      <li>3: {{third.address}} ({{third.balance}})</li>
+      <li>4: {{fourth.address}} ({{fourth.balance}})</li>
+      <li>5: {{fifth.address}} ({{fifth.balance}})</li>
+    </ul>
+    {{/if}} 
+  {{/with}}
+</template>

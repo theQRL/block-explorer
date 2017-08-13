@@ -28,6 +28,15 @@ Meteor.methods({
     return response;
   },
 
+  'richlist': function () {
+    // avoid blocking other method calls from the same client - *** may need to remove for production ***
+    this.unblock();
+    const apiUrl = 'http://104.251.219.215:8080/api/richlist';
+    // asynchronous call to the dedicated API calling function
+    const response = Meteor.wrapAsync(apiCall)(apiUrl);
+    return response;
+  },
+
   'lastblocks': function () {
     // avoid blocking other method calls from the same client - *** may need to remove for production ***
     this.unblock();
