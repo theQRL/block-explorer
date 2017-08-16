@@ -17,4 +17,7 @@ Template.block.helpers({
     block() {
         return Session.get("block");
     },
+    blockdata() {
+      return JSON.stringify(Session.get("block"), true, 2);
+    }
 });

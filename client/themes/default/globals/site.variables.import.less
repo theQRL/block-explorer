@@ -10,7 +10,7 @@
        Fonts
 --------------------*/
 
-@fontName          : 'Lato';
+@fontName          : 'Titillium Web';
 @fontSmoothing     : antialiased;
 
 @headerFont        : @fontName, 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -51,11 +51,11 @@
     Brand Colors
 --------------------*/
 
-@primaryColor        : @blue;
-@secondaryColor      : @black;
+@primaryColor        : #1d2951;
+@secondaryColor      : #a50b5e;
 
-@lightPrimaryColor   : @lightBlue;
-@lightSecondaryColor : @lightBlack;
+@lightPrimaryColor   : lighten(#1d2951,80%);
+@lightSecondaryColor : lighten(#a50b5e,80%);
 
 /*--------------
   Page Heading
@@ -81,9 +81,9 @@
 @inputPadding           : @inputVerticalPadding @inputHorizontalPadding;
 
 /* Input Text Color */
-@inputColor: @textColor;
-@inputPlaceholderColor: lighten(@inputColor, 75);
-@inputPlaceholderFocusColor: lighten(@inputColor, 45);
+@inputColor: @primaryColor;
+@inputPlaceholderColor: @grey;
+@inputPlaceholderFocusColor: @grey;
 
 /* Line Height Default For Inputs in Browser */
 @inputLineHeight: 1.2142em;
@@ -93,10 +93,10 @@
 --------------------*/
 
 /* Used on inputs, textarea etc */
-@focusedFormBorderColor: #85B7D9;
+@focusedFormBorderColor: @primaryColor;
 
 /* Used on dropdowns, other larger blocks */
-@focusedFormMutedBorderColor: #96C8DA;
+@focusedFormMutedBorderColor: #5F6680;
 
 /*-------------------
         Sizes
@@ -138,9 +138,9 @@
        Links
 --------------------*/
 
-@linkColor           : #4183C4;
+@linkColor           : #a50b5e;
 @linkUnderline       : none;
-@linkHoverColor      : darken(saturate(@linkColor, 20), 15, relative);
+@linkHoverColor      : lighten(@linkColor, 10%);
 @linkHoverUnderline  : @linkUnderline;
 
 /*-------------------
@@ -195,15 +195,15 @@
 --------------------*/
 
 /*---  Colors  ---*/
-@red              : #DB2828;
+@red              : #A50B5E;
 @orange           : #F2711C;
 @yellow           : #FBBD08;
 @olive            : #B5CC18;
 @green            : #21BA45;
 @teal             : #00B5AD;
-@blue             : #2185D0;
+@blue             : #EAA221;
 @violet           : #6435C9;
-@purple           : #A333C8;
+@purple           : #339D6C;
 @pink             : #E03997;
 @brown            : #A5673F;
 @grey             : #767676;
