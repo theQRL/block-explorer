@@ -1,0 +1,19 @@
+<template name="lasttx">
+  <h3>Last 5 transactions</h3><button class="ui mini button"><i class="ui refresh icon"></i> Refresh</button>
+  {{#with lasttx}}
+  {{#if error}}
+    <p>There was an error: {{error.error}} {{error.reason}}</p>
+  {{else}}
+    <!-- if lasttx has an error property, display it -->
+    {{#each lasttx.transactions}}
+    <ul>
+      <li>timestamp: {{this.timestamp}}</li>
+      <li>amount: {{this.amount}}</li>
+      <li>txhash: <a href="/tx/{{this.txhash}}">{{this.txhash}}</a></li>
+      <li>block: <a href="/block/{{this.block}}">{{this.block}}</a></li>
+      <li>type: {{this.type}}</li>
+    </ul>
+    {{/each}}
+    {{/if}} 
+  {{/with}}
+</template>

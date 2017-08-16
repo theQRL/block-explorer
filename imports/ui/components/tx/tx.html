@@ -9,14 +9,14 @@
       <li>nonce: {{txhash.nonce}}</li>
       <li>fee: {{txhash.fee}}</li>
       <li>timestamp: {{txhash.timestamp}}</li>
-      <li>txto: {{txhash.txto}}</li>
+      <li>txto: <a href="/a/{{txhash.txto}}">{{txhash.txto}}</a></li>
       <li>amount: {{txhash.amount}}</li>
       <li>txhash: {{txhash.txhash}}</li>
       <li>status: {{txhash.status}}</li>
       <li>confirmations: {{txhash.confirmations}}</li>
       <li>type: {{txhash.type}}</li>
-      <li>txfrom: {{txhash.txfrom}}</li>
-      <li>block: {{txhash.block}}</li>
+      <li>txfrom: <a href="/a/{{txhash.txfrom}}">{{txhash.txfrom}}</a></li>
+      <li>block: <a href="/block/{{txhash.block}}">{{txhash.block}}</a></li>
     </ul>
     {{/if}} 
   {{/with}}

@@ -6,11 +6,11 @@
       <p>There was an error: {{error.error}} {{error.reason}}</p>
     {{else}}
     <ul>
-      <li>1: {{first.address}} ({{first.balance}})</li>
-      <li>2: {{second.address}} ({{second.balance}})</li>
-      <li>3: {{third.address}} ({{third.balance}})</li>
-      <li>4: {{fourth.address}} ({{fourth.balance}})</li>
-      <li>5: {{fifth.address}} ({{fifth.balance}})</li>
+      <li>1: <a href="/a/{{first.address}}">{{first.address}}</a> ({{first.balance}})</li>
+      <li>2: <a href="/a/{{second.address}}">{{second.address}}</a> ({{second.balance}})</li>
+      <li>3: <a href="/a/{{third.address}}">{{third.address}}</a> ({{third.balance}})</li>
+      <li>4: <a href="/a/{{fourth.address}}">{{fourth.address}}</a> ({{fourth.balance}})</li>
+      <li>5: <a href="/a/{{fifth.address}}">{{fifth.address}}</a> ({{fifth.balance}})</li>
     </ul>
     {{/if}} 
   {{/with}}

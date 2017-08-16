@@ -46,6 +46,15 @@ Meteor.methods({
     return response;
   },
 
+  'lasttx': function () {
+    // avoid blocking other method calls from the same client - *** may need to remove for production ***
+    this.unblock();
+    const apiUrl = 'http://104.251.219.215:8080/api/last_tx/5';
+    // asynchronous call to the dedicated API calling function
+    const response = Meteor.wrapAsync(apiCall)(apiUrl);
+    return response;
+  },
+
   'stakers': function () {
     // avoid blocking other method calls from the same client - *** may need to remove for production ***
     this.unblock();
@@ -75,6 +84,36 @@ Meteor.methods({
     } else {
       const errorCode = 400;
       const errorMessage = 'Badly formed transaction ID';
+      throw new Meteor.Error(errorCode, errorMessage);
+    }
+  },
+
+  'block': function(blockId) {
+    if (Match.test(blockId,Number)) {
+      // avoid blocking other method calls from the same client - *** may need to remove for production ***
+      this.unblock();
+      const apiUrl = 'http://104.251.219.215:8080/api/block_data/' + blockId;
+      // asynchronous call to the dedicated API calling function
+      const response = Meteor.wrapAsync(apiCall)(apiUrl);
+      return response;
+    } else {
+      const errorCode = 400;
+      const errorMessage = 'Invalid block number';
+      throw new Meteor.Error(errorCode, errorMessage);
+    }
+  },
+
+  'address': function(aId) {
+    if ((Match.test(aId,String)) && (aId.length === 69)) {
+      // avoid blocking other method calls from the same client - *** may need to remove for production ***
+      this.unblock();
+      const apiUrl = 'http://104.251.219.215:8080/api/address/' + aId;
+      // asynchronous call to the dedicated API calling function
+      const response = Meteor.wrapAsync(apiCall)(apiUrl);
+      return response;
+    } else {
+      const errorCode = 400;
+      const errorMessage = 'Badly formed address';
       throw new Meteor.Error(errorCode, errorMessage);
     }
   },

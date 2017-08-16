@@ -1,0 +1,13 @@
+<template name="block">
+  <h1>Block</h1>
+  {{#with block}}
+    <!-- if block has an error property, display it -->
+    {{#if error}}
+      <p>There was an error: {{error.error}} {{error.reason}}</p>
+    {{else}}
+    <ul>
+      <li>status: {{block.status}}</li>
+    </ul>
+    {{/if}} 
+  {{/with}}
+</template>

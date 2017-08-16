@@ -1,0 +1,16 @@
+<template name="address">
+  <h1>Address</h1>
+  {{#with address}}
+    <!-- if address has an error property, display it -->
+    {{#if error}}
+      <p>There was an error: {{error.error}} {{error.reason}}</p>
+    {{else}}
+    <ul>
+      <li>address: {{address.state.address}}</li>
+      <li>balance: {{address.state.balance}}</li>
+      <li>nonce: {{address.state.nonce}}</li>
+      <li>Transactions: <em>awaiting API update...</em></li>
+    </ul>
+    {{/if}} 
+  {{/with}}
+</template>

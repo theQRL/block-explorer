@@ -7,7 +7,7 @@
     <!-- if stakers has an error property, display it -->
     {{#each stakers.stake_list}}
     <ul>
-      <li>address: {{this.address}}</li>
+      <li>address: <a href="/a/{{this.address}}">{{this.address}}</a></li>
       <li>balance: {{this.balance}}</li>
       <li>nonce: {{this.nonce}}</li>
       <li>hash_terminator: {{this.hash_terminator}}</li>
