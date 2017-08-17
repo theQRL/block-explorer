@@ -1,25 +1,49 @@
 <template name="status">
-  <h3>Network info</h3><button class="ui mini button"><i class="ui refresh icon"></i> Refresh</button>
+  <h3>Network info <i class="ui refresh red link icon"></i></h3>
   {{#with status}}
     <!-- if status has an error property, display it -->
     {{#if error}}
       <p>There was an error: {{error.error}} {{error.reason}}</p>
     {{else}}
+    <div class="ui three column stackable grid">
+      <div class="four wide column">
+    <div class="ui celled list">
+      <div class="item">
+        <i class="bordered inverted blue power middle aligned icon"></i>
+        <div class="content">
+          <div class="header">Status</div>
+          {{status.status}} <i class="ui tiny middle aligned green circle icon"></i> <small><strong>Uptime: </strong>{{status.network_uptime}}</small>
+        </div>
+      </div>
+      <div class="item">
+        <i class="bordered inverted blue info circle middle aligned icon"></i>
+        <div class="content">
+          <div class="header">Network</div>
+          {{status.network}} <small><strong>Version: </strong> {{status.version}}</small>
+        </div>
+      </div>
+      <div class="item">
+        <i class="bordered inverted blue server middle aligned icon"></i>
+        <div class="content">
+          <div class="header">Nodes</div>
+          {{status.nodes}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
     <ul>
-      <li>status: {{status.status}}</li>
       <li>unmined: {{status.unmined}}</li>
-      <li>network: {{status.network}}</li>
       <li>block_reward: {{status.block_reward}}</li>
       <li>emission: {{status.emission}}</li>
       <li>stake_validators: {{status.stake_validators}}</li>
       <li>epoch: {{status.epoch}}</li>
       <li>block_time: {{status.block_time}}</li>
-      <li>version: {{status.version}}</li>
       <li>staked_percentage_emission: {{status.staked_percentage_emission}}</li>
       <li>blockheight: {{status.blockheight}}</li>
       <li>nodes: {{status.nodes}}</li>
       <li>block_time_variance: {{status.block_time_variance}}</li>
-      <li>network_uptime: {{status.network_uptime}}</li>
     </ul>
     {{/if}} 
   {{/with}}

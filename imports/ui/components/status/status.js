@@ -19,7 +19,7 @@ Template.status.helpers({
 });
 
 Template.status.events({
-  'click button' (event, instance) {
+  'click .refresh' (event, instance) {
     Meteor.call('status', function(err, res) {
     // The method call sets the Session variable to the callback value
       if (err) {
