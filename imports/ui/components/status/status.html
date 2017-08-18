@@ -31,20 +31,46 @@
       </div>
     </div>
   </div>
-
+      <div class="four wide column">
+    <div class="ui celled list">
+      <div class="item">
+        <i class="bordered inverted blue law middle aligned icon"></i>
+        <div class="content">
+          <div class="header">Proof-of-stake</div>
+          <small><strong>Stake validators:</strong> {{status.stake_validators}}<br>
+          <strong>Staked emission:</strong> {{status.emission}}<br>
+          <strong>Epoch:</strong> {{status.epoch}}</small>
+        </div>
+      </div>
+    </div>
   </div>
-    <ul>
-      <li>unmined: {{status.unmined}}</li>
-      <li>block_reward: {{status.block_reward}}</li>
-      <li>emission: {{status.emission}}</li>
-      <li>stake_validators: {{status.stake_validators}}</li>
-      <li>epoch: {{status.epoch}}</li>
-      <li>block_time: {{status.block_time}}</li>
-      <li>staked_percentage_emission: {{status.staked_percentage_emission}}</li>
-      <li>blockheight: {{status.blockheight}}</li>
-      <li>nodes: {{status.nodes}}</li>
-      <li>block_time_variance: {{status.block_time_variance}}</li>
-    </ul>
+      <div class="four wide column">
+    <div class="ui celled list">
+      <div class="item">
+        <i class="bordered inverted blue cubes middle aligned icon"></i>
+        <div class="content">
+          <div class="header">Blocks</div>
+          <small><strong>Block height:</strong> {{status.blockheight}}<br>
+          <strong>Block time:</strong> {{status.block_time}}<br>
+          <strong>Block time variance:</strong> {{status.block_time_variance}}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+      <div class="four wide column">
+    <div class="ui celled list">
+      <div class="item">
+        <i class="bordered inverted blue database middle aligned icon"></i>
+        <div class="content">
+          <div class="header">Coin supply</div>
+          <small><strong>Emission:</strong> {{status.staked_percentage_emission}}<br>
+          <strong>Unmined:</strong> {{status.unmined}}<br>
+          <strong>Block reward:</strong> {{status.block_reward}}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
     {{/if}} 
   {{/with}}
 </template>
