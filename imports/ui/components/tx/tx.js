@@ -1,12 +1,12 @@
 import './tx.html';
+import '../../stylesheets/overrides.css';
 
 Template.tx.onCreated(function txOnCreated() {
     Session.set("txhash",{});
     var txId = FlowRouter.getParam("txId");
     Meteor.call('txhash', txId, function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
-        Session.set("txhash",{ error: err });
+        Session.set("txhash",{ error: err, id: txId });
       } else {
         Session.set("txhash",res);
       }
@@ -15,6 +15,12 @@ Template.tx.onCreated(function txOnCreated() {
 
 Template.tx.helpers({
     txhash() {
-        return Session.get("txhash");
+      return Session.get("txhash");
     },
 });
+
+Template.tx.events({
+  'click .close' : function(){
+    $('.message').hide();
+  }
+})

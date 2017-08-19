@@ -3,7 +3,6 @@ import './lastblocks.html';
 Template.lastblocks.onCreated(function lastblocksOnCreated() {
     Session.set("lastblocks",{});
     Meteor.call('lastblocks', function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
         Session.set("lastblocks",{ error: err });
       } else {
@@ -14,14 +13,14 @@ Template.lastblocks.onCreated(function lastblocksOnCreated() {
 
 Template.lastblocks.helpers({
     lastblocks() {
-        return Session.get("lastblocks");
+      return Session.get("lastblocks");
     },
 });
 
 Template.lastblocks.events({
-  'click button' (event, instance) {
+  'click .refresh' (event, instance) {
+    Session.set("lastblocks",{});
     Meteor.call('lastblocks', function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
         Session.set("lastblocks",{ error: err });
       } else {
@@ -29,4 +28,7 @@ Template.lastblocks.events({
       }
     });
   },
+  'click .close' : function(){
+    $('.message').hide();
+  }
 });

@@ -15,9 +15,15 @@ Template.block.onCreated(function blockOnCreated() {
 
 Template.block.helpers({
     block() {
-        return Session.get("block");
+      return Session.get("block");
     },
     blockdata() {
       return JSON.stringify(Session.get("block"), true, 2);
     }
+});
+
+Template.block.events({
+  'click .close' : function(){
+    $('.message').hide();
+  }
 });

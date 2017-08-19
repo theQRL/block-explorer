@@ -1,10 +1,15 @@
 <template name="lasttx">
-  <h3>Last 5 transactions</h3><button class="ui mini button"><i class="ui refresh icon"></i> Refresh</button>
+  <h1>Last 5 transactions <i class="ui refresh red link icon"></i></h1>
   {{#with lasttx}}
   {{#if error}}
-    <p>There was an error: {{error.error}} {{error.reason}}</p>
+    <div class="ui negative message">
+      <i class="close icon"></i>
+      <div class="header">
+        Error reading transaction
+      </div>
+      <p>{{error.error}} : {{error.reason}}</p>
+    </div>
   {{else}}
-    <!-- if lasttx has an error property, display it -->
     {{#each lasttx.transactions}}
     <ul>
       <li>timestamp: {{this.timestamp}}</li>

@@ -1,9 +1,14 @@
 <template name="tx">
-  <h1>Tx</h1>
   {{#with txhash}}
-    <!-- if txhash has an error property, display it -->
+  <h1>Transaction <div class="ui label"><i class="exchange icon"></i>{{id}}</div></h1>
     {{#if error}}
-      <p>There was an error: {{error.error}} {{error.reason}}</p>
+    <div class="ui negative message">
+      <i class="close icon"></i>
+      <div class="header">
+        Error reading transaction
+      </div>
+      <p>{{error.error}} : {{error.reason}}</p>
+    </div>
     {{else}}
     <ul>
       <li>nonce: {{txhash.nonce}}</li>

@@ -19,7 +19,8 @@ Template.lasttx.helpers({
 });
 
 Template.lasttx.events({
-  'click button' (event, instance) {
+  'click .refresh' (event, instance) {
+    Session.set("lasttx",{});
     Meteor.call('lasttx', function(err, res) {
     // The method call sets the Session variable to the callback value
       if (err) {
@@ -29,4 +30,7 @@ Template.lasttx.events({
       }
     });
   },
+  'click .close' : function(){
+    $('.message').hide();
+  }
 });

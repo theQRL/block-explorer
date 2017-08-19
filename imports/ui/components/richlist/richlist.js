@@ -3,7 +3,6 @@ import './richlist.html';
 Template.richlist.onCreated(function richlistOnCreated() {
     Session.set("richlist",{});
     Meteor.call('richlist', function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
         Session.set("richlist",{ error: err });
       } else {
@@ -36,14 +35,14 @@ Template.richlist.onCreated(function richlistOnCreated() {
 
 Template.richlist.helpers({
     richlist() {
-        return Session.get("richlist");
+      return Session.get("richlist");
     },
 });
 
 Template.richlist.events({
-  'click button' (event, instance) {
+  'click .refresh' (event, instance) {
+    Session.set("richlist",{});
     Meteor.call('richlist', function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
         Session.set("richlist",{ error: err });
       } else {
@@ -73,4 +72,7 @@ Template.richlist.events({
       }
     });
   },
+  'click .close' : function(){
+    $('.message').hide();
+  }
 });

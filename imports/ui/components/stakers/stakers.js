@@ -3,7 +3,6 @@ import './stakers.html';
 Template.stakers.onCreated(function stakersOnCreated() {
     Session.set("stakers",{});
     Meteor.call('stakers', function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
         Session.set("stakers",{ error: err });
       } else {
@@ -14,14 +13,14 @@ Template.stakers.onCreated(function stakersOnCreated() {
 
 Template.stakers.helpers({
     stakers() {
-        return Session.get("stakers");
+      return Session.get("stakers");
     },
 });
 
 Template.stakers.events({
-  'click button' (event, instance) {
+  'click .refresh' (event, instance) {
+    Session.set("stakers",{});
     Meteor.call('stakers', function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
         Session.set("stakers",{ error: err });
       } else {
@@ -29,4 +28,7 @@ Template.stakers.events({
       }
     });
   },
+  'click .close' : function(){
+    $('.message').hide();
+  }
 });

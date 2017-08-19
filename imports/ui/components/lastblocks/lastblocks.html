@@ -1,10 +1,15 @@
 <template name="lastblocks">
-  <h3>Last 5 blocks</h3><button class="ui mini button"><i class="ui refresh icon"></i> Refresh</button>
+  <h1>Last 5 blocks  <i class="ui refresh red link icon"></i></h1>
   {{#with lastblocks}}
   {{#if error}}
-    <p>There was an error: {{error.error}} {{error.reason}}</p>
+    <div class="ui negative message">
+      <i class="close icon"></i>
+      <div class="header">
+        Error reading last blocks
+      </div>
+      <p>{{error.error}} : {{error.reason}}</p>
+    </div>
   {{else}}
-    <!-- if lastblocks has an error property, display it -->
     {{#each lastblocks.blocks}}
     <ul>
       <li>block_interval: {{this.block_interval}}</li>

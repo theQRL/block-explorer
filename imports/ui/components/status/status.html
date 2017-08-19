@@ -1,9 +1,14 @@
 <template name="status">
   <h3>Network info <i class="ui refresh red link icon"></i></h3>
   {{#with status}}
-    <!-- if status has an error property, display it -->
     {{#if error}}
-      <p>There was an error: {{error.error}} {{error.reason}}</p>
+      <div class="ui negative message">
+        <i class="close icon"></i>
+        <div class="header">
+          Error reading network status
+        </div>
+        <p>{{error.error}} : {{error.reason}}</p>
+      </div>
     {{else}}
     <div class="ui three column stackable grid">
       <div class="four wide column">

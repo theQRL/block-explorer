@@ -3,7 +3,6 @@ import './status.html';
 Template.status.onCreated(function statusOnCreated() {
     Session.set("status",{});
     Meteor.call('status', function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
         Session.set("status",{ error: err });
       } else {
@@ -14,14 +13,14 @@ Template.status.onCreated(function statusOnCreated() {
 
 Template.status.helpers({
     status() {
-        return Session.get("status");
+      return Session.get("status");
     },
 });
 
 Template.status.events({
   'click .refresh' (event, instance) {
+    Session.set("status",{});
     Meteor.call('status', function(err, res) {
-    // The method call sets the Session variable to the callback value
       if (err) {
         Session.set("status",{ error: err });
       } else {
@@ -29,4 +28,7 @@ Template.status.events({
       }
     });
   },
+  'click .close' : function(){
+    $('.message').hide();
+  }
 });
