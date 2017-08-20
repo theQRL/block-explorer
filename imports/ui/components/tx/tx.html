@@ -1,7 +1,7 @@
 <template name="tx">
   {{#with txhash}}
-  <h1>Transaction <div class="ui label"><i class="exchange icon"></i>{{id}}</div></h1>
     {{#if error}}
+    <h1>Transaction <div class="ui label"><i class="exchange icon"></i>{{id}}</div></h1>
     <div class="ui negative message">
       <i class="close icon"></i>
       <div class="header">
@@ -10,6 +10,7 @@
       <p>{{error.error}} : {{error.reason}}</p>
     </div>
     {{else}}
+    <h1>Transaction <div class="ui label"><i class="exchange icon"></i>{{txhash.txhash}}</div></h1>
     <ul>
       <li>nonce: {{txhash.nonce}}</li>
       <li>fee: {{txhash.fee}}</li>

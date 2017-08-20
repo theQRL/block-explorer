@@ -1,15 +1,16 @@
 <template name="block">
-  <h1>Block</h1>
   {{#with block}}
     {{#if error}}
+    <h1>Block <div class="ui label"><i class="cube icon"></i>{{block.parameter}}</div></h1>
       <div class="ui negative message">
         <i class="close icon"></i>
         <div class="header">
           Error reading block
         </div>
-        <p>{{error.error}} : {{error.reason}}</p>
+        <p>{{block.error}}</p>
       </div>
     {{else}}
+    <h1>Block <div class="ui label"><i class="cube icon"></i>{{block.blockheader.blocknumber}}</div></h1>
     <ul>
       <li>status: {{block.status}}</li>
     </ul>

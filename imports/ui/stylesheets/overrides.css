@@ -1,1 +1,8 @@
+body { background-color: : #fff; }
     .ui .label { vertical-align: middle; }
+    .ui.menu {margin-bottom: 0px;}
+    body.pushable {background: #fff !important;}
+@media (max-width: 519px) {
+  .pusher {margin-top: 40px;}
+}
+ 

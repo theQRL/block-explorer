@@ -1,4 +1,5 @@
 <template name="App_body">
+  <body>
   <div class="ui menu" id="menu">
       <div class="ui container">
           <a href="/" class="header item">
@@ -44,32 +45,8 @@
       </div>
   </div>
 
-  <div class="ui sidebar inverted vertical menu">
-      <a class="item header" href="/"><img class="logo" src="assets/Q@2x.png" style="max-width: 50px; padding-bottom: 10px;"></a>
+ {{>sidebar}}
 
-         <div class="item header">Transactions</div>
-          <a class="item" href="/lasttx">&raquo; Confirmed Tx</a>
-          <a class="item" href="#">&raquo; Unconfirmed Tx</a>
-
-          <a class="item header" href="/lastblocks">Blocks</a>
-
-          <a class="item header" href="/richlist">Richlist</a>
-                      <div class="item header">Stakers</div>
-          <a class="item" href="/stakers">&raquo; Current epoch</a>
-          <a class="item" href="/nextstakers">&raquo; Next epoch</a>
-
-          <div class="item header">About</div>
-          <a class="item" href="http://theqrl.org/">&raquo; theQRL.org</a>
-          <a class="item" href="http://theqrl.org/whitepaper/QRL_whitepaper.pdf">&raquo; White Paper</a>
-          <a class="item" href="https://github.com/theQRL/QRL">&raquo; Github</a>
-
-          <div class="item">
-            <div class="ui icon input">
-              <input id="sideSearch" type="text" placeholder="tx, address, block height">
-              <i class="search link icon"></i>
-            </div>
-            </div>
-    </div>
     <div class="pusher">
       <div class="ui fixed inverted menu" id="m_menu">
           <div class="ui container" id="m_btn">
@@ -84,4 +61,5 @@
   {{> Template.dynamic template=main}}
 </div>
 </div>
+</body>
 </template>

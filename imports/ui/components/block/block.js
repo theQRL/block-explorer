@@ -6,7 +6,7 @@ Template.block.onCreated(function blockOnCreated() {
     Meteor.call('block', blockId, function(err, res) {
     // The method call sets the Session variable to the callback value
       if (err) {
-        Session.set("block",{ error: err });
+        Session.set("block",{ error: err, id: blockId });
       } else {
         Session.set("block",res);
       }
