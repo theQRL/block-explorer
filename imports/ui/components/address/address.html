@@ -13,20 +13,25 @@
     <h1>Address <i class="ui refresh red link icon"></i> <a class="ui label"><i class="qrcode icon"></i>{{address.state.address}}</a></h1>
     <ul>
       {{> QRCode text=QRtext size="128px"}}
-      <li>address: {{address.state.address}}</li>
+      <!-- <li>address: {{address.state.address}}</li> -->
       <li>balance: {{address.state.balance}}</li>
       <li>nonce: {{address.state.nonce}}</li>
-      <li>Transactions: <em>awaiting API update...</em></li>
+      <li>Transactions:</li>
+      <table class="ui striped table"><thead><th>Timestamp</th><th>Amount</th><th>From</th><th>To</th><th>Txhash</th><th>Block</th><th>Fee</th><th>OTS key</th></thead><tbody>
       {{#each address.transactions}}
-      <li>"fee": {{this.fee}}</li>
-      <li>"timestamp": {{this.timestamp}}</li>
-      <li>"txfrom": {{this.txfrom}}</li>
-      <li>"amount": {{this.amount}}</li>
-      <li>"ots_key": {{this.ots_key}}</li>
-      <li>"txhash": {{this.txhash}}</li>
-      <li>"txto": {{this.txto}}</li>
-       <li>"block": {{this.block}}</li>
+      <tr>
+        <td>{{ts}}</td>
+        <td>{{this.amount}}</td>
+        <td><a href="/a/{{this.txfrom}}">{{this.txfrom}}</a></td>
+        <td><a href="/a/{{this.txto}}">{{this.txto}}</a></td>
+        <td><a href="/tx/{{this.txhash}}">{{this.txhash}}</a></td>
+        <td><a href="/block/{{this.block}}">{{this.block}}</a></td>
+        <td>{{this.fee}}</td>
+        <td>{{this.ots_key}}</td>
+      </tr>
       {{/each}}
+    </tbody>
+    </table>
     </ul>
     {{/if}} 
   {{/with}}

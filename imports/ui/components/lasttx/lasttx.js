@@ -16,6 +16,10 @@ Template.lasttx.helpers({
     lasttx() {
         return Session.get("lasttx");
     },
+    ts() {
+     var x = moment.unix(this.timestamp);
+     return moment(x).format("HH:mm D MMM YYYY");
+    }
 });
 
 Template.lasttx.events({

@@ -12,7 +12,7 @@
   {{else}}
     {{#each lasttx.transactions}}
     <ul>
-      <li>timestamp: {{this.timestamp}}</li>
+      <li>timestamp: {{ts}}</li>
       <li>amount: {{this.amount}}</li>
       <li>txhash: <a href="/tx/{{this.txhash}}">{{this.txhash}}</a></li>
       <li>block: <a href="/block/{{this.block}}">{{this.block}}</a></li>

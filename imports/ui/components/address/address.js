@@ -19,6 +19,10 @@ Template.address.helpers({
     },
     QRtext() {
         return FlowRouter.getParam("aId");
+     },
+     ts() {
+      var x = moment.unix(this.timestamp);
+      return moment(x).format("HH:mm D MMM YYYY");
      }
 });
 

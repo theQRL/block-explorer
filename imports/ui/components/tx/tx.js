@@ -30,6 +30,10 @@ Template.tx.helpers({
       const value = txhash.amount;
       var x = Session.get("qrl");
       return Math.round((x * value)*100)/100;
+    },
+    ts() {
+     var x = moment.unix(this.timestamp);
+     return moment(x).format("HH:mm D MMM YYYY");
     }
 });
 
