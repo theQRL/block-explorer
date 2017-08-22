@@ -19,6 +19,17 @@ const apiCall = function (apiUrl, callback) {
 
 Meteor.methods({
   
+  'qrl-value': function() {
+    this.unblock();
+    const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl';
+    const apiUrlUSD = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=usdt-btc';
+    // asynchronous call to the dedicated API calling function
+    const response = Meteor.wrapAsync(apiCall)(apiUrl);
+    const responseUSD = Meteor.wrapAsync(apiCall)(apiUrlUSD);
+    const usd = response.result[0].Last * responseUSD.result[0].Last;
+    return usd;
+  },
+
   'status': function () {
     // avoid blocking other method calls from the same client - *** may need to remove for production ***
     this.unblock();

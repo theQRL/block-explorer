@@ -1,13 +1,13 @@
 <template name="tx">
   {{#with txhash}}
     {{#if error}}
-    <h1>Transaction <div class="ui label"><i class="exchange icon"></i>{{id}}</div></h1>
+    <h1>Transaction <div class="ui label"><i class="exchange icon"></i>{{txhash.parameter}}</div></h1>
     <div class="ui negative message">
       <i class="close icon"></i>
       <div class="header">
         Error reading transaction
       </div>
-      <p>{{error.error}} : {{error.reason}}</p>
+      <p>{{txhash.error}}</p>
     </div>
     {{else}}
     <div class="ui raised fluid card">
@@ -22,7 +22,7 @@
               <div class="label">
                 <div class="ui blue label">TX</div>
               </div>
-              <div class="value">
+              <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
                 {{txhash.amount}}
               </div>
               <div class="label">
