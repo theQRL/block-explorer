@@ -17,6 +17,9 @@ Template.address.helpers({
     address() {
       return Session.get("address");
     },
+    QRtext() {
+        return FlowRouter.getParam("aId");
+     }
 });
 
 Template.address.events({

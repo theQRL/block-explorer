@@ -12,6 +12,7 @@
     {{else}}
     <h1>Address <i class="ui refresh red link icon"></i> <a class="ui label"><i class="qrcode icon"></i>{{address.state.address}}</a></h1>
     <ul>
+      {{> QRCode text=QRtext size="128px"}}
       <li>address: {{address.state.address}}</li>
       <li>balance: {{address.state.balance}}</li>
       <li>nonce: {{address.state.nonce}}</li>
