@@ -31,6 +31,12 @@ td a {
     word-break: break-all;
 }
 
+td {
+    font-weight: normal;
+    overflow: auto;
+    word-break: break-all;
+}
+
 td .ui.label {
     word-break: keep-all !important;
     overflow: visible;

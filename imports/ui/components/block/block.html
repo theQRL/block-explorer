@@ -1,7 +1,7 @@
 <template name="block">
   {{#with block}}
     {{#if error}}
-    <h1>Block <div class="ui label"><i class="cube icon"></i>{{block.parameter}}</div></h1>
+    <h1>Block <div class="ui big label"><i class="cube icon"></i>{{block.parameter}}</div></h1>
       <div class="ui negative message">
         <i class="close icon"></i>
         <div class="header">
@@ -10,11 +10,28 @@
         <p>{{block.error}}</p>
       </div>
     {{else}}
-    <h1>Block <div class="ui label"><i class="cube icon"></i>{{block.blockheader.blocknumber}}</div></h1>
-    <ul>
-      <li>status: {{block.status}}</li>
-    </ul>
-    <code>{{blockdata}}</code>
+    <h1>Block <div class="ui big label"><i class="cube icon"></i>{{block.blockheader.blocknumber}}</div></h1>
+        <div class="ui celled horizontal list">
+          <div class="item"><strong>Transactions</strong> {{block.transactions.length}}</div>
+          <div class="item"><strong>Timestamp</strong> {{ts}}</div>
+          <div class="item"><strong>Epoch</strong> {{block.blockheader.epoch}}</div>
+          <div class="item"><strong>Reward</strong> {{block.blockheader.block_reward}} Quanta</div>
+        </div>
+    <h3>Block transactions</h3>
+      <table class="ui striped table"><thead><th>Amount</th><th>From</th><th>To</th><th>Txhash</th><th>Pubhash</th><th>Fee</th><th>OTS key</th></thead><tbody>
+      {{#each block.transactions}}
+      <tr>
+        <td>{{this.amount}}</td>
+        <td><a href="/a/{{this.txfrom}}">{{this.txfrom}}</a></td>
+        <td><a href="/a/{{this.txto}}">{{this.txto}}</a></td>
+        <td><a href="/tx/{{this.txhash}}">{{this.txhash}}</a></td>
+        <td>{{this.pubhash}}</td>
+        <td>{{this.fee}}</td>
+        <td>{{this.ots_key}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+    </table>
     {{/if}} 
   {{/with}}
 </template>
