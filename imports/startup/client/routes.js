@@ -13,6 +13,7 @@ import '../../ui/components/lastblocks/lastblocks.js';
 import '../../ui/components/lasttx/lasttx.js';
 import '../../ui/components/richlist/richlist.js';
 import '../../ui/components/block/block.js';
+
 // Set up all routes in the app
 FlowRouter.route('/', {
   name: 'App.home',

@@ -27,9 +27,13 @@ Template.tx.helpers({
     },
     qrl() {
       const txhash = Session.get("txhash");
+      try {
       const value = txhash.amount;
       var x = Session.get("qrl");
       return Math.round((x * value)*100)/100;
+    } catch(e) {
+      return 0
+    }
     },
     ts() {
      var x = moment.unix(this.timestamp);
