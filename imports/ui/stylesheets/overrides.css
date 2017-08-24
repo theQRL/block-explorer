@@ -53,3 +53,8 @@ td .ui.label {
     word-break: keep-all !important;
     overflow: visible;
 }
+
+
+.ui.inverted.segment, .ui.primary.inverted.segment {
+background: #1d2951;
+    }
