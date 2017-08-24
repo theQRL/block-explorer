@@ -37,6 +37,18 @@ td {
     word-break: break-all;
 }
 
+.value {
+    overflow: auto;
+    word-break: break-all;
+}
+
+@media (max-width: 519px) {
+    .ui.statistics .statistic>.value,
+    .ui.statistic>.value {
+        font-size: 2rem !important;
+    }
+}
+
 td .ui.label {
     word-break: keep-all !important;
     overflow: visible;

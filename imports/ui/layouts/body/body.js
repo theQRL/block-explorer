@@ -2,9 +2,9 @@ import './body.html';
 import './sidebar.html';
 BlazeLayout.setRoot('body');
 Template.App_body.rendered = function () {
-   this.$('.ui.dropdown').dropdown();
-   this.$('.modal').modal();
-  this.$('.sidebar').first().sidebar('attach events', '#hamburger', 'show');
+   $('.ui.dropdown').dropdown();
+   $('.modal').modal();
+  $('.sidebar').first().sidebar('attach events', '#hamburger', 'show');
 };
 Template.App_body.events({
   'click #hamburger': function(e) {
