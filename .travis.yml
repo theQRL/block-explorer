@@ -17,8 +17,4 @@ node_js:
  - 7.6.0
 
 script:
-  - meteor npm run gulp
-  - meteor remove practicalmeteor:mocha
-  - meteor add dispatch:mocha-phantomjs
-  - meteor test --once --driver-package dispatch:mocha-phantomjs
   - meteor build $HOME/build.tgz
