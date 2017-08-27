@@ -13,6 +13,9 @@ cache:
 before_script:
   - meteor npm install
  
+ node_js:
+ - 7.6.0
+
 script:
   - meteor npm run gulp
   - meteor remove practicalmeteor:mocha
