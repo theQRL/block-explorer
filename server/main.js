@@ -1,133 +1,135 @@
 // Server entry point, imports all server code
 
-import '/imports/startup/server';
-import '/imports/startup/both';
+import { check } from 'meteor/check'
+
+import '/imports/startup/server'
+import '/imports/startup/both'
 
 
-const apiCall = function (apiUrl, callback) {
-  // try…catch allows you to handle errors 
+const apiCall = (apiUrl, callback) => {
   try {
-    const response = HTTP.get(apiUrl).data;
-    // A successful API call returns no error 
-    // but the contents from the JSON response
-    callback(null, response);
+    const response = HTTP.get(apiUrl).data
+    // Successful call
+    callback(null, response)
   } catch (error) {
-      const myError = new Meteor.Error(500, 'Cannot access the API');
-      callback(myError, null);
+    const myError = new Meteor.Error(500, 'Cannot access the API')
+    callback(myError, null)
   }
-};
+}
 
 Meteor.methods({
-  
-  'qrl-value': function() {
-    this.unblock();
-    const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl';
-    const apiUrlUSD = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=usdt-btc';
-    // asynchronous call to the dedicated API calling function
-    const response = Meteor.wrapAsync(apiCall)(apiUrl);
-    const responseUSD = Meteor.wrapAsync(apiCall)(apiUrlUSD);
-    const usd = response.result[0].Last * responseUSD.result[0].Last;
-    return usd;
+
+  QRLvalue() {
+    this.unblock()
+    const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl'
+    const apiUrlUSD = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=usdt-btc'
+    // asynchronous call to API
+    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    const responseUSD = Meteor.wrapAsync(apiCall)(apiUrlUSD)
+    const usd = response.result[0].Last * responseUSD.result[0].Last
+    return usd
   },
 
-  'status': function () {
-    // avoid blocking other method calls from the same client - *** may need to remove for production ***
-    this.unblock();
-    const apiUrl = 'http://104.251.219.215:8080/api/stats';
-    // asynchronous call to the dedicated API calling function
-    const response = Meteor.wrapAsync(apiCall)(apiUrl);
-    return response;
+  status() {
+    // avoid blocking other method calls from same client - *may need to remove for production*
+    this.unblock()
+    const apiUrl = 'http://104.251.219.215:8080/api/stats'
+    // asynchronous call to API
+    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    return response
   },
 
-  'richlist': function () {
-    // avoid blocking other method calls from the same client - *** may need to remove for production ***
-    this.unblock();
-    const apiUrl = 'http://104.251.219.215:8080/api/richlist';
-    // asynchronous call to the dedicated API calling function
-    const response = Meteor.wrapAsync(apiCall)(apiUrl);
-    return response;
+  richlist() {
+    // avoid blocking other method calls from same client - *may need to remove for production*
+    this.unblock()
+    const apiUrl = 'http://104.251.219.215:8080/api/richlist'
+    // asynchronous call to API
+    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    return response
   },
 
-  'lastblocks': function () {
-    // avoid blocking other method calls from the same client - *** may need to remove for production ***
-    this.unblock();
-    const apiUrl = 'http://104.251.219.215:8080/api/last_block/5';
-    // asynchronous call to the dedicated API calling function
-    const response = Meteor.wrapAsync(apiCall)(apiUrl);
-    return response;
+  lastblocks() {
+    // avoid blocking other method calls from same client - *may need to remove for production*
+    this.unblock()
+    const apiUrl = 'http://104.251.219.215:8080/api/last_block/5'
+    // asynchronous call to API
+    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    return response
   },
 
-  'lasttx': function () {
-    // avoid blocking other method calls from the same client - *** may need to remove for production ***
-    this.unblock();
-    const apiUrl = 'http://104.251.219.215:8080/api/last_tx/5';
-    // asynchronous call to the dedicated API calling function
-    const response = Meteor.wrapAsync(apiCall)(apiUrl);
-    return response;
+  lasttx() {
+    // avoid blocking other method calls from same client - *may need to remove for production*
+    this.unblock()
+    const apiUrl = 'http://104.251.219.215:8080/api/last_tx/5'
+    // asynchronous call to API
+    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    return response
   },
 
-  'stakers': function () {
-    // avoid blocking other method calls from the same client - *** may need to remove for production ***
-    this.unblock();
-    const apiUrl = 'http://104.251.219.215:8080/api/stakers';
-    // asynchronous call to the dedicated API calling function
-    const response = Meteor.wrapAsync(apiCall)(apiUrl);
-    return response;
+  stakers() {
+    // avoid blocking other method calls from same client - *may need to remove for production*
+    this.unblock()
+    const apiUrl = 'http://104.251.219.215:8080/api/stakers'
+    // asynchronous call to API
+    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    return response
   },
 
-  'nextstakers': function () {
-    // avoid blocking other method calls from the same client - *** may need to remove for production ***
-    this.unblock();
-    const apiUrl = 'http://104.251.219.215:8080/api/next_stakers';
-    // asynchronous call to the dedicated API calling function
-    const response = Meteor.wrapAsync(apiCall)(apiUrl);
-    return response;
+  nextstakers() {
+    // avoid blocking other method calls from same client - *may need to remove for production*
+    this.unblock()
+    const apiUrl = 'http://104.251.219.215:8080/api/next_stakers'
+    // asynchronous call to API
+    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    return response
   },
 
-  'txhash': function(txId) {
-    if ((Match.test(txId,String)) && (txId.length === 64)) {
-      // avoid blocking other method calls from the same client - *** may need to remove for production ***
-      this.unblock();
-      const apiUrl = 'http://104.251.219.215:8080/api/txhash/' + txId;
-      // asynchronous call to the dedicated API calling function
-      const response = Meteor.wrapAsync(apiCall)(apiUrl);
-      return response;
+  txhash(txId) {
+    check(txId, String)
+    if (!((Match.test(txId, String)) && (txId.length === 64))) {
+      const errorCode = 400
+      const errorMessage = 'Badly formed transaction ID'
+      throw new Meteor.Error(errorCode, errorMessage)
     } else {
-      const errorCode = 400;
-      const errorMessage = 'Badly formed transaction ID';
-      throw new Meteor.Error(errorCode, errorMessage);
+      // avoid blocking other method calls from same client - *may need to remove for production*
+      this.unblock()
+      const apiUrl = `http://104.251.219.215:8080/api/txhash/${txId}`
+      // asynchronous call to API
+      const response = Meteor.wrapAsync(apiCall)(apiUrl)
+      return response
     }
   },
 
-  'block': function(blockId) {
-    if (Match.test(blockId,Number)) {
-      // avoid blocking other method calls from the same client - *** may need to remove for production ***
-      this.unblock();
-      const apiUrl = 'http://104.251.219.215:8080/api/block_data/' + blockId;
-      // asynchronous call to the dedicated API calling function
-      const response = Meteor.wrapAsync(apiCall)(apiUrl);
-      return response;
+  block(blockId) {
+    check(blockId, Number)
+    if (!(Match.test(blockId, Number))) {
+      const errorCode = 400
+      const errorMessage = 'Invalid block number'
+      throw new Meteor.Error(errorCode, errorMessage)
     } else {
-      const errorCode = 400;
-      const errorMessage = 'Invalid block number';
-      throw new Meteor.Error(errorCode, errorMessage);
+      // avoid blocking other method calls from same client - *may need to remove for production*
+      this.unblock()
+      const apiUrl = `http://104.251.219.215:8080/api/block_data/${blockId}`
+      // asynchronous call to API
+      const response = Meteor.wrapAsync(apiCall)(apiUrl)
+      return response
     }
   },
 
-  'address': function(aId) {
-    if ((Match.test(aId,String)) && (aId.length === 69)) {
-      // avoid blocking other method calls from the same client - *** may need to remove for production ***
-      this.unblock();
-      const apiUrl = 'http://104.251.219.215:8080/api/address/' + aId;
-      // asynchronous call to the dedicated API calling function
-      const response = Meteor.wrapAsync(apiCall)(apiUrl);
-      return response;
+  address(aId) {
+    check(aId, String)
+    if (!((Match.test(aId, String)) && (aId.length === 69))) {
+      const errorCode = 400
+      const errorMessage = 'Badly formed address'
+      throw new Meteor.Error(errorCode, errorMessage)
     } else {
-      const errorCode = 400;
-      const errorMessage = 'Badly formed address';
-      throw new Meteor.Error(errorCode, errorMessage);
+      // avoid blocking other method calls from same client - *may need to remove for production*
+      this.unblock()
+      const apiUrl = `http://104.251.219.215:8080/api/address/${aId}`
+      // asynchronous call to API
+      const response = Meteor.wrapAsync(apiCall)(apiUrl)
+      return response
     }
   },
-  
-});
 
+})

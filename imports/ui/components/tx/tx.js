@@ -12,7 +12,7 @@ Template.tx.onCreated(() => {
       Session.set('txhash', res)
     }
   })
-  Meteor.call('qrl-value', (err, res) => {
+  Meteor.call('QRLvalue', (err, res) => {
     if (err) {
       Session.set('qrl', 'Error getting value from API')
     } else {
