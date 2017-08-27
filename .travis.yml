@@ -1,0 +1,10 @@
+sudo: false
+ 
+language: node_js
+ 
+before_install:
+  - curl https://install.meteor.com | /bin/sh
+  - export PATH="$HOME/.meteor:$PATH"
+ 
+script:
+  - meteor build $HOME/build.tgz
