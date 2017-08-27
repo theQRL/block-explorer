@@ -1,34 +1,34 @@
-import './stakers.html';
+import './stakers.html'
 
-Template.stakers.onCreated(function stakersOnCreated() {
-    Session.set("stakers",{});
-    Meteor.call('stakers', function(err, res) {
-      if (err) {
-        Session.set("stakers",{ error: err });
-      } else {
-        Session.set("stakers",res);
-      }
-    });
-  });
+Template.stakers.onCreated(() => {
+  Session.set('stakers', {})
+  Meteor.call('stakers', (err, res) => {
+    if (err) {
+      Session.set('stakers', { error: err })
+    } else {
+      Session.set('stakers', res)
+    }
+  })
+})
 
 Template.stakers.helpers({
-    stakers() {
-      return Session.get("stakers");
-    },
-});
+  stakers() {
+    return Session.get('stakers')
+  },
+})
 
 Template.stakers.events({
-  'click .refresh' (event, instance) {
-    Session.set("stakers",{});
-    Meteor.call('stakers', function(err, res) {
+  'click .refresh': () => {
+    Session.set('stakers', {})
+    Meteor.call('stakers', (err, res) => {
       if (err) {
-        Session.set("stakers",{ error: err });
+        Session.set('stakers', { error: err })
       } else {
-        Session.set("stakers",res);
+        Session.set('stakers', res)
       }
-    });
+    })
   },
-  'click .close' : function(){
-    $('.message').hide();
-  }
-});
+  'click .close': () => {
+    $('.message').hide()
+  },
+})

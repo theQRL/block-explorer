@@ -1,52 +1,52 @@
-import './tx.html';
-import '../../stylesheets/overrides.css';
+import './tx.html'
+import '../../stylesheets/overrides.css'
 
-Template.tx.onCreated(function txOnCreated() {
-    Session.set("txhash",{});
-    Session.set("qrl",0);
-    var txId = FlowRouter.getParam("txId");
-    Meteor.call('txhash', txId, function(err, res) {
-      if (err) {
-        Session.set("txhash",{ error: err, id: txId });
-      } else {
-        Session.set("txhash",res);
-      }
-    });
-    Meteor.call('qrl-value', function(err, res){
-      if (err) {
-        Session.set('qrl', 'Error getting value from API');
-      } else {
-        Session.set('qrl', res);
-      }
-    });
-  });
+Template.tx.onCreated(() => {
+  Session.set('txhash', {})
+  Session.set('qrl', 0)
+  const txId = FlowRouter.getParam('txId')
+  Meteor.call('txhash', txId, (err, res) => {
+    if (err) {
+      Session.set('txhash', { error: err, id: txId })
+    } else {
+      Session.set('txhash', res)
+    }
+  })
+  Meteor.call('qrl-value', (err, res) => {
+    if (err) {
+      Session.set('qrl', 'Error getting value from API')
+    } else {
+      Session.set('qrl', res)
+    }
+  })
+})
 
 Template.tx.helpers({
-    txhash() {
-      return Session.get("txhash");
-    },
-    qrl() {
-      const txhash = Session.get("txhash");
-      try {
-      const value = txhash.amount;
-      var x = Session.get("qrl");
-      return Math.round((x * value)*100)/100;
-    } catch(e) {
+  txhash() {
+    return Session.get('txhash')
+  },
+  qrl() {
+    const txhash = Session.get('txhash')
+    try {
+      const value = txhash.amount
+      const x = Session.get('qrl')
+      return Math.round((x * value) * 100) / 100
+    } catch (e) {
       return 0
     }
-    },
-    ts() {
-     var x = moment.unix(this.timestamp);
-     return moment(x).format("HH:mm D MMM YYYY");
-    }
-});
+  },
+  ts() {
+    const x = moment.unix(this.timestamp)
+    return moment(x).format('HH:mm D MMM YYYY')
+  },
+})
 
 Template.tx.events({
-  'click .close' : function(){
-    $('.message').hide();
-  }
-});
+  'click .close': () => {
+    $('.message').hide()
+  },
+})
 
-Template.tx.rendered = function() {
-  this.$('.value').popup();
-}
+Template.tx.onRendered(() => {
+  this.$('.value').popup()
+})
