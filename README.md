@@ -1,6 +1,6 @@
 # QRL Block Explorer
 
-[![Build Status](https://travis-ci.org/theQRL/block-explorer.svg?branch=master)](https://travis-ci.org/theQRL/QRL)
+[![Build Status](https://travis-ci.org/theQRL/block-explorer.svg?branch=master)](https://travis-ci.org/theQRL/block-explorer)
 
 Work in progress.
 
