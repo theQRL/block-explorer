@@ -13,7 +13,7 @@ cache:
 before_script:
   - meteor npm install
  
- node_js:
+node_js:
  - 7.6.0
 
 script:
