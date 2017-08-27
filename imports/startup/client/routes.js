@@ -11,6 +11,7 @@ import '../../ui/components/stakers/stakers.js'
 import '../../ui/components/nextstakers/nextstakers.js'
 import '../../ui/components/lastblocks/lastblocks.js'
 import '../../ui/components/lasttx/lasttx.js'
+import '../../ui/components/lastunconfirmedtx/lastunconfirmedtx.js'
 import '../../ui/components/richlist/richlist.js'
 import '../../ui/components/block/block.js'
 
@@ -61,6 +62,12 @@ FlowRouter.route('/lasttx', {
   name: 'Lasttx.home',
   action() {
     BlazeLayout.render('appBody', { main: 'lasttx' })
+  },
+})
+FlowRouter.route('/unconfirmed', {
+  name: 'Lastunconfirmedtx.home',
+  action() {
+    BlazeLayout.render('appBody', { main: 'lastunconfirmedtx' })
   },
 })
 FlowRouter.route('/richlist', {
