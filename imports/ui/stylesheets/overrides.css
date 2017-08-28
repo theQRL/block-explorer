@@ -54,6 +54,11 @@ td .ui.label {
     overflow: visible;
 }
 
+td .unbreakable {
+    word-break: keep-all !important;
+    overflow: visible;
+}
+
 
 .ui.inverted.segment, .ui.primary.inverted.segment {
 background: #1d2951;

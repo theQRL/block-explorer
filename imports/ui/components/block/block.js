@@ -28,10 +28,36 @@ Template.block.helpers({
       return ' '
     }
   },
+  color() {
+    if (this.subtype === 'COINBASE') {
+      return 'teal'
+    }
+    if (this.subtype === 'STAKE') {
+      return 'red'
+    }
+    if (this.subtype === 'TX') {
+      return 'yellow'
+    }
+    return ''
+  },
 })
 
 Template.block.events({
   'click .close': () => {
     $('.message').hide()
   },
+})
+
+Template.block.onRendered(() => {
+  Tracker.autorun(() => {
+    FlowRouter.watchPathChange()
+    const blockId = parseInt(FlowRouter.getParam('blockId'), 10)
+    Meteor.call('block', blockId, (err, res) => {
+      if (err) {
+        Session.set('block', { error: err })
+      } else {
+        Session.set('block', res)
+      }
+    })
+  })
 })

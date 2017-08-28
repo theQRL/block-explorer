@@ -42,7 +42,7 @@ Template.appBody.events({
         }
       }
     }
-    return f
+    // return f
   },
   'keypress input': (event) => {
     let f = false
@@ -77,7 +77,7 @@ Template.appBody.events({
         return false
       }
     }
-    return f
+    return true
   },
 })
 
