@@ -20,7 +20,7 @@ Template.appBody.events({
     // check if s is an integer
     const x = parseFloat(s)
     let f = false // found an exit point?
-    if ((!isNaN(x) && (x | 0) === x)) {
+    if ((!isNaN(x) && (parseInt(x, 10)) === x)) {
       // console.log('likely a block number')
       f = true
       FlowRouter.go(`/block/${x}`)
@@ -52,7 +52,7 @@ Template.appBody.events({
         const s = $(':focus').val()
         // check if s is an integer
         const x = parseFloat(s)
-        if ((!isNaN(x) && (x | 0) === x)) {
+        if ((!isNaN(x) && (parseInt(x, 10)) === x)) {
           // console.log('likely a block number')
           f = true
           FlowRouter.go(`/block/${x}`)
