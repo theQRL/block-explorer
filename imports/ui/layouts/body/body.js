@@ -19,25 +19,33 @@ Template.appBody.events({
     const s = $(event.currentTarget).prev().val()
     // check if s is an integer
     const x = parseFloat(s)
+    let f = false // found an exit point?
     if ((!isNaN(x) && (x | 0) === x)) {
       // console.log('likely a block number')
+      f = true
       FlowRouter.go(`/block/${x}`)
     } else {
+      f = false
       if (s.length === 69 && s.charAt(0) === 'Q') {
         // console.log("Searching for address")
+        f = true
         FlowRouter.go(`/a/${s}`)
         // ADDRESS display
       } else {
+        f = false
         if (s.length === 64) {
+          f = true
           // console.log('search string is likely a txhash')
           FlowRouter.go(`/tx/${s}`)
         } else {
-          // console.log('not sure what is being searched for...')
+          f = false
         }
       }
     }
+    return f
   },
   'keypress input': (event) => {
+    let f = false
     if (event.keyCode === 13) {
       // console.log('search clicked')
       if ($(':focus').is('input')) {
@@ -46,15 +54,19 @@ Template.appBody.events({
         const x = parseFloat(s)
         if ((!isNaN(x) && (x | 0) === x)) {
           // console.log('likely a block number')
+          f = true
           FlowRouter.go(`/block/${x}`)
         } else {
+          f = false
           if (s.length === 69 && s.charAt(0) === 'Q') {
             // console.log("Searching for address")
             FlowRouter.go(`/a/${s}`)
             // ADDRESS display
           } else {
+            f = false
             if (s.length === 64) {
               // console.log('search string is likely a txhash')
+              f = true
               FlowRouter.go(`/tx/${s}`)
             } else {
               // console.log('not sure what is being searched for...')
@@ -65,6 +77,7 @@ Template.appBody.events({
         return false
       }
     }
+    return f
   },
 })
 
