@@ -59,6 +59,10 @@ td .unbreakable {
     overflow: visible;
 }
 
+.unbreakable {
+    overflow: hidden;
+    word-break: break-all;
+}
 
 .ui.inverted.segment, .ui.primary.inverted.segment {
 background: #1d2951;

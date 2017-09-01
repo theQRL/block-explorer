@@ -15,6 +15,14 @@ Template.lastblocks.helpers({
   lastblocks() {
     return Session.get('lastblocks')
   },
+  ts() {
+    const x = moment.unix(this.timestamp)
+    return moment(x).format('HH:mm D MMM YYYY')
+  },
+  interval() {
+    const x = Math.round(this.block_interval)
+    return `${x} seconds`
+  },
 })
 
 Template.lastblocks.events({
