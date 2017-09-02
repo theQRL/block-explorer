@@ -39,6 +39,18 @@ Template.tx.helpers({
     const x = moment.unix(this.timestamp)
     return moment(x).format('HH:mm D MMM YYYY')
   },
+  txcolor() {
+    if (this.subtype === 'COINBASE') {
+      return 'teal'
+    }
+    if (this.subtype === 'TX') {
+      return 'yellow'
+    }
+    if (this.subtype === 'STAKE') {
+      return 'red'
+    }
+    return ''
+  },
 })
 
 Template.tx.events({
