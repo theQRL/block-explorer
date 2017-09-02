@@ -20,6 +20,16 @@ Template.status.helpers({
     x = x.network_uptime
     return moment('1900-01-01 00:00:00').add(x, 'seconds').format('d[d] h[h] mm[min]')
   },
+  emission(emm) {
+    let r = 'Undetermined'
+    try {
+      const x = Math.round(parseFloat(emm) / 105) / 10000
+      r = `${x}%`
+    } catch (e) {
+      //
+    }
+    return r
+  },
 })
 
 Template.status.events({

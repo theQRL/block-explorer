@@ -56,7 +56,7 @@
                 <div class="content">
                   <div class="header">Proof-of-stake</div>
                   <small><strong>Stake validators:</strong> {{status.stake_validators}}<br>
-                  <strong>Staked emission:</strong> {{status.emission}}<br>
+                  <strong>Staked emission:</strong> {{status.staked_percentage_emission}}%<br>
                   <strong>Epoch:</strong> {{status.epoch}}</small>
                 </div>
               </div>
@@ -81,7 +81,7 @@
                 <i class="bordered inverted blue database middle aligned icon"></i>
                 <div class="content">
                   <div class="header">Coin supply</div>
-                  <small><strong>Emission:</strong> {{status.staked_percentage_emission}}<br>
+                  <small><strong>Emission:</strong> {{emission(status.emission)}}<br>
                   <strong>Unmined:</strong> {{status.unmined}}<br>
                   <strong>Block reward:</strong> {{status.block_reward}}</small>
                 </div>
