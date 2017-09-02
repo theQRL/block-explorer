@@ -1,5 +1,17 @@
 <template name="appHome">
-  <div class="ui segment">
-  {{> status}}
-</div>
+  <div class="ui stackable grid">
+    <div class="row">
+      <div class="ui segment">
+        {{> status}}
+      </div>
+    </div>
+    <div class="row">
+      <div class="eight wide column">
+        {{> lastblocks}}
+      </div>
+      <div class="eight wide column">
+        {{> lasttx}}
+      </div>
+    </div>
+  </div>
 </template>
