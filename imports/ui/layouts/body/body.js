@@ -21,25 +21,25 @@ Template.appBody.events({
     const x = parseFloat(s)
     let f = false // found an exit point?
     if ((!isNaN(x) && (parseInt(x, 10)) === x)) {
-      // console.log('likely a block number')
-      f = true
-      FlowRouter.go(`/block/${x}`)
+      // f = false
+      if (s.length === 64) {
+        // f = true
+        // console.log('search string is likely a txhash')
+        FlowRouter.go(`/tx/${s}`)
+      } else {
+        // f = false
+      }
     } else {
-      f = false
+      // f = false
       if (s.length === 69 && s.charAt(0) === 'Q') {
         // console.log("Searching for address")
-        f = true
+        // f = true
         FlowRouter.go(`/a/${s}`)
         // ADDRESS display
       } else {
-        f = false
-        if (s.length === 64) {
-          f = true
-          // console.log('search string is likely a txhash')
-          FlowRouter.go(`/tx/${s}`)
-        } else {
-          f = false
-        }
+        // console.log('likely a block number')
+        // f = true
+        FlowRouter.go(`/block/${x}`)
       }
     }
     // return f
