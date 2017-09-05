@@ -1,4 +1,5 @@
 import './block.html'
+import JSONFormatter from 'json-formatter-js'
 
 Template.block.onCreated(() => {
   Session.set('block', {})
@@ -42,11 +43,19 @@ Template.block.helpers({
     }
     return ''
   },
+  json() {
+    const myJSON = this
+    const formatter = new JSONFormatter(myJSON)
+    $('.json').append(formatter.render())
+  },
 })
 
 Template.block.events({
   'click .close': () => {
     $('.message').hide()
+  },
+  'click .jsonclick': () => {
+    $('.jsonbox').toggle()
   },
 })
 
