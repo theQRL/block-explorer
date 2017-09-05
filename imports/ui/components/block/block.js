@@ -3,14 +3,16 @@ import './block.html'
 Template.block.onCreated(() => {
   Session.set('block', {})
   const blockId = parseInt(FlowRouter.getParam('blockId'), 10)
-  Meteor.call('block', blockId, (err, res) => {
-    // The method call sets the Session variable to the callback value
-    if (err) {
-      Session.set('block', { error: err, id: blockId })
-    } else {
-      Session.set('block', res)
-    }
-  })
+  if (blockId) {
+    Meteor.call('block', blockId, (err, res) => {
+      // The method call sets the Session variable to the callback value
+      if (err) {
+        Session.set('block', { error: err, id: blockId })
+      } else {
+        Session.set('block', res)
+      }
+    })
+  }
 })
 
 Template.block.helpers({

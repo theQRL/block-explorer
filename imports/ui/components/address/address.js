@@ -5,13 +5,15 @@ Template.address.onCreated(() => {
   Session.set('address', {})
   Session.set('qrl', 0)
   const aId = FlowRouter.getParam('aId')
-  Meteor.call('address', aId, (err, res) => {
-    if (err) {
-      Session.set('address', { error: err, id: aId })
-    } else {
-      Session.set('address', res)
-    }
-  })
+  if (aId) {
+    Meteor.call('address', aId, (err, res) => {
+      if (err) {
+        Session.set('address', { error: err, id: aId })
+      } else {
+        Session.set('address', res)
+      }
+    })
+  }
   Meteor.call('QRLvalue', (err, res) => {
     if (err) {
       Session.set('qrl', 'Error getting value from API')
@@ -57,13 +59,15 @@ Template.address.events({
   'click .refresh': () => {
     Session.set('address', {})
     const aId = FlowRouter.getParam('aId')
-    Meteor.call('address', aId, (err, res) => {
-      if (err) {
-        Session.set('address', { error: err })
-      } else {
-        Session.set('address', res)
-      }
-    })
+    if (aId) {
+      Meteor.call('address', aId, (err, res) => {
+        if (err) {
+          Session.set('address', { error: err })
+        } else {
+          Session.set('address', res)
+        }
+      })
+    }
   },
   'click .close': () => {
     $('.message').hide()
@@ -85,13 +89,14 @@ Template.address.onRendered(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     const aId = FlowRouter.getParam('aId')
-    Meteor.call('address', aId, (err, res) => {
-      if (err) {
-        Session.set('address', { error: err })
-      } else {
-        Session.set('address', res)
-      }
-    })
+    if (aId) {
+      Meteor.call('address', aId, (err, res) => {
+        if (err) {
+          Session.set('address', { error: err })
+        } else {
+          Session.set('address', res)
+        }
+      })
+    }
   })
 })
-
