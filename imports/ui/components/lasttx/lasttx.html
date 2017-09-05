@@ -24,24 +24,24 @@
             {{ts}}
           </div>
         </div>
-      <div class="item">
-        <div class="content">
-          <div class="header">AMOUNT</div>
-          <div class="ui yellow label">{{this.amount}}
-            <div class="detail">QRL</div>
+        <div class="item">
+          <div class="content">
+            <div class="header">AMOUNT</div>
+            <div class="ui yellow label">{{this.amount}}
+              <div class="detail">QRL</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ui horizontal list">
+        <div class="item">
+          <div class="content">
+            <div class="header">TXHASH</div>
+            <div class="unbreakable"><a href="/tx/{{this.txhash}}">{{this.txhash}}</a></div>
           </div>
         </div>
       </div>
     </div>
-    <div class="ui horizontal list">
-      <div class="item">
-        <div class="content">
-          <div class="header">TXHASH</div>
-          <div class="unbreakable"><a href="/tx/{{this.txhash}}">{{this.txhash}}</a></div>
-        </div>
-      </div>
-    </div>
-  </div>
     {{/each}}
   </div>
   {{/if}} {{/with}}
