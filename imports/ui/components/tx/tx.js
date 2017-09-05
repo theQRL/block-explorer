@@ -1,24 +1,28 @@
 import './tx.html'
 import '../../stylesheets/overrides.css'
+import JSONFormatter from 'json-formatter-js'
+
 
 Template.tx.onCreated(() => {
   Session.set('txhash', {})
   Session.set('qrl', 0)
   const txId = FlowRouter.getParam('txId')
-  Meteor.call('txhash', txId, (err, res) => {
-    if (err) {
-      Session.set('txhash', { error: err, id: txId })
-    } else {
-      Session.set('txhash', res)
-    }
-  })
-  Meteor.call('QRLvalue', (err, res) => {
-    if (err) {
-      Session.set('qrl', 'Error getting value from API')
-    } else {
-      Session.set('qrl', res)
-    }
-  })
+  if (txId) {
+    Meteor.call('txhash', txId, (err, res) => {
+      if (err) {
+        Session.set('txhash', { error: err, id: txId })
+      } else {
+        Session.set('txhash', res)
+      }
+    })
+    Meteor.call('QRLvalue', (err, res) => {
+      if (err) {
+        Session.set('qrl', 'Error getting value from API')
+      } else {
+        Session.set('qrl', res)
+      }
+    })
+  }
 })
 
 Template.tx.helpers({
@@ -51,11 +55,19 @@ Template.tx.helpers({
     }
     return ''
   },
+  json() {
+    const myJSON = this
+    const formatter = new JSONFormatter(myJSON)
+    $('.json').append(formatter.render())
+  },
 })
 
 Template.tx.events({
   'click .close': () => {
     $('.message').hide()
+  },
+  'click .jsonclick': () => {
+    $('.jsonbox').toggle()
   },
 })
 
