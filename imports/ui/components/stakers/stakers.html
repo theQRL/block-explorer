@@ -60,12 +60,25 @@
                 <div class="header">
                   HASH TERM.
                 </div>
-                <button class="ui mini button">&raquo;</button>
+                <button class="ui mini button hashShow">Show &raquo;</button>
               </div>
             </div>
           </div>
         </div>
-        <!-- TO DO: needs to be a popup... hash_terminator: {{this.hash_terminator}} -->
+        <div class="row" style="display: none;">
+          <div class="ui unbreakable basic segment">
+            <div class="ui horizontal list">
+              <div class="item">
+                <div class="content">
+                  <div class="header">
+                    HASH TERMINATOR
+                  </div>
+                  {{this.hash_terminator}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     {{/each}}
