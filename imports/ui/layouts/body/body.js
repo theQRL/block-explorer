@@ -19,8 +19,8 @@ Template.appBody.events({
     const s = $(event.currentTarget).prev().val()
     // check if s is an integer
     const x = parseFloat(s)
-    let f = false // found an exit point?
-    if ((!isNaN(x) && (parseInt(x, 10)) === x)) {
+    // let f = false // found an exit point?
+    if (((x) && (parseInt(x, 10)) === x)) {
       // f = false
       if (s.length === 64) {
         // f = true
@@ -45,28 +45,28 @@ Template.appBody.events({
     // return f
   },
   'keypress input': (event) => {
-    let f = false
+    // let f = false
     if (event.keyCode === 13) {
       // console.log('search clicked')
       if ($(':focus').is('input')) {
         const s = $(':focus').val()
         // check if s is an integer
         const x = parseFloat(s)
-        if ((!isNaN(x) && (parseInt(x, 10)) === x)) {
+        if (((x) && (parseInt(x, 10)) === x)) {
           // console.log('likely a block number')
-          f = true
+          // f = true
           FlowRouter.go(`/block/${x}`)
         } else {
-          f = false
+          // f = false
           if (s.length === 69 && s.charAt(0) === 'Q') {
             // console.log("Searching for address")
             FlowRouter.go(`/a/${s}`)
             // ADDRESS display
           } else {
-            f = false
+            // f = false
             if (s.length === 64) {
               // console.log('search string is likely a txhash')
-              f = true
+              // f = true
               FlowRouter.go(`/tx/${s}`)
             } else {
               // console.log('not sure what is being searched for...')

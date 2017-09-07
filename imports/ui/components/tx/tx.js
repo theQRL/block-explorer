@@ -1,6 +1,6 @@
+import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
-import JSONFormatter from 'json-formatter-js'
 
 
 Template.tx.onCreated(() => {

@@ -1,5 +1,5 @@
-import './block.html'
 import JSONFormatter from 'json-formatter-js'
+import './block.html'
 
 Template.block.onCreated(() => {
   Session.set('block', {})

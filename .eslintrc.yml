@@ -36,7 +36,7 @@ rules:
     - never
   # import/no-extraneous-dependencies: 0
   # eslint-plugin-meteor
-  # meteor/no-session: [0] # allow Session
+  meteor/no-session: [0] # allow Session
   # meteor/prefer-session-equals: [2] # prefer Session.equals instead
  
 

@@ -31,8 +31,13 @@ Template.nextstakers.events({
   'click .close': () => {
     $('.message').hide()
   },
-  'click .hashShow': (e) => {
-    console.log(e.target)
-    $(e.target).parent().parent().parent().parent().parent().children('.row').toggle()
+  'click .hashShow': (event) => {
+    $(event.target).parent()
+      .parent()
+      .parent()
+      .parent()
+      .parent()
+      .children('.row')
+      .toggle()
   },
 })
