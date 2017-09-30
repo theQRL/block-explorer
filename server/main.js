@@ -127,7 +127,7 @@ Meteor.methods({
 
   address(aId) {
     check(aId, String)
-    if (!((Match.test(aId, String)) && (aId.length === 69))) {
+    if (!((Match.test(aId, String)) && (aId.length === 73))) {
       const errorCode = 400
       const errorMessage = 'Badly formed address'
       throw new Meteor.Error(errorCode, errorMessage)
