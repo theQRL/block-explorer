@@ -4,7 +4,7 @@
 
 Work in progress.
 
-Currently running at: [http://qrlexplorer.info:8008/](http://qrlexplorer.info:8008/)
+Currently running at: [http://qrlexplorer.info/](http://qrlexplorer.info/)
 
 ## Dependencies
 
