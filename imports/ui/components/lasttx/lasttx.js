@@ -31,6 +31,7 @@ Template.lasttx.events({
       if (err) {
         Session.set('lasttx', { error: err })
       } else {
+        res.transactions = res.transactions.reverse()
         Session.set('lasttx', res)
       }
     })

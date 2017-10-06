@@ -10,6 +10,7 @@ Template.address.onCreated(() => {
       if (err) {
         Session.set('address', { error: err, id: aId })
       } else {
+        res.transactions = res.transactions.reverse()
         Session.set('address', res)
       }
     })
@@ -64,6 +65,7 @@ Template.address.events({
         if (err) {
           Session.set('address', { error: err })
         } else {
+          res.transactions = res.transactions.reverse()
           Session.set('address', res)
         }
       })
@@ -94,6 +96,7 @@ Template.address.onRendered(() => {
         if (err) {
           Session.set('address', { error: err })
         } else {
+          res.transactions = res.transactions.reverse()
           Session.set('address', res)
         }
       })
