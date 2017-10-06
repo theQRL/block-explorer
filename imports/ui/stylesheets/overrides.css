@@ -64,6 +64,10 @@ td .unbreakable {
     word-break: break-all;
 }
 
+.json-formatter-row .json-formatter-string {
+    white-space: pre-wrap !important;
+}
+
 .ui.inverted.segment, .ui.primary.inverted.segment {
 background: #1d2951;
     }
