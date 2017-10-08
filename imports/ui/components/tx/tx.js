@@ -12,6 +12,7 @@ Template.tx.onCreated(() => {
       if (err) {
         Session.set('txhash', { error: err, id: txId })
       } else {
+        res.amount = parseFloat(res.amount)
         Session.set('txhash', res)
       }
     })

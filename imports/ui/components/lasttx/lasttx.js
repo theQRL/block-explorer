@@ -8,6 +8,13 @@ Template.lasttx.onCreated(() => {
       Session.set('lasttx', { error: err })
     } else {
       res.transactions = res.transactions.reverse()
+      const tx = []
+      res.transactions.forEach((index) => {
+        const obj = index
+        obj.amount = parseFloat(obj.amount)
+        tx.push(obj)
+      })
+      res.transactions = tx
       Session.set('lasttx', res)
     }
   })
@@ -32,6 +39,13 @@ Template.lasttx.events({
         Session.set('lasttx', { error: err })
       } else {
         res.transactions = res.transactions.reverse()
+        const tx = []
+        res.transactions.forEach((index) => {
+          const obj = index
+          obj.amount = parseFloat(obj.amount)
+          tx.push(obj)
+        })
+        res.transactions = tx
         Session.set('lasttx', res)
       }
     })
