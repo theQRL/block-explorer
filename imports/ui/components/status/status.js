@@ -30,6 +30,16 @@ Template.status.helpers({
     }
     return r
   },
+  stakedEmission() {
+    let y = 'undetermined'
+    try {
+      const x = Session.get('status')
+      y = Math.round(parseFloat(x.staked_percentage_emission['py/reduce'][1]['py/tuple'][0]) * 10000) / 10000
+    } catch (e) {
+      //
+    }
+    return y
+  },
 })
 
 Template.status.events({
