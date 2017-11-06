@@ -1,41 +1,34 @@
 <template name="appBody">
+
   <body>
-  <div class="ui menu" id="menu">
+    <div class="ui menu" id="menu">
       <div class="ui container">
-          <a href="/" class="header item">
-              <img class="logo" src="/img/Q@2x.png"><!-- QRL -->
-          </a>
-          <a href="#" class="item disabled">Login</a>
-          <div class="ui simple dropdown item">
-              Blockchain <i class="dropdown icon"></i>
-              <div class="menu">
-                  <div class="header">Transactions</div>
-
-                  <a class="item" href="/lasttx">Confirmed</a>
-                  <a class="item" href="/unconfirmed">Unconfirmed</a>
-                  <div class="divider"></div>
-                  <a class="item" href="/lastblocks">Blocks</a>
-                  <div class="divider"></div>
-                  <a class="item" href="/richlist">Richlist</a>
-                  <div class="divider"></div>
-                  <div class="header">Stakers</div>
-                  <a href="/stakers" class="item">
-                  Current epoch</a>
-                  <a class="item" href="/nextstakers">Next epoch
-                  </a>
-                  
-              </div>
-
+        <a href="/" class="header item"><img class="logo" src="/img/Q@2x.png"></a>
+        <div class="ui simple dropdown item">
+          About <i class="dropdown icon"></i>
+          <div class="menu">
+            <a class="item" href="http://theqrl.org/whitepaper/QRL_whitepaper.pdf">QRL Whitepaper</a>
+            <a class="item" href="https://github.com/theQRL/QRL">Github</a>
+            <a class="item" href="http://theQRL.org">theQRL.org</a>
           </div>
-          <div class="ui simple dropdown item">
-              About <i class="dropdown icon"></i>
-              <div class="menu">
-                  <a class="item" href="http://theqrl.org/whitepaper/QRL_whitepaper.pdf">QRL Whitepaper</a>
-                  <a class="item" href="https://github.com/theQRL/QRL">Github</a>
-                  <a class="item" href="http://theQRL.org">theQRL.org</a>
-              </div>
-
+        </div>
+        <div class="ui simple dropdown item">
+          Blockchain <i class="dropdown icon"></i>
+          <div class="menu">
+            <div class="header">Transactions</div>
+            <a class="item" href="/lasttx">Confirmed</a>
+            <a class="item" href="/unconfirmed">Unconfirmed</a>
+            <div class="divider"></div>
+            <a class="item" href="/lastblocks">Blocks</a>
+            <div class="divider"></div>
+            <a class="item" href="/richlist">Richlist</a>
+            <div class="divider"></div>
+            <div class="header">Stakers</div>
+            <a href="/stakers" class="item">Current epoch</a>
+            <a class="item" href="/nextstakers">Next epoch</a>
           </div>
+        </div>
+        <a href="https://wallet.qrlexplorer.info" class="item">Wallet</a>
         <div class="right menu item">
           <div class="ui icon input">
             <input style="width:200px !important" type="text" placeholder="tx, address, block height">
@@ -43,40 +36,34 @@
           </div>
         </div>
       </div>
-  </div>
-
- {{>sidebar}}
- <div class="ui fixed menu" id="m_menu">
-     <div class="ui container" id="m_btn">
-
-         <div class="icon item">
-           <a id="hamburger"><i class="content icon"></i> Menu</a>
-         </div>
-     </div>
- </div>
-    <div class="pusher">
-
-
-  <div class="ui container" style="margin-top: 1em">
-  {{> Template.dynamic template=main}}
-</div>
-
-<div class="ui hidden divider"></div>
-
-<div class="ui inverted vertical footer segment">
-            <div class="ui center aligned container">
-                <a href="#"><img width="91" src="/img/ringedQ@2x.png"></a>
-                <p></p>
-            <div class="ui center aligned container">
-            <div class="ui horizontal inverted small divided link list">
-                <a class="item" href="http://theqrl.org/">theQRL.org</a>
-                <a class="item" href="http://theqrl.org/whitepaper/QRL_whitepaper.pdf">White Paper</a>
-                <a class="item" href="https://github.com/theQRL/QRL">Github</a>
-            </div>
-        </div>
-        </div>
     </div>
-
-</div> <!-- pusher close tag -->
-</body>
+    {{>sidebar}}
+    <div class="ui fixed menu" id="m_menu">
+      <div class="ui container" id="m_btn">
+        <div class="icon item">
+          <a id="hamburger"><i class="content icon"></i> Menu</a>
+        </div>
+      </div>
+    </div>
+    <div class="pusher">
+      <div class="ui container" style="margin-top: 1em">
+        {{> Template.dynamic template=main}}
+      </div>
+      <div class="ui hidden divider"></div>
+      <div class="ui inverted vertical footer segment">
+        <div class="ui center aligned container">
+          <a href="#"><img width="91" src="/img/ringedQ@2x.png"></a>
+          <p></p>
+          <div class="ui center aligned container">
+            <div class="ui horizontal inverted small divided link list">
+              <a class="item" href="http://theqrl.org/">theQRL.org</a>
+              <a class="item" href="http://theqrl.org/whitepaper/QRL_whitepaper.pdf">White Paper</a>
+              <a class="item" href="https://github.com/theQRL/QRL">Github</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- pusher close tag -->
+  </body>
 </template>
