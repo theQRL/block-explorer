@@ -5,7 +5,13 @@
   "main": "index.js",
   "dependencies": {
     "babel-runtime": "^6.26.0",
-    "json-formatter-js": "^2.2.0"
+    "crypto": "^1.0.1",
+    "fs": "0.0.1-security",
+    "grpc": "^1.7.1",
+    "json-formatter-js": "^2.2.0",
+    "path": "^0.12.7",
+    "qrllib": "^0.2.9",
+    "tmp": "0.0.33"
   },
   "private": true,
   "repository": {
