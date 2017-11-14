@@ -12,7 +12,7 @@
     {{else}}
     <div class="ui raised fluid card">
       <div class="content">
-        <div class="header">Transaction <div class="ui label"><i class="exchange icon"></i> {{txhash.txhash}}</div></div>
+        <div class="header">Transaction <div class="ui label"><i class="exchange icon"></i> {{txhash.transactionHash}}</div></div>
         <div class="meta">
           {{#if txhash.confirmations}} {{txhash.confirmations}} confirmations {{else}}Unconfirmed{{/if}}
         </div>
@@ -20,10 +20,10 @@
           <div class="ui basic center aligned segment">
             <div class="ui statistic">
               <div class="label">
-                <div class="ui {{txcolor}} label">{{txhash.subtype}}</div>
+                <div class="ui {{txcolor}} label">{{txhash.type}}</div>
               </div>
               <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
-                {{txhash.amount}}
+                {{txhash.transfer.amount}}
               </div>
               <div class="label">
                 Quanta
@@ -33,17 +33,17 @@
           <table class="ui stackable table">
             <thead></thead>
             <tbody>
-            <tr><td class="single line"><div class="ui red label"><i class="sign out icon"></i>from</div></td><td><a href="/a/{{txhash.txfrom}}">{{txhash.txfrom}}</a></td>
+            <tr><td class="single line"><div class="ui red label"><i class="sign out icon"></i>from</div></td><td><a href="/a/{{txhash.txfrom}}">{{txhash.addrFrom}}</a></td>
             <td><i class="large right arrow icon"></i></td>
-            <td class="single line"><div class="ui purple label"><i class="sign in icon"></i>to</div></td><td><a href="/a/{{txhash.txto}}">{{txhash.txto}}</a></td></tr>
+            <td class="single line"><div class="ui purple label"><i class="sign in icon"></i>to</div></td><td><a href="/a/{{txhash.txto}}">{{txhash.transfer.addrTo}}</a></td></tr>
           </tbody>
           </table>
           <div class="ui celled horizontal list">
             <div class="item"><strong>Block</strong> <a href="/block/{{txhash.block}}">{{txhash.block}}</a></div>
             <div class="item"><strong>Nonce</strong> {{txhash.nonce}}</div>
-            <div class="item"><strong>OTS key</strong> {{txhash.ots_key}}</div>
-            <div class="item"><strong>Hexsize</strong> {{txhash.hexsize}}</div>
-            <div class="item"><strong>Fee</strong> {{txhash.fee}}</div>
+            <div class="item"><strong>OTS key</strong> {{txhash.otsKey}}</div>
+<!--             <div class="item"><strong>Hexsize</strong> {{txhash.hexsize}}</div>
+            <div class="item"><strong>Fee</strong> {{txhash.fee}}</div> -->
           </div>
           <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
           <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
