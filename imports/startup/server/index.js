@@ -43,6 +43,40 @@ const errorCallback = (error, message, alert) => {
   return meteorError
 }
 
+const getAddressState = (request, callback) => {
+  try {
+    qrlClient.API.GetAddressState({}, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
+        callback(myError, null)
+      } else {
+        console.log(response)
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+    callback(myError, null)
+  }
+}
+
+const getLatestData = (request, callback) => {
+  try {
+    qrlClient.API.GetLatestData({}, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/getLatestData** ')
+        callback(myError, null)
+      } else {
+        console.log(response)
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+    callback(myError, null)
+  }
+}
+
 const getStats = (request, callback) => {
   try {
     qrlClient.API.GetStats({}, (error, response) => {
@@ -223,8 +257,21 @@ Meteor.methods({
   getObject(request) {
     check(request, Object)
     this.unblock()
-    // check(request, Object)
     const response = Meteor.wrapAsync(getObject)(request)
+    return response
+  },
+
+  getLatestData(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getLatestData)(request)
+    return response
+  },
+
+  getAddressState(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getAddressState)(request)
     return response
   },
 
