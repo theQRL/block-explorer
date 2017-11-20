@@ -7,7 +7,9 @@ Meteor.call('getStats', (err, res) => {
   }
 })
 
-let req = {}
+let req = {
+  block: 5,
+}
 Meteor.call('getObject', req, (err, res) => {
   if (err) {
     console.log(err.message)
@@ -26,7 +28,7 @@ Meteor.call('getLatestData', req, (err, res) => {
 })
 
 req = {
-  address: 'UTFjYWE2YTM1N2Y2YjU2ODQxMzEyNDNmYjdjYjIzMzFlYTZlNTUwMzk2NTVhMzY2YjUzYmM0NzlkYTJkNWM0NTFhMGEzNzVjYw==',
+  address: 'Qa02d909723512ecd1606c96f52f5a4121946f068986e612a57c75353952ab3624ddd0bd6',
 }
 Meteor.call('getAddressState', req, (err, res) => {
   if (err) {

@@ -45,7 +45,7 @@ const errorCallback = (error, message, alert) => {
 
 const getAddressState = (request, callback) => {
   try {
-    qrlClient.API.GetAddressState({}, (error, response) => {
+    qrlClient.API.GetAddressState(request, (error, response) => {
       if (error) {
         const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
         callback(myError, null)
@@ -62,7 +62,7 @@ const getAddressState = (request, callback) => {
 
 const getLatestData = (request, callback) => {
   try {
-    qrlClient.API.GetLatestData({}, (error, response) => {
+    qrlClient.API.GetLatestData(request, (error, response) => {
       if (error) {
         const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/getLatestData** ')
         callback(myError, null)
