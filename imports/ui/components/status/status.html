@@ -30,21 +30,25 @@
               <i class="bordered inverted blue power middle aligned icon"></i>
               <div class="content">
                 <div class="header">Status</div>
-          {{status.status}} <i class="ui tiny middle aligned green circle icon"></i><br><small><strong>Uptime: </strong>{{uptime}}</small>
+          {{status.status}} <i class="ui tiny middle aligned green circle icon"></i>
+          <small>Connected</small>
+          <br><small><strong>Uptime: </strong>{{uptime}}</small>
                 </div>
               </div>
               <div class="item">
                 <i class="bordered inverted blue info circle middle aligned icon"></i>
                 <div class="content">
                   <div class="header">Network</div>
-                  {{status.network}}<br><small><strong>Version: </strong> {{status.version}}</small>
+                  <small>{{status.node_info.network_id}}</small>
+                  <br>
+                  <small><strong>Version: </strong> {{status.node_info.version}}</small>
                 </div>
               </div>
               <div class="item">
                 <i class="bordered inverted blue server middle aligned icon"></i>
                 <div class="content">
                   <div class="header">Nodes</div>
-                  {{status.nodes}}
+                  {{status.node_info.num_known_peers}}
                 </div>
               </div>
             </div>
@@ -55,8 +59,8 @@
                 <i class="bordered inverted blue law middle aligned icon"></i>
                 <div class="content">
                   <div class="header">Proof-of-stake</div>
-                  <small><strong>Stake validators:</strong> {{status.stake_validators}}<br>
-                  <strong>Staked emission:</strong> {{status.staked_percentage_emission}}%<br>
+                  <small><strong>Stake validators:</strong> {{status.stakers_count}}<br>
+                  <strong>Staked emission:</strong> {{staked}}%<br>
                   <strong>Epoch:</strong> {{status.epoch}}</small>
                 </div>
               </div>
@@ -68,9 +72,9 @@
                 <i class="bordered inverted blue cubes middle aligned icon"></i>
                 <div class="content">
                   <div class="header">Blocks</div>
-                  <small><strong>Block height:</strong> {{status.blockheight}}<br>
-                  <strong>Block time:</strong> {{status.block_time}}<br>
-                  <strong>Block time variance:</strong> {{status.block_time_variance}}</small>
+                  <small><strong>Block height:</strong> {{status.node_info.block_height}}<br>
+                  <strong>Block time:</strong> {{status.block_time_mean}}<br>
+                  <strong>Block time variance:</strong> {{status.block_time_sd}}</small>
                 </div>
               </div>
             </div>
@@ -81,9 +85,9 @@
                 <i class="bordered inverted blue database middle aligned icon"></i>
                 <div class="content">
                   <div class="header">Coin supply</div>
-                  <small><strong>Emission:</strong> {{emission(status.emission)}}<br>
-                  <strong>Unmined:</strong> {{status.unmined}}<br>
-                  <strong>Block reward:</strong> {{status.block_reward}}</small>
+                  <small><strong>Emission:</strong> {{emission}}%<br>
+                  <strong>Unmined:</strong> {{unmined}}<br>
+                  <strong>Block reward:</strong> {{reward(status.block_last_reward)}}</small>
                 </div>
               </div>
             </div>
