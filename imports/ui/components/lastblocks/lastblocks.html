@@ -13,7 +13,7 @@
     <div class="ui segment">
       <div class="content">
         <a class="ui primary button" href="/block/{{this.blocknumber}}">
-            <i class="cube icon"></i> {{this.blocknumber}}
+            <i class="cube icon"></i> {{this.header.block_number}}
             <i class="right chevron icon"></i>
         </a>
         <div class="meta">
@@ -25,7 +25,7 @@
             <div class="item">
               <div class="content">
                 <div class="header">BLOCK REWARD</div>
-                <div class="ui yellow label">{{this.block_reward}}
+                <div class="ui yellow label">{{reward(this.header.reward_block)}}
                   <div class="detail">QRL</div>
                 </div>
               </div>
@@ -33,24 +33,24 @@
             <div class="item">
               <div class="content">
                 <div class="header">TRANSACTIONS</div>
-                <div class="ui red label">{{this.number_transactions}}</div>
+                <div class="ui red label">{{txCount}}</div>
               </div>
             </div>
-            <div class="item">
+<!--             <div class="item">
               <div class="content">
                 <div class="header">BLOCK INTERVAL</div>
                 <div class="ui label">{{interval}}</div>
               </div>
-            </div>
+            </div> -->
           </div>
-          <div class="ui horizontal list">
+<!--           <div class="ui horizontal list">
             <div class="item">
               <div class="content">
                 <div class="header">BLOCKHASH</div>
-                <div class="unbreakable">{{this.blockhash}}</div>
+                <div class="unbreakable">{{hash}}</div>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
         <div class="extra">
         </div>

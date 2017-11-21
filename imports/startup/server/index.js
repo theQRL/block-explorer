@@ -67,7 +67,6 @@ const getLatestData = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/getLatestData** ')
         callback(myError, null)
       } else {
-        console.log(response)
         callback(null, response)
       }
     })
@@ -84,7 +83,6 @@ const getStats = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetStats', '**ERROR/getStats** ')
         callback(myError, null)
       } else {
-        console.log(response)
         callback(null, response)
       }
     })
@@ -155,9 +153,8 @@ Meteor.methods({
   lastblocks() {
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
-    const apiUrl = 'http://104.251.219.215:8080/api/last_block/5'
     // asynchronous call to API
-    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    const response = Meteor.wrapAsync(getLatestData)({})
     return response
   },
 
