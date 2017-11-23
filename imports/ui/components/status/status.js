@@ -17,29 +17,49 @@ Template.status.helpers({
   },
   uptime() {
     let x = Session.get('status')
-    x = x.network_uptime
+    x = x.uptime_network
     return moment('1900-01-01 00:00:00').add(x, 'seconds').format('d[d] h[h] mm[min]')
   },
-  emission(emm) {
+  emission() {
+    let x = Session.get('status')
     let r = 'Undetermined'
     try {
-      const x = Math.round(parseFloat(emm) / 105) / 10000
-      r = `${x}%`
+      r = Math.round(parseFloat(x.coins_emitted) / parseFloat(x.coins_total_supply)*10000) / 100
     } catch (e) {
-      //
+      r = 'Error parsing API results'
     }
     return r
   },
-  stakedEmission() {
-    let y = 'undetermined'
+  staked() {
+    let x = Session.get('status')
+    let r = 'Undetermined'
     try {
-      const x = Session.get('status')
-      y = Math.round(parseFloat(x.staked_percentage_emission['py/reduce'][1]['py/tuple'][0]) * 10000) / 10000
-    } catch (e) {
-      //
+      r = Math.round(parseFloat(x.coins_atstake) / parseFloat(x.coins_emitted)*10000) / 100
+    } catch(e) {
+      r = 'Error parsing API results'
     }
-    return y
+    return r
   },
+  reward(rew) {
+    let r = 'Undetermined'
+    try {
+      const x = parseFloat(rew) / 100000000
+      r = `${x}`
+    } catch (e) {
+      r = 'Error parsing API results'
+    }
+    return r
+  },
+  unmined() {
+    let x = Session.get('status')
+    let r = 'Undetermined'
+    try {
+      r = parseFloat(x.coins_total_supply) - parseFloat(x.coins_emitted)
+    } catch (e) {
+      r = 'Error parsing API results'
+    }
+    return r
+  }
 })
 
 Template.status.events({

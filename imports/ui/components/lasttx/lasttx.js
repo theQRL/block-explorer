@@ -28,6 +28,14 @@ Template.lasttx.helpers({
     const x = moment.unix(this.timestamp)
     return moment(x).format('HH:mm D MMM YYYY')
   },
+  zeroCheck() {
+    const x = Session.get('lasttx')
+    let y = true
+    if (x.length > 0) {
+      y = false
+    }
+    return y
+  },
 })
 
 Template.lasttx.events({
