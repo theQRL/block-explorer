@@ -161,9 +161,8 @@ Meteor.methods({
   lasttx() {
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
-    const apiUrl = 'http://104.251.219.215:8080/api/last_tx/5'
     // asynchronous call to API
-    const response = Meteor.wrapAsync(apiCall)(apiUrl)
+    const response = Meteor.wrapAsync(getLatestData)({})
     return response
   },
 

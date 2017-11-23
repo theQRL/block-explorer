@@ -9,6 +9,9 @@
   </div>
   {{else}}
   <div class="ui raised segments">
+    {{#if zeroCheck}}
+    <div class="ui segment">No transactions yet</div>
+    {{else}}
     {{#each lasttx.transactions}}
     <div class="ui segment">
       <div class="ui horizontal list">
@@ -43,6 +46,7 @@
       </div>
     </div>
     {{/each}}
+    {{/if}}
   </div>
   {{/if}} {{/with}}
 </template>
