@@ -18,7 +18,7 @@ Meteor.call('getObject', req, (err, res) => {
   }
 })
 
-req = {}
+req = { filter: 'BLOCKHEADERS', offset: 0, quantity: 5 }
 Meteor.call('getLatestData', req, (err, res) => {
   if (err) {
     console.log(err.message)

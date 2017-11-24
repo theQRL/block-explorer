@@ -33,9 +33,6 @@ Template.lastblocks.helpers({
     }
     return r
   },
-  txCount() {
-    return this.transactions.length
-  },
   // hash() {
   //   let hex = Buffer.from(this.header.hash_header).toString('hex');
   //   return hex
