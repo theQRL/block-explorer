@@ -8,7 +8,7 @@ Meteor.call('getStats', (err, res) => {
 })
 
 let req = {
-  block: 5,
+  query: Buffer.from('5', 'ascii'),
 }
 Meteor.call('getObject', req, (err, res) => {
   if (err) {
@@ -27,8 +27,17 @@ Meteor.call('getLatestData', req, (err, res) => {
   }
 })
 
+req = { filter: 'TRANSACTIONS', offset: 0, quantity: 5 }
+Meteor.call('getLatestData', req, (err, res) => {
+  if (err) {
+    console.log(err.message)
+  } else {
+    console.log(res)
+  }
+})
+
 req = {
-  address: 'Qa02d909723512ecd1606c96f52f5a4121946f068986e612a57c75353952ab3624ddd0bd6',
+  address: Buffer.from('Qa02d909723512ecd1606c96f52f5a4121946f068986e612a57c75353952ab3624ddd0bd6', 'ascii'),
 }
 Meteor.call('getAddressState', req, (err, res) => {
   if (err) {

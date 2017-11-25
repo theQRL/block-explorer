@@ -1,16 +1,22 @@
 import './address.html'
 import '../../stylesheets/overrides.css'
 
-Template.address.onCreated(() => {
-  Session.set('address', {})
-  Session.set('qrl', 0)
+const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
+
+
+const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
   if (aId) {
-    Meteor.call('address', aId, (err, res) => {
+    const req = {
+      address: Buffer.from(aId, 'ascii'),
+    }
+    Meteor.call('getAddressState', req, (err, res) => {
       if (err) {
         Session.set('address', { error: err, id: aId })
       } else {
-        res.transactions = res.transactions.reverse()
+        res.state.address = ab2str(res.state.address)
+        res.state.transactions = res.state.transaction_hashes.length
+        res.state.balance /= 100000000
         Session.set('address', res)
       }
     })
@@ -22,6 +28,12 @@ Template.address.onCreated(() => {
       Session.set('qrl', res)
     }
   })
+}
+
+Template.address.onCreated(() => {
+  Session.set('address', {})
+  Session.set('qrl', 0)
+  renderAddressBlock()
 })
 
 Template.address.helpers({
@@ -45,31 +57,12 @@ Template.address.helpers({
       return 0
     }
   },
-  txcount() {
-    const address = Session.get('address')
-    try {
-      const y = address.transactions.length
-      return y
-    } catch (e) {
-      return 0
-    }
-  },
 })
 
 Template.address.events({
   'click .refresh': () => {
     Session.set('address', {})
-    const aId = FlowRouter.getParam('aId')
-    if (aId) {
-      Meteor.call('address', aId, (err, res) => {
-        if (err) {
-          Session.set('address', { error: err })
-        } else {
-          res.transactions = res.transactions.reverse()
-          Session.set('address', res)
-        }
-      })
-    }
+    renderAddressBlock()
   },
   'click .close': () => {
     $('.message').hide()
@@ -90,16 +83,8 @@ Template.address.onRendered(() => {
   this.$('.value').popup()
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
-    const aId = FlowRouter.getParam('aId')
-    if (aId) {
-      Meteor.call('address', aId, (err, res) => {
-        if (err) {
-          Session.set('address', { error: err })
-        } else {
-          res.transactions = res.transactions.reverse()
-          Session.set('address', res)
-        }
-      })
-    }
+    Session.set('address', {})
+    Session.set('qrl', 0)
+    renderAddressBlock()
   })
 })

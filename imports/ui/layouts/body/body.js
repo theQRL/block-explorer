@@ -31,7 +31,7 @@ Template.appBody.events({
       }
     } else {
       // f = false
-      if (s.length === 69 && s.charAt(0) === 'Q') {
+      if (s.length === 73 && s.charAt(0) === 'Q') {
         // console.log("Searching for address")
         // f = true
         FlowRouter.go(`/a/${s}`)
@@ -58,7 +58,7 @@ Template.appBody.events({
           FlowRouter.go(`/block/${x}`)
         } else {
           // f = false
-          if (s.length === 69 && s.charAt(0) === 'Q') {
+          if (s.length === 73 && s.charAt(0) === 'Q') {
             // console.log("Searching for address")
             FlowRouter.go(`/a/${s}`)
             // ADDRESS display

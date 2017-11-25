@@ -3,4 +3,5 @@
 import './routes.js'
 import './grpc-console-tests.js'
 
-import('buffer').then(({Buffer}) => {global.Buffer = Buffer})
+/* eslint-disable */
+// import ('buffer').then(({Buffer}) => {global.Buffer = Buffer}) // eslint-disable-line

@@ -50,7 +50,6 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
         callback(myError, null)
       } else {
-        console.log(response)
         callback(null, response)
       }
     })
@@ -162,7 +161,7 @@ Meteor.methods({
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
-    const response = Meteor.wrapAsync(getLatestData)({})
+    const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 5 })
     return response
   },
 
