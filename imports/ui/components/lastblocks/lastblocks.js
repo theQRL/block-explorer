@@ -1,14 +1,19 @@
 import './lastblocks.html'
 
-Template.lastblocks.onCreated(() => {
-  Session.set('lastblocks', {})
+const renderLastBlocksBlock = () => {
   Meteor.call('lastblocks', (err, res) => {
     if (err) {
       Session.set('lastblocks', { error: err })
     } else {
+      res.blockheaders = res.blockheaders.reverse()
       Session.set('lastblocks', res)
     }
   })
+}
+
+Template.lastblocks.onCreated(() => {
+  Session.set('lastblocks', {})
+  renderLastBlocksBlock()
 })
 
 Template.lastblocks.helpers({
@@ -33,22 +38,12 @@ Template.lastblocks.helpers({
     }
     return r
   },
-  // hash() {
-  //   let hex = Buffer.from(this.header.hash_header).toString('hex');
-  //   return hex
-  // },
 })
 
 Template.lastblocks.events({
   'click .refresh': () => {
     Session.set('lastblocks', {})
-    Meteor.call('lastblocks', (err, res) => {
-      if (err) {
-        Session.set('lastblocks', { error: err })
-      } else {
-        Session.set('lastblocks', res)
-      }
-    })
+    renderLastBlocksBlock()
   },
   'click .close': () => {
     $('.message').hide()

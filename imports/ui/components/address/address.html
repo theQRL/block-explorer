@@ -39,11 +39,11 @@
     </div>
     <div class="ui celled horizontal list">
     <div class="item"><button class="ui mini blue button" id="ShowTx"><i class="down arrow icon"></i> Show transactions</button><button style="display:none" class="ui mini blue button" id="HideTx"><i class="up arrow icon"></i> Hide transactions</button></div>
-    <div class="item"><strong>Transactions</strong> {{state.transactions}}</div>
-    <div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>
+    <div class="item"><strong>Transactions</strong> {{state.txcount}}</div>
+    <div class="item"><strong>Nonce</strong> {{state.nonce}}</div>
     </div>
       <table style="display:none;" class="ui striped table"><thead><th>Timestamp</th><th>Amount</th><th>From</th><th>To</th><th>Txhash</th><th>Block</th><th>Fee</th><th>OTS key</th></thead><tbody>
-      {{#each address.transactions}}
+      {{#each state.transactions}}
       <tr>
         <td>{{ts}}</td>
         <td>{{this.amount}}</td>

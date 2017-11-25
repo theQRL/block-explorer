@@ -15,8 +15,13 @@ const renderAddressBlock = () => {
         Session.set('address', { error: err, id: aId })
       } else {
         res.state.address = ab2str(res.state.address)
-        res.state.transactions = res.state.transaction_hashes.length
+        res.state.txcount = res.state.transaction_hashes.length
+        res.state.transactions = []
+        res.state.transaction_hashes.forEach((value) => {
+          res.state.transactions.push({ txhash: ab2str(value) })
+        })
         res.state.balance /= 100000000
+        console.log(res)
         Session.set('address', res)
       }
     })

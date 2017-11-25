@@ -8,8 +8,9 @@ Meteor.call('getStats', (err, res) => {
 })
 
 let req = {
-  query: Buffer.from('5', 'ascii'),
+  query: Buffer.from('63e4fc9803fb0c44d98dbff04f54ca2592e4faa9964bac2ed4f5715fc753c54a', 'hex'),
 }
+console.log(req)
 Meteor.call('getObject', req, (err, res) => {
   if (err) {
     console.log(err.message)
