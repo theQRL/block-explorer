@@ -42,7 +42,9 @@
     <div class="item"><strong>Transactions</strong> {{state.txcount}}</div>
     <div class="item"><strong>Nonce</strong> {{state.nonce}}</div>
     </div>
-      <table style="display:none;" class="ui striped table"><thead><th>Timestamp</th><th>Amount</th><th>From</th><th>To</th><th>Txhash</th><th>Block</th><th>Fee</th><th>OTS key</th></thead><tbody>
+    <div style="display:none;" class="ui active centered inline loader"></div>
+      <table style="display:none;" class="ui striped table">
+       <thead><th>Timestamp</th><th>Amount</th><th>From</th><th>To</th><th>Txhash</th><th>Block</th><th>Fee</th><th>OTS key</th></thead><tbody>
       {{#each state.transactions}}
       <tr>
         <td>{{ts}}</td>
@@ -57,6 +59,7 @@
       {{/each}}
     </tbody>
     </table>
+ 
   </div>
 </div>
 </div>

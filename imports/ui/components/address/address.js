@@ -1,8 +1,10 @@
+/* eslint no-console: 0 */
+/* ^^^ remove once testing complete
+*/
 import './address.html'
 import '../../stylesheets/overrides.css'
 
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
-
 
 const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
@@ -37,7 +39,9 @@ const renderAddressBlock = () => {
 
 Template.address.onCreated(() => {
   Session.set('address', {})
+  Session.set('addressTransactions', {})
   Session.set('qrl', 0)
+  Session.set('fetchedTx', false)
   renderAddressBlock()
 })
 
@@ -49,8 +53,11 @@ Template.address.helpers({
     return FlowRouter.getParam('aId')
   },
   ts() {
-    const x = moment.unix(this.timestamp)
-    return moment(x).format('HH:mm D MMM YYYY')
+    let x = ''
+    if (moment.unix(this.timestamp).isValid()) {
+      x = moment.unix(this.timestamp)
+    }
+    return x
   },
   qrl() {
     const address = Session.get('address')
@@ -74,11 +81,26 @@ Template.address.events({
   },
   'click #ShowTx': () => {
     $('table').show()
+    const x = Session.get('fetchedTx')
+    if (x === false) {
+      const tx = Session.get('address').state.transactions
+      Meteor.call('addressTransactions', tx, (err, res) => {
+        if (err) {
+          Session.set('addressTransactions', { error: err })
+        } else {
+          console.log(res)
+          Session.set('addressTransactions', res)
+          $('.loader').hide()
+          Session.set('fetchedTx', true)
+        }
+      })
+    }
     $('#ShowTx').hide()
     $('#HideTx').show()
   },
   'click #HideTx': () => {
     $('table').hide()
+    $('.loader').hide()
     $('#ShowTx').show()
     $('#HideTx').hide()
   },
@@ -89,7 +111,9 @@ Template.address.onRendered(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('address', {})
+    Session.set('addressTransactions', {})
     Session.set('qrl', 0)
+    Session.set('fetchedTx', false)
     renderAddressBlock()
   })
 })

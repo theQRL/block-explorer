@@ -91,6 +91,22 @@ const getStats = (request, callback) => {
   }
 }
 
+const getStakers = (request, callback) => {
+  try {
+    qrlClient.API.GetStakers(request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers** ')
+        callback(myError, null)
+      } else {
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers**')
+    callback(myError, null)
+  }
+}
+
 const getObject = (request, callback) => {
   try {
     qrlClient.API.GetObject(request, (error, response) => {
@@ -174,24 +190,6 @@ Meteor.methods({
     return response
   },
 
-  stakers() {
-    // avoid blocking other method calls from same client - *may need to remove for production*
-    this.unblock()
-    const apiUrl = 'http://104.251.219.215:8080/api/stakers'
-    // asynchronous call to API
-    const response = Meteor.wrapAsync(apiCall)(apiUrl)
-    return response
-  },
-
-  nextstakers() {
-    // avoid blocking other method calls from same client - *may need to remove for production*
-    this.unblock()
-    const apiUrl = 'http://104.251.219.215:8080/api/next_stakers'
-    // asynchronous call to API
-    const response = Meteor.wrapAsync(apiCall)(apiUrl)
-    return response
-  },
-
   txhash(txId) {
     check(txId, String)
     if (!((Match.test(txId, String)) && (txId.length === 64))) {
@@ -239,7 +237,15 @@ Meteor.methods({
       return response
     }
   },
-
+  addressTransactions(targets) {
+    check(targets, Array)
+    const result = []
+    targets.forEach((arr) => {
+      console.log(`Lookup Txhash ${arr.txhash}`)
+      result.push({ txhash: arr.txhash, amount: 2344 })
+    })
+    return result
+  },
   getStats() {
     this.unblock()
     const request = {}
@@ -259,6 +265,13 @@ Meteor.methods({
     check(request, Object)
     this.unblock()
     const response = Meteor.wrapAsync(getLatestData)(request)
+    return response
+  },
+
+  stakers(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getStakers)(request)
     return response
   },
 
