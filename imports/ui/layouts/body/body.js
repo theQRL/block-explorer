@@ -8,71 +8,44 @@ Template.appBody.onRendered(() => {
   $('.sidebar').first().sidebar('attach events', '#hamburger', 'show')
 })
 
+const identifySearch = (str) => {
+  const type = { parameter: str, type: 'Undetermined' }
+  if (str.length === 73 && str.charAt(0) === 'Q') {
+    type.type = 'Address'
+    type.route = `/a/${str}`
+  }
+  if ((str.length === 64) && (parseInt(str, 10) !== str)) {
+    type.type = 'Txhash'
+    type.route = `/tx/${str}`
+  }
+  if ((parseInt(str, 10).toString()) === str) {
+    type.type = 'Block'
+    type.route = `/block/${str}`
+  }
+  return type
+}
+
+const postSearch = (results) => {
+  if (results.type !== 'Undetermined') {
+    FlowRouter.go(results.route)
+  }
+}
+
 Template.appBody.events({
   'click #hamburger': (event) => {
     event.preventDefault()
     $('.ui.sidebar').sidebar('toggle')
   },
   'click .search': (event) => {
-    // console.log('search clicked')
-    // console.log($(e.currentTarget).prev().val())
     const s = $(event.currentTarget).prev().val()
-    // check if s is an integer
-    const x = parseFloat(s)
-    // let f = false // found an exit point?
-    if (((x) && (parseInt(x, 10)) === x)) {
-      // f = false
-      if (s.length === 64) {
-        // f = true
-        // console.log('search string is likely a txhash')
-        FlowRouter.go(`/tx/${s}`)
-      } else {
-        // f = false
-      }
-    } else {
-      // f = false
-      if (s.length === 73 && s.charAt(0) === 'Q') {
-        // console.log("Searching for address")
-        // f = true
-        FlowRouter.go(`/a/${s}`)
-        // ADDRESS display
-      } else {
-        // console.log('likely a block number')
-        // f = true
-        FlowRouter.go(`/block/${x}`)
-      }
-    }
-    // return f
+    postSearch(identifySearch(s))
   },
   'keypress input': (event) => {
-    // let f = false
     if (event.keyCode === 13) {
       // console.log('search clicked')
       if ($(':focus').is('input')) {
         const s = $(':focus').val()
-        // check if s is an integer
-        const x = parseFloat(s)
-        if (((x) && (parseInt(x, 10)) === x)) {
-          // console.log('likely a block number')
-          // f = true
-          FlowRouter.go(`/block/${x}`)
-        } else {
-          // f = false
-          if (s.length === 73 && s.charAt(0) === 'Q') {
-            // console.log("Searching for address")
-            FlowRouter.go(`/a/${s}`)
-            // ADDRESS display
-          } else {
-            // f = false
-            if (s.length === 64) {
-              // console.log('search string is likely a txhash')
-              // f = true
-              FlowRouter.go(`/tx/${s}`)
-            } else {
-              // console.log('not sure what is being searched for...')
-            }
-          }
-        }
+        postSearch(identifySearch(s))
         event.stopPropagation()
         return false
       }
@@ -83,9 +56,7 @@ Template.appBody.events({
 
 Template.sidebar.events({
   click: (event) => {
-    if (event.target.tagName === 'INPUT') {
-      // cows
-    } else {
+    if (event.target.tagName !== 'INPUT') {
       $('.ui.sidebar').sidebar('toggle')
     }
   },
