@@ -106,6 +106,7 @@ const getStakers = (request, callback) => {
             address: ab2str(staker.address_state.address),
             balance: staker.address_state.balance / 100000000,
             nonce: staker.address_state.nonce,
+            hash_terminator: staker.terminator_hash.toString('hex'),
           })
         })
         callback(null, currentStakers)
