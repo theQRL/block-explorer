@@ -1,14 +1,18 @@
 import './nextstakers.html'
 
-Template.nextstakers.onCreated(() => {
-  Session.set('nextstakers', {})
-  Meteor.call('nextstakers', (err, res) => {
+const renderNextStakersBlock = () => {
+  Meteor.call('stakers', { filter: 'NEXT', offset: 0, quantity: 100 }, (err, res) => {
     if (err) {
       Session.set('nextstakers', { error: err })
     } else {
       Session.set('nextstakers', res)
     }
   })
+}
+
+Template.nextstakers.onCreated(() => {
+  Session.set('nextstakers', [])
+  renderNextStakersBlock()
 })
 
 Template.nextstakers.helpers({
@@ -19,22 +23,13 @@ Template.nextstakers.helpers({
 
 Template.nextstakers.events({
   'click .refresh': () => {
-    Session.set('nextstakers', {})
-    Meteor.call('nextstakers', (err, res) => {
-      if (err) {
-        Session.set('nextstakers', { error: err })
-      } else {
-        Session.set('nextstakers', res)
-      }
-    })
+    renderNextStakersBlock()
   },
   'click .close': () => {
     $('.message').hide()
   },
   'click .hashShow': (event) => {
-    $(event.target).parent()
-      .parent()
-      .parent()
+    $(event.target).parent().parent().parent()
       .parent()
       .parent()
       .children('.row')

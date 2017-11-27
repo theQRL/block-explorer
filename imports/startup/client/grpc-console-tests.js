@@ -1,4 +1,6 @@
 /* eslint no-console: 0 */
+const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
+
 Meteor.call('getStats', (err, res) => {
   if (err) {
     console.log(err.message)
@@ -64,6 +66,7 @@ Meteor.call('stakers', req, (err, res) => {
   if (err) {
     console.log(err.message)
   } else {
+    console.log('CURRENT STAKERS:')
     console.log(res)
   }
 })
@@ -73,6 +76,7 @@ Meteor.call('stakers', req, (err, res) => {
   if (err) {
     console.log(err.message)
   } else {
+    console.log('NEXT STAKERS:')
     console.log(res)
   }
 })

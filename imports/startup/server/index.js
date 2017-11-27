@@ -6,6 +6,8 @@ import tmp from 'tmp'
 import fs from 'fs'
 import { check } from 'meteor/check'
 
+const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
+
 //  import { QRLLIB } from 'qrllib/build/web-libjsqrl.js'
 
 // The address of the API node used
@@ -98,7 +100,15 @@ const getStakers = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers** ')
         callback(myError, null)
       } else {
-        callback(null, response)
+        const currentStakers = []
+        response.stakers.forEach((staker) => {
+          currentStakers.push({
+            address: ab2str(staker.address_state.address),
+            balance: staker.address_state.balance / 100000000,
+            nonce: staker.address_state.nonce,
+          })
+        })
+        callback(null, currentStakers)
       }
     })
   } catch (error) {
@@ -114,7 +124,7 @@ const getObject = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
         callback(myError, null)
       } else {
-        console.log(response)
+        // console.log(response)
         callback(null, response)
       }
     })

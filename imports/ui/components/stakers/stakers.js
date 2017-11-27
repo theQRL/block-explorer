@@ -1,14 +1,18 @@
 import './stakers.html'
 
-Template.stakers.onCreated(() => {
-  Session.set('stakers', {})
-  Meteor.call('stakers', (err, res) => {
+const renderStakersBlock = () => {
+  Meteor.call('stakers', { filter: 'CURRENT', offset: 0, quantity: 100 }, (err, res) => {
     if (err) {
       Session.set('stakers', { error: err })
     } else {
       Session.set('stakers', res)
     }
   })
+}
+
+Template.stakers.onCreated(() => {
+  Session.set('stakers', [])
+  renderStakersBlock()
 })
 
 Template.stakers.helpers({
@@ -19,14 +23,7 @@ Template.stakers.helpers({
 
 Template.stakers.events({
   'click .refresh': () => {
-    Session.set('stakers', {})
-    Meteor.call('stakers', (err, res) => {
-      if (err) {
-        Session.set('stakers', { error: err })
-      } else {
-        Session.set('stakers', res)
-      }
-    })
+    renderStakersBlock()
   },
   'click .close': () => {
     $('.message').hide()
