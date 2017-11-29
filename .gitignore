@@ -8,3 +8,5 @@ client/theme.import.less
 client/.custom.semantic.json
 client/theme.config.import.less
 /public/img/offline.png
+
+\.idea/

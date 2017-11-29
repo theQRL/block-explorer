@@ -1,5 +1,5 @@
 <template name="lastblocks">
-  <h1>Latest blocks  <i class="ui refresh red link icon"></i></h1> {{#with lastblocks}} {{#if error}}
+  <h1>Latest blocks <i class="ui refresh red link icon"></i></h1> {{#with lastblocks}} {{#if error}}
   <div class="ui negative message">
     <i class="close icon"></i>
     <div class="header">
@@ -7,56 +7,57 @@
     </div>
     <p>{{error.error}} : {{error.reason}}</p>
   </div>
-  {{else}}
+{{else}}
   <div class="ui raised segments">
     {{#each lastblocks.blockheaders}}
-    <div class="ui segment">
-      <div class="content">
-        <a class="ui primary button" href="/block/{{this.blocknumber}}">
+      <div class="ui segment">
+        <div class="content">
+          <a class="ui primary button" href="/block/{{this.header.block_number}}">
             <i class="cube icon"></i> {{this.header.block_number}}
             <i class="right chevron icon"></i>
-        </a>
-        <div class="meta">
-          <span class="timestamp">{{ts}}</span>
-        </div>
+          </a>
+          <div class="meta">
+            <span class="timestamp">{{ts}}</span>
+          </div>
 
-        <div class="description">
-          <div class="ui horizontal list">
-            <div class="item">
-              <div class="content">
-                <div class="header">BLOCK REWARD</div>
-                <div class="ui yellow label">{{reward(this.header.reward_block)}}
-                  <div class="detail">QRL</div>
+          <div class="description">
+            <div class="ui horizontal list">
+              <div class="item">
+                <div class="content">
+                  <div class="header">BLOCK REWARD</div>
+                  <div class="ui yellow label">{{reward(this.header.reward_block)}}
+                    <div class="detail">QRL</div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="item">
-              <div class="content">
-                <div class="header">TRANSACTIONS</div>
-                <div class="ui red label">{{this.transaction_count}}</div>
+              <div class="item">
+                <div class="content">
+                  <div class="header">TRANSACTIONS</div>
+                  <div class="ui red label">{{this.transaction_count}}</div>
+                </div>
               </div>
-            </div>
-<!--             <div class="item">
+              <!--
+              <div class="item">
               <div class="content">
                 <div class="header">BLOCK INTERVAL</div>
                 <div class="ui label">{{interval}}</div>
               </div>
-            </div> -->
-          </div>
-<!--           <div class="ui horizontal list">
-            <div class="item">
-              <div class="content">
-                <div class="header">BLOCKHASH</div>
-                <div class="unbreakable">{{hash}}</div>
+              </div> -->
+            </div>
+            <div class="ui horizontal list">
+              <div class="item">
+                <div class="content">
+                  <div class="header">BLOCKHASH</div>
+                  <div class="unbreakable">{{this.header.hash_header_hex}}</div>
+                </div>
               </div>
             </div>
-          </div> -->
-        </div>
-        <div class="extra">
+          </div>
+          <div class="extra">
+          </div>
         </div>
       </div>
-    </div>
     {{/each}}
   </div>
-  {{/if}} {{/with}}
+{{/if}} {{/with}}
 </template>
