@@ -1,99 +1,102 @@
 <template name="status">
-  <h1>Network info <i class="ui refresh red link icon"></i></h1>
-  {{#with status}}
-    {{#if error}}
-      <div class="ui negative message">
-        <i class="close icon"></i>
-        <div class="header">
-          Error reading network status
-        </div>
-        <p>{{error.error}} : {{error.reason}}</p>
-      </div>
-    <div class="ui three column stackable grid">
-      <div class="ten wide column">
-    <div class="ui celled list">
-      <div class="item">
-        <i class="bordered inverted blue power middle aligned icon"></i>
-        <div class="content">
-          <div class="header">Status</div>
-          No connection  <i class="ui tiny middle aligned red circle icon"></i> <small>API node returned an error</small>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-          {{else}}
-          <div class="ui three column stackable grid">
-            <div class="four wide column">
-          <div class="ui celled list">
-            <div class="item">
-              <i class="bordered inverted blue power middle aligned icon"></i>
-              <div class="content">
-                <div class="header">Status</div>
-          {{status.status}} <i class="ui tiny middle aligned green circle icon"></i>
-          <small>Connected</small>
-          <br><small><strong>Uptime: </strong>{{uptime}}</small>
+    <h1>Network info <i class="ui refresh red link icon"></i></h1>
+    {{#with status}}
+        {{#if error}}
+            <div class="ui negative message">
+                <i class="close icon"></i>
+                <div class="header">
+                    Error reading network status
                 </div>
-              </div>
-              <div class="item">
-                <i class="bordered inverted blue info circle middle aligned icon"></i>
-                <div class="content">
-                  <div class="header">Network</div>
-                  <small>{{status.node_info.network_id}}</small>
-                  <br>
-                  <small><strong>Version: </strong> {{status.node_info.version}}</small>
-                </div>
-              </div>
-              <div class="item">
-                <i class="bordered inverted blue server middle aligned icon"></i>
-                <div class="content">
-                  <div class="header">Nodes</div>
-                  {{status.node_info.num_known_peers}}
-                </div>
-              </div>
+                <p>{{error.error}} : {{error.reason}}</p>
             </div>
-          </div>
-              <div class="four wide column">
-            <div class="ui celled list">
-              <div class="item">
-                <i class="bordered inverted blue law middle aligned icon"></i>
-                <div class="content">
-                  <div class="header">Proof-of-stake</div>
-                  <small><strong>Stake validators:</strong> {{status.stakers_count}}<br>
-                  <strong>Staked emission:</strong> {{staked}}%<br>
-                  <strong>Epoch:</strong> {{status.epoch}}</small>
+            <div class="ui three column stackable grid">
+                <div class="ten wide column">
+                    <div class="ui celled list">
+                        <div class="item">
+                            <i class="bordered inverted blue power middle aligned icon"></i>
+                            <div class="content">
+                                <div class="header">Status</div>
+                                No connection <i class="ui tiny middle aligned red circle icon"></i>
+                                <small>API node returned an error</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
-              <div class="four wide column">
-            <div class="ui celled list">
-              <div class="item">
-                <i class="bordered inverted blue cubes middle aligned icon"></i>
-                <div class="content">
-                  <div class="header">Blocks</div>
-                  <small><strong>Block height:</strong> {{status.node_info.block_height}}<br>
-                  <strong>Block time:</strong> {{status.block_time_mean}}<br>
-                  <strong>Block time variance:</strong> {{status.block_time_sd}}</small>
+        {{else}}
+            <div class="ui three column stackable grid">
+                <div class="four wide column">
+                    <div class="ui celled list">
+                        <div class="item">
+                            <i class="bordered inverted blue power middle aligned icon"></i>
+                            <div class="content">
+                                <div class="header">Status</div>
+                                {{status.status}} <i class="ui tiny middle aligned green circle icon"></i>
+                                <small>Connected</small>
+                                <br>
+                                <small><strong>Uptime: </strong>{{uptime}}</small>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <i class="bordered inverted blue info circle middle aligned icon"></i>
+                            <div class="content">
+                                <div class="header">Network</div>
+                                <small>{{status.node_info.network_id}}</small>
+                                <br>
+                                <small><strong>Version: </strong> {{status.node_info.version}}</small>
+                            </div>
+                        </div>
+                        <div class="item">
+                            <i class="bordered inverted blue server middle aligned icon"></i>
+                            <div class="content">
+                                <div class="header">Nodes</div>
+                                {{status.node_info.num_known_peers}}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
-              <div class="four wide column">
-            <div class="ui celled list">
-              <div class="item">
-                <i class="bordered inverted blue database middle aligned icon"></i>
-                <div class="content">
-                  <div class="header">Coin supply</div>
-                  <small><strong>Emission:</strong> {{emission}}%<br>
-                  <strong>Unmined:</strong> {{unmined}}<br>
-                  <strong>Block reward:</strong> {{reward(status.block_last_reward)}}</small>
+                <div class="four wide column">
+                    <div class="ui celled list">
+                        <div class="item">
+                            <i class="bordered inverted blue law middle aligned icon"></i>
+                            <div class="content">
+                                <div class="header">Proof-of-stake</div>
+                                <small>
+                                    <strong>Stake validators:</strong> {{status.stakers_count}}<br>
+                                    <strong>Staked emission:</strong> {{staked}}%<br>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
+                <div class="four wide column">
+                    <div class="ui celled list">
+                        <div class="item">
+                            <i class="bordered inverted blue cubes middle aligned icon"></i>
+                            <div class="content">
+                                <div class="header">Blocks</div>
+                                <small><strong>Block height:</strong> {{status.node_info.block_height}}<br>
+                                    <strong>Block time:</strong> {{status.block_time_mean}}<br>
+                                    <strong>Block time variance:</strong> {{status.block_time_sd}}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="four wide column">
+                    <div class="ui celled list">
+                        <div class="item">
+                            <i class="bordered inverted blue database middle aligned icon"></i>
+                            <div class="content">
+                                <div class="header">Coin supply</div>
+                                <small><strong>Emission:</strong> {{emission}}%<br>
+                                    <strong>Unmined:</strong> {{unmined}}<br>
+                                    <strong>Block reward:</strong> {{reward(status.block_last_reward)}}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-          {{/if}}
+        {{/if}}
 
-  {{/with}}
+    {{/with}}
 </template>
