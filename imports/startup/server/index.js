@@ -52,6 +52,11 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
         callback(myError, null)
       } else {
+        response.state.txcount = response.state.transaction_hashes.length
+        response.state.transactions = []
+        response.state.transaction_hashes.forEach((value) => {
+          response.state.transactions.push({ txhash: Buffer.from(value).toString('hex') })
+        })
         callback(null, response)
       }
     })
@@ -147,7 +152,6 @@ const apiCall = (apiUrl, callback) => {
 }
 
 Meteor.methods({
-
   QRLvalue() {
     this.unblock()
     const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl'
@@ -167,15 +171,6 @@ Meteor.methods({
     return response
   },
 
-  richlist() {
-    // avoid blocking other method calls from same client - *may need to remove for production*
-    this.unblock()
-    const apiUrl = 'http://104.251.219.215:8080/api/richlist'
-    // asynchronous call to API
-    const response = Meteor.wrapAsync(apiCall)(apiUrl)
-    return response
-  },
-
   lastblocks() {
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
@@ -192,15 +187,6 @@ Meteor.methods({
     return response
   },
 
-  lastunconfirmedtx() {
-    // avoid blocking other method calls from same client - *may need to remove for production*
-    this.unblock()
-    const apiUrl = 'http://104.251.219.215:8080/api/last_unconfirmed_tx/5'
-    // asynchronous call to API
-    const response = Meteor.wrapAsync(apiCall)(apiUrl)
-    return response
-  },
-
   txhash(txId) {
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
@@ -212,19 +198,13 @@ Meteor.methods({
       throw new Meteor.Error(errorCode, errorMessage)
     } else {
       // asynchronous call to API
-
-      const req = {
-        query: Buffer.from(txId, 'hex'),
-      }
-
+      const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
-
       // FIXME: This will require refactoring
       // TODO: This could probably be unified with block
       response.transaction.tx.addr_from = Buffer.from(response.transaction.tx.addr_from).toString()
       response.transaction.tx.transaction_hash =
         Buffer.from(response.transaction.tx.transaction_hash).toString('hex')
-
       response.transaction.tx.addr_to = ''
       response.transaction.tx.amount = ''
       if (response.transaction.coinbase) {
@@ -235,8 +215,7 @@ Meteor.methods({
         // FIXME: We need a unified way to format Quanta
         response.transaction.tx.amount = response.transaction.tx.coinbase.amount * 1e-8
       }
-      if (response.transaction.tx.transfer)
-      {
+      if (response.transaction.tx.transfer) {
         response.transaction.tx.addr_to =
           Buffer.from(response.transaction.tx.transfer.addr_to).toString()
         response.transaction.tx.transfer.addr_to =
@@ -244,10 +223,8 @@ Meteor.methods({
         // FIXME: We need a unified way to format Quanta
         response.transaction.tx.amount = response.transaction.tx.transfer.amount * 1e-8
       }
-
       response.transaction.tx.public_key = Buffer.from(response.transaction.tx.public_key).toString('hex')
       response.transaction.tx.signature = Buffer.from(response.transaction.tx.signature).toString('hex')
-
       return response
     }
   },
@@ -263,7 +240,7 @@ Meteor.methods({
       this.unblock()
       // asynchronous call to API
       check(blockId, Number)
-      req = {
+      const req = {
         query: Buffer.from(blockId.toString()),
       }
       const response = Meteor.wrapAsync(getObject)(req)
@@ -271,34 +248,19 @@ Meteor.methods({
     }
   },
 
-  address(aId) {
-    check(aId, String)
-    if (!((Match.test(aId, String)) && (aId.length === 73))) {
-      const errorCode = 400
-      const errorMessage = 'Badly formed address'
-      throw new Meteor.Error(errorCode, errorMessage)
-    } else {
-      // avoid blocking other method calls from same client - *may need to remove for production*
-      this.unblock()
-      const apiUrl = `http://104.251.219.215:8080/api/address/${aId}`
-      // asynchronous call to API
-      const response = Meteor.wrapAsync(apiCall)(apiUrl)
-      return response
-    }
-  },
   addressTransactions(targets) {
     check(targets, Array)
     const result = []
     targets.forEach((arr) => {
       console.log(`Lookup Txhash ${arr.txhash}`)
-      result.push({ txhash: arr.txhash, amount: 2344 })
+      result.push({ txhash: ab2str(arr.txhash) })
     })
     return result
   },
+
   getStats() {
     this.unblock()
     const request = {}
-    // check(request, Object)
     const response = Meteor.wrapAsync(getStats)(request)
     return response
   },
@@ -330,5 +292,4 @@ Meteor.methods({
     const response = Meteor.wrapAsync(getAddressState)(request)
     return response
   },
-
 })
