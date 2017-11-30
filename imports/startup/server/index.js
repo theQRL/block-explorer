@@ -212,10 +212,44 @@ Meteor.methods({
       throw new Meteor.Error(errorCode, errorMessage)
     } else {
       // asynchronous call to API
-      req = {
+
+      req =
+      {
         query: Buffer.from(txId, 'hex'),
       }
+
       const response = Meteor.wrapAsync(getObject)(req)
+
+      // FIXME: This will require refactoring
+      // TODO: This could probably be unified with block
+      response.transaction.tx.addr_from = Buffer.from(response.transaction.tx.addr_from).toString()
+      response.transaction.tx.transaction_hash =
+        Buffer.from(response.transaction.tx.transaction_hash).toString('hex')
+
+      response.transaction.tx.addr_to = ''
+      response.transaction.tx.amount = ''
+      if (response.transaction.coinbase)
+      {
+        response.transaction.tx.addr_to =
+          Buffer.from(response.transaction.tx.coinbase.addr_to).toString()
+        response.transaction.tx.coinbase.addr_to =
+          Buffer.from(response.transaction.tx.coinbase.addr_to).toString()
+        // FIXME: We need a unified way to format Quanta
+        response.transaction.tx.amount = response.transaction.tx.coinbase.amount * 1e-8
+      }
+      if (response.transaction.tx.transfer)
+      {
+        response.transaction.tx.addr_to =
+          Buffer.from(response.transaction.tx.transfer.addr_to).toString()
+        response.transaction.tx.transfer.addr_to =
+          Buffer.from(response.transaction.tx.transfer.addr_to).toString()
+        // FIXME: We need a unified way to format Quanta
+        response.transaction.tx.amount = response.transaction.tx.transfer.amount * 1e-8
+      }
+
+      response.transaction.tx.public_key = Buffer.from(response.transaction.tx.public_key).toString('hex')
+      response.transaction.tx.signature = Buffer.from(response.transaction.tx.signature).toString('hex')
+
       return response
     }
   },

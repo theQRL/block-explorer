@@ -2,19 +2,19 @@ import './lastblocks.html'
 
 const renderLastBlocksBlock = () => {
   Meteor.call('lastblocks', (err, res) => {
-    if (err) {
+    if (err){
       Session.set('lastblocks', { error: err })
-    } else {
-      res.blockheaders = res.blockheaders.reverse()
-
-      for(idx in res.blockheaders)
-      {
-        tmp_hash_header_hex = Buffer.from(res.blockheaders[idx].header.hash_header).toString('hex')
-        res.blockheaders[idx].header.hash_header_hex = tmp_hash_header_hex
-      }
-
-      Session.set('lastblocks', res)
+      return;
     }
+
+    res.blockheaders = res.blockheaders.reverse()
+    for(idx in res.blockheaders)
+    {
+      tmp = res.blockheaders[idx]
+      tmp.header.hash_header_hex = Buffer.from(tmp.header.hash_header).toString('hex')
+    }
+
+    Session.set('lastblocks', res)
   })
 }
 

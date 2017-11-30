@@ -68,6 +68,20 @@ Template.block.helpers({
   transaction_hash_hex() {
     return Buffer.from(this.transaction_hash).toString('hex')
   },
+  amount() {
+    if (this.transfer)
+    {
+      return this.transfer.amount * 1e-8
+    }
+    return ''
+  },
+  fee() {
+    if (this.transfer)
+    {
+      return this.transfer.fee * 1.0e-8
+    }
+    return ''
+  },
   public_key_hex() {
     return Buffer.from(this.public_key).toString('hex')
   },  json() {

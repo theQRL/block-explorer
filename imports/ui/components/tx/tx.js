@@ -1,4 +1,3 @@
-import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
 
@@ -12,30 +11,6 @@ Template.tx.onCreated(() => {
       if (err) {
         Session.set('txhash', { error: err, id: txId })
       } else {
-        // TODO: This could probably be unified with block
-        res.transaction.tx.addr_from = Buffer.from(res.transaction.tx.addr_from).toString()
-        res.transaction.tx.transaction_hash = Buffer.from(res.transaction.tx.transaction_hash).toString('hex')
-
-        res.transaction.tx.addr_to = ''
-        res.transaction.tx.amount = ''
-        if(res.transaction.coinbase)
-        {
-          res.transaction.tx.addr_to = Buffer.from(res.transaction.tx.coinbase.addr_to).toString()
-          res.transaction.tx.coinbase.addr_to = Buffer.from(res.transaction.tx.coinbase.addr_to).toString()
-          // FIXME: We need a unified way to format Quanta
-          res.transaction.tx.amount = res.transaction.tx.coinbase.amount * 1e-8
-        }
-        if(res.transaction.tx.transfer)
-        {
-          res.transaction.tx.addr_to = Buffer.from(res.transaction.tx.transfer.addr_to).toString()
-          res.transaction.tx.transfer.addr_to = Buffer.from(res.transaction.tx.transfer.addr_to).toString()
-          // FIXME: We need a unified way to format Quanta
-          res.transaction.tx.amount = res.transaction.tx.transfer.amount * 1e-8
-        }
-
-        res.transaction.tx.public_key = Buffer.from(res.transaction.tx.public_key).toString('hex')
-        res.transaction.tx.signature = Buffer.from(res.transaction.tx.signature).toString('hex')
-
         Session.set('txhash', res)
       }
     })
@@ -68,10 +43,14 @@ Template.tx.helpers({
   },
   confirmations() {
     const x = Session.get('status')
-    try {
+    try
+    {
       return x.node_info.block_height - this.header.block_number
-    } catch (e) { }
-    return 0
+    }
+    catch (e)
+    {
+      return 0
+    }
   },
   ts() {
     const x = moment.unix(this.header.timestamp.seconds)
