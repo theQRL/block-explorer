@@ -213,8 +213,7 @@ Meteor.methods({
     } else {
       // asynchronous call to API
 
-      req =
-      {
+      const req = {
         query: Buffer.from(txId, 'hex'),
       }
 
@@ -228,8 +227,7 @@ Meteor.methods({
 
       response.transaction.tx.addr_to = ''
       response.transaction.tx.amount = ''
-      if (response.transaction.coinbase)
-      {
+      if (response.transaction.coinbase) {
         response.transaction.tx.addr_to =
           Buffer.from(response.transaction.tx.coinbase.addr_to).toString()
         response.transaction.tx.coinbase.addr_to =

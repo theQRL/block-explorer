@@ -76,8 +76,7 @@ Template.block.helpers({
     return ''
   },
   fee() {
-    if (this.transfer)
-    {
+    if (this.transfer) {
       return this.transfer.fee * 1.0e-8
     }
     return ''

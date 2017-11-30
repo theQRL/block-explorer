@@ -4,7 +4,7 @@ const renderLastBlocksBlock = () => {
   Meteor.call('lastblocks', (err, res) => {
     if (err){
       Session.set('lastblocks', { error: err })
-      return;
+      return
     }
 
     res.blockheaders = res.blockheaders.reverse()
