@@ -1,52 +1,55 @@
 <template name="lasttx">
-  <h1>Latest transactions <i class="ui refresh red link icon"></i></h1> {{#with lasttx}} {{#if error}}
-  <div class="ui negative message">
-    <i class="close icon"></i>
-    <div class="header">
-      Error reading transaction
-    </div>
-    <p>{{error.error}} : {{error.reason}}</p>
-  </div>
-  {{else}}
-  <div class="ui raised segments">
-    {{#if zeroCheck}}
-    <div class="ui segment">No transactions yet</div>
+  <h1>Latest transactions <i class="ui refresh red link icon"></i></h1>
+  {{#with lasttx}}
+    {{#if error}}
+      <div class="ui negative message">
+        <i class="close icon"></i>
+        <div class="header">
+          Error reading transaction
+        </div>
+        <p>{{error.error}} : {{error.reason}}</p>
+      </div>
     {{else}}
-    {{#each lasttx.transactions}}
-    <div class="ui segment">
-      <div class="ui horizontal list">
-        <div class="item">
-          <div class="content">
-            <div class="header">BLOCK</div>
-            <a href="/block/{{this.block}}">{{this.block}}</a>
-          </div>
-        </div>
-        <div class="item">
-          <div class="content">
-            <div class="header">TIMESTAMP</div>
-            {{ts}}
-          </div>
-        </div>
-        <div class="item">
-          <div class="content">
-            <div class="header">AMOUNT</div>
-            <div class="ui yellow label">{{this.amount}}
-              <div class="detail">QRL</div>
+      <div class="ui raised segments">
+        {{#if zeroCheck}}
+          <div class="ui segment">No transactions yet</div>
+        {{else}}
+          {{#each lasttx.transactions}}
+            <div class="ui segment">
+              <div class="ui horizontal list">
+                <div class="item">
+                  <div class="content">
+                    <div class="header">BLOCK</div>
+                    <a href="/block/{{block}}">{{block}}</a>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="content">
+                    <div class="header">TIMESTAMP</div>
+                    {{ts}}
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="content">
+                    <div class="header">AMOUNT</div>
+                    <div class="ui yellow label">{{amount}}
+                      <div class="detail">QRL</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ui horizontal list">
+                <div class="item">
+                  <div class="content">
+                    <div class="header">TXHASH</div>
+                    <div class="unbreakable"><a href="/tx/{{tx_hash}}">{{tx_hash}}</a></div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          {{/each}}
+        {{/if}}
       </div>
-      <div class="ui horizontal list">
-        <div class="item">
-          <div class="content">
-            <div class="header">TXHASH</div>
-            <div class="unbreakable"><a href="/tx/{{this.txhash}}">{{this.txhash}}</a></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    {{/each}}
     {{/if}}
-  </div>
-  {{/if}} {{/with}}
+  {{/with}}
 </template>

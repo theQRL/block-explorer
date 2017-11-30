@@ -15,16 +15,16 @@
       <div class="ui raised fluid card">
         <div class="content">
           <div class="header">Transaction
-            <div class="ui label"><i class="exchange icon"></i> {{tx.transaction_hash}}</div>
+            <div class="ui label"><i class="exchange icon"></i> {{tx.tx.transaction_hash}}</div>
           </div>
           <div class="meta">
-            {{#if tx.confirmations}} {{tx.confirmations}} confirmations {{else}}Unconfirmed{{/if}}
+            {{#if confirmations}} {{confirmations}} confirmations {{else}}Unconfirmed{{/if}}
           </div>
           <div class="description">
             <div class="ui basic center aligned segment">
               <div class="ui statistic">
                 <div class="label">
-                  <div class="ui {{color}} label">{{tx.type}}</div>
+                  <div class="ui {{color}} label">{{tx.tx.type}}</div>
                 </div>
                 <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
                   {{tx.amount}}
@@ -41,19 +41,19 @@
                 <td class="single line">
                   <div class="ui red label"><i class="sign out icon"></i>from</div>
                 </td>
-                <td><a href="/a/{{tx.addr_from}}">{{tx.addr_from}}</a></td>
+                <td><a href="/a/{{tx.tx.addr_from}}">{{tx.tx.addr_from}}</a></td>
                 <td><i class="large right arrow icon"></i></td>
                 <td class="single line">
                   <div class="ui purple label"><i class="sign in icon"></i>to</div>
                 </td>
-                <td><a href="/a/{{tx.addr_to}}">{{tx.addr_to}}</a></td>
+                <td><a href="/a/{{tx.tx.addr_to}}">{{tx.tx.addr_to}}</a></td>
               </tr>
               </tbody>
             </table>
             <div class="ui celled horizontal list">
-              <div class="item"><strong>Block</strong> <a href="/block/{{tx.block}}">{{tx.block}}</a></div>
-              <div class="item"><strong>Nonce</strong> {{tx.nonce}}</div>
-              <div class="item"><strong>OTS key</strong> {{tx.ots_key}}</div>
+              <div class="item"><strong>Block</strong> <a href="/block/{{tx.header.block_number}}">{{tx.header.block_number}}</a></div>
+              <div class="item"><strong>Nonce</strong> {{tx.tx.nonce}}</div>
+              <div class="item"><strong>OTS key</strong> {{tx.tx.ots_key}}</div>
               <!-- div class="item"><strong>Hexsize</strong> {{tx.hexsize}}</div>
               <div class="item"><strong>Fee</strong> {{tx.fee}}</div> -->
             </div>
