@@ -1,4 +1,3 @@
-import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
 
@@ -12,7 +11,6 @@ Template.tx.onCreated(() => {
       if (err) {
         Session.set('txhash', { error: err, id: txId })
       } else {
-        res.amount = parseFloat(res.amount)
         Session.set('txhash', res)
       }
     })
@@ -27,8 +25,11 @@ Template.tx.onCreated(() => {
 })
 
 Template.tx.helpers({
-  txhash() {
-    return Session.get('txhash')
+  tx() {
+    return Session.get('txhash').transaction
+  },
+  header() {
+    return Session.get('txhash').transaction.header
   },
   qrl() {
     const txhash = Session.get('txhash')
@@ -40,26 +41,37 @@ Template.tx.helpers({
       return 0
     }
   },
+  confirmations() {
+    const x = Session.get('status')
+    try
+    {
+      return x.node_info.block_height - this.header.block_number
+    }
+    catch (e)
+    {
+      return 0
+    }
+  },
   ts() {
-    const x = moment.unix(this.timestamp)
+    const x = moment.unix(this.header.timestamp.seconds)
     return moment(x).format('HH:mm D MMM YYYY')
   },
-  txcolor() {
-    if (this.subtype === 'COINBASE') {
+  color() {
+    if (this.tx.transactionType === 'coinbase') {
       return 'teal'
     }
-    if (this.subtype === 'TX') {
-      return 'yellow'
-    }
-    if (this.subtype === 'STAKE') {
+    if (this.tx.transactionType === 'stake') {
       return 'red'
+    }
+    if (this.tx.transactionType === 'transfer') {
+      return 'yellow'
     }
     return ''
   },
   json() {
-    const myJSON = this
-    const formatter = new JSONFormatter(myJSON)
-    $('.json').append(formatter.render())
+    // TODO: Improve the formatting here
+    const myJSON = JSON.stringify(this.tx, null, 4)
+    return myJSON.replace(new RegExp("\\\\n", "g"), "<br />");
   },
 })
 
