@@ -8,7 +8,10 @@ Template.block.onCreated(() => {
     Meteor.call('block', blockId, (err, res) => {
       // The method call sets the Session variable to the callback value
       if (err) {
-        Session.set('block', { error: err, id: blockId })
+        Session.set('block', {
+          error: err,
+          id: blockId
+        })
       } else {
         Session.set('block', res)
       }
@@ -18,44 +21,71 @@ Template.block.onCreated(() => {
 
 Template.block.helpers({
   block() {
-    return Session.get('block')
+    return Session.get('block').block
   },
-  blockdata() {
-    return JSON.stringify(Session.get('block'), true, 2)
+  header() {
+    return Session.get('block').block.header
+  },
+  transactions() {
+    return Session.get('block').block.transactions
+  },
+  block_reward() {
+    reward_block = Session.get('block').block.header.reward_block
+    return reward_block * 1.0e-8
   },
   ts() {
     try {
-      const x = moment.unix(this.blockheader.timestamp)
+      const x = moment.unix(this.header.timestamp.seconds)
       return moment(x).format('HH:mm D MMM YYYY')
     } catch (e) {
       return ' '
     }
   },
   color() {
-    if (this.subtype === 'COINBASE') {
+    if (this.transactionType === 'coinbase') {
       return 'teal'
     }
-    if (this.subtype === 'STAKE') {
+    if (this.transactionType === 'stake') {
       return 'red'
     }
-    if (this.subtype === 'TX') {
+    if (this.transactionType === 'transfer') {
       return 'yellow'
     }
     return ''
   },
-  json() {
+  addr_from_hex() {
+    return Buffer.from(this.addr_from)
+  },
+  addr_to_hex() {
+    if (this.transactionType === 'coinbase') {
+      return Buffer.from(this.coinbase.addr_to)
+    }
+    if (this.transactionType === 'transfer') {
+      return Buffer.from(this.transfer.addr_to)
+    }
+    return ''
+  },
+  transaction_hash_hex() {
+    return Buffer.from(this.transaction_hash).toString('hex')
+  },
+  public_key_hex() {
+    return Buffer.from(this.public_key).toString('hex')
+  },  json() {
     const myJSON = this
     const formatter = new JSONFormatter(myJSON)
-    $('.json').append(formatter.render())
+    $('.json')
+      .append(formatter.render())
   },
 })
 
 Template.block.events({
   'click .close': () => {
-    $('.message').hide()
+    $('.message')
+      .hide()
   },
   'click .jsonclick': () => {
-    $('.jsonbox').toggle()
+    $('.jsonbox')
+      .toggle()
   },
 })
 

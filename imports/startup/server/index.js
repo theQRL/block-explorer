@@ -202,17 +202,20 @@ Meteor.methods({
   },
 
   txhash(txId) {
+    // avoid blocking other method calls from same client - *may need to remove for production*
+    this.unblock()
     check(txId, String)
+    console.log(txId)
     if (!((Match.test(txId, String)) && (txId.length === 64))) {
       const errorCode = 400
       const errorMessage = 'Badly formed transaction ID'
       throw new Meteor.Error(errorCode, errorMessage)
     } else {
-      // avoid blocking other method calls from same client - *may need to remove for production*
-      this.unblock()
-      const apiUrl = `http://104.251.219.215:8080/api/txhash/${txId}`
       // asynchronous call to API
-      const response = Meteor.wrapAsync(apiCall)(apiUrl)
+      req = {
+        query: Buffer.from(txId, 'hex'),
+      }
+      const response = Meteor.wrapAsync(getObject)(req)
       return response
     }
   },
@@ -226,9 +229,12 @@ Meteor.methods({
     } else {
       // avoid blocking other method calls from same client - *may need to remove for production*
       this.unblock()
-      const apiUrl = `http://104.251.219.215:8080/api/block_data/${blockId}`
       // asynchronous call to API
-      const response = Meteor.wrapAsync(apiCall)(apiUrl)
+      check(blockId, Number)
+      req = {
+        query: Buffer.from(blockId.toString()),
+      }
+      const response = Meteor.wrapAsync(getObject)(req)
       return response
     }
   },

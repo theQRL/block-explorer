@@ -1,7 +1,9 @@
 <template name="block">
   {{#with block}}
     {{#if error}}
-    <h1>Block <div class="ui big label"><i class="cube icon"></i>{{block.id}}</div></h1>
+      <h1>Block
+        <div class="ui big label"><i class="cube icon"></i>{{block.id}}</div>
+      </h1>
       <div class="ui negative message">
         <i class="close icon"></i>
         <div class="header">
@@ -10,31 +12,46 @@
         <p>{{block.error.reason}}</p>
       </div>
     {{else}}
-    <h1>Block <div class="ui big label"><i class="cube icon"></i>{{block.blockheader.blocknumber}}</div></h1>
-        <div class="ui celled horizontal list">
-          <div class="item"><strong>Transactions</strong> {{block.transactions.length}}</div>
-          <div class="item"><strong>Timestamp</strong> {{ts}}</div>
-          <div class="item"><strong>Epoch</strong> {{block.blockheader.epoch}}</div>
-          <div class="item"><strong>Reward</strong> {{block.blockheader.block_reward}} Quanta</div>
-        </div>
-    <h3>Block transactions</h3>
-      <table class="ui striped table"><thead><th>Type</th><th>Amount</th><th>From</th><th>To</th><th>Txhash</th><th>Pubhash</th><th>Fee</th><th>OTS key</th></thead><tbody>
-      {{#each block.transactions}}
-      <tr>
-        <td><div class="ui label {{color}}">{{this.subtype}}</div></td>
-        <td><div class="unbreakable">{{this.amount}}</div></td>
-        <td><a href="/a/{{this.txfrom}}">{{this.txfrom}}</a></td>
-        <td><a href="/a/{{this.txto}}">{{this.txto}}</a></td>
-        <td><a href="/tx/{{this.txhash}}">{{this.txhash}}</a></td>
-        <td>{{this.pubhash}}</td>
-        <td>{{this.fee}}</td>
-        <td>{{this.ots_key}}</td>
-      </tr>
-      {{/each}}
-    </tbody>
-    </table>
-    <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
-    <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
-    {{/if}} 
+      <h1>Block
+        <div class="ui big label"><i class="cube icon"></i>{{header.block_number}}</div>
+      </h1>
+      <div class="ui celled horizontal list">
+        <div class="item"><strong>Transactions</strong> {{block.transactions.length}}</div>
+        <div class="item"><strong>Timestamp</strong> {{ts}}</div>
+        <div class="item"><strong>Epoch</strong> {{header.epoch}}</div>
+        <div class="item"><strong>Reward</strong> {{block_reward}} Quanta</div>
+      </div>
+      <h3>Block transactions</h3>
+      <table class="ui striped table">
+        <thead>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Fee</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Txhash</th>
+        <th>Pubhash</th>
+        <th>OTS key</th>
+        </thead>
+        <tbody>
+        {{#each transactions}}
+          <tr>
+            <td>
+              <div class="ui label {{color}}">{{this.transactionType}}</div>
+            </td>
+            <td><div class="unbreakable">{{this.transfer.amount}}</div></td>
+            <td><div class="unbreakable">{{this.transfer.fee}}</div></td>
+            <td><a href="/a/{{addr_from_hex}}">{{addr_from_hex}}</a></td>
+            <td><a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a></td>
+            <td><a href="/tx/{{transaction_hash_hex}}">{{transaction_hash_hex}}</a></td>
+            <td>{{public_key_hex}}</td>
+            <td>{{this.ots_key}}</td>
+          </tr>
+        {{/each}}
+        </tbody>
+      </table>
+      <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
+      <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
+    {{/if}}
   {{/with}}
 </template>

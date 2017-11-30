@@ -62,6 +62,16 @@ Template.status.helpers({
     }
     return r
   },
+  max_block_index() {
+    const x = Session.get('status')
+    let r = 'Undetermined'
+    try {
+      r = x.node_info.block_height - 1
+    } catch (e) {
+      r = 'Error parsing API results'
+    }
+    return r
+  }
 })
 
 Template.status.events({

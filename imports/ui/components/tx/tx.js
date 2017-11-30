@@ -12,7 +12,32 @@ Template.tx.onCreated(() => {
       if (err) {
         Session.set('txhash', { error: err, id: txId })
       } else {
-        res.amount = parseFloat(res.amount)
+
+        // TODO: This could probably be unified with block
+        res.transaction.amount = parseFloat(res.transaction.amount)
+        res.transaction.addr_from = Buffer.from(res.transaction.addr_from).toString()
+        res.transaction.transaction_hash = Buffer.from(res.transaction.transaction_hash).toString('hex')
+
+        res.transaction.addr_from = Buffer.from(res.transaction.addr_from).toString()
+
+        res.transaction.addr_to = ''
+        res.transaction.amount = ''
+        if(res.transaction.coinbase)
+        {
+          res.transaction.addr_to = Buffer.from(res.transaction.coinbase.addr_to).toString()
+          // FIXME: We need a unified way to format Quantas
+          res.transaction.amount = res.transaction.coinbase.amount * 1e-8
+        }
+        if(res.transaction.transfer)
+        {
+          res.transaction.addr_to = Buffer.from(res.transaction.transfer.addr_to).toString()
+          // FIXME: We need a unified way to format Quantas
+          res.transaction.amount = res.transaction.transfer.amount * 1e-8
+        }
+
+        res.transaction.public_key = Buffer.from(res.transaction.public_key).toString('hex')
+        res.transaction.signature = Buffer.from(res.transaction.signature).toString('hex')
+
         Session.set('txhash', res)
       }
     })
@@ -27,8 +52,8 @@ Template.tx.onCreated(() => {
 })
 
 Template.tx.helpers({
-  txhash() {
-    return Session.get('txhash')
+  tx() {
+    return Session.get('txhash').transaction
   },
   qrl() {
     const txhash = Session.get('txhash')
@@ -44,22 +69,22 @@ Template.tx.helpers({
     const x = moment.unix(this.timestamp)
     return moment(x).format('HH:mm D MMM YYYY')
   },
-  txcolor() {
-    if (this.subtype === 'COINBASE') {
+  color() {
+    if (this.transactionType === 'coinbase') {
       return 'teal'
     }
-    if (this.subtype === 'TX') {
-      return 'yellow'
-    }
-    if (this.subtype === 'STAKE') {
+    if (this.transactionType === 'stake') {
       return 'red'
+    }
+    if (this.transactionType === 'transfer') {
+      return 'yellow'
     }
     return ''
   },
   json() {
-    const myJSON = this
-    const formatter = new JSONFormatter(myJSON)
-    $('.json').append(formatter.render())
+    // TODO: Improve the formatting here
+    const myJSON = JSON.stringify(this, null, 4)
+    return myJSON.replace(new RegExp("\\\\n", "g"), "<br />");
   },
 })
 
