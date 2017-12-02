@@ -16,6 +16,7 @@ const renderLastBlocksBlock = () => {
       res.blockheaders.forEach((bh) => {
         editedBlockheaders.push(addHex(bh))
       })
+      res.blockheaders = editedBlockheaders
       Session.set('lastblocks', res)
     }
   })
