@@ -1,20 +1,23 @@
 import './lastblocks.html'
 
+const addHex = (b) => {
+  const result = b
+  result.header.hash_header_hex = Buffer.from(result.header.hash_header).toString('hex')
+  return result
+}
+
 const renderLastBlocksBlock = () => {
   Meteor.call('lastblocks', (err, res) => {
-    if (err){
+    if (err) {
       Session.set('lastblocks', { error: err })
-      return
+    } else {
+      res.blockheaders = res.blockheaders.reverse()
+      const editedBlockheaders = []
+      res.blockheaders.forEach((bh) => {
+        editedBlockheaders.push(addHex(bh))
+      })
+      Session.set('lastblocks', res)
     }
-
-    res.blockheaders = res.blockheaders.reverse()
-    for(idx in res.blockheaders)
-    {
-      tmp = res.blockheaders[idx]
-      tmp.header.hash_header_hex = Buffer.from(tmp.header.hash_header).toString('hex')
-    }
-
-    Session.set('lastblocks', res)
   })
 }
 
@@ -35,13 +38,14 @@ Template.lastblocks.helpers({
     const x = Math.round(this.block_interval)
     return `${x} seconds`
   },
-  votes_percentual() {
+  votes_percent() {
     if (this.header.block_number === 0) {
-        return 'N/A'
+      return 'N/A'
     }
 
-    const vp = this.voted_weight / this.total_stake_weight * 100
-    return vp.toFixed(2) + '%'
+    let vp = this.voted_weight / this.total_stake_weight
+    vp *= 100
+    return `${vp.toFixed(2)}%`
   },
   reward(rew) {
     let r = 'Undetermined'

@@ -191,7 +191,6 @@ Meteor.methods({
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     check(txId, String)
-    console.log(txId)
     if (!((Match.test(txId, String)) && (txId.length === 64))) {
       const errorCode = 400
       const errorMessage = 'Badly formed transaction ID'
@@ -252,7 +251,6 @@ Meteor.methods({
     check(targets, Array)
     const result = []
     targets.forEach((arr) => {
-      console.log(`Lookup Txhash ${arr.txhash}`)
       result.push({ txhash: ab2str(arr.txhash) })
     })
     return result
