@@ -35,6 +35,14 @@ Template.lastblocks.helpers({
     const x = Math.round(this.block_interval)
     return `${x} seconds`
   },
+  votes_percentual() {
+    if (this.header.block_number === 0) {
+        return 'N/A'
+    }
+
+    const vp = this.voted_weight / this.total_stake_weight * 100
+    return vp.toFixed(2) + '%'
+  },
   reward(rew) {
     let r = 'Undetermined'
     try {
