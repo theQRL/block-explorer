@@ -5,6 +5,7 @@ import '../../stylesheets/overrides.css'
 Template.tx.onCreated(() => {
   Session.set('txhash', {})
   Session.set('qrl', 0)
+  Session.set('status', {})
   const txId = FlowRouter.getParam('txId')
   if (txId) {
     Meteor.call('txhash', txId, (err, res) => {
@@ -19,6 +20,13 @@ Template.tx.onCreated(() => {
         Session.set('qrl', 'Error getting value from API')
       } else {
         Session.set('qrl', res)
+      }
+    })
+    Meteor.call('status', (err, res) => {
+      if (err) {
+        Session.set('status', { error: err })
+      } else {
+        Session.set('status', res)
       }
     })
   }
@@ -43,12 +51,9 @@ Template.tx.helpers({
   },
   confirmations() {
     const x = Session.get('status')
-    try
-    {
+    try {
       return x.node_info.block_height - this.header.block_number
-    }
-    catch (e)
-    {
+    } catch (e) {
       return 0
     }
   },
@@ -71,7 +76,7 @@ Template.tx.helpers({
   json() {
     // TODO: Improve the formatting here
     const myJSON = JSON.stringify(this.tx, null, 4)
-    return myJSON.replace(new RegExp("\\\\n", "g"), "<br />");
+    return myJSON.replace(new RegExp('\\\\n', 'g'), '<br />')
   },
 })
 
