@@ -6,6 +6,8 @@ const addHex = (b) => {
   return result
 }
 
+const sumValues = obj => Object.values(obj).reduce((a, b) => a + b)
+
 const renderLastBlocksBlock = () => {
   Meteor.call('lastblocks', (err, res) => {
     if (err) {
@@ -43,7 +45,6 @@ Template.lastblocks.helpers({
     if (this.header.block_number === 0) {
       return 'N/A'
     }
-
     let vp = this.voted_weight / this.total_stake_weight
     vp *= 100
     return `${vp.toFixed(2)}%`
@@ -57,6 +58,18 @@ Template.lastblocks.helpers({
       r = 'Error parsing API results'
     }
     return r
+  },
+  numberTransactions() {
+    const x = this.separate_transaction_count.count
+    //     UNKNOWN = 0;
+    //     TRANSFER = 1;
+    //     STAKE = 2;
+    //     DESTAKE = 3;
+    //     COINBASE = 4;
+    //     LATTICE = 5;
+    //     DUPLICATE = 6;
+    //     VOTE = 7;
+    return sumValues(x)
   },
 })
 
