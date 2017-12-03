@@ -10,7 +10,7 @@ Template.block.onCreated(() => {
       if (err) {
         Session.set('block', {
           error: err,
-          id: blockId
+          id: blockId,
         })
       } else {
         Session.set('block', res)
@@ -30,8 +30,8 @@ Template.block.helpers({
     return Session.get('block').block.transactions
   },
   block_reward() {
-    reward_block = Session.get('block').block.header.reward_block
-    return reward_block * 1.0e-8
+    const rewardBlock = Session.get('block').block.header.reward_block
+    return rewardBlock * 1.0e-8
   },
   ts() {
     try {
@@ -69,8 +69,7 @@ Template.block.helpers({
     return Buffer.from(this.transaction_hash).toString('hex')
   },
   amount() {
-    if (this.transfer)
-    {
+    if (this.transfer) {
       return this.transfer.amount * 1e-8
     }
     return ''
@@ -83,11 +82,6 @@ Template.block.helpers({
   },
   public_key_hex() {
     return Buffer.from(this.public_key).toString('hex')
-  },  json() {
-    const myJSON = this
-    const formatter = new JSONFormatter(myJSON)
-    $('.json')
-      .append(formatter.render())
   },
 })
 
@@ -97,8 +91,12 @@ Template.block.events({
       .hide()
   },
   'click .jsonclick': () => {
-    $('.jsonbox')
-      .toggle()
+    if (!($('.json').html())) {
+      const myJSON = Session.get('block').block
+      const formatter = new JSONFormatter(myJSON)
+      $('.json').html(formatter.render())
+    }
+    $('.jsonbox').toggle()
   },
 })
 
