@@ -1,6 +1,6 @@
+import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
-
 
 Template.tx.onCreated(() => {
   Session.set('txhash', {})
@@ -73,11 +73,6 @@ Template.tx.helpers({
     }
     return ''
   },
-  json() {
-    // TODO: Improve the formatting here
-    const myJSON = JSON.stringify(this.tx, null, 4)
-    return myJSON.replace(new RegExp('\\\\n', 'g'), '<br />')
-  },
 })
 
 Template.tx.events({
@@ -85,6 +80,11 @@ Template.tx.events({
     $('.message').hide()
   },
   'click .jsonclick': () => {
+    if (!($('.json').html())) {
+      const myJSON = Session.get('txhash').transaction
+      const formatter = new JSONFormatter(myJSON)
+      $('.json').html(formatter.render())
+    }
     $('.jsonbox').toggle()
   },
 })
