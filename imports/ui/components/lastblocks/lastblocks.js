@@ -60,7 +60,7 @@ Template.lastblocks.helpers({
     return r
   },
   numberTransactions() {
-    const x = this.separate_transaction_count.count
+    const x = this.transaction_count.count
     //     UNKNOWN = 0;
     //     TRANSFER = 1;
     //     STAKE = 2;
