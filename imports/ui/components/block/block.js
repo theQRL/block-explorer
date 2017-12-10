@@ -1,6 +1,8 @@
 import JSONFormatter from 'json-formatter-js'
 import './block.html'
 
+const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
+
 Template.block.onCreated(() => {
   Session.set('block', {})
   const blockId = parseInt(FlowRouter.getParam('blockId'), 10)
@@ -66,7 +68,7 @@ Template.block.helpers({
     return ''
   },
   transaction_hash_hex() {
-    return Buffer.from(this.transaction_hash).toString('hex')
+    return ab2str(this.transaction_hash)
   },
   amount() {
     if (this.transfer) {
