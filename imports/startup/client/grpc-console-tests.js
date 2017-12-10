@@ -1,6 +1,12 @@
 /* eslint no-console: 0 */
 // const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
+const addHex = (b) => {
+  const result = b
+  result.header.hash_header_hex = Buffer.from(result.header.hash_header).toString('hex')
+  return result
+}
+
 Meteor.call('getStats', (err, res) => {
   if (err) {
     console.log(err.message)
@@ -41,6 +47,12 @@ Meteor.call('getLatestData', req, (err, res) => {
     console.log(err.message)
   } else {
     console.log('LATEST BLOCKHEADERS:')
+    res.blockheaders = res.blockheaders.reverse()
+    const editedBlockheaders = []
+    res.blockheaders.forEach((bh) => {
+      editedBlockheaders.push(addHex(bh))
+    })
+    res.blockheaders = editedBlockheaders
     console.log(res)
   }
 })
