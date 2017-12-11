@@ -34,6 +34,7 @@ Template.tx.onCreated(() => {
 
 Template.tx.helpers({
   tx() {
+    console.log(Session.get('txhash'))
     return Session.get('txhash').transaction
   },
   header() {
