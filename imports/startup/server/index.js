@@ -53,16 +53,11 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
         callback(myError, null)
       } else {
-        response.state.address = ab2str(response.state.address)
-        response.state.txcount = response.state.transaction_hashes.length
-        response.state.transactions = []
-        response.state.transaction_hashes.forEach((value) => {
-          response.state.transactions.push({ txhash: Buffer.from(value).toString('hex') })
-        })
-        if (!(Addresses.findOne({ Address: response.state.address }))) {
-          console.log('Going to add this one...')
-          Addresses.insert({ Address: response.state.address })
-        }
+        // server side buffering being added here
+        // if (!(Addresses.findOne({ Address: response.state.address }))) {
+        //   console.log('Going to add this one...')
+        //   Addresses.insert({ Address: response.state.address })
+        // }
         callback(null, response)
       }
     })
@@ -205,34 +200,6 @@ Meteor.methods({
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
-      // Moved into client side
-      /*
-      response.transaction.tx.addr_from = Buffer.from(response.transaction.tx.addr_from).toString()
-      response.transaction.tx.transaction_hash =
-        Buffer.from(response.transaction.tx.transaction_hash).toString('hex')
-      response.transaction.tx.addr_to = ''
-      response.transaction.tx.amount = ''
-      if (response.transaction.coinbase) {
-        response.transaction.tx.addr_to =
-          Buffer.from(response.transaction.tx.coinbase.addr_to).toString()
-        response.transaction.tx.coinbase.addr_to =
-          Buffer.from(response.transaction.tx.coinbase.addr_to).toString()
-        // FIXME: We need a unified way to format Quanta
-        response.transaction.tx.amount = response.transaction.tx.coinbase.amount * 1e-8
-      }
-      if (response.transaction.tx.transfer) {
-        response.transaction.tx.addr_to =
-          Buffer.from(response.transaction.tx.transfer.addr_to).toString()
-        response.transaction.tx.transfer.addr_to =
-          Buffer.from(response.transaction.tx.transfer.addr_to).toString()
-        // FIXME: We need a unified way to format Quanta
-        response.transaction.tx.amount = response.transaction.tx.transfer.amount * 1e-8
-      }
-      response.transaction.tx.public_key =
-         Buffer.from(response.transaction.tx.public_key).toString('hex')
-      response.transaction.tx.signature =
-         Buffer.from(response.transaction.tx.signature).toString('hex')
-      */
       return response
     }
   },
