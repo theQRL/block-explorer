@@ -1,6 +1,7 @@
 /* eslint no-console: 0 */
 /* ^^^ remove once testing complete
-*/
+ */
+import JSONFormatter from 'json-formatter-js'
 import './address.html'
 import '../../stylesheets/overrides.css'
 
@@ -16,8 +17,18 @@ const renderAddressBlock = () => {
       if (err) {
         Session.set('address', { error: err, id: aId })
       } else {
-        res.state.address = ab2str(res.state.address)
-        res.state.balance /= 100000000
+        if (res) {
+          res.state.address = ab2str(res.state.address)
+          res.state.balance *= 1e-8
+          if (!(res.state.address)) {
+            res.state.address = aId
+          }
+          if (parseInt(res.state.txcount, 10) === 0 && parseInt(res.state.nonce, 10) === 0) {
+            res.state.empty_warning = true
+          } else {
+            res.state.empty_warning = false
+          }
+        }
         Session.set('address', res)
       }
     })
@@ -96,6 +107,14 @@ Template.address.events({
     $('.loader').hide()
     $('#ShowTx').show()
     $('#HideTx').hide()
+  },
+  'click .jsonclick': () => {
+    if (!($('.json').html())) {
+      const myJSON = Session.get('address')
+      const formatter = new JSONFormatter(myJSON)
+      $('.json').html(formatter.render())
+    }
+    $('.jsonbox').toggle()
   },
 })
 

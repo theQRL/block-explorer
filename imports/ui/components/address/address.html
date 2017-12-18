@@ -1,14 +1,13 @@
 <template name="address">
   {{#with address}}
     {{#if error}}
-      <h1>Address <i class="ui refresh red link icon"></i> <a class="ui big label"><i
-              class="qrcode icon"></i>{{address.parameter}}</a></h1>
+      <h1>Address <i class="ui refresh red link icon"></i></h1>
       <div class="ui negative message">
         <i class="close icon"></i>
         <div class="header">
-          Error reading address
+          Error reading address {{address.id}}
         </div>
-        <p>{{address.error}}</p>
+        <p>{{address.error.message}}</p>
       </div>
     {{else}}
       <div class="ui raised fluid card">
@@ -16,6 +15,9 @@
           <div class="header">
             <h1>Address <i class="ui refresh red link icon"></i> <a class="ui big yellow label"><i
                     class="qrcode icon"></i>{{address.state.address}}</a></h1>
+                    {{#if address.state.empty_warning}}
+                    <div class="ui red header"><h6>This appears to be an empty address.  It may be an offline wallet, but you should double-check before transacting Quanta to this wallet address.</h6></div>
+                    {{/if}}
           </div>
           <div class="description">
             <div class="ui hidden divider"></div>
@@ -78,7 +80,8 @@
               {{/each}}
               </tbody>
             </table>
-
+            <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
+            <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
           </div>
         </div>
       </div>
