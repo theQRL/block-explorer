@@ -7,6 +7,39 @@ import '../../stylesheets/overrides.css'
 
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
+const addressResultsRefactor = (res) => {
+  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
+  const output = res
+  if (res.state) {
+    output.state.address = ab2str(output.state.address)
+    output.state.txcount = output.state.transaction_hashes.length
+
+    // transactions
+    const transactions = []
+    output.state.transaction_hashes.forEach((value) => {
+      transactions.push({ txhash: Buffer.from(value).toString('hex') })
+    })
+    output.state.transactions = transactions
+
+    // pubhashes
+    const pubhashes = []
+    output.state.pubhashes.forEach((value) => {
+      const adjusted = Buffer.from(value).toString('hex')
+      pubhashes.push(adjusted)
+    })
+    output.state.pubhashes = pubhashes
+
+    // txhashes
+    const transactionHashes = []
+    output.state.transaction_hashes.forEach((value) => {
+      const adjusted = Buffer.from(value).toString('hex')
+      transactionHashes.push(adjusted)
+    })
+    output.state.transaction_hashes = transactionHashes
+  }
+  return output
+}
+
 const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
   if (aId) {
@@ -29,7 +62,7 @@ const renderAddressBlock = () => {
             res.state.empty_warning = false
           }
         }
-        Session.set('address', res)
+        Session.set('address', addressResultsRefactor(res))
       }
     })
   }
