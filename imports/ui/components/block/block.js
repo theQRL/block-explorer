@@ -3,21 +3,69 @@ import './block.html'
 
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
+const resultsRefactor = (res) => {
+  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
+  const output = res
+  if (res.block.header) {
+    output.block.header.hash_header = Buffer.from(output.block.header.hash_header).toString('hex')
+    output.block.header.hash_header_prev = Buffer.from(output.block.header.hash_header_prev).toString('hex')
+    output.block.header.merkle_root = Buffer.from(output.block.header.merkle_root).toString('hex')
+    output.block.header.hash_reveal = Buffer.from(output.block.header.hash_reveal).toString('hex')
+    output.block.header.stake_selector = ab2str(output.block.header.stake_selector)
+
+    // transactions
+    const transactions = []
+    output.block.transactions.forEach((value) => {
+      const adjusted = value
+      adjusted.addr_from = ab2str(adjusted.addr_from)
+      adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
+      adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
+      adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
+      if (value.transactionType === 'coinbase') {
+        adjusted.coinbase.addr_to = ab2str(adjusted.coinbase.addr_to)
+      }
+      if (value.transactionType === 'transfer') {
+        adjusted.transfer.addr_to = ab2str(adjusted.transfer.addr_to)
+      }
+      transactions.push(adjusted)
+    })
+    output.block.transactions = transactions
+
+    // votes
+    const votes = []
+    output.block.vote.forEach((value) => {
+      const adjusted = value
+      adjusted.addr_from = ab2str(adjusted.addr_from)
+      adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
+      adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
+      adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
+      adjusted.vote.hash_header = Buffer.from(adjusted.vote.hash_header).toString('hex')
+      votes.push(adjusted)
+    })
+    output.block.vote = votes
+  }
+  return output
+}
+
+const renderBlockBlock = (blockId) => {
+  Meteor.call('block', blockId, (err, res) => {
+    // The method call sets the Session variable to the callback value
+    if (err) {
+      Session.set('block', {
+        error: err,
+        id: blockId,
+      })
+    } else {
+      Session.set('block', resultsRefactor(res))
+    }
+  })
+}
+
 Template.block.onCreated(() => {
   Session.set('block', {})
   const blockId = parseInt(FlowRouter.getParam('blockId'), 10)
   if (blockId) {
-    Meteor.call('block', blockId, (err, res) => {
-      // The method call sets the Session variable to the callback value
-      if (err) {
-        Session.set('block', {
-          error: err,
-          id: blockId,
-        })
-      } else {
-        Session.set('block', res)
-      }
-    })
+    renderBlockBlock(blockId)
   }
 })
 
@@ -60,15 +108,12 @@ Template.block.helpers({
   },
   addr_to_hex() {
     if (this.transactionType === 'coinbase') {
-      return Buffer.from(this.coinbase.addr_to)
+      return this.coinbase.addr_to
     }
     if (this.transactionType === 'transfer') {
-      return Buffer.from(this.transfer.addr_to)
+      return this.transfer.addr_to
     }
     return ''
-  },
-  transaction_hash_hex() {
-    return ab2str(this.transaction_hash)
   },
   amount() {
     if (this.transfer) {
@@ -81,9 +126,6 @@ Template.block.helpers({
       return this.transfer.fee * 1.0e-8
     }
     return ''
-  },
-  public_key_hex() {
-    return Buffer.from(this.public_key).toString('hex')
   },
 })
 
@@ -106,12 +148,6 @@ Template.block.onRendered(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     const blockId = parseInt(FlowRouter.getParam('blockId'), 10)
-    Meteor.call('block', blockId, (err, res) => {
-      if (err) {
-        Session.set('block', { error: err })
-      } else {
-        Session.set('block', res)
-      }
-    })
+    renderBlockBlock(blockId)
   })
 })
