@@ -3,7 +3,7 @@ import './block.html'
 
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
-const resultsRefactor = (res) => {
+const blockResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
   if (res.block.header) {
@@ -56,7 +56,7 @@ const renderBlockBlock = (blockId) => {
         id: blockId,
       })
     } else {
-      Session.set('block', resultsRefactor(res))
+      Session.set('block', blockResultsRefactor(res))
     }
   })
 }
