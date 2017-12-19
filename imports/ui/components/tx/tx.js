@@ -1,3 +1,6 @@
+/* eslint no-console: 0 */
+/* ^^^ remove once testing complete
+ */
 import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
@@ -73,7 +76,6 @@ Template.tx.onCreated(() => {
 
 Template.tx.helpers({
   tx() {
-    console.log(Session.get('txhash'))
     return Session.get('txhash').transaction
   },
   header() {

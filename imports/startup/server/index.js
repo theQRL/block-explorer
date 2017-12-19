@@ -227,7 +227,10 @@ Meteor.methods({
     check(targets, Array)
     const result = []
     targets.forEach((arr) => {
-      result.push({ txhash: ab2str(arr.txhash) })
+      const req = { query: Buffer.from(arr.txhash, 'hex') }
+      const response = Meteor.wrapAsync(getObject)(req)
+      response.txhash = arr.txhash
+      result.push(response)
     })
     return result
   },

@@ -11,7 +11,7 @@ const addressResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
   if (res.state) {
-    output.state.address = ab2str(output.state.address)
+    // output.state.address = ab2str(output.state.address)
     output.state.txcount = output.state.transaction_hashes.length
 
     // transactions
@@ -87,13 +87,22 @@ Template.address.helpers({
   address() {
     return Session.get('address')
   },
+  addressTx() {
+    let ret = []
+    if (Session.get('addressTransactions').length > 0) {
+      ret = Session.get('addressTransactions')
+    }
+    return ret
+  },
   QRtext() {
     return FlowRouter.getParam('aId')
   },
   ts() {
     let x = ''
-    if (moment.unix(this.timestamp).isValid()) {
-      x = moment.unix(this.timestamp)
+    if (Session.get('addressTransactions').length > 0) {
+      if (moment.unix(this.transaction.header.timestamp.seconds).isValid()) {
+        x = moment.unix(this.transaction.header.timestamp.seconds)
+      }
     }
     return x
   },
