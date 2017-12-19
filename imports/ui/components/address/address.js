@@ -40,6 +40,43 @@ const addressResultsRefactor = (res) => {
   return output
 }
 
+const addressTransactionsRefactor = (res) => {
+  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
+  let output = res
+  if (res.length > 0) {
+    // transactions
+    const transactions = []
+    output.forEach((value) => {
+      const edit = value
+      edit.transaction.header.hash_header = Buffer.from(edit.transaction.header.hash_header).toString('hex')
+      edit.transaction.header.hash_header_prev = Buffer.from(edit.transaction.header.hash_header_prev).toString('hex')
+      edit.transaction.header.hash_reveal = Buffer.from(edit.transaction.header.hash_reveal).toString('hex')
+      edit.transaction.header.merkle_root = Buffer.from(edit.transaction.header.merkle_root).toString('hex')
+      edit.transaction.header.stake_selector = ab2str(edit.transaction.header.stake_selector)
+      edit.transaction.tx.addr_from = ab2str(edit.transaction.tx.addr_from)
+      edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
+      edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
+      edit.transaction.tx.transaction_hash = Buffer.from(edit.transaction.tx.transaction_hash).toString('hex')
+      if (edit.transaction.tx.coinbase) {
+        edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
+        edit.transaction.tx.coinbase.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
+        edit.transaction.tx.coinbase.amount *= 1e-8
+        edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
+      }
+      if (edit.transaction.tx.transfer) {
+        edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
+        edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
+        edit.transaction.tx.transfer.amount *= 1e-8
+        edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
+        edit.transaction.tx.transfer.fee *= 1e-8
+      }
+      transactions.push(edit)
+    })
+    output = transactions
+  }
+  return output
+}
+
 const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
   if (aId) {
@@ -116,6 +153,18 @@ Template.address.helpers({
       return 0
     }
   },
+  color() {
+    if (this.transaction.tx.transactionType === 'coinbase') {
+      return 'teal'
+    }
+    if (this.transaction.tx.transactionType === 'stake') {
+      return 'red'
+    }
+    if (this.transaction.tx.transactionType === 'transfer') {
+      return 'yellow'
+    }
+    return ''
+  },
 })
 
 Template.address.events({
@@ -128,6 +177,7 @@ Template.address.events({
   },
   'click #ShowTx': () => {
     $('table').show()
+    $('.loader').show()
     const x = Session.get('fetchedTx')
     if (x === false) {
       const tx = Session.get('address').state.transactions
@@ -135,7 +185,7 @@ Template.address.events({
         if (err) {
           Session.set('addressTransactions', { error: err })
         } else {
-          Session.set('addressTransactions', res)
+          Session.set('addressTransactions', addressTransactionsRefactor(res))
           $('.loader').hide()
           Session.set('fetchedTx', true)
         }
@@ -164,6 +214,10 @@ Template.address.onRendered(() => {
   this.$('.value').popup()
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
+    $('table').hide()
+    $('.loader').hide()
+    $('#ShowTx').show()
+    $('#HideTx').hide()
     Session.set('address', {})
     Session.set('addressTransactions', {})
     Session.set('qrl', 0)
