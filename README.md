@@ -4,7 +4,7 @@
 
 Work in progress.
 
-Currently running at: [http://qrlexplorer.info/](http://qrlexplorer.info/)
+Currently running at: [https://explorer.theqrl.org/](https://explorer.theqrl.org/)
 
 ## Dependencies
 
