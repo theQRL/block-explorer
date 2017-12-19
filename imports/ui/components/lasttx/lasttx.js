@@ -56,7 +56,7 @@ Template.lasttx.helpers({
 
 Template.lasttx.events({
   'click .refresh': () => {
-
+    renderLastTxBlock()
   },
   'click .close': () => {
     $('.message').hide()
