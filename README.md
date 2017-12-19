@@ -12,10 +12,10 @@ Currently running at: [https://explorer.theqrl.org/](https://explorer.theqrl.org
 
 ## Install
 
-	git clone -b dev https://github.com/theQRL/block-explorer.git
+	git clone https://github.com/theQRL/block-explorer.git
 	cd block-explorer
 	meteor npm install
-	meteor npm install --save meteor-babel-helpers
+	meteor npm install --save babel-runtime meteor-node-stubs
 
 ## Run
 
