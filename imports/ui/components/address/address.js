@@ -1,10 +1,44 @@
 /* eslint no-console: 0 */
 /* ^^^ remove once testing complete
-*/
+ */
+import JSONFormatter from 'json-formatter-js'
 import './address.html'
 import '../../stylesheets/overrides.css'
 
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
+
+const addressResultsRefactor = (res) => {
+  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
+  const output = res
+  if (res.state) {
+    output.state.address = ab2str(output.state.address)
+    output.state.txcount = output.state.transaction_hashes.length
+
+    // transactions
+    const transactions = []
+    output.state.transaction_hashes.forEach((value) => {
+      transactions.push({ txhash: Buffer.from(value).toString('hex') })
+    })
+    output.state.transactions = transactions
+
+    // pubhashes
+    const pubhashes = []
+    output.state.pubhashes.forEach((value) => {
+      const adjusted = Buffer.from(value).toString('hex')
+      pubhashes.push(adjusted)
+    })
+    output.state.pubhashes = pubhashes
+
+    // txhashes
+    const transactionHashes = []
+    output.state.transaction_hashes.forEach((value) => {
+      const adjusted = Buffer.from(value).toString('hex')
+      transactionHashes.push(adjusted)
+    })
+    output.state.transaction_hashes = transactionHashes
+  }
+  return output
+}
 
 const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
@@ -16,9 +50,19 @@ const renderAddressBlock = () => {
       if (err) {
         Session.set('address', { error: err, id: aId })
       } else {
-        res.state.address = ab2str(res.state.address)
-        res.state.balance /= 100000000
-        Session.set('address', res)
+        if (res) {
+          res.state.address = ab2str(res.state.address)
+          res.state.balance *= 1e-8
+          if (!(res.state.address)) {
+            res.state.address = aId
+          }
+          if (parseInt(res.state.txcount, 10) === 0 && parseInt(res.state.nonce, 10) === 0) {
+            res.state.empty_warning = true
+          } else {
+            res.state.empty_warning = false
+          }
+        }
+        Session.set('address', addressResultsRefactor(res))
       }
     })
   }
@@ -96,6 +140,14 @@ Template.address.events({
     $('.loader').hide()
     $('#ShowTx').show()
     $('#HideTx').hide()
+  },
+  'click .jsonclick': () => {
+    if (!($('.json').html())) {
+      const myJSON = Session.get('address')
+      const formatter = new JSONFormatter(myJSON)
+      $('.json').html(formatter.render())
+    }
+    $('.jsonbox').toggle()
   },
 })
 

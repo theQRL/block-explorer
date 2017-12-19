@@ -2,17 +2,49 @@ import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
 
-Template.tx.onCreated(() => {
-  Session.set('txhash', {})
-  Session.set('qrl', 0)
-  Session.set('status', {})
+const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
+
+const txResultsRefactor = (res) => {
+  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
+  const output = res
+  if (res.transaction.header) {
+    output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
+    output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
+    output.transaction.header.merkle_root = Buffer.from(output.transaction.header.merkle_root).toString('hex')
+    output.transaction.header.hash_reveal = Buffer.from(output.transaction.header.hash_reveal).toString('hex')
+    output.transaction.header.stake_selector = ab2str(output.transaction.header.stake_selector)
+
+    output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
+    output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
+    output.transaction.tx.addr_to = ''
+    output.transaction.tx.amount = ''
+
+    if (output.transaction.coinbase) {
+      output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
+      output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
+      output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-8
+    }
+
+    if (output.transaction.tx.transfer) {
+      output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
+      output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
+      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
+    }
+
+    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+  }
+  return output
+}
+
+const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
   if (txId) {
     Meteor.call('txhash', txId, (err, res) => {
       if (err) {
         Session.set('txhash', { error: err, id: txId })
       } else {
-        Session.set('txhash', res)
+        Session.set('txhash', txResultsRefactor(res))
       }
     })
     Meteor.call('QRLvalue', (err, res) => {
@@ -30,10 +62,18 @@ Template.tx.onCreated(() => {
       }
     })
   }
+}
+
+Template.tx.onCreated(() => {
+  Session.set('txhash', {})
+  Session.set('qrl', 0)
+  Session.set('status', {})
+  renderTxBlock()
 })
 
 Template.tx.helpers({
   tx() {
+    console.log(Session.get('txhash'))
     return Session.get('txhash').transaction
   },
   header() {
