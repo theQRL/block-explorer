@@ -62,7 +62,11 @@
           </div>
           <div class="extra content">
             <div class="right floated author">
+              {{#if confirmations}}
               OK <i class="ui green circle icon"></i> {{ts}}
+              {{else}}
+              Unconfirmed <i class="ui yellow circle icon"></i>
+              {{/if}}
             </div>
           </div>
         </div>
