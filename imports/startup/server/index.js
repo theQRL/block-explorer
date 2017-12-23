@@ -188,6 +188,14 @@ Meteor.methods({
     return response
   },
 
+  lastunconfirmedtx() {
+    // avoid blocking other method calls from same client - *may need to remove for production*
+    this.unblock()
+    // asynchronous call to API
+    const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
+    return response
+  },
+
   txhash(txId) {
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
