@@ -77,6 +77,18 @@ const addressTransactionsRefactor = (res) => {
   return output
 }
 
+const getTxArray = (txArray) => {
+  Meteor.call('addressTransactions', txArray, (errTx, resTx) => {
+    if (errTx) {
+      Session.set('addressTransactions', { error: errTx })
+    } else {
+      Session.set('addressTransactions', addressTransactionsRefactor(resTx))
+      $('.loader').hide()
+      Session.set('fetchedTx', true)
+    }
+  })
+}
+
 const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
   if (aId) {
@@ -100,6 +112,22 @@ const renderAddressBlock = () => {
           }
         }
         Session.set('address', addressResultsRefactor(res))
+        Session.set('fetchedTx', false)
+        const numPages = Math.ceil(res.state.transactions.length / 10)
+        const pages = []
+        while (pages.length !== numPages) {
+          pages.push({
+            number: pages.length + 1,
+            from: ((pages.length + 1) * 10) + 1,
+            to: ((pages.lenth + 1) * 10) + 10,
+          })
+        }
+        Session.set('pages', pages)
+        let txArray = res.state.transactions.reverse()
+        if (txArray.length > 10) {
+          txArray = txArray.slice(0, 9)
+        }
+        getTxArray(txArray)
       }
     })
   }
@@ -112,17 +140,16 @@ const renderAddressBlock = () => {
   })
 }
 
-Template.address.onCreated(() => {
-  Session.set('address', {})
-  Session.set('addressTransactions', {})
-  Session.set('qrl', 0)
-  Session.set('fetchedTx', false)
-  renderAddressBlock()
-})
-
 Template.address.helpers({
   address() {
     return Session.get('address')
+  },
+  pages() {
+    let ret = []
+    if (Session.get('pages').length > 0) {
+      ret = Session.get('pages')
+    }
+    return ret
   },
   addressTx() {
     let ret = []
@@ -175,31 +202,6 @@ Template.address.events({
   'click .close': () => {
     $('.message').hide()
   },
-  'click #ShowTx': () => {
-    $('table').show()
-    $('.loader').show()
-    const x = Session.get('fetchedTx')
-    if (x === false) {
-      const tx = Session.get('address').state.transactions
-      Meteor.call('addressTransactions', tx, (err, res) => {
-        if (err) {
-          Session.set('addressTransactions', { error: err })
-        } else {
-          Session.set('addressTransactions', addressTransactionsRefactor(res))
-          $('.loader').hide()
-          Session.set('fetchedTx', true)
-        }
-      })
-    }
-    $('#ShowTx').hide()
-    $('#HideTx').show()
-  },
-  'click #HideTx': () => {
-    $('table').hide()
-    $('.loader').hide()
-    $('#ShowTx').show()
-    $('#HideTx').hide()
-  },
   'click .jsonclick': () => {
     if (!($('.json').html())) {
       const myJSON = Session.get('address')
@@ -208,19 +210,48 @@ Template.address.events({
     }
     $('.jsonbox').toggle()
   },
+  'click .pagination': (event) => {
+    let b = 0
+    if (parseInt(event.target.text, 10)) {
+      b = parseInt(event.target.text, 10)
+      Session.set('active', b)
+    } else {
+      const a = event.target.getAttribute('qrl-data')
+      b = Session.get('active')
+      const c = Session.get('pages')
+      if (a === 'forward') {
+        b += 1
+      }
+      if (a === 'back') {
+        b -= 1
+      }
+      if (b > c) {
+        b = c
+      }
+      if (b < 1) {
+        b = 1
+      }
+    }
+    const startIndex = (b - 1) * 10
+    console.log(`active page: ${b}`)
+    Session.set('active', b)
+    const txArray = Session.get('address').state.transactions.reverse().slice(startIndex, startIndex + 10)
+    console.log(txArray)
+    $('.loader').show()
+    Session.set('fetchedTx', false)
+    getTxArray(txArray)
+  },
 })
 
 Template.address.onRendered(() => {
   this.$('.value').popup()
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
-    $('table').hide()
-    $('.loader').hide()
-    $('#ShowTx').show()
-    $('#HideTx').hide()
     Session.set('address', {})
     Session.set('addressTransactions', {})
     Session.set('qrl', 0)
+    Session.set('pages', [])
+    Session.set('active', 1)
     Session.set('fetchedTx', false)
     renderAddressBlock()
   })

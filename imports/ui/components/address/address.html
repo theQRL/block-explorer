@@ -41,18 +41,19 @@
           </div>
         </div>
         <div class="ui celled horizontal list">
-          <div class="item">
+<!--           <div class="item">
             <button class="ui mini blue button" id="ShowTx"><i class="down arrow icon"></i> Show transactions
             </button>
-            <button style="display:none" class="ui mini blue button" id="HideTx"><i class="up arrow icon"></i> Hide transactions
+            <button class="ui mini blue button" id="HideTx"><i class="up arrow icon"></i> Hide transactions
             </button>
-          </div>
+          </div> -->
           <div class="item"><strong>Transactions</strong> {{state.txcount}}</div>
           <div class="item"><strong>Nonce</strong> {{state.nonce}}</div>
         </div>
-        <div style="display:none;" class="ui active centered inline loader"></div>
-        <table style="display:none;" class="ui striped table">
+        <div class="ui active centered inline loader"></div>
+        <table class="ui striped table">
           <thead>
+            <th>Time</th>
             <th>Type</th>
             <th>Amount</th>
             <th>Fee</th>
@@ -65,6 +66,9 @@
           <tbody>
             {{#each addressTx}}
             <tr>
+              <td>
+                <div class="unbreakable">{{ts}}</div>
+              </td>
               <td>
                 <div class="ui label {{color}}">{{this.transaction.tx.transactionType}}</div>
               </td>
@@ -82,6 +86,21 @@
             </tr>
             {{/each}}
           </tbody>
+          <tfoot>
+              <tr><th colspan="7">
+                <div class="ui right floated pagination menu">
+                  <a qrl-data="back" class="icon item">
+                    <i qrl-data="back" class="left chevron icon"></i>
+                  </a>
+                  {{#each pages}}
+                  <a class="item">{{this.number}}</a>
+                  {{/each}}
+                  <a qrl-data="forward" class="icon item">
+                    <i qrl-data="forward" class="right chevron icon"></i>
+                  </a>
+                </div>
+              </th>
+            </tr></tfoot>
         </table>
         <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
         <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
