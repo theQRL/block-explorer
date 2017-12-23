@@ -28,30 +28,17 @@ const txResultsRefactor = (res) => {
       output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-8
     }
 
-    if (output.transaction.tx.transfer) {
+    if (output.transaction.tx) {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
+      output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+      output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
     }
 
     if (output.transaction.tx.token) {
-      // output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-      // output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-      // output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
+      // TODO: token data refactoring
     }
-
-    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-  }
-
-  if (output.transaction.tx) {
-    output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
-    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-    output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
-    output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
-    output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-    output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
   }
 
   return output
