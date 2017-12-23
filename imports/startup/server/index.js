@@ -225,6 +225,7 @@ Meteor.methods({
 
   addressTransactions(targets) {
     check(targets, Array)
+    // TODO: throw an error if greater than 10
     const result = []
     targets.forEach((arr) => {
       const req = { query: Buffer.from(arr.txhash, 'hex') }
