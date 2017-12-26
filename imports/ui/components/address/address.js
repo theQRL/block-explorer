@@ -192,6 +192,13 @@ Template.address.helpers({
     }
     return ''
   },
+  isActive() {
+    let ret = ''
+    if (this.number === Session.get('active')) {
+      ret = 'active'
+    }
+    return ret
+  },
 })
 
 Template.address.events({
@@ -212,6 +219,7 @@ Template.address.events({
   },
   'click .pagination': (event) => {
     let b = 0
+    Session.set('addressTransactions', {})
     if (parseInt(event.target.text, 10)) {
       b = parseInt(event.target.text, 10)
       Session.set('active', b)
