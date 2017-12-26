@@ -47,96 +47,121 @@ const errorCallback = (error, message, alert) => {
 }
 
 const getAddressState = (request, callback) => {
-  try {
-    qrlClient.API.GetAddressState(request, (error, response) => {
-      if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
-        callback(myError, null)
-      } else {
-        // server side buffering being added here
-        // if (!(Addresses.findOne({ Address: response.state.address }))) {
-        //   console.log('Going to add this one...')
-        //   Addresses.insert({ Address: response.state.address })
-        // }
-        callback(null, response)
-      }
-    })
-  } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+  if (qrlClient.length !== 0) {
+    try {
+      qrlClient.API.GetAddressState(request, (error, response) => {
+        if (error) {
+          const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
+          callback(myError, null)
+        } else {
+          // server side buffering being added here
+          // if (!(Addresses.findOne({ Address: response.state.address }))) {
+          //   console.log('Going to add this one...')
+          //   Addresses.insert({ Address: response.state.address })
+          // }
+          callback(null, response)
+        }
+      })
+    } catch (error) {
+      const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+      callback(myError, null)
+    }
+  } else {
+    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
     callback(myError, null)
   }
 }
 
 const getLatestData = (request, callback) => {
-  try {
-    qrlClient.API.GetLatestData(request, (error, response) => {
-      if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/getLatestData** ')
-        callback(myError, null)
-      } else {
-        callback(null, response)
-      }
-    })
-  } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+  if (qrlClient.length !== 0) {
+    try {
+      qrlClient.API.GetLatestData(request, (error, response) => {
+        if (error) {
+          const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/getLatestData** ')
+          callback(myError, null)
+        } else {
+          callback(null, response)
+        }
+      })
+    } catch (error) {
+      const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+      callback(myError, null)
+    }
+  } else {
+    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
     callback(myError, null)
   }
 }
 
 const getStats = (request, callback) => {
-  try {
-    qrlClient.API.GetStats({}, (error, response) => {
-      if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetStats', '**ERROR/getStats** ')
-        callback(myError, null)
-      } else {
-        callback(null, response)
-      }
-    })
-  } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+  if (qrlClient.length !== 0) {
+    try {
+      qrlClient.API.GetStats({}, (error, response) => {
+        if (error) {
+          const myError = errorCallback(error, 'Cannot access API/GetStats/a', '**ERROR/getStats/a** ')
+          callback(myError, null)
+        } else {
+          callback(null, response)
+        }
+      })
+    } catch (error) {
+      const myError = errorCallback(error, 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
+      callback(myError, null)
+    }
+  } else {
+    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
     callback(myError, null)
   }
 }
 
 const getStakers = (request, callback) => {
-  try {
-    qrlClient.API.GetStakers(request, (error, response) => {
-      if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers** ')
-        callback(myError, null)
-      } else {
-        const currentStakers = []
-        response.stakers.forEach((staker) => {
-          currentStakers.push({
-            address: ab2str(staker.address_state.address),
-            balance: staker.address_state.balance / 100000000,
-            nonce: staker.address_state.nonce,
-            hash_terminator: staker.terminator_hash.toString('hex'),
+  if (qrlClient.length !== 0) {
+    try {
+      qrlClient.API.GetStakers(request, (error, response) => {
+        if (error) {
+          const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers** ')
+          callback(myError, null)
+        } else {
+          const currentStakers = []
+          response.stakers.forEach((staker) => {
+            currentStakers.push({
+              address: ab2str(staker.address_state.address),
+              balance: staker.address_state.balance / 100000000,
+              nonce: staker.address_state.nonce,
+              hash_terminator: staker.terminator_hash.toString('hex'),
+            })
           })
-        })
-        callback(null, currentStakers)
-      }
-    })
-  } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers**')
+          callback(null, currentStakers)
+        }
+      })
+    } catch (error) {
+      const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers**')
+      callback(myError, null)
+    }
+  } else {
+    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
     callback(myError, null)
   }
 }
 
 const getObject = (request, callback) => {
-  try {
-    qrlClient.API.GetObject(request, (error, response) => {
-      if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
-        callback(myError, null)
-      } else {
-        // console.log(response)
-        callback(null, response)
-      }
-    })
-  } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+  if (qrlClient.length !== 0) {
+    try {
+      qrlClient.API.GetObject(request, (error, response) => {
+        if (error) {
+          const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+          callback(myError, null)
+        } else {
+          // console.log(response)
+          callback(null, response)
+        }
+      })
+    } catch (error) {
+      const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
+      callback(myError, null)
+    }
+  } else {
+    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
     callback(myError, null)
   }
 }
