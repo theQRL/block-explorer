@@ -22,13 +22,13 @@ const txResultsRefactor = (res) => {
     output.transaction.tx.addr_to = ''
     output.transaction.tx.amount = ''
 
-    if (output.transaction.coinbase) {
+    if (output.transaction.tx.transactionType === 'coinbase') {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-8
     }
 
-    if (output.transaction.tx) {
+    if (output.transaction.tx.transactionType === 'transfer') {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
