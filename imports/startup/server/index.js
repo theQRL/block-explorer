@@ -261,10 +261,14 @@ Meteor.methods({
     // TODO: throw an error if greater than 10
     const result = []
     targets.forEach((arr) => {
-      const req = { query: Buffer.from(arr.txhash, 'hex') }
-      const response = Meteor.wrapAsync(getObject)(req)
-      response.txhash = arr.txhash
-      result.push(response)
+      try {
+        const req = { query: Buffer.from(arr.txhash, 'hex') }
+        const response = Meteor.wrapAsync(getObject)(req)
+        response.txhash = arr.txhash
+        result.push(response)
+      } catch (error) {
+        throw new Meteor.Error('270', error)
+      }
     })
     return result
   },
