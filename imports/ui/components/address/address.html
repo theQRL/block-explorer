@@ -86,21 +86,27 @@
             </tr>
             {{/each}}
           </tbody>
+          {{#if pagination}}
           <tfoot>
               <tr><th colspan="7">
                 <div class="ui right floated pagination menu">
+                  {{#if pback}}
                   <a qrl-data="back" class="icon item">
                     <i qrl-data="back" class="left chevron icon"></i>
                   </a>
+                  {{/if}}
                   {{#each pages}}
                   <a class="item {{isActive}}">{{this.number}}</a>
                   {{/each}}
+                  {{#if pforward}}
                   <a qrl-data="forward" class="icon item">
                     <i qrl-data="forward" class="right chevron icon"></i>
                   </a>
+                  {{/if}}
                 </div>
               </th>
             </tr></tfoot>
+            {{/if}}
         </table>
         <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
         <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>

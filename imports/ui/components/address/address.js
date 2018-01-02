@@ -48,27 +48,29 @@ const addressTransactionsRefactor = (res) => {
     const transactions = []
     output.forEach((value) => {
       const edit = value
-      edit.transaction.header.hash_header = Buffer.from(edit.transaction.header.hash_header).toString('hex')
-      edit.transaction.header.hash_header_prev = Buffer.from(edit.transaction.header.hash_header_prev).toString('hex')
-      edit.transaction.header.hash_reveal = Buffer.from(edit.transaction.header.hash_reveal).toString('hex')
-      edit.transaction.header.merkle_root = Buffer.from(edit.transaction.header.merkle_root).toString('hex')
-      edit.transaction.header.stake_selector = ab2str(edit.transaction.header.stake_selector)
-      edit.transaction.tx.addr_from = ab2str(edit.transaction.tx.addr_from)
-      edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
-      edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
-      edit.transaction.tx.transaction_hash = Buffer.from(edit.transaction.tx.transaction_hash).toString('hex')
-      if (edit.transaction.tx.coinbase) {
-        edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
-        edit.transaction.tx.coinbase.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
-        edit.transaction.tx.coinbase.amount *= 1e-8
-        edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
-      }
-      if (edit.transaction.tx.transfer) {
-        edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
-        edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
-        edit.transaction.tx.transfer.amount *= 1e-8
-        edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
-        edit.transaction.tx.transfer.fee *= 1e-8
+      if (edit.found) {
+        edit.transaction.header.hash_header = Buffer.from(edit.transaction.header.hash_header).toString('hex')
+        edit.transaction.header.hash_header_prev = Buffer.from(edit.transaction.header.hash_header_prev).toString('hex')
+        edit.transaction.header.hash_reveal = Buffer.from(edit.transaction.header.hash_reveal).toString('hex')
+        edit.transaction.header.merkle_root = Buffer.from(edit.transaction.header.merkle_root).toString('hex')
+        edit.transaction.header.stake_selector = ab2str(edit.transaction.header.stake_selector)
+        edit.transaction.tx.addr_from = ab2str(edit.transaction.tx.addr_from)
+        edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
+        edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
+        edit.transaction.tx.transaction_hash = Buffer.from(edit.transaction.tx.transaction_hash).toString('hex')
+        if (edit.transaction.tx.transactionType === 'coinbase') {
+          edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
+          edit.transaction.tx.coinbase.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
+          edit.transaction.tx.coinbase.amount *= 1e-8
+          edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
+        }
+        if (edit.transaction.tx.transactionType === 'transfer') {
+          edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
+          edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
+          edit.transaction.tx.transfer.amount *= 1e-8
+          edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
+          edit.transaction.tx.transfer.fee *= 1e-8
+        }
       }
       transactions.push(edit)
     })
@@ -119,7 +121,7 @@ const renderAddressBlock = () => {
           pages.push({
             number: pages.length + 1,
             from: ((pages.length + 1) * 10) + 1,
-            to: ((pages.lenth + 1) * 10) + 10,
+            to: ((pages.length + 1) * 10) + 10,
           })
         }
         Session.set('pages', pages)
@@ -146,8 +148,18 @@ Template.address.helpers({
   },
   pages() {
     let ret = []
+    const active = Session.get('active')
     if (Session.get('pages').length > 0) {
       ret = Session.get('pages')
+      if ((active - 5) <= 0) {
+        ret = ret.slice(0, 9)
+      } else {
+        if ((active + 10) > ret.length) {
+          ret = ret.slice(ret.length - 10, ret.length)
+        } else {
+          ret = ret.slice(active - 5, active + 4)
+        }
+      }
     }
     return ret
   },
@@ -164,8 +176,12 @@ Template.address.helpers({
   ts() {
     let x = ''
     if (Session.get('addressTransactions').length > 0) {
-      if (moment.unix(this.transaction.header.timestamp.seconds).isValid()) {
-        x = moment.unix(this.transaction.header.timestamp.seconds)
+      if (this.found) {
+        if (moment.unix(this.transaction.header.timestamp.seconds).isValid()) {
+          x = moment.unix(this.transaction.header.timestamp.seconds)
+        }
+      } else {
+        x = 'Unconfirmed Tx'
       }
     }
     return x
@@ -181,21 +197,45 @@ Template.address.helpers({
     }
   },
   color() {
-    if (this.transaction.tx.transactionType === 'coinbase') {
-      return 'teal'
+    let ret = ''
+    if (this.found) {
+      if (this.transaction.tx.transactionType === 'coinbase') {
+        ret = 'teal'
+      }
+      if (this.transaction.tx.transactionType === 'stake') {
+        ret = 'red'
+      }
+      if (this.transaction.tx.transactionType === 'transfer') {
+        ret = 'yellow'
+      }
     }
-    if (this.transaction.tx.transactionType === 'stake') {
-      return 'red'
-    }
-    if (this.transaction.tx.transactionType === 'transfer') {
-      return 'yellow'
-    }
-    return ''
+    return ret
   },
   isActive() {
     let ret = ''
     if (this.number === Session.get('active')) {
       ret = 'active'
+    }
+    return ret
+  },
+  pback() {
+    let ret = false
+    if (Session.get('active') !== 1) {
+      ret = true
+    }
+    return ret
+  },
+  pforward() {
+    let ret = false
+    if (Session.get('active') !== Session.get('pages').length) {
+      ret = true
+    }
+    return ret
+  },
+  pagination() {
+    let ret = false
+    if (Session.get('pages').length > 1) {
+      ret = true
     }
     return ret
   },
