@@ -10,8 +10,7 @@ const blockResultsRefactor = (res) => {
     output.block.header.hash_header = Buffer.from(output.block.header.hash_header).toString('hex')
     output.block.header.hash_header_prev = Buffer.from(output.block.header.hash_header_prev).toString('hex')
     output.block.header.merkle_root = Buffer.from(output.block.header.merkle_root).toString('hex')
-    output.block.header.hash_reveal = Buffer.from(output.block.header.hash_reveal).toString('hex')
-    output.block.header.stake_selector = ab2str(output.block.header.stake_selector)
+    output.block.header.mining_nonce = output.block.header.mining_nonce // Missing in template
 
     // transactions
     const transactions = []
@@ -30,19 +29,6 @@ const blockResultsRefactor = (res) => {
       transactions.push(adjusted)
     })
     output.block.transactions = transactions
-
-    // votes
-    const votes = []
-    output.block.vote.forEach((value) => {
-      const adjusted = value
-      adjusted.addr_from = ab2str(adjusted.addr_from)
-      adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
-      adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
-      adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
-      adjusted.vote.hash_header = Buffer.from(adjusted.vote.hash_header).toString('hex')
-      votes.push(adjusted)
-    })
-    output.block.vote = votes
   }
   return output
 }
@@ -82,6 +68,9 @@ Template.block.helpers({
   block_reward() {
     const rewardBlock = Session.get('block').block.header.reward_block
     return rewardBlock * 1.0e-8
+  },
+  mining_nonce() {
+    return Session.get('block').block.header.mining_nonce
   },
   ts() {
     try {
