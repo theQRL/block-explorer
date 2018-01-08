@@ -21,14 +21,6 @@ const addressResultsRefactor = (res) => {
     })
     output.state.transactions = transactions
 
-    // pubhashes
-    const pubhashes = []
-    output.state.pubhashes.forEach((value) => {
-      const adjusted = Buffer.from(value).toString('hex')
-      pubhashes.push(adjusted)
-    })
-    output.state.pubhashes = pubhashes
-
     // txhashes
     const transactionHashes = []
     output.state.transaction_hashes.forEach((value) => {
@@ -51,9 +43,7 @@ const addressTransactionsRefactor = (res) => {
       if (edit.found) {
         edit.transaction.header.hash_header = Buffer.from(edit.transaction.header.hash_header).toString('hex')
         edit.transaction.header.hash_header_prev = Buffer.from(edit.transaction.header.hash_header_prev).toString('hex')
-        edit.transaction.header.hash_reveal = Buffer.from(edit.transaction.header.hash_reveal).toString('hex')
         edit.transaction.header.merkle_root = Buffer.from(edit.transaction.header.merkle_root).toString('hex')
-        edit.transaction.header.stake_selector = ab2str(edit.transaction.header.stake_selector)
         edit.transaction.tx.addr_from = ab2str(edit.transaction.tx.addr_from)
         edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
         edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
