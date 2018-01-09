@@ -14,8 +14,6 @@ const txResultsRefactor = (res) => {
     output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
     output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
     output.transaction.header.merkle_root = Buffer.from(output.transaction.header.merkle_root).toString('hex')
-    output.transaction.header.hash_reveal = Buffer.from(output.transaction.header.hash_reveal).toString('hex')
-    output.transaction.header.stake_selector = ab2str(output.transaction.header.stake_selector)
 
     output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
     output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
