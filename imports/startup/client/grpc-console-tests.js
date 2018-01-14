@@ -27,14 +27,14 @@ Meteor.call('getObject', req, (err, res) => {
 })
 
 req = {
-  query: Buffer.from(('1').toString()),
+  query: Buffer.from(('0').toString()),
 }
 Meteor.call('getObject', req, (err, res) => {
   if (err) {
-    console.log('GET BLOCK 1: - **ERROR**')
+    console.log('GET BLOCK 0: - **ERROR**')
     console.log(err.message)
   } else {
-    console.log('GET BLOCK 1:')
+    console.log('GET BLOCK 0:')
     console.log(res)
   }
 })
@@ -84,25 +84,25 @@ Meteor.call('getAddressState', req, (err, res) => {
 })
 
 
-req = { filter: 'CURRENT', offset: 0, quantity: 5 }
-Meteor.call('stakers', req, (err, res) => {
-  if (err) {
-    console.log('CURRENT STAKERS: - **ERROR**')
-    console.log(err.message)
-  } else {
-    console.log('CURRENT STAKERS:')
-    console.log(res)
-  }
-})
+// req = { filter: 'CURRENT', offset: 0, quantity: 5 }
+// Meteor.call('stakers', req, (err, res) => {
+//   if (err) {
+//     console.log('CURRENT STAKERS: - **ERROR**')
+//     console.log(err.message)
+//   } else {
+//     console.log('CURRENT STAKERS:')
+//     console.log(res)
+//   }
+// })
 
 
-req = { filter: 'NEXT', offset: 0, quantity: 5 }
-Meteor.call('stakers', req, (err, res) => {
-  if (err) {
-    console.log('NEXT STAKERS: - **ERROR**')
-    console.log(err.message)
-  } else {
-    console.log('NEXT STAKERS:')
-    console.log(res)
-  }
-})
+// req = { filter: 'NEXT', offset: 0, quantity: 5 }
+// Meteor.call('stakers', req, (err, res) => {
+//   if (err) {
+//     console.log('NEXT STAKERS: - **ERROR**')
+//     console.log(err.message)
+//   } else {
+//     console.log('NEXT STAKERS:')
+//     console.log(res)
+//   }
+// })
