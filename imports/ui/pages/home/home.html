@@ -1,13 +1,17 @@
 <template name="appHome">
   <div class="ui stackable grid">
     <div class="row">
+      <div class="sixteen wide column">
       <div class="ui segment">
         {{> status}}
       </div>
     </div>
+  </div>
     <div class="row">
       <div class="eight wide column">
-        {{> lastblocks}}
+        <div class="ui segment">
+          {{> lastblocks}}
+        </div>
       </div>
       <div class="eight wide column">
         {{> lasttx}}

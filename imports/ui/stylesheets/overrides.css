@@ -9,13 +9,15 @@ body {
 .ui.menu {
     margin-bottom: 0;
 }
-
+.outer {
+    padding: 10px!important;
+}
 body.pushable {
     background: #fff !important;
 }
 
 div.pusher {
-    background: #d8d8d8 !important;
+    /*background: #d8d8d8 !important;*/
 }
 
 @media (max-width: 519px) {
@@ -75,3 +77,7 @@ td .unbreakable {
 .ui.inverted.segment, .ui.primary.inverted.segment {
 background: #1d2951;
     }
+tbody {
+    font-family: Hack, monospace;
+    font-size: 0.8em;
+}
