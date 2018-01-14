@@ -10,7 +10,8 @@ const blockResultsRefactor = (res) => {
     output.block.header.hash_header = Buffer.from(output.block.header.hash_header).toString('hex')
     output.block.header.hash_header_prev = Buffer.from(output.block.header.hash_header_prev).toString('hex')
     output.block.header.merkle_root = Buffer.from(output.block.header.merkle_root).toString('hex')
-    output.block.header.mining_nonce = output.block.header.mining_nonce // Missing in template
+    // output.block.header.mining_nonce = output.block.header.mining_nonce
+    output.block.header.PK = Buffer.from(output.block.header.PK).toString('hex')
 
     // transactions
     const transactions = []
@@ -22,6 +23,7 @@ const blockResultsRefactor = (res) => {
       adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
       if (value.transactionType === 'coinbase') {
         adjusted.coinbase.addr_to = ab2str(adjusted.coinbase.addr_to)
+        adjusted.coinbase.headerhash = Buffer.from(adjusted.coinbase.headerhash).toString('hex')
       }
       if (value.transactionType === 'transfer') {
         adjusted.transfer.addr_to = ab2str(adjusted.transfer.addr_to)
