@@ -1,63 +1,70 @@
 <template name="lastblocks">
-  <h1>Latest blocks <i class="ui refresh red link icon"></i></h1> {{#with lastblocks}} {{#if error}}
-  <div class="ui negative message">
-    <i class="close icon"></i>
-    <div class="header">
-      Error reading last blocks
-    </div>
-    <p>{{error.error}} : {{error.reason}}</p>
-  </div>
-{{else}}
-  <div class="ui raised segments">
+  <style type="text/css">
+.ui.horizontal.list > .item {
+  margin-left: 0em;
+  margin-right: 1em;
+}
+.hack {
+  font-family: Hack, monospace;
+}
+.item {
+    overflow: hidden;
+  word-break: break-word;
+}
+.items > .item > .content:hover {
+  background: #F8F8F8;
+}
+  </style>
+  <div class="ui fluid container outer">
+    <div class="ui header">
+      <h1>Latest blocks <i class="ui refresh red link icon"></i></h1>
+      </div>
+      {{#with lastblocks}} {{#if error}}
+        <div class="ui negative message">
+          <i class="close icon"></i>
+          <div class="header">
+            Error reading last blocks
+          </div>
+          <p>{{error.error}} : {{error.reason}}</p>
+        </div>
+      {{else}}
+  <div class="spacer"></div>
+  <div class="ui dividied items">
     {{#each lastblocks.blockheaders}}
-      <div class="ui segment">
-        <div class="content">
-          <a class="ui primary button" href="/block/{{this.header.block_number}}">
-            <i class="cube icon"></i> {{this.header.block_number}}
-            <i class="right chevron icon"></i>
-          </a>
-          <div class="meta">
-            <span class="timestamp">{{ts}}</span>
+      <div class="item" data-block="{{this.header.block_number}}">
+    <div class="content">
+      <a href="/block/{{this.header.block_number}}" class="header">{{this.header.block_number}}</a>
+      <div class="meta">
+        <span>{{ts}}</span>
+      </div>
+      <div class="ui horizontal list">
+        <div class="item">
+          <i class="ui large exchange icon"></i>
+          <div class="content">
+            <div class="header">Transactions</div>
+            <span class="hack">{{numberTransactions}}</span>
           </div>
-
-          <div class="description">
-            <div class="ui horizontal list">
-              <div class="item">
-                <div class="content">
-                  <div class="header">BLOCK REWARD</div>
-                  <div class="ui yellow label">{{reward(this.header.reward_block)}}
-                    <div class="detail">QRL</div>
-                  </div>
-                </div>
-              </div>
-              <div class="item">
-                <div class="content">
-                  <div class="header">TRANSACTIONS</div>
-                  <div class="ui red label">{{numberTransactions}}</div>
-                </div>
-              </div>
-              <!--
-              <div class="item">
-              <div class="content">
-                <div class="header">BLOCK INTERVAL</div>
-                <div class="ui label">{{interval}}</div>
-              </div>
-              </div> -->
-            </div>
-            <div class="ui horizontal list">
-              <div class="item">
-                <div class="content">
-                  <div class="header">BLOCKHASH</div>
-                  <div class="unbreakable">{{this.header.hash_header_hex}}</div>
-                </div>
-              </div>
-            </div>
+        </div>
+        <div class="item">
+          <i class="ui large database icon"></i>
+          <div class="content">
+            <div class="header">Reward</div>
+            <span class="hack">{{reward(this.header.reward_block)}}</span>
           </div>
-          <div class="extra">
+        </div>
+        <div class="item">
+          <i class="ui large privacy icon"></i>
+          <div class="content">
+            <div class="header">Blockhash</div>
+            <span class="hack">{{this.header.hash_header_hex}}</span>
           </div>
+        </div>
+      </div>
+   
         </div>
       </div>
     {{/each}}
   </div>
 {{/if}} {{/with}}
+</div>
 </template>

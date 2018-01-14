@@ -73,4 +73,8 @@ Template.lastblocks.events({
   'click .close': () => {
     $('.message').hide()
   },
+  'click .item': (event) => {
+    const blockTarget = $(event.target).parentsUntil('.items').closest('.item[data-block]').attr('data-block')
+    FlowRouter.go(`/block/${blockTarget}`)
+  },
 })
