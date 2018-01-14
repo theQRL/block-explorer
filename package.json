@@ -13,7 +13,6 @@
     "meteor-babel-helpers": "0.0.3",
     "meteor-node-stubs": "^0.3.2",
     "path": "^0.12.7",
-    "qrllib": "^0.2.9",
     "tmp": "0.0.33"
   },
   "private": true,
