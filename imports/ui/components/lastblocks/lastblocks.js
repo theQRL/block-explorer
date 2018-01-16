@@ -37,6 +37,10 @@ Template.lastblocks.helpers({
     const x = moment.unix(this.header.timestamp.seconds)
     return moment(x).format('HH:mm D MMM YYYY')
   },
+  tsReadable() {
+    const x = moment.unix(this.header.timestamp.seconds)
+    return moment(x).fromNow()
+  },
   interval() {
     const x = Math.round(this.block_interval)
     return `${x} seconds`

@@ -24,6 +24,16 @@ div.pusher {
     .pusher {
         margin-top: 40px;
     }
+    .ui.segment {
+        padding: 0em;
+        padding-top: 0.5em;
+        padding-bottom: 0.5em;
+    }
+    .outer {
+        padding: 0px!important;
+        padding-top: 5px!important;
+        padding-bottom: 5px!important;
+    }
 }
 
 .ui.label {
@@ -80,4 +90,28 @@ background: #1d2951;
 tbody {
     font-family: Hack, monospace;
     font-size: 0.8em;
+}
+.container-header {
+  background: #1d2951;
+  color: #fff;
+  font-weight: 300;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
+}
+.ui.horizontal.list > .item {
+  margin-left: 0em;
+  margin-right: 1em;
+}
+.hack {
+  font-family: Hack, monospace;
+}
+.block-item {
+    overflow: hidden;
+  word-break: break-word;
+}
+.items > .block-item > .content:hover {
+  background: #F8F8F8;
+}
+.float-right {
+    float: right;
 }

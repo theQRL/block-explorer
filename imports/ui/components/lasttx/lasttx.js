@@ -49,8 +49,10 @@ Template.lasttx.helpers({
     return moment(x).format('HH:mm D MMM YYYY')
   },
   zeroCheck() {
-    const x = Session.get('lasttx')
-    return x.length === 0
+    let ret = false
+    const x = Session.get('lasttx').transactions
+    if (x) { if (x.length === 0) { ret = true } }
+    return ret
   },
 })
 
