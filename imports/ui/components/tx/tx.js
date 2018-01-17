@@ -44,8 +44,6 @@ const txResultsRefactor = (res) => {
       edit.address = ab2str(edit.address)
       balances.push(edit)
     })
-    let txType = output.transaction.tx.type
-    if (output.transaction.tx.transfer_token === null) { txType = 'CREATE TOKEN' }
     output.transaction.explorer = {
       from: ab2str(output.transaction.tx.addr_from),
       to: ab2str(output.transaction.tx.addr_from),
@@ -55,7 +53,19 @@ const txResultsRefactor = (res) => {
       name: ab2str(output.transaction.tx.token.name),
       owner: ab2str(output.transaction.tx.token.owner),
       initialBalances: balances,
-      type: txType,
+      type: 'CREATE TOKEN',
+    }
+  }
+  if (output.transaction.tx.transactionType === 'transfer_token') {
+    output.transaction.explorer = {
+      from: ab2str(output.transaction.tx.addr_from),
+      to: ab2str(output.transaction.tx.transfer_token.addr_to),
+      signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
+      publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
+      token_txhash: Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex'),
+      amount: output.transaction.tx.transfer_token.amount,
+      fee: output.transaction.tx.transfer_token.fee,
+      type: 'TRANSFER TOKEN',
     }
   }
   return output
@@ -141,6 +151,12 @@ Template.tx.helpers({
   },
   isToken() {
     if (this.explorer.type === 'CREATE TOKEN') {
+      return true
+    }
+    return false
+  },
+  isTokenTransfer() {
+    if (this.explorer.type === 'TRANSFER TOKEN') {
       return true
     }
     return false

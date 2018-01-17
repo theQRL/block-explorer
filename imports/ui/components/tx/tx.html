@@ -36,12 +36,19 @@
                 {{#if isToken}}
                 <strong>{{explorer.name}} ({{explorer.symbol}})</strong><br>owned by:<br><a href="/a/{{explorer.owner}}">{{explorer.owner}}</a>
                 {{else}}
+                {{#if isTokenTransfer}}
+                <div class="value">{{explorer.amount}}</div>
+                Tokens transferred
+                <div class="label">Token creation transaction: </div>
+                <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
+                {{else}}
                 <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
                   {{tx.tx.amount}}
                 </div>
                 <div class="label">
                   Quanta
                 </div>
+                {{/if}}
                 {{/if}}
               </div>
             </div>
