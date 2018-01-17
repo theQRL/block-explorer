@@ -72,7 +72,9 @@ const addressTransactionsRefactor = (res) => {
           edit.transaction.tx.transfer.fee *= 1e-8
         }
       }
-      transactions.push(edit)
+      if (edit.transaction.header) {
+        transactions.push(edit) // only push transactions that have a header (i.e. are confirmed)
+      }
     })
     output = transactions
   }
