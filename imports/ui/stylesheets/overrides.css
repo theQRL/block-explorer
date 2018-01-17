@@ -75,3 +75,6 @@ td .unbreakable {
 .ui.inverted.segment, .ui.primary.inverted.segment {
 background: #1d2951;
     }
+    .hack {
+        font-family: Hack, monospace;
+    }

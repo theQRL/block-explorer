@@ -12,6 +12,13 @@
         <p>{{tx.error}}</p>
       </div>
     {{else}}
+      {{#if tx.notFound}}
+      <div class="ui raised fluid card">
+        <div class="content">
+          <div class="header">Error</div>
+      Transaction <span class="hack">{{tx.parameter}}</span> not found
+    </div></div>
+      {{else}}
       <div class="ui raised fluid card">
         <div class="content">
           <div class="header">Transaction
@@ -71,6 +78,7 @@
           </div>
         </div>
       </div>
+      {{/if}}
     {{/if}}
   {{/with}}
 </template>

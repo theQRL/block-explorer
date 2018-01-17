@@ -10,6 +10,7 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 const txResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
+  console.log(res)
   if (res.transaction.header) {
     output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
     output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
@@ -35,12 +36,24 @@ const txResultsRefactor = (res) => {
       output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
       output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
     }
-
-    if (output.transaction.tx.token) {
-      // TODO: token data refactoring
-    }
   }
-
+  if (output.transaction.tx.transactionType === 'token') {
+    output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
+    output.transaction.tx.addr_to = ab2str(output.transaction.tx.addr_to)
+    output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
+    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+    output.transaction.tx.token.symbol = ab2str(output.transaction.tx.token.symbol)
+    output.transaction.tx.token.name = ab2str(output.transaction.tx.token.name)
+    output.transaction.tx.token.owner = ab2str(output.transaction.tx.token.owner)
+    const balances = []
+    output.transaction.tx.token.initial_balances.forEach((value) => {
+      const edit = value
+      edit.address = ab2str(edit.address)
+      balances.push(edit)
+    })
+    output.transaction.tx.token.initial_balances = balances
+  }
   return output
 }
 
@@ -51,7 +64,7 @@ const renderTxBlock = () => {
       if (err) {
         Session.set('txhash', { error: err, id: txId })
       } else {
-        Session.set('txhash', txResultsRefactor(res))
+        if (res.found === true) { Session.set('txhash', txResultsRefactor(res)) } else { Session.set('txhash', res) } /* eslint no-lonely-if:0 */
       }
     })
     Meteor.call('QRLvalue', (err, res) => {
@@ -80,7 +93,10 @@ Template.tx.onCreated(() => {
 
 Template.tx.helpers({
   tx() {
-    return Session.get('txhash').transaction
+    if (Session.get('txhash').found === true) {
+      return Session.get('txhash').transaction
+    }
+    return { notFound: true, parameter: FlowRouter.getParam('txId') }
   },
   header() {
     return Session.get('txhash').transaction.header
