@@ -18,9 +18,8 @@ const txResultsRefactor = (res) => {
     output.transaction.header.hash_reveal = Buffer.from(output.transaction.header.hash_reveal).toString('hex')
     output.transaction.header.stake_selector = ab2str(output.transaction.header.stake_selector)
 
-    output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
     output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
-    output.transaction.tx.addr_to = ''
+    // output.transaction.tx.addr_to = ''
     output.transaction.tx.amount = ''
 
     if (output.transaction.tx.transactionType === 'coinbase') {
@@ -30,6 +29,7 @@ const txResultsRefactor = (res) => {
     }
 
     if (output.transaction.tx.transactionType === 'transfer') {
+      output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
@@ -38,21 +38,25 @@ const txResultsRefactor = (res) => {
     }
   }
   if (output.transaction.tx.transactionType === 'token') {
-    output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
-    output.transaction.tx.addr_to = ab2str(output.transaction.tx.addr_to)
-    output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
-    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-    output.transaction.tx.token.symbol = ab2str(output.transaction.tx.token.symbol)
-    output.transaction.tx.token.name = ab2str(output.transaction.tx.token.name)
-    output.transaction.tx.token.owner = ab2str(output.transaction.tx.token.owner)
     const balances = []
     output.transaction.tx.token.initial_balances.forEach((value) => {
       const edit = value
       edit.address = ab2str(edit.address)
       balances.push(edit)
     })
-    output.transaction.tx.token.initial_balances = balances
+    let txType = output.transaction.tx.type
+    if (output.transaction.tx.transfer_token === null) { txType = 'CREATE TOKEN' }
+    output.transaction.explorer = {
+      from: ab2str(output.transaction.tx.addr_from),
+      to: ab2str(output.transaction.tx.addr_from),
+      signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
+      publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
+      symbol: ab2str(output.transaction.tx.token.symbol),
+      name: ab2str(output.transaction.tx.token.name),
+      owner: ab2str(output.transaction.tx.token.owner),
+      initialBalances: balances,
+      type: txType,
+    }
   }
   return output
 }
@@ -134,6 +138,12 @@ Template.tx.helpers({
       return 'yellow'
     }
     return ''
+  },
+  isToken() {
+    if (this.explorer.type === 'CREATE TOKEN') {
+      return true
+    }
+    return false
   },
 })
 
