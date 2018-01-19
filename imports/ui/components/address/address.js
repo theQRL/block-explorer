@@ -10,6 +10,7 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 const addressResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
+  console.log(res)
   if (res.state) {
     // output.state.address = ab2str(output.state.address)
     output.state.txcount = output.state.transaction_hashes.length
@@ -23,11 +24,13 @@ const addressResultsRefactor = (res) => {
 
     // pubhashes
     const pubhashes = []
-    output.state.pubhashes.forEach((value) => {
-      const adjusted = Buffer.from(value).toString('hex')
-      pubhashes.push(adjusted)
-    })
-    output.state.pubhashes = pubhashes
+    if (output.state.pubhashes) {
+      output.state.pubhashes.forEach((value) => {
+        const adjusted = Buffer.from(value).toString('hex')
+        pubhashes.push(adjusted)
+      })
+      output.state.pubhashes = pubhashes
+    }
 
     // txhashes
     const transactionHashes = []
@@ -48,7 +51,7 @@ const addressTransactionsRefactor = (res) => {
     const transactions = []
     output.forEach((value) => {
       const edit = value
-      if (edit.found) {
+      if (edit.found === true) {
         edit.transaction.header.hash_header = Buffer.from(edit.transaction.header.hash_header).toString('hex')
         edit.transaction.header.hash_header_prev = Buffer.from(edit.transaction.header.hash_header_prev).toString('hex')
         edit.transaction.header.hash_reveal = Buffer.from(edit.transaction.header.hash_reveal).toString('hex')
@@ -71,9 +74,9 @@ const addressTransactionsRefactor = (res) => {
           edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
           edit.transaction.tx.transfer.fee *= 1e-8
         }
-      }
-      if (edit.transaction.header) {
-        transactions.push(edit) // only push transactions that have a header (i.e. are confirmed)
+        // if (edit.transaction.header) {
+          transactions.push(edit) // only push transactions that have a header (i.e. are confirmed)
+        // }
       }
     })
     output = transactions

@@ -6,6 +6,7 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 const blockResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
+  // console.log(res)
   if (res.block.header) {
     output.block.header.hash_header = Buffer.from(output.block.header.hash_header).toString('hex')
     output.block.header.hash_header_prev = Buffer.from(output.block.header.hash_header_prev).toString('hex')
@@ -56,7 +57,8 @@ const renderBlockBlock = (blockId) => {
         id: blockId,
       })
     } else {
-      Session.set('block', blockResultsRefactor(res))
+      // console.log(res)
+      if (res.found) { Session.set('block', blockResultsRefactor(res)) }
     }
   })
 }

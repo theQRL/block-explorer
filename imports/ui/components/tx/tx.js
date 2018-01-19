@@ -10,7 +10,7 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 const txResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
-  console.log(res)
+  // console.log(res)
   if (res.transaction.header) {
     output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
     output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
@@ -26,6 +26,11 @@ const txResultsRefactor = (res) => {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-8
+      output.transaction.explorer = {
+        from: '',
+        to: output.transaction.tx.addr_to,
+        type: 'TRANSFER',
+      }
     }
 
     if (output.transaction.tx.transactionType === 'transfer') {
@@ -35,6 +40,11 @@ const txResultsRefactor = (res) => {
       output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
       output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
       output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+      output.transaction.explorer = {
+        from: output.transaction.tx.addr_from,
+        to: output.transaction.tx.addr_to,
+        type: 'TRANSFER',
+      }
     }
   }
   if (output.transaction.tx.transactionType === 'token') {
@@ -107,10 +117,20 @@ Template.tx.onCreated(() => {
 
 Template.tx.helpers({
   tx() {
+    // console.log(Session.get('txhash'))
     if (Session.get('txhash').found === true) {
       return Session.get('txhash').transaction
     }
-    return { notFound: true, parameter: FlowRouter.getParam('txId') }
+    if (Session.get('txhash').found === false) {
+      return { notFound: true, parameter: FlowRouter.getParam('txId') }
+    }
+    return ''
+  },
+  notFound() {
+    if (Session.get('txhash').found === false) {
+      return true
+    }
+    return false
   },
   header() {
     return Session.get('txhash').transaction.header
