@@ -6,6 +6,7 @@ import tmp from 'tmp'
 import fs from 'fs'
 import { check } from 'meteor/check'
 import '/imports/api/index.js'
+import '/imports/startup/server/cron.js'
 
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
@@ -72,7 +73,7 @@ const getAddressState = (request, callback) => {
   }
 }
 
-const getLatestData = (request, callback) => {
+export const getLatestData = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
       qrlClient.API.GetLatestData(request, (error, response) => {
@@ -93,7 +94,7 @@ const getLatestData = (request, callback) => {
   }
 }
 
-const getStats = (request, callback) => {
+export const getStats = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
       qrlClient.API.GetStats({}, (error, response) => {
