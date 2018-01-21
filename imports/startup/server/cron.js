@@ -6,4 +6,4 @@ Meteor.setInterval(() => {
   const response = Meteor.wrapAsync(getLatestData)(request)
   Blocks.remove({})
   Blocks.insert(response)
-}, 30000)
+}, 3000)

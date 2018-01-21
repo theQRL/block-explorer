@@ -9,30 +9,23 @@ const addHex = (b) => {
 
 const sumValues = obj => Object.values(obj).reduce((a, b) => a + b)
 
-const renderLastBlocksBlock = () => {
-  const res = Blocks.findOne()
-  if (res) {
-    res.blockheaders = res.blockheaders.reverse()
-    const editedBlockheaders = []
-    res.blockheaders.forEach((bh) => {
-      editedBlockheaders.push(addHex(bh))
-    })
-    res.blockheaders = editedBlockheaders
-    Session.set('lastblocks', res)
-  }
-}
-
 Template.lastblocks.onCreated(() => {
   Session.set('lastblocks', {})
   Meteor.subscribe('blocks')
-  renderLastBlocksBlock()
 })
 
 Template.lastblocks.helpers({
   lastblocks() {
-    const x = Blocks.findOne()
-    x.blockheaders = x.blockheaders.reverse()
-    return x
+    const res = Blocks.findOne()
+    if (res) {
+      res.blockheaders = res.blockheaders.reverse()
+      const editedBlockheaders = []
+      res.blockheaders.forEach((bh) => {
+        editedBlockheaders.push(addHex(bh))
+      })
+      res.blockheaders = editedBlockheaders
+    }
+    return res
   },
   ts() {
     const x = moment.unix(this.header.timestamp.seconds)
@@ -71,10 +64,6 @@ Template.lastblocks.helpers({
 })
 
 Template.lastblocks.events({
-  'click .refresh': () => {
-    Session.set('lastblocks', {})
-    renderLastBlocksBlock()
-  },
   'click .close': () => {
     $('.message').hide()
   },
