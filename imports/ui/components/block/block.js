@@ -24,6 +24,8 @@ const blockResultsRefactor = (res) => {
       if (value.transactionType === 'coinbase') {
         adjusted.coinbase.addr_to = ab2str(adjusted.coinbase.addr_to)
         adjusted.coinbase.headerhash = Buffer.from(adjusted.coinbase.headerhash).toString('hex')
+        // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
+        adjusted.transfer = adjusted.coinbase
       }
       if (value.transactionType === 'transfer') {
         adjusted.transfer.addr_to = ab2str(adjusted.transfer.addr_to)
@@ -69,7 +71,7 @@ Template.block.helpers({
   },
   block_reward() {
     const rewardBlock = Session.get('block').block.header.reward_block
-    return rewardBlock * 1.0e-8
+    return rewardBlock * 1.0e-9
   },
   mining_nonce() {
     return Session.get('block').block.header.mining_nonce
@@ -108,13 +110,14 @@ Template.block.helpers({
   },
   amount() {
     if (this.transfer) {
-      return this.transfer.amount * 1e-8
+      return (this.transfer.amount * 1e-9).toFixed(9)
     }
     return ''
   },
   fee() {
     if (this.transfer) {
-      return this.transfer.fee * 1.0e-8
+      console.log('fee: ' + this.fee)
+      return this.fee
     }
     return ''
   },

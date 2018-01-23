@@ -23,19 +23,29 @@ const txResultsRefactor = (res) => {
     if (output.transaction.tx.transactionType === 'coinbase') {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
-      output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-8
+      output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-9
     }
 
     if (output.transaction.tx.transactionType === 'transfer') {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
+      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-9
       output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
       output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
     }
 
     if (output.transaction.tx.token) {
       // TODO: token data refactoring
+    }
+  } else {
+    if (res.transaction.tx) {
+      output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
+      output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
+      output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
+      output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
+      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-9
+      output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+      output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
     }
   }
 
@@ -92,6 +102,18 @@ Template.tx.helpers({
     } catch (e) {
       return 0
     }
+  },
+  amount() {
+    if (this.tx.coinbase) {
+      // FIXME: We need a unified way to format Quantas
+      return (this.tx.coinbase.amount * 1e-9).toFixed(9)
+    }
+    if (this.tx.transfer) {
+      // FIXME: We need a unified way to format Quantas
+      // return (this.tx.transfer.amount * 1e-9).toFixed(9)
+      return (this.tx.transfer.amount * 1e-9).toFixed(9)
+    }
+    return ''
   },
   confirmations() {
     const x = Session.get('status')

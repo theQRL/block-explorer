@@ -27,7 +27,7 @@ Meteor.call('getObject', req, (err, res) => {
 })
 
 req = {
-  query: Buffer.from(('0').toString()),
+  query: Buffer.from(('150').toString()),
 }
 Meteor.call('getObject', req, (err, res) => {
   if (err) {

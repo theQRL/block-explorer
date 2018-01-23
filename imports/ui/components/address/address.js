@@ -51,15 +51,15 @@ const addressTransactionsRefactor = (res) => {
         if (edit.transaction.tx.transactionType === 'coinbase') {
           edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
           edit.transaction.tx.coinbase.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
-          edit.transaction.tx.coinbase.amount *= 1e-8
+          edit.transaction.tx.coinbase.amount *= 1e-9
           edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
         }
         if (edit.transaction.tx.transactionType === 'transfer') {
           edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
           edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
-          edit.transaction.tx.transfer.amount *= 1e-8
+          edit.transaction.tx.transfer.amount *= 1e-9
           edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
-          edit.transaction.tx.transfer.fee *= 1e-8
+          edit.transaction.tx.transfer.fee *= 1e-9
         }
       }
       transactions.push(edit)
@@ -93,7 +93,7 @@ const renderAddressBlock = () => {
       } else {
         if (res) {
           res.state.address = ab2str(res.state.address)
-          res.state.balance *= 1e-8
+          res.state.balance *= 1e-9
           if (!(res.state.address)) {
             res.state.address = aId
           }
