@@ -1,26 +1,26 @@
 /* eslint no-console: 0 */
-/* global Addresses */
 // server-side startup
 import grpc from 'grpc'
 import tmp from 'tmp'
 import fs from 'fs'
 import { check } from 'meteor/check'
 import '/imports/api/index.js'
+import '/imports/startup/server/cron.js'
 
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
 //  import { QRLLIB } from 'qrllib/build/web-libjsqrl.js'
 
 // The address of the API node used
-const API_NODE_ADDRESS = '104.251.219.215:9009'
+let API_NODE_ADDRESS = '127.0.0.1:9009'
 
 // Create a temp file to store the qrl.proto file in
-const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
-const qrlClient = []
+let qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
+let qrlClient = []
 
 // Load qrlbase.proto and fetch current qrl.proto from node
-const baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
-const client = new baseGrpcObject.qrl.Base(API_NODE_ADDRESS, grpc.credentials.createInsecure())
+let baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
+let client = new baseGrpcObject.qrl.Base(API_NODE_ADDRESS, grpc.credentials.createInsecure())
 
 client.getNodeInfo({}, (err, res) => {
   if (err) {
@@ -72,7 +72,7 @@ const getAddressState = (request, callback) => {
   }
 }
 
-const getLatestData = (request, callback) => {
+export const getLatestData = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
       qrlClient.API.GetLatestData(request, (error, response) => {
@@ -93,7 +93,7 @@ const getLatestData = (request, callback) => {
   }
 }
 
-const getStats = (request, callback) => {
+export const getStats = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
       qrlClient.API.GetStats({}, (error, response) => {
@@ -126,7 +126,7 @@ const getStakers = (request, callback) => {
           response.stakers.forEach((staker) => {
             currentStakers.push({
               address: ab2str(staker.address_state.address),
-              balance: staker.address_state.balance / 100000000,
+              balance: staker.address_state.balance * 10e-9,
               nonce: staker.address_state.nonce,
               hash_terminator: staker.terminator_hash.toString('hex'),
             })
@@ -306,5 +306,35 @@ Meteor.methods({
     this.unblock()
     const response = Meteor.wrapAsync(getAddressState)(request)
     return response
+  },
+
+  // Switch node --> remove for production
+  cyyber(request) {
+    check(request, String)
+    API_NODE_ADDRESS = `${request}:9009`
+
+    // Create a temp file to store the qrl.proto file in
+    qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
+    qrlClient = []
+
+    // Load qrlbase.proto and fetch current qrl.proto from node
+    baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
+    client = new baseGrpcObject.qrl.Base(API_NODE_ADDRESS, grpc.credentials.createInsecure())
+
+    client.getNodeInfo({}, (err, res) => {
+      if (err) {
+        console.log(`Error fetching qrl.proto from ${API_NODE_ADDRESS}`)
+      } else {
+        fs.writeFile(qrlProtoFilePath, res.grpcProto, (FSerr) => {
+          if (FSerr) throw FSerr
+          const grpcObject = grpc.load(qrlProtoFilePath)
+          // Create area to store this grpc connection
+          qrlClient.push('API')
+          qrlClient.API = new grpcObject.qrl
+            .PublicAPI(API_NODE_ADDRESS, grpc.credentials.createInsecure())
+          console.log(`qrlClient.API loaded for ${API_NODE_ADDRESS}`)
+        })
+      }
+    })
   },
 })

@@ -1,3 +1,4 @@
+import { Blocks } from '/imports/api/index.js'
 import './lastblocks.html'
 
 const addHex = (b) => {
@@ -8,51 +9,40 @@ const addHex = (b) => {
 
 const sumValues = obj => Object.values(obj).reduce((a, b) => a + b)
 
-const renderLastBlocksBlock = () => {
-  Meteor.call('lastblocks', (err, res) => {
-    if (err) {
-      Session.set('lastblocks', { error: err })
-    } else {
+Template.lastblocks.onCreated(() => {
+  Session.set('lastblocks', {})
+  Meteor.subscribe('blocks')
+})
+
+Template.lastblocks.helpers({
+  lastblocks() {
+    const res = Blocks.findOne()
+    if (res) {
       res.blockheaders = res.blockheaders.reverse()
       const editedBlockheaders = []
       res.blockheaders.forEach((bh) => {
         editedBlockheaders.push(addHex(bh))
       })
       res.blockheaders = editedBlockheaders
-      Session.set('lastblocks', res)
     }
-  })
-}
-
-Template.lastblocks.onCreated(() => {
-  Session.set('lastblocks', {})
-  renderLastBlocksBlock()
-})
-
-Template.lastblocks.helpers({
-  lastblocks() {
-    return Session.get('lastblocks')
+    return res
   },
   ts() {
     const x = moment.unix(this.header.timestamp.seconds)
     return moment(x).format('HH:mm D MMM YYYY')
   },
+  tsReadable() {
+    const x = moment.unix(this.header.timestamp.seconds)
+    return moment(x).fromNow()
+  },
   interval() {
     const x = Math.round(this.block_interval)
     return `${x} seconds`
   },
-  votes_percent() {
-    if (this.header.block_number === 0) {
-      return 'N/A'
-    }
-    let vp = this.voted_weight / this.total_stake_weight
-    vp *= 100
-    return `${vp.toFixed(2)}%`
-  },
   reward(rew) {
     let r = 'Undetermined'
     try {
-      const x = parseFloat(rew) / 100000000
+      const x = parseFloat(rew) * 1e-9
       r = x
     } catch (e) {
       r = 'Error parsing API results'
@@ -74,11 +64,11 @@ Template.lastblocks.helpers({
 })
 
 Template.lastblocks.events({
-  'click .refresh': () => {
-    Session.set('lastblocks', {})
-    renderLastBlocksBlock()
-  },
   'click .close': () => {
     $('.message').hide()
+  },
+  'click .item': (event) => {
+    const blockTarget = $(event.target).parentsUntil('.items').closest('.item[data-block]').attr('data-block')
+    FlowRouter.go(`/block/${blockTarget}`)
   },
 })

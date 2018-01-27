@@ -17,17 +17,17 @@
       </h1>
       <div class="ui celled horizontal list">
         <div class="item"><strong>Transactions</strong> {{block.transactions.length}}</div>
-        <div class="item"><strong>Votes</strong> {{block.vote.length}}</div>
         <div class="item"><strong>Timestamp</strong> {{ts}}</div>
         <div class="item"><strong>Epoch</strong> {{header.epoch}}</div>
         <div class="item"><strong>Reward</strong> {{block_reward}} Quanta</div>
+        <div class="item"><strong>Mining Nonce</strong> {{mining_nonce}}</div>
       </div>
       <h3>Block transactions</h3>
       <table class="ui striped table">
         <thead>
         <th>Type</th>
-        <th>Amount</th>
-        <th>Fee</th>
+        <th>Amount (Quanta)</th>
+        <th>Fee (Shor)</th>
         <th>From</th>
         <th>To</th>
         <th>Txhash</th>
@@ -46,7 +46,7 @@
             <td><a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a></td>
             <td><a href="/tx/{{transaction_hash}}">{{transaction_hash}}</a></td>
             <td>{{public_key}}</td>
-            <td>{{this.ots_key}}</td>
+            <td>{{this.xmss_ots_index}}</td>
           </tr>
         {{/each}}
         </tbody>

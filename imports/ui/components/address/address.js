@@ -10,7 +10,6 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 const addressResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
-  console.log(res)
   if (res.state) {
     // output.state.address = ab2str(output.state.address)
     output.state.txcount = output.state.transaction_hashes.length
@@ -21,16 +20,6 @@ const addressResultsRefactor = (res) => {
       transactions.push({ txhash: Buffer.from(value).toString('hex') })
     })
     output.state.transactions = transactions
-
-    // pubhashes
-    const pubhashes = []
-    if (output.state.pubhashes) {
-      output.state.pubhashes.forEach((value) => {
-        const adjusted = Buffer.from(value).toString('hex')
-        pubhashes.push(adjusted)
-      })
-      output.state.pubhashes = pubhashes
-    }
 
     // txhashes
     const transactionHashes = []
@@ -51,12 +40,10 @@ const addressTransactionsRefactor = (res) => {
     const transactions = []
     output.forEach((value) => {
       const edit = value
-      if (edit.found === true) {
+      if (edit.found) {
         edit.transaction.header.hash_header = Buffer.from(edit.transaction.header.hash_header).toString('hex')
         edit.transaction.header.hash_header_prev = Buffer.from(edit.transaction.header.hash_header_prev).toString('hex')
-        edit.transaction.header.hash_reveal = Buffer.from(edit.transaction.header.hash_reveal).toString('hex')
         edit.transaction.header.merkle_root = Buffer.from(edit.transaction.header.merkle_root).toString('hex')
-        edit.transaction.header.stake_selector = ab2str(edit.transaction.header.stake_selector)
         edit.transaction.tx.addr_from = ab2str(edit.transaction.tx.addr_from)
         edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
         edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
@@ -64,20 +51,18 @@ const addressTransactionsRefactor = (res) => {
         if (edit.transaction.tx.transactionType === 'coinbase') {
           edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
           edit.transaction.tx.coinbase.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
-          edit.transaction.tx.coinbase.amount *= 1e-8
+          edit.transaction.tx.coinbase.amount *= 1e-9
           edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
         }
         if (edit.transaction.tx.transactionType === 'transfer') {
           edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
           edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
-          edit.transaction.tx.transfer.amount *= 1e-8
+          edit.transaction.tx.transfer.amount *= 1e-9
           edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
-          edit.transaction.tx.transfer.fee *= 1e-8
+          edit.transaction.tx.transfer.fee *= 1e-9
         }
-        // if (edit.transaction.header) {
-          transactions.push(edit) // only push transactions that have a header (i.e. are confirmed)
-        // }
       }
+      transactions.push(edit)
     })
     output = transactions
   }
@@ -108,7 +93,7 @@ const renderAddressBlock = () => {
       } else {
         if (res) {
           res.state.address = ab2str(res.state.address)
-          res.state.balance *= 1e-8
+          res.state.balance *= 1e-9
           if (!(res.state.address)) {
             res.state.address = aId
           }
