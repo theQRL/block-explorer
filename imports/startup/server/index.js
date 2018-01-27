@@ -1,5 +1,4 @@
 /* eslint no-console: 0 */
-/* global Addresses */
 // server-side startup
 import grpc from 'grpc'
 import tmp from 'tmp'
@@ -13,7 +12,7 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 //  import { QRLLIB } from 'qrllib/build/web-libjsqrl.js'
 
 // The address of the API node used
-let API_NODE_ADDRESS = '35.177.60.137:9009'
+let API_NODE_ADDRESS = '127.0.0.1:9009'
 
 // Create a temp file to store the qrl.proto file in
 let qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
