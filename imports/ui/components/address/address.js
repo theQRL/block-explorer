@@ -103,7 +103,7 @@ const renderAddressBlock = () => {
       } else {
         if (res) {
           res.state.address = ab2str(res.state.address)
-          res.state.balance *= 1e-9
+          res.state.balance = (parseInt(res.state.balance, 10) * 1e-9).toFixed(9)
           if (!(res.state.address)) {
             res.state.address = aId
           }
