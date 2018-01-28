@@ -61,6 +61,8 @@ Template.appHome.onRendered(() => {
       data: [25, 36, 56, 100, 128, 177, 180],
     }],
   }
-  const ctx = document.getElementById('myChart').getContext('2d')
-  const myLineChart = new Chart(ctx).Line(data, options) /* eslint no-undef:0, no-unused-vars:0 */
+
+//  const ctx = document.getElementById('myChart').getContext('2d')
+//  const myLineChart = new Chart(ctx).Line(data, options) /* eslint no-undef:0, no-unused-vars:0 */
+
 })

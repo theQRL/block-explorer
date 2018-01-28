@@ -24,6 +24,11 @@ const txResultsRefactor = (res) => {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-9
+      output.transaction.explorer = {
+        from: '',
+        to: output.transaction.tx.addr_to,
+        type: 'TRANSFER',
+      }
     }
 
     if (output.transaction.tx.transactionType === 'transfer') {
@@ -32,6 +37,11 @@ const txResultsRefactor = (res) => {
       output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-9
       output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
       output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+      output.transaction.explorer = {
+        from: output.transaction.tx.addr_from,
+        to: output.transaction.tx.addr_to,
+        type: 'TRANSFER',
+      }
     }
 
     if (output.transaction.tx.token) {
