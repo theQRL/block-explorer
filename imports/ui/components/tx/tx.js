@@ -10,20 +10,22 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 const txResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
+  // console.log(res)
   if (res.transaction.header) {
     output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
     output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
     output.transaction.header.merkle_root = Buffer.from(output.transaction.header.merkle_root).toString('hex')
+    output.transaction.header.hash_reveal = Buffer.from(output.transaction.header.hash_reveal).toString('hex')
+    output.transaction.header.stake_selector = ab2str(output.transaction.header.stake_selector)
 
-    output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
     output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
-    output.transaction.tx.addr_to = ''
+    // output.transaction.tx.addr_to = ''
     output.transaction.tx.amount = ''
 
     if (output.transaction.tx.transactionType === 'coinbase') {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
-      output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-9
+      output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-8
       output.transaction.explorer = {
         from: '',
         to: output.transaction.tx.addr_to,
@@ -32,9 +34,10 @@ const txResultsRefactor = (res) => {
     }
 
     if (output.transaction.tx.transactionType === 'transfer') {
+      output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-9
+      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
       output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
       output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
       output.transaction.explorer = {
@@ -43,22 +46,38 @@ const txResultsRefactor = (res) => {
         type: 'TRANSFER',
       }
     }
-
-    if (output.transaction.tx.token) {
-      // TODO: token data refactoring
-    }
-  } else {
-    if (res.transaction.tx) {
-      output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
-      output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
-      output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-      output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-9
-      output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-      output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+  }
+  if (output.transaction.tx.transactionType === 'token') {
+    const balances = []
+    output.transaction.tx.token.initial_balances.forEach((value) => {
+      const edit = value
+      edit.address = ab2str(edit.address)
+      balances.push(edit)
+    })
+    output.transaction.explorer = {
+      from: ab2str(output.transaction.tx.addr_from),
+      to: ab2str(output.transaction.tx.addr_from),
+      signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
+      publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
+      symbol: ab2str(output.transaction.tx.token.symbol),
+      name: ab2str(output.transaction.tx.token.name),
+      owner: ab2str(output.transaction.tx.token.owner),
+      initialBalances: balances,
+      type: 'CREATE TOKEN',
     }
   }
-
+  if (output.transaction.tx.transactionType === 'transfer_token') {
+    output.transaction.explorer = {
+      from: ab2str(output.transaction.tx.addr_from),
+      to: ab2str(output.transaction.tx.transfer_token.addr_to),
+      signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
+      publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
+      token_txhash: Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex'),
+      amount: output.transaction.tx.transfer_token.amount,
+      fee: output.transaction.tx.transfer_token.fee,
+      type: 'TRANSFER TOKEN',
+    }
+  }
   return output
 }
 
@@ -148,6 +167,18 @@ Template.tx.helpers({
       return 'yellow'
     }
     return ''
+  },
+  isToken() {
+    if (this.explorer.type === 'CREATE TOKEN') {
+      return true
+    }
+    return false
+  },
+  isTokenTransfer() {
+    if (this.explorer.type === 'TRANSFER TOKEN') {
+      return true
+    }
+    return false
   },
 })
 

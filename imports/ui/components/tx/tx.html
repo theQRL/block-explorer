@@ -43,7 +43,7 @@
                 <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
                 {{else}}
                 <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
-                  {{amount}}
+                  {{tx.tx.amount}}
                 </div>
                 <div class="label">
                   Quanta
@@ -84,7 +84,7 @@
             <div class="ui celled horizontal list">
               <div class="item"><strong>Block</strong> <a href="/block/{{tx.header.block_number}}">{{tx.header.block_number}}</a></div>
               <div class="item"><strong>Nonce</strong> {{tx.tx.nonce}}</div>
-              <div class="item"><strong>OTS key</strong> {{tx.tx.xmss_ots_index}}</div>
+              <div class="item"><strong>OTS key</strong> {{tx.tx.ots_key}}</div>
               <!-- div class="item"><strong>Hexsize</strong> {{tx.hexsize}}</div>
               <div class="item"><strong>Fee</strong> {{tx.fee}}</div> -->
             </div>
