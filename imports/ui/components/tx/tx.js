@@ -38,6 +38,7 @@ const txResultsRefactor = (res) => {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-9
+      output.transaction.tx.fee = output.transaction.tx.fee * 1e-9
       output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
       output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
       output.transaction.explorer = {
