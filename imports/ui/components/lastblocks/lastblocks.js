@@ -29,7 +29,7 @@ Template.lastblocks.helpers({
   },
   ts() {
     const x = moment.unix(this.header.timestamp.seconds)
-    return moment(x).format('HH:mm D MMM YYYY')
+    return moment(x).format('HH:mm:ss D MMM YYYY')
   },
   tsReadable() {
     const x = moment.unix(this.header.timestamp.seconds)
