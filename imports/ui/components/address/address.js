@@ -69,7 +69,7 @@ const addressTransactionsRefactor = (res) => {
           edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
           edit.transaction.tx.transfer.amount *= 1e-9
           edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
-          edit.transaction.tx.transfer.fee *= 1e-9
+          edit.transaction.tx.fee *= 1e-9
         }
       }
       transactions.push(edit)
