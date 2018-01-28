@@ -21,6 +21,16 @@ const addressResultsRefactor = (res) => {
     })
     output.state.transactions = transactions
 
+    // pubhashes
+    const pubhashes = []
+    if (output.state.pubhashes) {
+      output.state.pubhashes.forEach((value) => {
+        const adjusted = Buffer.from(value).toString('hex')
+        pubhashes.push(adjusted)
+      })
+      output.state.pubhashes = pubhashes
+    }
+
     // txhashes
     const transactionHashes = []
     output.state.transaction_hashes.forEach((value) => {
