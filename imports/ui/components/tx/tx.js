@@ -15,7 +15,7 @@ const txResultsRefactor = (res) => {
     output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
     output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
     output.transaction.header.merkle_root = Buffer.from(output.transaction.header.merkle_root).toString('hex')
-    output.transaction.header.hash_reveal = Buffer.from(output.transaction.header.hash_reveal).toString('hex')
+
     output.transaction.header.stake_selector = ab2str(output.transaction.header.stake_selector)
 
     output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
@@ -25,7 +25,7 @@ const txResultsRefactor = (res) => {
     if (output.transaction.tx.transactionType === 'coinbase') {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
-      output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-8
+      output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-9
       output.transaction.explorer = {
         from: '',
         to: output.transaction.tx.addr_to,
@@ -37,7 +37,7 @@ const txResultsRefactor = (res) => {
       output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
       output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-8
+      output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-9
       output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
       output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
       output.transaction.explorer = {
@@ -76,6 +76,17 @@ const txResultsRefactor = (res) => {
       amount: output.transaction.tx.transfer_token.amount,
       fee: output.transaction.tx.transfer_token.fee,
       type: 'TRANSFER TOKEN',
+    }
+  }
+  if (output.transaction.tx.transactionType === 'slave') {
+    output.transaction.explorer = {
+      from: ab2str(output.transaction.tx.addr_from),
+      to: '',
+      signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
+      publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
+      amount: output.transaction.tx.amount,
+      fee: output.transaction.tx.fee,
+      type: 'SLAVE',
     }
   }
   return output
@@ -117,7 +128,20 @@ Template.tx.onCreated(() => {
 
 Template.tx.helpers({
   tx() {
-    return Session.get('txhash').transaction
+    // console.log(Session.get('txhash'))
+    if (Session.get('txhash').found === true) {
+      return Session.get('txhash').transaction
+    }
+    if (Session.get('txhash').found === false) {
+      return { notFound: true, parameter: FlowRouter.getParam('txId') }
+    }
+    return ''
+  },
+  notFound() {
+    if (Session.get('txhash').found === false) {
+      return true
+    }
+    return false
   },
   header() {
     return Session.get('txhash').transaction.header
