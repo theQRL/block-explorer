@@ -193,7 +193,7 @@ Template.address.helpers({
       const x = Session.get('qrl')
       return Math.round((x * value) * 100) / 100
     } catch (e) {
-      return 0
+      return '...'
     }
   },
   color() {
