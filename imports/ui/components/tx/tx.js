@@ -150,12 +150,14 @@ Template.tx.helpers({
   qrl() {
     const txhash = Session.get('txhash')
     try {
-      const value = txhash.amount
+      const value = txhash.transaction.tx.amount
       const x = Session.get('qrl')
-      return Math.round((x * value) * 100) / 100
+      const y = Math.round((x * value) * 100) / 100
+      if (y !== 0) { return y }
     } catch (e) {
-      return 0
+      return '...'
     }
+    return '...'
   },
   amount() {
     if (this.tx.coinbase) {
