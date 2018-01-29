@@ -73,7 +73,7 @@ Template.block.helpers({
   },
   block_reward() {
     const rewardBlock = Session.get('block').block.header.reward_block
-    return rewardBlock * 1.0e-9
+    return (parseInt(rewardBlock, 10) * 1.0e-9).toFixed(9)
   },
   mining_nonce() {
     return Session.get('block').block.header.mining_nonce
