@@ -1,28 +1,27 @@
 <template name="appHome">
   <div class="ui stackable grid">
     <div class="row">
-      <div class="ten wide column">
-        <div class="ui segment" id="statusSegment">
+      <div class="six wide column">
+        <div class="ui" id="statusSegment">
           {{> status}}
         </div>
       </div>
-      <div class="six wide column">
+      <div class="ten wide column">
         <div class="ui segment">
-          <!-- <div id="chart"> -->
-            <!-- <canvas id="myChart"></canvas> -->
-            Stats coming here soon...
-          <!-- </div> -->
+          <div id="chart">
+            <canvas id="myChart"></canvas>
+          </div>
         </div>
       </div>
     </div>
     <div class="row">
       <div class="eight wide column">
-        <div class="ui segment">
+        <div class="ui">
           {{> lastblocks}}
         </div>
       </div>
       <div class="eight wide column">
-        <div class="ui segment">
+        <div class="ui">
           {{> lasttx}}
         </div>
       </div>
