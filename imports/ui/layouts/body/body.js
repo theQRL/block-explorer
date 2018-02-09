@@ -5,7 +5,7 @@ BlazeLayout.setRoot('body')
 Template.appBody.onRendered(() => {
   $('.ui.dropdown').dropdown()
   $('.modal').modal()
-  $('.sidebar').first().sidebar('attach events', '#hamburger', 'show')
+  //$('.sidebar').first().sidebar('attach events', '#hamburger', 'show')
 })
 
 const identifySearch = (str) => {
@@ -32,10 +32,12 @@ const postSearch = (results) => {
 }
 
 Template.appBody.events({
+  /*
   'click #hamburger': (event) => {
     event.preventDefault()
     $('.ui.sidebar').sidebar('toggle')
   },
+  */
   'click .search': (event) => {
     const s = $(event.currentTarget).prev().val()
     postSearch(identifySearch(s))

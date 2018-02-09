@@ -1,54 +1,49 @@
 <template name="lastblocks">
-  <div class="ui fluid container outer">
-    <div class="ui header">
-      <h1 class="container-header">Latest blocks<!-- <i class="ui refresh red link icon"></i>--></h1>
+  <h4 class="ui pageHeader header">
+    <div class="content">
+      Latest Blocks
     </div>
-    {{#with lastblocks}} {{#if error}}
-    <div class="ui negative message">
-      <i class="close icon"></i>
-      <div class="header">
-        Error reading last blocks
-      </div>
-      <p>{{error.error}} : {{error.reason}}</p>
+  </h4>
+  {{#with lastblocks}} {{#if error}}
+  <div class="ui negative message">
+    <i class="close icon"></i>
+    <div class="header">
+      Error reading last blocks
     </div>
-    {{else}}
-    <div class="spacer"></div>
-    <div class="ui divided items">
-      {{#each lastblocks.blockheaders}}
-      <div class="block-item item" data-block="{{this.header.block_number}}">
-        <div class="content">
-          <a href="/block/{{this.header.block_number}}" class="header"><i class="ui cube icon"></i> {{this.header.block_number}}</a>
-          <span class="float-right">{{tsReadable}}</span>
-          <div class="meta">
-            <span>{{ts}}</span>
-          </div>
-          <div class="ui horizontal list">
-            <div class="item">
-              <i class="ui large exchange icon"></i>
-              <div class="content">
-                <div class="header">Transactions</div>
-                <span class="hack">{{numberTransactions}}</span>
-              </div>
-            </div>
-            <div class="item">
-              <i class="ui large database icon"></i>
-              <div class="content">
-                <div class="header">Reward</div>
-                <span class="hack">{{reward(this.header.reward_block)}}</span>
-              </div>
-            </div>
-            <div class="item">
-              <i class="ui large privacy icon"></i>
-              <div class="content">
-                <div class="header">Blockhash</div>
-                <span class="hack"><small>{{this.header.hash_header_hex}}</small></span>
-              </div>
+    <p>{{error.error}} : {{error.reason}}</p>
+  </div>
+  {{else}}
+    {{#each lastblocks.blockheaders}}
+    <div class="ui icon message transactionRecord">
+      <div class="ui stackable grid fullWidth">
+        <div class="two wide column">
+
+          <div class="item">
+            <div class="content">
+              <div class="header">Block No.</div>
+              <a href="/block/{{this.header.block_number}}">{{this.header.block_number}}</a>
             </div>
           </div>
+
+        </div>
+        <div class="nine wide column">
+          <div class="ui stackable two column grid">
+            <div class="column">{{tsReadable}}</div>
+            <div class="column">{{ts}}</div>
+          </div>
+          <span class="hack breakable"><small>{{this.header.hash_header_hex}}</small></span>
+        </div>
+        <div class="four wide column">
+          Transactions: {{numberTransactions}}<br />
+          Reward: {{reward(this.header.reward_block)}}
         </div>
       </div>
-      {{/each}}
+      <div class="one wide column">
+        <div class="floatright">
+          <a href="/block/{{this.header.block_number}}">&gt;</a>
+        </div>
+      </div>
     </div>
-    {{/if}} {{/with}}
-  </div>
+    {{/each}}
+  {{/if}} {{/with}}
 </template>

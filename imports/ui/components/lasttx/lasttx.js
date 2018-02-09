@@ -24,7 +24,7 @@ Template.lasttx.onCreated(() => {
 })
 
 Template.lasttx.helpers({
-  lasttx() {
+  lasttx() {    
     return Session.get('lasttx')
   },
   amount() {
@@ -55,6 +55,30 @@ Template.lasttx.helpers({
     const x = Session.get('lasttx').transactions
     if (x) { if (x.length === 0) { ret = true } }
     return ret
+  },
+  isTransfer(txType) {
+    if(txType == "TRANSFER") {
+      return true
+    }
+    return false
+  },
+  isTokenCreation(txType) {
+    if(txType == "TOKEN") {
+      return true
+    }
+    return false
+  },
+  isTokenTransfer(txType) {
+    if(txType == "TRANSFERTOKEN") {
+      return true
+    }
+    return false
+  },
+  isCoinbaseTxn(txType) {
+    if(txType == "COINBASE") {
+      return true
+    }
+    return false
   },
 })
 

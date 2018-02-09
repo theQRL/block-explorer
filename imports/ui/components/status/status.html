@@ -1,107 +1,68 @@
 <template name="status">
-  <h1>Network info <i class="ui refresh red link icon"></i></h1>
-  {{#with status}}
-    {{#if error}}
-<!--       <div class="ui negative message">
-        <i class="close icon"></i>
-        <div class="header">
-          Error reading network status
-        </div>
-        <p>{{error.error}} : {{error.reason}}</p>
-      </div> -->
-      <div class="ui three column stackable grid">
-        <div class="ten wide column">
-          <div class="ui celled list">
-            <div class="item">
-              <i class="bordered inverted blue power middle aligned icon"></i>
-              <div class="content">
-                <div class="header">Status</div>
-                No connection <i class="ui tiny middle aligned red circle icon"></i>
-                <small>API node returned an error</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    {{else}}
-      <div class="ui three column stackable grid">
-        <div class="four wide column">
-          <div class="ui celled list">
-            <div class="item">
-              <i class="bordered inverted blue power middle aligned icon"></i>
-              <div class="content">
-                <div class="header">Status</div>
-                {{status.status}} <i class="ui tiny middle aligned green circle icon"></i>
-                <!-- FIXME: the proper connection state should be shown here -->
-                <small>Connected</small> <br>
-                <small>{{status.node_info.state}}</small> <br>
-                <small>
-                  <strong>Uptime: </strong><br>
-                  {{uptime}}</small>
-              </div>
-            </div>
-            <div class="item">
-              <i class="bordered inverted blue info circle middle aligned icon"></i>
-              <div class="content">
-                <div class="header">Network</div>
-                <small>{{status.node_info.network_id}}</small>
-                <br>
-                <small><strong>Version: </strong> {{status.node_info.version}}</small>
-              </div>
-            </div>
-            <div class="item">
-              <i class="bordered inverted blue server middle aligned icon"></i>
-              <div class="content">
-                <div class="header">Nodes</div>
-                {{status.node_info.num_connections}}
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- PoS -> PoW
-        <div class="four wide column">
-          <div class="ui celled list">
-            <div class="item">
-              <i class="bordered inverted blue law middle aligned icon"></i>
-              <div class="content">
-                <div class="header">Proof-of-stake</div>
-                <small>
-                  <strong>Stake validators:</strong> {{status.stakers_count}}<br>
-                  <strong>Staked emission:</strong> {{staked}}%<br>
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-      -->
-        <div class="four wide column">
-          <div class="ui celled list">
-            <div class="item">
-              <i class="bordered inverted blue cubes middle aligned icon"></i>
-              <div class="content">
-                <div class="header">Blocks</div>
-                <small><strong>Max index:</strong> {{max_block_index}}<br>
-                  <strong>Block time:</strong> {{status.block_time_mean}}<br>
-                  <strong>Block time variance:</strong> {{status.block_time_sd}}</small>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="four wide column">
-          <div class="ui celled list">
-            <div class="item">
-              <i class="bordered inverted blue database middle aligned icon"></i>
-              <div class="content">
-                <div class="header">Coin supply</div>
-                <small><strong>Emission:</strong> {{emission}}%<br>
-                  <strong>Unmined:</strong> {{unmined}}<br>
-                  <strong>Block reward:</strong> {{reward(status.block_last_reward)}}</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    {{/if}}
 
-  {{/with}}
+<h4 class="ui pageHeader header">
+  <div class="content">
+    <i class="ui refresh red link icon"></i>
+    Market Cap: $xxxxx<br />
+    $y.yy QUANTA USD
+  </div>
+</h4>
+<br />
+{{#with status}} {{#if error}}
+<div class="ui stackable three column grid">
+  <div class="column">
+    <div class="ui icon message transactionRecord">
+      <div class="content">
+        <strong>Status</strong><br />
+        No connection <i class="ui tiny middle aligned red circle icon"></i>
+        <small>API node returned an error</small>
+      </div>
+    </div>
+  </div>
+</div>
+{{else}}
+<div class="ui stackable three column grid">
+  <div class="stretched row">
+    <div class="column">
+      <div class="ui message transactionRecord">
+        <div class="content">
+          <strong>Network Status</strong><br />
+          <small>
+            Connected: {{status.node_info.state}}<br />
+            Uptime: {{uptime}}<br />
+            {{status.node_info.network_id}}<br />
+            Nodes: {{status.node_info.num_connections}}<br />
+            Version: {{status.node_info.version}}
+          </small>
+        </div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="ui message transactionRecord">
+        <div class="content">
+          <strong>Blocks</strong><br />
+          <small>
+            Max Index: {{max_block_index}}<br />
+            Block Time: {{status.block_time_mean}}<br />
+            Block Time Variance: {{status.block_time_sd}}
+          </small>
+        </div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="ui message transactionRecord">
+        <div class="content">
+          <strong>Coin Supply</strong><br />
+          <small>
+            Emission: {{emission}}%<br />
+            Unmined: {{unmined}}<br />
+            Block Reward: {{reward(status.block_last_reward)}}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{/if}} {{/with}}
+
 </template>

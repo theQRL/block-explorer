@@ -1,56 +1,88 @@
 <template name="lasttx">
-  <div class="ui fluid container outer">
-    <div class="ui header">
-      <h1 class="container-header">Latest transactions<!-- <i class="ui refresh red link icon"></i>--></h1>
-    </div>
-    {{#with lasttx}}<!--  {{#if error}}
-    <div class="ui negative message">
-      <i class="close icon"></i>
-      <div class="header">
-        Error reading transaction
-      </div>
-      <p>{{error.error}} : {{error.reason}}</p>
-    </div>
-    {{else}} -->
-    <div class="spacer"></div>
-    <div class="ui divided items">
-      {{#if zeroCheck}}
-      <div class="ui item">No transactions yet</div>
-      {{else}} {{#each lasttx.transactions}}
-      <div class="ui item">
-        <div class="ui horizontal list">
-          <div class="item">
-            <div class="content">
-              <div class="header">BLOCK</div>
-              <a href="/block/{{block}}">{{block}}</a>
-            </div>
-          </div>
-          <div class="item">
-            <div class="content">
-              <div class="header">TIMESTAMP</div>
-              {{ts}}
-            </div>
-          </div>
-          <div class="item">
-            <div class="content">
-              <div class="header">AMOUNT</div>
-              <div class="ui yellow label">{{amount}}
-                <div class="detail">Quanta</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="ui horizontal list">
-          <div class="item">
-            <div class="content">
-              <div class="header">TXHASH</div>
-              <div class="unbreakable"><a href="/tx/{{tx_hash}}">{{tx_hash}}</a></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {{/each}} {{/if}}
-    </div>
-    <!-- {{/if}} --> {{/with}}
+
+<h4 class="ui pageHeader header">
+  <div class="content">
+    Latest Transactions
   </div>
+</h4>
+{{#with lasttx}} {{#if zeroCheck}}
+<div class="ui negative message">
+  <i class="close icon"></i>
+  <div class="header">
+    No transactions yet
+  </div>
+</div>
+{{else}}
+  {{#each lasttx.transactions}}
+    {{#if isTransfer this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <div class="content">
+        <div class="header">
+          Transfer | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+        <a href="/tx/{{tx_hash}}">{{amount}} Quanta &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if isTokenCreation this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <div class="content">
+        <div class="header">
+          Token Creation - {{this.name}} ({{this.symbol}})
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+         <a href="/tx/{{tx_hash}}">{{this.symbol}} &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if isTokenTransfer this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <div class="content">
+        <div class="header">
+          Token Transfer
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+        <a href="/tx/{{tx_hash}}">{{this.amount}} {{this.symbol}} &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if isCoinbaseTxn this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/receive.png" />
+      <div class="content">
+        <div class="header">
+          Coinbase Received
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+        <a href="/tx/{{tx_hash}}">{{this.amount}} Quanta &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+  {{/each}}
+{{/if}} {{/with}}
+
+
 </template>
