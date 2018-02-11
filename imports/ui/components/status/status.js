@@ -18,7 +18,7 @@ Template.status.helpers({
   uptime() {
     let x = Session.get('status')
     x = x.uptime_network
-    return moment('1900-01-01 00:00:00').add(x, 'seconds').format('d[d] h[h] mm[min]')
+    return moment('1900-01-01 00:00:00').add(x, 'seconds').format('D[d] h[h] mm[min]')
   },
   emission() {
     const x = Session.get('status')
