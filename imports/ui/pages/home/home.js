@@ -29,7 +29,7 @@ Template.appHome.onRendered(() => {
       // Build Difficulty and hash power datasets and Block # labels
       let labels = []
       let hashPower = {
-        label: 'Hash Power',
+        label: 'Hash Power (hps)',
         borderColor: '#DC255D',
         backgroundColor: '#DC255D',
         fill: false,
@@ -49,7 +49,7 @@ Template.appHome.onRendered(() => {
         borderWidth: 2,
       }
       let movingAverage = {
-        label: 'Block Time Average',
+        label: 'Block Time Average (s)',
         borderColor: '#0A0724',
         backgroundColor: '#0A0724',
         fill: false,
@@ -59,7 +59,7 @@ Template.appHome.onRendered(() => {
         borderWidth: 2,
       }
       let blockTime = {
-        label: 'Block Time',
+        label: 'Block Time (s)',
         borderColor: '#1EE9CB',
         backgroundColor: '#1EE9CB',
         fill: false,
@@ -91,10 +91,21 @@ Template.appHome.onRendered(() => {
         type: 'line',
         data: chartLineData,
         options: {
+          tooltips: {
+            mode: 'index'
+          },
           responsive: true,
           hoverMode: 'index',
           stacked: false,
           scales: {
+            xAxes: [
+              {
+                scaleLabel: {
+                  display: true,
+                  labelString: "Block Number"
+                }
+              }
+            ],
             yAxes: [
               {
                 type: "linear",
@@ -104,6 +115,10 @@ Template.appHome.onRendered(() => {
                 ticks: {
                   beginAtZero: true,
                   max: 150
+                },
+                scaleLabel: {
+                  display: true,
+                  labelString: "Seconds"
                 }
               },{
                 type: "linear",
@@ -113,6 +128,10 @@ Template.appHome.onRendered(() => {
                 gridLines: {
                   drawOnChartArea: false,
                 },
+                scaleLabel: {
+                  display: true,
+                  labelString: "Hashes Per Second"
+                }
               }
             ],
           }
