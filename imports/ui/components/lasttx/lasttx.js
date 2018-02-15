@@ -80,6 +80,12 @@ Template.lasttx.helpers({
     }
     return false
   },
+  isSlaveTxn(txType) {
+    if(txType == "SLAVE") {
+      return true
+    }
+    return false
+  }
 })
 
 Template.lasttx.events({
