@@ -9,9 +9,35 @@ Template.status.onCreated(() => {
       Session.set('status', res)
     }
   })
+
+  Meteor.call('QRLvalue', (err, res) => {
+    if (err) {
+      Session.set('quantaUsd', { error: err })
+    } else {
+      Session.set('quantaUsd', res)
+    }
+  })
 })
 
 Template.status.helpers({
+  quantaUsd() {
+    let quantaUsd =  Math.round(Session.get('quantaUsd') * 10, 2) / 10
+    return quantaUsd
+  },
+  marketCap() {
+    const x = Session.get('status')
+    let quantaUsd =  Math.round(Session.get('quantaUsd') * 10, 2) / 10
+    let coinsInCirculation = parseFloat(x.coins_emitted)
+    const marketCap = quantaUsd * coinsInCirculation
+    // TODO
+    // Can get rid of this if statement next fork.
+    // Emmision not showing correctly at the moment.
+    if(marketCap == 0) {
+      return "0.00"
+    } else {
+      return marketCap
+    }
+  },
   status() {
     return Session.get('status')
   },
@@ -82,6 +108,13 @@ Template.status.events({
         Session.set('status', { error: err })
       } else {
         Session.set('status', res)
+      }
+    })
+    Meteor.call('QRLvalue', (err, res) => {
+      if (err) {
+        Session.set('quantaUsd', { error: err })
+      } else {
+        Session.set('quantaUsd', res)
       }
     })
   },
