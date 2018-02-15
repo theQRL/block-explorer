@@ -36,7 +36,7 @@
       <img class="transactionTypeImage" src="/img/icons/send.png" />
       <div class="content">
         <div class="header">
-          Token Creation - {{this.name}} ({{this.symbol}})
+          Token Creation - {{this.name}} ({{this.symbol}}) | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
         </div>
         <p class="transactionAddress">
           {{tx_hash}}
@@ -53,7 +53,7 @@
       <img class="transactionTypeImage" src="/img/icons/send.png" />
       <div class="content">
         <div class="header">
-          Token Transfer
+          Token Transfer | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
         </div>
         <p class="transactionAddress">
           {{tx_hash}}
@@ -70,7 +70,7 @@
       <img class="transactionTypeImage" src="/img/icons/receive.png" />
       <div class="content">
         <div class="header">
-          Coinbase Received
+          Coinbase Received | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
         </div>
         <p class="transactionAddress">
           {{tx_hash}}
@@ -81,6 +81,29 @@
       </div>
     </div>
     {{/if}}
+
+
+
+    {{#if isSlaveTxn this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/receive.png" />
+      <div class="content">
+        <div class="header">
+          Slave Transaction | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+        <a href="/tx/{{tx_hash}}">View Transaction &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
+
+
+
   {{/each}}
 {{/if}} {{/with}}
 

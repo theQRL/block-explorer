@@ -96,7 +96,7 @@ export const getLatestData = (request, callback) => {
 export const getStats = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
-      qrlClient.API.GetStats(request, (error, response) => {
+      qrlClient.API.GetStats(request, (error, response) => {        
         if (error) {
           const myError = errorCallback(error, 'Cannot access API/GetStats/a', '**ERROR/getStats/a** ')
           callback(myError, null)
