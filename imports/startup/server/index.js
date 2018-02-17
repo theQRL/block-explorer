@@ -148,11 +148,12 @@ const getObject = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
       qrlClient.API.GetObject(request, (error, response) => {
+        console.log(request)
         if (error) {
           const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
           callback(myError, null)
         } else {
-          // console.log(response)
+          console.log(response)
           callback(null, response)
         }
       })

@@ -58,6 +58,17 @@ Meteor.call('getLatestData', req, (err, res) => {
 })
 
 
+req = { filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 }
+Meteor.call('getLatestData', req, (err, res) => {
+  if (err) {
+    console.log('LATEST TRANSACTIONS_UNCONFIRMED: - **ERROR**')
+    console.log(err.message)
+  } else {
+    console.log('LATEST TRANSACTIONS_UNCONFIRMED:')
+    console.log(res)
+  }
+})
+
 req = { filter: 'TRANSACTIONS', offset: 0, quantity: 5 }
 Meteor.call('getLatestData', req, (err, res) => {
   if (err) {
@@ -68,7 +79,6 @@ Meteor.call('getLatestData', req, (err, res) => {
     console.log(res)
   }
 })
-
 
 req = {
   address: Buffer.from('Qa02d909723512ecd1606c96f52f5a4121946f068986e612a57c75353952ab3624ddd0bd6', 'ascii'),
