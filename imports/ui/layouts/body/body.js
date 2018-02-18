@@ -1,5 +1,6 @@
 import './body.html'
 import './sidebar.html'
+/* global WALLET_VERSION */
 
 BlazeLayout.setRoot('body')
 Template.appBody.onRendered(() => {
@@ -53,6 +54,12 @@ Template.appBody.events({
       }
     }
     return true
+  },
+})
+
+Template.appBody.helpers({
+  qrlExplorerVersion() {
+    return EXPLORER_VERSION
   },
 })
 
