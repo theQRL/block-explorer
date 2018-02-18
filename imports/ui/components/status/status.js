@@ -21,12 +21,12 @@ Template.status.onCreated(() => {
 
 Template.status.helpers({
   quantaUsd() {
-    let quantaUsd =  Math.round(Session.get('quantaUsd') * 10, 2) / 10
+    let quantaUsd = Session.get('quantaUsd').toFixed(2)
     return quantaUsd
   },
   marketCap() {
     const x = Session.get('status')
-    let quantaUsd =  Math.round(Session.get('quantaUsd') * 10, 2) / 10
+    let quantaUsd =  Session.get('quantaUsd').toFixed(2)
     let coinsInCirculation = parseFloat(x.coins_emitted)
     const marketCap = quantaUsd * coinsInCirculation
     // TODO

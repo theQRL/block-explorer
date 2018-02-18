@@ -6,14 +6,9 @@ const renderLastTxBlock = () => {
     if (err) {
       Session.set('lasttx', { error: err })
     } else {
-      const tx = []
-      res.transactions.forEach((index) => {
-        const obj = index
-        obj.amount = parseFloat(obj.amount)
-        tx.push(obj)
-      })
-      res.transactions = tx
       Session.set('lasttx', res)
+
+      console.log(res)
     }
   })
 }
@@ -37,6 +32,9 @@ Template.lasttx.helpers({
       // FIXME: We need a unified way to format Quantas
       return (this.tx.transfer.amount * 1e-9).toFixed(9)
       // return this.tx.transfer.amount
+    }
+    if(this.tx.transfer_token) {
+      return (this.tx.transfer_token.amount * 1e-9).toFixed(9)
     }
     return ''
   },

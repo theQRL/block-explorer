@@ -2,4 +2,4 @@
 import './routes.js'
 
 // a few client console test gRPC calls
-import './grpc-console-tests.js'
+// import './grpc-console-tests.js'

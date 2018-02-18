@@ -8,15 +8,15 @@
         <img class="main-menu-logo" src="/img/qrl-logo-white.png" />
         QRL
       </a>
-      <a href="/lastblocks" class="item main-menu-btn">
+      <a href="/lastblocks" class="item main-menu-btn {{menuBlocksActive}}">
         <i class="block layout icon"></i>
         Blocks
       </a>
-      <a href="/lasttx" class="item main-menu-btn {{menuOpenWalletActive}}" style="{{walletStatus.menuHiddenInverse}}">
+      <a href="/lasttx" class="item main-menu-btn {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
         <i class="check square icon"></i>
         Recent<br />Transactions
       </a>
-      <a href="/unconfirmed" class="item main-menu-btn {{menuOpenWalletActive}}" style="{{walletStatus.menuHiddenInverse}}">
+      <a href="/unconfirmed" class="item main-menu-btn {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
         <i class="help circle icon"></i>
         Unconfirmed<br />Transactions
       </a>

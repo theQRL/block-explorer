@@ -1,28 +1,90 @@
 <template name="lastunconfirmedtx">
-  <h1>Last 5 unconfirmed transactions <i class="ui refresh red link icon"></i></h1>
-  {{#with lastunconfirmedtx}}
-  {{#if error}}
-    <div class="ui negative message">
-      <i class="close icon"></i>
-      <div class="header">
-        Error reading transaction
+
+<h4 class="ui pageHeader header">
+  <div class="content">
+    Latest Unconfirmed Transactions <i class="ui refresh red link icon"></i>
+  </div>
+</h4>
+{{#with lastunconfirmedtx}} {{#if allConfirmed}}
+<div class="ui negative message">
+  <i class="close icon"></i>
+  <div class="header">
+    All network transactions have been confirmed
+  </div>
+</div>
+{{else}}
+  {{#each lastunconfirmedtx.transactions_unconfirmed}}
+    {{#if isTransfer this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <div class="content">
+        <div class="header">
+          Transfer | Unconfirmed
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
       </div>
-      <p>{{error.error}} : {{error.reason}}</p>
+      <div class="floatright">
+        <a href="/tx/{{tx_hash}}">{{amount}} Quanta &gt;</a>
+      </div>
     </div>
-  {{else}}
-    {{#if allConfirmed}}
-      <p>All network transactions have been confirmed</p>
-    {{else}}
-    {{#each lastunconfirmedtx.transactions}}
-    <ul>
-      <li>timestamp: unconfirmed</li>
-      <li>amount: {{this.amount}}</li>
-      <li>txhash: <a href="/tx/{{this.txhash}}">{{this.txhash}}</a></li>
-      <li>block: {{this.block}}</li>
-      <li>type: {{this.type}}</li>
-    </ul>
-    {{/each}}
     {{/if}}
-    {{/if}} 
-  {{/with}}
+
+    {{#if isTokenCreation this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <div class="content">
+        <div class="header">
+          Token Creation - ({{this.tx.tokenSymbol}}) | Unconfirmed
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+         <a href="/tx/{{tx_hash}}">{{this.tx.tokenSymbol}} Creation &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if isTokenTransfer this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <div class="content">
+        <div class="header">
+          Token Transfer - ({{this.tx.tokenSymbol}}) | Unconfirmed
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+        <a href="/tx/{{tx_hash}}">{{amount}} {{this.tx.tokenSymbol}} &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if isSlaveTxn this.tx.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/receive.png" />
+      <div class="content">
+        <div class="header">
+          Slave Transaction | Unconfirmed
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+        <a href="/tx/{{tx_hash}}">View Transaction &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
+
+  {{/each}}
+{{/if}} {{/with}}
+
+
 </template>

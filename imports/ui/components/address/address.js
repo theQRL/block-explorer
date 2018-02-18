@@ -58,6 +58,7 @@ const addressTransactionsRefactor = (res) => {
         edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
         edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
         edit.transaction.tx.transaction_hash = Buffer.from(edit.transaction.tx.transaction_hash).toString('hex')
+        edit.transaction.tx.fee *= 1e-9
         if (edit.transaction.tx.transactionType === 'coinbase') {
           edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
           edit.transaction.tx.coinbase.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
@@ -69,7 +70,7 @@ const addressTransactionsRefactor = (res) => {
           edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
           edit.transaction.tx.transfer.amount *= 1e-9
           edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
-          edit.transaction.tx.fee *= 1e-9
+          
         }
       }
       transactions.push(edit)

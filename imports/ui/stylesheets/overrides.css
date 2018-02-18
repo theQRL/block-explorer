@@ -195,7 +195,7 @@ td .unbreakable {
 
 .main-menu-btn {
   font-weight: bold;
-  color: #dc255d !important;
+  color: #fff !important;
   font-family: 'Quicksand', sans-serif !important;
 }
 .main-menu-btn .icon {
@@ -410,4 +410,9 @@ input {
 
 .statusCol {
     height: 100% !important;
+}
+
+
+#chart {
+  position: relative;
 }

@@ -36,14 +36,14 @@
       <img class="transactionTypeImage" src="/img/icons/send.png" />
       <div class="content">
         <div class="header">
-          Token Creation - {{this.name}} ({{this.symbol}}) | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
+          Token Creation - ({{this.tx.tokenSymbol}}) | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
         </div>
         <p class="transactionAddress">
           {{tx_hash}}
         </p>
       </div>
       <div class="floatright">
-         <a href="/tx/{{tx_hash}}">{{this.symbol}} &gt;</a>
+         <a href="/tx/{{tx_hash}}">{{this.tx.tokenSymbol}} Creation &gt;</a>
       </div>
     </div>
     {{/if}}
@@ -53,14 +53,14 @@
       <img class="transactionTypeImage" src="/img/icons/send.png" />
       <div class="content">
         <div class="header">
-          Token Transfer | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
+          Token Transfer - ({{this.tx.tokenSymbol}}) | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
         </div>
         <p class="transactionAddress">
           {{tx_hash}}
         </p>
       </div>
       <div class="floatright">
-        <a href="/tx/{{tx_hash}}">{{this.amount}} {{this.symbol}} &gt;</a>
+        <a href="/tx/{{tx_hash}}">{{amount}} {{this.tx.tokenSymbol}} &gt;</a>
       </div>
     </div>
     {{/if}}
