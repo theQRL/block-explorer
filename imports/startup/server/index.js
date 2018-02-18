@@ -148,7 +148,6 @@ const getObject = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
       qrlClient.API.GetObject(request, (error, response) => {
-        console.log(request)
         if (error) {
           const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
           callback(myError, null)
@@ -211,6 +210,23 @@ Meteor.methods({
     this.unblock()
     // asynchronous call to API
     const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 5 })
+    response.transactions.forEach (function (item, index) {
+      if (item.tx.type == "TOKEN") {
+        // Store plain text version of token symbol
+        response.transactions[index].tx.tokenSymbol = 
+          Buffer.from(item.tx.token.symbol).toString()
+      } else if (item.tx.type == "TRANSFERTOKEN") {
+        // Request Token Symbol
+        const symbolRequest = {
+          query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')
+        }
+        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+        // Store symbol in response
+        response.transactions[index].tx.tokenSymbol = 
+          Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+      }
+    })
+
     return response
   },
 
@@ -219,6 +235,23 @@ Meteor.methods({
     this.unblock()
     // asynchronous call to API
     const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
+    response.transactions_unconfirmed.forEach (function (item, index) {
+      if (item.tx.type == "TOKEN") {
+        // Store plain text version of token symbol
+        response.transactions_unconfirmed[index].tx.tokenSymbol = 
+          Buffer.from(item.tx.token.symbol).toString()
+      } else if (item.tx.type == "TRANSFERTOKEN") {
+        // Request Token Symbol
+        const symbolRequest = {
+          query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')
+        }
+        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+        // Store symbol in response
+        response.transactions_unconfirmed[index].tx.tokenSymbol = 
+          Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+      }
+    })
+
     return response
   },
 

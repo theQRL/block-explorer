@@ -39,6 +39,9 @@ Template.lastunconfirmedtx.helpers({
       return (this.tx.transfer.amount * 1e-9).toFixed(9)
       // return this.tx.transfer.amount
     }
+    if(this.tx.transfer_token) {
+      return (this.tx.transfer_token.amount * 1e-9).toFixed(9)
+    }
     return ''
   },
   tx_hash() {

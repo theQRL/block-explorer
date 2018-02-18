@@ -48,13 +48,16 @@ const txResultsRefactor = (res) => {
       }
     }
   }
+
   if (output.transaction.tx.transactionType === 'token') {
     const balances = []
     output.transaction.tx.token.initial_balances.forEach((value) => {
       const edit = value
       edit.address = ab2str(edit.address)
+      edit.amount = edit.amount * 1e-9
       balances.push(edit)
     })
+    output.transaction.tx.fee = output.transaction.tx.fee * 1e-9
     output.transaction.explorer = {
       from: ab2str(output.transaction.tx.addr_from),
       to: ab2str(output.transaction.tx.addr_from),
@@ -68,25 +71,25 @@ const txResultsRefactor = (res) => {
     }
   }
   if (output.transaction.tx.transactionType === 'transfer_token') {
+    output.transaction.tx.fee = output.transaction.tx.fee * 1e-9
     output.transaction.explorer = {
       from: ab2str(output.transaction.tx.addr_from),
       to: ab2str(output.transaction.tx.transfer_token.addr_to),
       signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
       publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
       token_txhash: Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex'),
-      amount: output.transaction.tx.transfer_token.amount,
-      fee: output.transaction.tx.transfer_token.fee,
+      amount: output.transaction.tx.transfer_token.amount * 1e-9,
       type: 'TRANSFER TOKEN',
     }
   }
   if (output.transaction.tx.transactionType === 'slave') {
+    output.transaction.tx.fee = output.transaction.tx.fee * 1e-9
     output.transaction.explorer = {
       from: ab2str(output.transaction.tx.addr_from),
       to: '',
       signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
       publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
       amount: output.transaction.tx.amount,
-      fee: output.transaction.tx.fee,
       type: 'SLAVE',
     }
   }
