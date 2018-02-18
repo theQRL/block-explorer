@@ -95,6 +95,7 @@ Template.appHome.onRendered(() => {
             mode: 'index'
           },
           responsive: true,
+          maintainAspectRatio: false,
           hoverMode: 'index',
           stacked: false,
           scales: {

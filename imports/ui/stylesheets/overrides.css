@@ -411,3 +411,8 @@ input {
 .statusCol {
     height: 100% !important;
 }
+
+
+#chart {
+  position: relative;
+}
