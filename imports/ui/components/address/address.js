@@ -70,7 +70,10 @@ const addressTransactionsRefactor = (res) => {
           edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
           edit.transaction.tx.transfer.amount /= SHOR_PER_QUANTA
           edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
-          
+        }
+        if (edit.transaction.tx.transactionType === 'transfer_token') {
+          edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.transfer_token.addr_to)
+          edit.transaction.tx.amount = edit.transaction.tx.transfer_token.amount / SHOR_PER_QUANTA
         }
       }
       transactions.push(edit)
