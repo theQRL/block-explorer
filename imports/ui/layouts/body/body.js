@@ -58,6 +58,33 @@ Template.appBody.events({
 })
 
 Template.appBody.helpers({
+  /* Active Menu Item Helpers */
+  menuBlocksActive() {
+    if(
+      (FlowRouter.getRouteName() == "Block.home") ||
+      (FlowRouter.getRouteName() == "Lastblocks.home")
+      
+      ) {
+      return 'active'
+    }
+  },
+  menuTransactionsActive() {
+    if(
+      (FlowRouter.getRouteName() == "Lasttx.home") ||
+      (FlowRouter.getRouteName() == "Tx.home") || 
+      (FlowRouter.getRouteName() == "Address.home")
+      ) {
+      return 'active'
+    }
+  },
+  menuUnconfirmedTransactionsActive() {
+    if(
+      (FlowRouter.getRouteName() == "Lastunconfirmedtx.home")
+      ) {
+      return 'active'
+    }
+  },
+
   qrlExplorerVersion() {
     return EXPLORER_VERSION
   },
