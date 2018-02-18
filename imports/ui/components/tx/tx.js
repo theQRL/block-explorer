@@ -25,7 +25,7 @@ const txResultsRefactor = (res) => {
     if (output.transaction.tx.transactionType === 'coinbase') {
       output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
       output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
-      output.transaction.tx.amount = output.transaction.tx.coinbase.amount * 1e-9
+      output.transaction.tx.amount = output.transaction.tx.coinbase.amount / SHOR_PER_QUANTA
       output.transaction.explorer = {
         from: '',
         to: output.transaction.tx.addr_to,
@@ -40,8 +40,8 @@ const txResultsRefactor = (res) => {
     output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
     output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
     output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-    output.transaction.tx.amount = output.transaction.tx.transfer.amount * 1e-9
-    output.transaction.tx.fee = output.transaction.tx.fee * 1e-9
+    output.transaction.tx.amount = output.transaction.tx.transfer.amount / SHOR_PER_QUANTA
+    output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
     output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
     output.transaction.explorer = {
@@ -56,10 +56,10 @@ const txResultsRefactor = (res) => {
     output.transaction.tx.token.initial_balances.forEach((value) => {
       const edit = value
       edit.address = ab2str(edit.address)
-      edit.amount = edit.amount * 1e-9
+      edit.amount = edit.amount / SHOR_PER_QUANTA
       balances.push(edit)
     })
-    output.transaction.tx.fee = output.transaction.tx.fee * 1e-9
+    output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.explorer = {
       from: ab2str(output.transaction.tx.addr_from),
       to: ab2str(output.transaction.tx.addr_from),
@@ -74,20 +74,20 @@ const txResultsRefactor = (res) => {
   }
   
   if (output.transaction.tx.transactionType === 'transfer_token') {
-    output.transaction.tx.fee = output.transaction.tx.fee * 1e-9
+    output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.explorer = {
       from: ab2str(output.transaction.tx.addr_from),
       to: ab2str(output.transaction.tx.transfer_token.addr_to),
       signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
       publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
       token_txhash: Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex'),
-      amount: output.transaction.tx.transfer_token.amount * 1e-9,
+      amount: output.transaction.tx.transfer_token.amount / SHOR_PER_QUANTA,
       type: 'TRANSFER TOKEN',
     }
   }
 
   if (output.transaction.tx.transactionType === 'slave') {
-    output.transaction.tx.fee = output.transaction.tx.fee * 1e-9
+    output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.explorer = {
       from: ab2str(output.transaction.tx.addr_from),
       to: '',
@@ -168,13 +168,10 @@ Template.tx.helpers({
   },
   amount() {
     if (this.tx.coinbase) {
-      // FIXME: We need a unified way to format Quantas
-      return (this.tx.coinbase.amount * 1e-9).toFixed(9)
+      return (this.tx.coinbase.amount / SHOR_PER_QUANTA).toFixed(9)
     }
     if (this.tx.transfer) {
-      // FIXME: We need a unified way to format Quantas
-      // return (this.tx.transfer.amount * 1e-9).toFixed(9)
-      return (this.tx.transfer.amount * 1e-9).toFixed(9)
+      return (this.tx.transfer.amount / SHOR_PER_QUANTA).toFixed(9)
     }
     return ''
   },
