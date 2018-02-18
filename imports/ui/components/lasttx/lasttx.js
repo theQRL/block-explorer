@@ -24,17 +24,13 @@ Template.lasttx.helpers({
   },
   amount() {
     if (this.tx.coinbase) {
-      // FIXME: We need a unified way to format Quantas
-      return (this.tx.coinbase.amount * 1e-9).toFixed(9)
-      // return this.tx.coinbase.amount
+      return (this.tx.coinbase.amount / SHOR_PER_QUANTA).toFixed(9)
     }
     if (this.tx.transfer) {
-      // FIXME: We need a unified way to format Quantas
-      return (this.tx.transfer.amount * 1e-9).toFixed(9)
-      // return this.tx.transfer.amount
+      return (this.tx.transfer.amount / SHOR_PER_QUANTA).toFixed(9)
     }
     if(this.tx.transfer_token) {
-      return (this.tx.transfer_token.amount * 1e-9).toFixed(9)
+      return (this.tx.transfer_token.amount / SHOR_PER_QUANTA).toFixed(9)
     }
     return ''
   },

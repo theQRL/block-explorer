@@ -73,7 +73,7 @@ Template.block.helpers({
   },
   block_reward() {
     const rewardBlock = Session.get('block').block.header.reward_block
-    return (parseInt(rewardBlock, 10) * 1.0e-9).toFixed(9)
+    return (parseInt(rewardBlock, 10)  / SHOR_PER_QUANTA).toFixed(9)
   },
   mining_nonce() {
     return Session.get('block').block.header.mining_nonce
@@ -112,7 +112,7 @@ Template.block.helpers({
   },
   amount() {
     if (this.transfer) {
-      return (this.transfer.amount * 1e-9).toFixed(9)
+      return (this.transfer.amount / SHOR_PER_QUANTA).toFixed(9)
     }
     return ''
   },

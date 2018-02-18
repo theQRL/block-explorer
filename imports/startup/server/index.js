@@ -126,7 +126,7 @@ const getStakers = (request, callback) => {
           response.stakers.forEach((staker) => {
             currentStakers.push({
               address: ab2str(staker.address_state.address),
-              balance: staker.address_state.balance * 10e-9,
+              balance: staker.address_state.balance / SHOR_PER_QUANTA,
               nonce: staker.address_state.nonce,
               hash_terminator: staker.terminator_hash.toString('hex'),
             })

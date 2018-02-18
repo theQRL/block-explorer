@@ -42,7 +42,7 @@ Template.lastblocks.helpers({
   reward(rew) {
     let r = 'Undetermined'
     try {
-      const x = (parseInt(rew, 10) * 1e-9).toFixed(9)
+      const x = (parseInt(rew, 10) / SHOR_PER_QUANTA).toFixed(9)
       r = x
     } catch (e) {
       r = 'Error parsing API results'

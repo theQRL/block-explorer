@@ -58,17 +58,17 @@ const addressTransactionsRefactor = (res) => {
         edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
         edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
         edit.transaction.tx.transaction_hash = Buffer.from(edit.transaction.tx.transaction_hash).toString('hex')
-        edit.transaction.tx.fee *= 1e-9
+        edit.transaction.tx.fee /= SHOR_PER_QUANTA
         if (edit.transaction.tx.transactionType === 'coinbase') {
           edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
           edit.transaction.tx.coinbase.addr_to = ab2str(edit.transaction.tx.coinbase.addr_to)
-          edit.transaction.tx.coinbase.amount *= 1e-9
+          edit.transaction.tx.coinbase.amount /= SHOR_PER_QUANTA
           edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
         }
         if (edit.transaction.tx.transactionType === 'transfer') {
           edit.transaction.tx.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
           edit.transaction.tx.transfer.addr_to = ab2str(edit.transaction.tx.transfer.addr_to)
-          edit.transaction.tx.transfer.amount *= 1e-9
+          edit.transaction.tx.transfer.amount /= SHOR_PER_QUANTA
           edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
           
         }
@@ -104,7 +104,7 @@ const renderAddressBlock = () => {
       } else {
         if (res) {
           res.state.address = ab2str(res.state.address)
-          res.state.balance = (parseInt(res.state.balance, 10) * 1e-9).toFixed(9)
+          res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(9)
           if (!(res.state.address)) {
             res.state.address = aId
           }
