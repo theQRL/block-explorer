@@ -129,7 +129,7 @@ Template.tx.onCreated(() => {
 
 Template.tx.helpers({
   tx() {
-    console.log(Session.get('txhash'))
+    // console.log(Session.get('txhash'))
     if (Session.get('txhash').found === true) {
       return Session.get('txhash').transaction
     }

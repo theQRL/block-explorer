@@ -153,7 +153,7 @@ const getObject = (request, callback) => {
           const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
           callback(myError, null)
         } else {
-          console.log(response)
+          // console.log(response)
           callback(null, response)
         }
       })
