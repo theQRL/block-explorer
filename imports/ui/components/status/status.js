@@ -50,9 +50,7 @@ Template.status.helpers({
     const x = Session.get('status')
     let r = 'Undetermined'
     try {
-      r = Math.round((parseFloat(x.coins_emitted) / parseFloat(x.coins_total_supply))
-        * 10000)
-        / 1000000000
+      r = Math.round(parseFloat(x.coins_emitted) / parseFloat(x.coins_total_supply))
     } catch (e) {
       r = 'Error parsing API results'
     }
@@ -82,7 +80,7 @@ Template.status.helpers({
     const x = Session.get('status')
     let r = 'Undetermined'
     try {
-      r = parseFloat(x.coins_total_supply) - (parseFloat(x.coins_emitted) / 10000000)
+      r = parseFloat(x.coins_total_supply) - parseFloat(x.coins_emitted)
     } catch (e) {
       r = 'Error parsing API results'
     }
