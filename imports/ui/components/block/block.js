@@ -1,7 +1,10 @@
 import JSONFormatter from 'json-formatter-js'
 import './block.html'
 
-const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
+const calculateEpoch = (blockNumber) => {
+  const blocksPerEpoch = 100
+  return Math.floor(blockNumber / blocksPerEpoch)
+}
 
 const blockResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
@@ -18,18 +21,18 @@ const blockResultsRefactor = (res) => {
     const transactions = []
     output.block.transactions.forEach((value) => {
       const adjusted = value
-      adjusted.addr_from = ab2str(adjusted.addr_from)
+      adjusted.addr_from = 'Q' + Buffer.from(adjusted.addr_from).toString('hex')
       adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
       adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
       adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
       if (value.transactionType === 'coinbase') {
-        adjusted.coinbase.addr_to = ab2str(adjusted.coinbase.addr_to)
+        adjusted.coinbase.addr_to = 'Q' + Buffer.from(adjusted.coinbase.addr_to).toString('hex')
         adjusted.coinbase.headerhash = Buffer.from(adjusted.coinbase.headerhash).toString('hex')
         // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
         adjusted.transfer = adjusted.coinbase
       }
       if (value.transactionType === 'transfer') {
-        adjusted.transfer.addr_to = ab2str(adjusted.transfer.addr_to)
+        adjusted.transfer.addr_to = 'Q' + Buffer.from(adjusted.transfer.addr_to).toString('hex')
       }
       transactions.push(adjusted)
     })
@@ -75,12 +78,15 @@ Template.block.helpers({
     const rewardBlock = Session.get('block').block.header.reward_block
     return (parseInt(rewardBlock, 10)  / SHOR_PER_QUANTA).toFixed(9)
   },
+  block_epoch() {
+    return calculateEpoch(Session.get('block').block.header.block_number)
+  },
   mining_nonce() {
     return Session.get('block').block.header.mining_nonce
   },
   ts() {
     try {
-      const x = moment.unix(this.header.timestamp.seconds)
+      const x = moment.unix(this.header.timestamp_seconds)
       return moment(x).format('HH:mm D MMM YYYY')
     } catch (e) {
       return ' '

@@ -41,7 +41,7 @@ Template.lasttx.helpers({
     return this.header.block_number
   },
   ts() {
-    const x = moment.unix(this.header.timestamp.seconds)
+    const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).format('HH:mm D MMM YYYY')
   },
   zeroCheck() {

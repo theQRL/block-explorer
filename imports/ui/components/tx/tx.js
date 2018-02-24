@@ -23,13 +23,13 @@ const txResultsRefactor = (res) => {
     output.transaction.tx.amount = ''
 
     if (output.transaction.tx.transactionType === 'coinbase') {
-      output.transaction.tx.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
-      output.transaction.tx.coinbase.addr_to = ab2str(output.transaction.tx.coinbase.addr_to)
+      output.transaction.tx.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
+      output.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
       output.transaction.tx.amount = output.transaction.tx.coinbase.amount / SHOR_PER_QUANTA
       output.transaction.explorer = {
         from: '',
         to: output.transaction.tx.addr_to,
-        type: 'TRANSFER',
+        type: 'COINBASE',
       }
     }
   } else {
@@ -37,9 +37,9 @@ const txResultsRefactor = (res) => {
   }
 
   if (output.transaction.tx.transactionType === 'transfer') {
-    output.transaction.tx.addr_from = ab2str(output.transaction.tx.addr_from)
-    output.transaction.tx.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
-    output.transaction.tx.transfer.addr_to = ab2str(output.transaction.tx.transfer.addr_to)
+    output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+    output.transaction.tx.addr_to = 'Q' + Buffer.from(output.transaction.tx.transfer.addr_to).toString('hex')
+    output.transaction.tx.transfer.addr_to = 'Q' + Buffer.from(output.transaction.tx.transfer.addr_to).toString('hex')
     output.transaction.tx.amount = output.transaction.tx.transfer.amount / SHOR_PER_QUANTA
     output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
@@ -61,8 +61,8 @@ const txResultsRefactor = (res) => {
     })
     output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.explorer = {
-      from: ab2str(output.transaction.tx.addr_from),
-      to: ab2str(output.transaction.tx.addr_from),
+      from: 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex'),
+      to: 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex'),
       signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
       publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
       symbol: ab2str(output.transaction.tx.token.symbol),
@@ -76,8 +76,8 @@ const txResultsRefactor = (res) => {
   if (output.transaction.tx.transactionType === 'transfer_token') {
     output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.explorer = {
-      from: ab2str(output.transaction.tx.addr_from),
-      to: ab2str(output.transaction.tx.transfer_token.addr_to),
+      from: 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex'),
+      to: 'Q' + Buffer.from(output.transaction.tx.transfer_token.addr_to).toString('hex'),
       signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
       publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
       token_txhash: Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex'),
@@ -89,7 +89,7 @@ const txResultsRefactor = (res) => {
   if (output.transaction.tx.transactionType === 'slave') {
     output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.explorer = {
-      from: ab2str(output.transaction.tx.addr_from),
+      from: 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex'),
       to: '',
       signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
       publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
@@ -184,7 +184,7 @@ Template.tx.helpers({
     }
   },
   ts() {
-    const x = moment.unix(this.header.timestamp.seconds)
+    const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).format('HH:mm D MMM YYYY')
   },
   color() {

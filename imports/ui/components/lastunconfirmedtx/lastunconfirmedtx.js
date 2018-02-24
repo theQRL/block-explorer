@@ -26,8 +26,6 @@ Template.lastunconfirmedtx.helpers({
     }
     return false
   },
-
-
   amount() {
     if (this.tx.coinbase) {
       return (this.tx.coinbase.amount / SHOR_PER_QUANTA).toFixed(9)
@@ -47,7 +45,7 @@ Template.lastunconfirmedtx.helpers({
     return this.header.block_number
   },
   ts() {
-    const x = moment.unix(this.header.timestamp.seconds)
+    const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).format('HH:mm D MMM YYYY')
   },
   zeroCheck() {
@@ -92,7 +90,6 @@ Template.lastunconfirmedtx.events({
   'click .refresh': () => {
     Session.set('lastunconfirmedtx', {})
     Meteor.call('lastunconfirmedtx', (err, res) => {
-      console.log(res)
       // The method call sets the Session variable to the callback value
       if (err) {
         Session.set('lastunconfirmedtx', { error: err })

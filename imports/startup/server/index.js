@@ -12,7 +12,8 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 //  import { QRLLIB } from 'qrllib/build/web-libjsqrl.js'
 
 // The address of the API node used
-let API_NODE_ADDRESS = '104.237.3.185:9009'
+//let API_NODE_ADDRESS = '104.237.3.185:9009' // Testnet
+let API_NODE_ADDRESS = '35.177.114.111:9009' // Devnet
 
 // Create a temp file to store the qrl.proto file in
 let qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
@@ -96,7 +97,7 @@ export const getLatestData = (request, callback) => {
 export const getStats = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
-      qrlClient.API.GetStats(request, (error, response) => {        
+      qrlClient.API.GetStats(request, (error, response) => {
         if (error) {
           const myError = errorCallback(error, 'Cannot access API/GetStats/a', '**ERROR/getStats/a** ')
           callback(myError, null)

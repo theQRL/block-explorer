@@ -28,11 +28,11 @@ Template.lastblocks.helpers({
     return res
   },
   ts() {
-    const x = moment.unix(this.header.timestamp.seconds)
+    const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).format('HH:mm:ss D MMM YYYY')
   },
   tsReadable() {
-    const x = moment.unix(this.header.timestamp.seconds)
+    const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).fromNow()
   },
   interval() {

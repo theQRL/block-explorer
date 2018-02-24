@@ -13,20 +13,17 @@ Template.appHome.onRendered(() => {
   $('#chart').parent().height(h)
 
  
-  // Draw chart on homepage
+  // Call stats API to get timeseries data for homepage chart
   Meteor.call('getStats', { include_timeseries: true }, (err, res) => {
     if (err) {
       console.log(err)
     } else {
-      console.log('stat')
-      console.log(res)
-
       let chartLineData = {
         labels: [],
         datasets: [],
       }
 
-      // Build Difficulty and hash power datasets and Block # labels
+      // Create chart axis objects
       let labels = []
       let hashPower = {
         label: 'Hash Power (hps)',
@@ -70,7 +67,7 @@ Template.appHome.onRendered(() => {
         borderWidth: 2,
       }
 
-
+      // Loop all API responses and push data into axis objects
       _.each(res.block_timeseries, (entry) => {
         labels.push(entry.number)
         hashPower.data.push(entry.hash_power)
@@ -79,14 +76,15 @@ Template.appHome.onRendered(() => {
         blockTime.data.push(entry.time_last)
       })
 
+      // Push axis objects into chart data
       chartLineData.labels = labels
       chartLineData.datasets.push(hashPower)
       chartLineData.datasets.push(difficulty)
       chartLineData.datasets.push(movingAverage)
       chartLineData.datasets.push(blockTime)
 
+      // Draw chart
       const ctx = document.getElementById('myChart').getContext('2d')
-
       let myChart = new Chart(ctx, {
         type: 'line',
         data: chartLineData,
