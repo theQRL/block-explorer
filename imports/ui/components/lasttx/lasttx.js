@@ -7,8 +7,6 @@ const renderLastTxBlock = () => {
       Session.set('lasttx', { error: err })
     } else {
       Session.set('lasttx', res)
-
-      console.log(res)
     }
   })
 }
@@ -41,7 +39,7 @@ Template.lasttx.helpers({
     return this.header.block_number
   },
   ts() {
-    const x = moment.unix(this.header.timestamp.seconds)
+    const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).format('HH:mm D MMM YYYY')
   },
   zeroCheck() {
@@ -51,31 +49,31 @@ Template.lasttx.helpers({
     return ret
   },
   isTransfer(txType) {
-    if(txType == "TRANSFER") {
+    if(txType == "transfer") {
       return true
     }
     return false
   },
   isTokenCreation(txType) {
-    if(txType == "TOKEN") {
+    if(txType == "token") {
       return true
     }
     return false
   },
   isTokenTransfer(txType) {
-    if(txType == "TRANSFERTOKEN") {
+    if(txType == "transfer_token") {
       return true
     }
     return false
   },
   isCoinbaseTxn(txType) {
-    if(txType == "COINBASE") {
+    if(txType == "coinbase") {
       return true
     }
     return false
   },
   isSlaveTxn(txType) {
-    if(txType == "SLAVE") {
+    if(txType == "slave") {
       return true
     }
     return false

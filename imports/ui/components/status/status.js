@@ -22,21 +22,17 @@ Template.status.onCreated(() => {
 Template.status.helpers({
   quantaUsd() {
     let quantaUsd = Session.get('quantaUsd').toFixed(2)
+    quantaUsd = quantaUsd.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
     return quantaUsd
   },
   marketCap() {
     const x = Session.get('status')
     let quantaUsd =  Session.get('quantaUsd').toFixed(2)
-    let coinsInCirculation = parseFloat(x.coins_emitted)
-    const marketCap = quantaUsd * coinsInCirculation
-    // TODO
-    // Can get rid of this if statement next fork.
-    // Emmision not showing correctly at the moment.
-    if(marketCap == 0) {
-      return "0.00"
-    } else {
-      return marketCap
-    }
+    let coinsInCirculation = Math.round(parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
+    let marketCap = Math.round(quantaUsd * coinsInCirculation)
+    marketCap = marketCap.toFixed(2)
+    marketCap = marketCap.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+    return marketCap
   },
   status() {
     return Session.get('status')
@@ -50,7 +46,7 @@ Template.status.helpers({
     const x = Session.get('status')
     let r = 'Undetermined'
     try {
-      r = Math.round(parseFloat(x.coins_emitted) / parseFloat(x.coins_total_supply))
+      r = Math.round(((parseFloat(x.coins_emitted) / SHOR_PER_QUANTA) / parseFloat(x.coins_total_supply)) * 100)
     } catch (e) {
       r = 'Error parsing API results'
     }
@@ -69,7 +65,7 @@ Template.status.helpers({
   reward(rew) {
     let r = 'Undetermined'
     try {
-      const x = parseFloat(rew) / 1000000000
+      const x = parseFloat(rew) / SHOR_PER_QUANTA
       r = `${x}`
     } catch (e) {
       r = 'Error parsing API results'
@@ -80,7 +76,7 @@ Template.status.helpers({
     const x = Session.get('status')
     let r = 'Undetermined'
     try {
-      r = parseFloat(x.coins_total_supply) - parseFloat(x.coins_emitted)
+      r = parseFloat(x.coins_total_supply) - (parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
     } catch (e) {
       r = 'Error parsing API results'
     }

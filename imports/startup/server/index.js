@@ -12,7 +12,8 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 //  import { QRLLIB } from 'qrllib/build/web-libjsqrl.js'
 
 // The address of the API node used
-let API_NODE_ADDRESS = '104.237.3.185:9009'
+let API_NODE_ADDRESS = '104.237.3.185:9009' // Testnet
+// let API_NODE_ADDRESS = '35.177.114.111:9009' // Devnet
 
 // Create a temp file to store the qrl.proto file in
 let qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
@@ -96,7 +97,7 @@ export const getLatestData = (request, callback) => {
 export const getStats = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
-      qrlClient.API.GetStats(request, (error, response) => {        
+      qrlClient.API.GetStats(request, (error, response) => {
         if (error) {
           const myError = errorCallback(error, 'Cannot access API/GetStats/a', '**ERROR/getStats/a** ')
           callback(myError, null)
@@ -211,11 +212,11 @@ Meteor.methods({
     // asynchronous call to API
     const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 5 })
     response.transactions.forEach (function (item, index) {
-      if (item.tx.type == "TOKEN") {
+      if (item.tx.transactionType == "token") {
         // Store plain text version of token symbol
         response.transactions[index].tx.tokenSymbol = 
           Buffer.from(item.tx.token.symbol).toString()
-      } else if (item.tx.type == "TRANSFERTOKEN") {
+      } else if (item.tx.transactionType == "transfer_token") {
         // Request Token Symbol
         const symbolRequest = {
           query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')
@@ -236,11 +237,11 @@ Meteor.methods({
     // asynchronous call to API
     const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
     response.transactions_unconfirmed.forEach (function (item, index) {
-      if (item.tx.type == "TOKEN") {
+      if (item.tx.transactionType == "token") {
         // Store plain text version of token symbol
         response.transactions_unconfirmed[index].tx.tokenSymbol = 
           Buffer.from(item.tx.token.symbol).toString()
-      } else if (item.tx.type == "TRANSFERTOKEN") {
+      } else if (item.tx.transactionType == "transfer_token") {
         // Request Token Symbol
         const symbolRequest = {
           query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')
@@ -292,6 +293,8 @@ Meteor.methods({
 
   addressTransactions(targets) {
     check(targets, Array)
+    this.unblock()
+
     // TODO: throw an error if greater than 10
     const result = []
     targets.forEach((arr) => {
