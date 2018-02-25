@@ -59,9 +59,10 @@ const addressTransactionsRefactor = (res) => {
         edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
         edit.transaction.tx.transaction_hash = Buffer.from(edit.transaction.tx.transaction_hash).toString('hex')
         edit.transaction.tx.fee /= SHOR_PER_QUANTA
+
         if (edit.transaction.tx.transactionType === 'coinbase') {
           edit.transaction.tx.addr_to = 'Q' + Buffer.from(edit.transaction.tx.coinbase.addr_to).toString('hex')
-          edit.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(edit.transaction.tx.coinbase.addr_t).toString('hex')
+          edit.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(edit.transaction.tx.coinbase.addr_to).toString('hex')
           edit.transaction.tx.coinbase.amount /= SHOR_PER_QUANTA
           edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
         }
@@ -99,8 +100,9 @@ const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
   if (aId) {
     const req = {
-      address: Buffer.from(aId, 'ascii'),
+      address: addressForAPI(aId),
     }
+
     Meteor.call('getAddressState', req, (err, res) => {
       if (err) {
         Session.set('address', { error: err, id: aId })

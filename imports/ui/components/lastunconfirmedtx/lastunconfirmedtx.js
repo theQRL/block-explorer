@@ -55,31 +55,31 @@ Template.lastunconfirmedtx.helpers({
     return ret
   },
   isTransfer(txType) {
-    if(txType == "TRANSFER") {
+    if(txType == "transfer") {
       return true
     }
     return false
   },
   isTokenCreation(txType) {
-    if(txType == "TOKEN") {
+    if(txType == "token") {
       return true
     }
     return false
   },
   isTokenTransfer(txType) {
-    if(txType == "TRANSFERTOKEN") {
+    if(txType == "transfer_token") {
       return true
     }
     return false
   },
   isCoinbaseTxn(txType) {
-    if(txType == "COINBASE") {
+    if(txType == "coinbase") {
       return true
     }
     return false
   },
   isSlaveTxn(txType) {
-    if(txType == "SLAVE") {
+    if(txType == "slave") {
       return true
     }
     return false

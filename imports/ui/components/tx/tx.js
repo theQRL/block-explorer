@@ -15,17 +15,22 @@ const txResultsRefactor = (res) => {
     output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
     output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
     output.transaction.header.merkle_root = Buffer.from(output.transaction.header.merkle_root).toString('hex')
-
-    output.transaction.header.stake_selector = ab2str(output.transaction.header.stake_selector)
+    output.transaction.header.PK = Buffer.from(output.transaction.header.PK).toString('hex')
 
     output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
     // output.transaction.tx.addr_to = ''
     output.transaction.tx.amount = ''
 
     if (output.transaction.tx.transactionType === 'coinbase') {
+      output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
       output.transaction.tx.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
       output.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
       output.transaction.tx.amount = output.transaction.tx.coinbase.amount / SHOR_PER_QUANTA
+
+      output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+      output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+      output.transaction.tx.coinbase.headerhash = Buffer.from(output.transaction.tx.coinbase.headerhash).toString('hex')
+
       output.transaction.explorer = {
         from: '',
         to: output.transaction.tx.addr_to,
@@ -55,19 +60,28 @@ const txResultsRefactor = (res) => {
     const balances = []
     output.transaction.tx.token.initial_balances.forEach((value) => {
       const edit = value
-      edit.address = ab2str(edit.address)
+      edit.address = 'Q' + Buffer.from(edit.address).toString('hex'),
       edit.amount = edit.amount / SHOR_PER_QUANTA
       balances.push(edit)
     })
+
+    output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+
+    output.transaction.tx.token.symbol = ab2str(output.transaction.tx.token.symbol)
+    output.transaction.tx.token.name = ab2str(output.transaction.tx.token.name)
+    output.transaction.tx.token.owner = 'Q' + Buffer.from(output.transaction.tx.token.owner).toString('hex')
+
     output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
     output.transaction.explorer = {
-      from: 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex'),
-      to: 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex'),
-      signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
-      publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
-      symbol: ab2str(output.transaction.tx.token.symbol),
-      name: ab2str(output.transaction.tx.token.name),
-      owner: ab2str(output.transaction.tx.token.owner),
+      from: output.transaction.tx.addr_from,
+      to: output.transaction.tx.addr_from,
+      signature: output.transaction.tx.signature,
+      publicKey: output.transaction.tx.public_key,
+      symbol: output.transaction.tx.token.symbol,
+      name: output.transaction.tx.token.name,
+      owner: output.transaction.tx.token.owner,
       initialBalances: balances,
       type: 'CREATE TOKEN',
     }
@@ -75,12 +89,19 @@ const txResultsRefactor = (res) => {
   
   if (output.transaction.tx.transactionType === 'transfer_token') {
     output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
+
+    output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+    output.transaction.tx.transfer_token.addr_to = 'Q' + Buffer.from(output.transaction.tx.transfer_token.addr_to).toString('hex')
+    output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
+    
     output.transaction.explorer = {
-      from: 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex'),
-      to: 'Q' + Buffer.from(output.transaction.tx.transfer_token.addr_to).toString('hex'),
-      signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
-      publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
-      token_txhash: Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex'),
+      from: output.transaction.tx.addr_from,
+      to: output.transaction.tx.transfer_token.addr_to,
+      signature: output.transaction.tx.signature,
+      publicKey: output.transaction.tx.public_key,
+      token_txhash: output.transaction.tx.transfer_token.token_txhash,
       amount: output.transaction.tx.transfer_token.amount / SHOR_PER_QUANTA,
       type: 'TRANSFER TOKEN',
     }
@@ -88,11 +109,16 @@ const txResultsRefactor = (res) => {
 
   if (output.transaction.tx.transactionType === 'slave') {
     output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
+
+    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+    output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+
     output.transaction.explorer = {
-      from: 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex'),
+      from: output.transaction.tx.addr_from,
       to: '',
-      signature: Buffer.from(output.transaction.tx.signature).toString('hex'),
-      publicKey: Buffer.from(output.transaction.tx.public_key).toString('hex'),
+      signature: output.transaction.tx.signature,
+      publicKey: output.transaction.tx.public_key,
       amount: output.transaction.tx.amount,
       type: 'SLAVE',
     }
@@ -136,9 +162,11 @@ Template.tx.onCreated(() => {
 
 Template.tx.helpers({
   tx() {
-    // console.log(Session.get('txhash'))
     if (Session.get('txhash').found === true) {
-      return Session.get('txhash').transaction
+      let txhash = Session.get('txhash').transaction
+      let signature = txhash.tx.signature
+      txhash.tx.ots_key = parseInt(signature.substring(0, 8), 16)
+      return txhash
     }
     if (Session.get('txhash').found === false) {
       return { notFound: true, parameter: FlowRouter.getParam('txId') }

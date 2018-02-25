@@ -22,21 +22,17 @@ Template.status.onCreated(() => {
 Template.status.helpers({
   quantaUsd() {
     let quantaUsd = Session.get('quantaUsd').toFixed(2)
+    quantaUsd = quantaUsd.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
     return quantaUsd
   },
   marketCap() {
     const x = Session.get('status')
     let quantaUsd =  Session.get('quantaUsd').toFixed(2)
-    let coinsInCirculation = parseFloat(x.coins_emitted)
-    const marketCap = quantaUsd * coinsInCirculation
-    // TODO
-    // Can get rid of this if statement next fork.
-    // Emmision not showing correctly at the moment.
-    if(marketCap == 0) {
-      return "0.00"
-    } else {
-      return marketCap
-    }
+    let coinsInCirculation = Math.round(parseFloat(x.coins_emitted) / 10000000)
+    let marketCap = Math.round(quantaUsd * coinsInCirculation)
+    marketCap = marketCap.toFixed(2)
+    marketCap = marketCap.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+    return marketCap
   },
   status() {
     return Session.get('status')

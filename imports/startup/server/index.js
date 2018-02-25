@@ -212,11 +212,11 @@ Meteor.methods({
     // asynchronous call to API
     const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 5 })
     response.transactions.forEach (function (item, index) {
-      if (item.tx.type == "TOKEN") {
+      if (item.tx.transactionType == "token") {
         // Store plain text version of token symbol
         response.transactions[index].tx.tokenSymbol = 
           Buffer.from(item.tx.token.symbol).toString()
-      } else if (item.tx.type == "TRANSFERTOKEN") {
+      } else if (item.tx.transactionType == "transfer_token") {
         // Request Token Symbol
         const symbolRequest = {
           query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')
@@ -237,11 +237,11 @@ Meteor.methods({
     // asynchronous call to API
     const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
     response.transactions_unconfirmed.forEach (function (item, index) {
-      if (item.tx.type == "TOKEN") {
+      if (item.tx.transactionType == "token") {
         // Store plain text version of token symbol
         response.transactions_unconfirmed[index].tx.tokenSymbol = 
           Buffer.from(item.tx.token.symbol).toString()
-      } else if (item.tx.type == "TRANSFERTOKEN") {
+      } else if (item.tx.transactionType == "transfer_token") {
         // Request Token Symbol
         const symbolRequest = {
           query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')

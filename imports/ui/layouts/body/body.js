@@ -11,7 +11,7 @@ Template.appBody.onRendered(() => {
 
 const identifySearch = (str) => {
   const type = { parameter: str, type: 'Undetermined' }
-  if (str.length === 73 && str.charAt(0) === 'Q') {
+  if (str.length === 79 && str.charAt(0) === 'Q') {
     type.type = 'Address'
     type.route = `/a/${str}`
   }
