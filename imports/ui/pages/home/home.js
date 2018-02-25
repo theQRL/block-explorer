@@ -16,6 +16,9 @@ Template.appHome.onRendered(() => {
   // Call stats API to get timeseries data for homepage chart
   setTimeout(() => { // Temporary work around so we don't delay latest txn. Will move to cache soon.
     Meteor.call('getStats', { include_timeseries: true }, (err, res) => {
+
+      $('#chartLoading').hide();
+
       if (err) {
         console.log(err)
       } else {

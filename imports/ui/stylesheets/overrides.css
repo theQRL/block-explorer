@@ -416,3 +416,75 @@ input {
 #chart {
   position: relative;
 }
+
+
+
+
+
+/* 
+SVG styling
+*/
+
+.svg__loading {
+  height: 150px;
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+}
+
+.svg__loading-won {
+  fill: #DC255D; 
+}
+
+.svg__loading-lost {
+  fill: #4A90E2; 
+}
+
+.svg__loading-new {
+  fill: #0A0724; 
+}
+
+.svg__loading-open {
+  fill: #1EE9CB; 
+}
+
+
+/* 
+"Loading Segments" copy
+*/
+.snapshot__loading {
+  position: relative;
+  font-family: "Apex Sans", "Helvetica", sans-serif;
+  height: 150px;
+  padding-top: 20px;
+  text-align: center; 
+}
+
+.snapshot__loading-info::after {
+  width: 0;
+  opacity: 0.3;
+  position: absolute;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+  padding-left: 0.25em;
+  content: "\2026";
+  -webkit-animation: ellipsis 2s infinite; 
+}
+
+/* 
+Ellipsis Animation
+*/
+@-webkit-keyframes ellipsis {
+  0% {
+    width: 0.25em;
+  }
+
+  50% {
+    width: 0.6em;
+  }
+
+  100% {
+    width: 1em;
+  } 
+}

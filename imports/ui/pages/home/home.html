@@ -9,8 +9,75 @@
       <div class="ten wide column">
         <div class="ui segment">
           <div id="chart">
+            <section id="chartLoading" class="snapshot__loading">
+               <svg class="svg__loading" viewBox="0 0 311 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <path d="M0,0 L0,119 L74.6161228,119 L74.6161228,0 L0,0 Z M78.7946257,0 L78.7946257,119 L153.410749,119 L153.410749,0 L78.7946257,0 Z M157.589251,0 L157.589251,119 L232.205374,119 L232.205374,0 L157.589251,0 Z M236.383877,0 L236.383877,119 L311,119 L311,0 L236.383877,0 Z" id="Rectangle-1-copy" fill="#FAFAFA"></path>
+                    <rect class="svg__loading-new" x="0" y="74.618705" width="74.6161228" height="100%">
+                        <animate id="animate__new-bar"
+                        attributeName="y"
+                        from="74.618705"
+                        to="74.618705"
+                        begin="0s"
+                        dur="1.5s"
+                        values="74.618705; 0; 74.618705; 74.618705; 74.618705"
+                        keySplines=".75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99"
+                        keyTimes="0; 0.25; 0.5; 0.75; 1"
+                        calcMode="spline"
+                        repeatCount="indefinite"/>
+                    </rect>
+                    <rect class="svg__loading-open" x="78.7946257"  y="37"  width="74.6161228" height="100%">
+                        <animate id="animate__open-bar"
+                        attributeName="y"
+                        from="37"
+                        to="37"
+                        begin="0.1s"
+                        dur="1.5s"
+                        values="37; 0; 37; 37; 37"
+                        keySplines=".75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99"
+                        keyTimes="0; 0.25; 0.5; 0.75; 1"
+                        calcMode="spline"
+                        repeatCount="indefinite"/>
+                    </rect>
+                    <rect class="svg__loading-won"  x="157.589251"  y="57.3021583"  width="74.6161228" height="100%">
+                        <animate id="animate__won-bar"
+                        attributeName="y"
+                        from="57.3021583"
+                        to="57.3021583"
+                        begin="0.2s"
+                        dur="1.5s"
+                        values="57.3021583; 0; 57.3021583; 57.3021583; 57.3021583"
+                        keySplines=".75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99"
+                        keyTimes="0; 0.25; 0.5; 0.75; 1"
+                        calcMode="spline"
+                        repeatCount="indefinite"/>
+                    </rect>
+                    <rect class="svg__loading-lost" x="236.383877"  y="97.3093525"  width="74.6161228" height="100%">
+                        <animate id="animate__lost-bar"
+                        attributeName="y"
+                        from="97.3093525"
+                        to="97.3093525"
+                        begin="0.3s"
+                        dur="1.5s"
+                        values="97.3093525; 0; 97.3093525; 97.3093525; 97.3093525"
+                        keySplines=".75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99"
+                        keyTimes="0; 0.25; 0.5; 0.75; 1"
+                        calcMode="spline"
+                        repeatCount="indefinite"/>
+                    </rect>
+                </g>
+              </svg>
+              <p class="snapshot__loading-info">Loading Chart</p>
+            </section>
+
+
             <canvas id="myChart"></canvas>
+
           </div>
+
+
+
+
         </div>
       </div>
     </div>
