@@ -114,6 +114,11 @@ const txResultsRefactor = (res) => {
     output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
     output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
 
+    output.transaction.tx.slave.slave_pks.forEach((value, index) => {
+      output.transaction.tx.slave.slave_pks[index] = 
+        Buffer.from(value).toString('hex')
+    })
+
     output.transaction.explorer = {
       from: output.transaction.tx.addr_from,
       to: '',
