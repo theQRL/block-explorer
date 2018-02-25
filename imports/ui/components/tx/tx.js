@@ -163,6 +163,13 @@ Template.tx.onCreated(() => {
   Session.set('qrl', 0)
   Session.set('status', {})
   renderTxBlock()
+
+  // Track changes to Flow Router Path
+  Tracker.autorun(function() {
+      FlowRouter.watchPathChange();
+      renderTxBlock()
+  });
+
 })
 
 Template.tx.helpers({
