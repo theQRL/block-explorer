@@ -145,7 +145,7 @@ const getStakers = (request, callback) => {
   }
 }
 
-const getObject = (request, callback) => {
+export const getObject = (request, callback) => {
   if (qrlClient.length !== 0) {
     try {
       qrlClient.API.GetObject(request, (error, response) => {

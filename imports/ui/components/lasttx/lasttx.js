@@ -1,6 +1,8 @@
+import { lasttx } from '/imports/api/index.js'
 import './lasttx.html'
 
 const renderLastTxBlock = () => {
+  /*
   Meteor.call('lasttx', (err, res) => {
     // The method call sets the Session variable to the callback value
     if (err) {
@@ -9,16 +11,24 @@ const renderLastTxBlock = () => {
       Session.set('lasttx', res)
     }
   })
+  */
+
+  const res = lasttx.findOne()
+  Session.set('lasttx', res)
 }
 
 Template.lasttx.onCreated(() => {
   Session.set('lasttx', {})
+  Meteor.subscribe('lasttx')
   renderLastTxBlock()
 })
 
 Template.lasttx.helpers({
   lasttx() {    
-    return Session.get('lasttx')
+    //return Session.get('lasttx')
+    const res = lasttx.findOne()
+    console.log(res)
+    return res
   },
   amount() {
     if (this.tx.coinbase) {
@@ -46,6 +56,7 @@ Template.lasttx.helpers({
     let ret = false
     const x = Session.get('lasttx').transactions
     if (x) { if (x.length === 0) { ret = true } }
+    if (x === undefined) { ret = true }
     return ret
   },
   isTransfer(txType) {
