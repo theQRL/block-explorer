@@ -65,7 +65,7 @@ Template.status.helpers({
   reward(rew) {
     let r = 'Undetermined'
     try {
-      const x = parseFloat(rew) / 1000000000
+      const x = parseFloat(rew) / SHOR_PER_QUANTA
       r = `${x}`
     } catch (e) {
       r = 'Error parsing API results'
