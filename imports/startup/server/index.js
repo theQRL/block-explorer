@@ -12,8 +12,8 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 //  import { QRLLIB } from 'qrllib/build/web-libjsqrl.js'
 
 // The address of the API node used
-/// let API_NODE_ADDRESS = '104.237.3.185:9009' // Testnet
-let API_NODE_ADDRESS = '35.177.114.111:9009' // Devnet
+let API_NODE_ADDRESS = '104.237.3.185:9009' // Testnet
+// let API_NODE_ADDRESS = '35.177.114.111:9009' // Devnet
 
 // Create a temp file to store the qrl.proto file in
 let qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
