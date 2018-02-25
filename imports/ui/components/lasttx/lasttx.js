@@ -27,7 +27,6 @@ Template.lasttx.helpers({
   lasttx() {    
     //return Session.get('lasttx')
     const res = lasttx.findOne()
-    console.log(res)
     return res
   },
   amount() {
