@@ -293,6 +293,8 @@ Meteor.methods({
 
   addressTransactions(targets) {
     check(targets, Array)
+    this.unblock()
+
     // TODO: throw an error if greater than 10
     const result = []
     targets.forEach((arr) => {
