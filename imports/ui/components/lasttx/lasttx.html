@@ -104,6 +104,25 @@
 
 
 
+    {{#if isLatticePKTxn this.tx.transactionType}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <div class="content">
+        <div class="header">
+          Lattice Public Key | Block <a href="/block/{{block}}">{{block}}</a> Timestamp: {{ts}}
+        </div>
+        <p class="transactionAddress">
+          {{tx_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+        <a href="/tx/{{tx_hash}}">View Transaction &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
+
+
   {{/each}}
 {{/if}} {{/with}}
 

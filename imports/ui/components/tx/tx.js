@@ -128,6 +128,27 @@ const txResultsRefactor = (res) => {
       type: 'SLAVE',
     }
   }
+
+
+  if (output.transaction.tx.transactionType === 'latticePK') {
+    output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
+
+    output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+    output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+    output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+
+    output.transaction.tx.latticePK.kyber_pk = Buffer.from(output.transaction.tx.latticePK.kyber_pk).toString('hex')
+    output.transaction.tx.latticePK.dilithium_pk = Buffer.from(output.transaction.tx.latticePK.dilithium_pk).toString('hex')
+
+    output.transaction.explorer = {
+      from: output.transaction.tx.addr_from,
+      to: '',
+      signature: output.transaction.tx.signature,
+      publicKey: output.transaction.tx.public_key,
+      amount: output.transaction.tx.amount,
+      type: 'LATTICE PK',
+    }
+  }
   return output
 }
 

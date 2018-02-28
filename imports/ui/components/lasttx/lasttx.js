@@ -87,6 +87,12 @@ Template.lasttx.helpers({
       return true
     }
     return false
+  },
+  isLatticePKTxn(txType) {
+    if(txType == "latticePK") {
+      return true
+    }
+    return false
   }
 })
 

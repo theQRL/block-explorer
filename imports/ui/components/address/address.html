@@ -179,6 +179,24 @@
         </div>
       </div>
       {{/if}}
+
+      {{#if isLatticePKTxn this.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            Lattice Public Key
+          </div>
+          <p class="transactionAddress">
+            {{this.from}}
+          </p>
+        </div>
+        <div class="floatright">
+          <a href="/tx/{{this.txhash}}">View Transactions &gt;</a>
+        </div>
+      </div>
+      {{/if}}
+
     {{/each}}
       <table class="ui striped table">
         {{#if pagination}}
