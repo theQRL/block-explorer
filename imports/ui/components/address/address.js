@@ -376,6 +376,12 @@ Template.address.helpers({
     }
     return false
   },
+  isLatticePKTxn(txType) {
+    if(txType == "latticePK") {
+      return true
+    }
+    return false
+  },
   tokensHeld() {
     return Session.get('tokensHeld')
   },
