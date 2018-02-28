@@ -154,7 +154,7 @@
             Coinbase Received
           </div>
           <p class="transactionAddress">
-            {{this.from}}
+            {{this.txhash}}
           </p>
         </div>
         <div class="floatright">
@@ -171,7 +171,7 @@
             Slave Transaction
           </div>
           <p class="transactionAddress">
-            {{this.from}}
+            {{this.txhash}}
           </p>
         </div>
         <div class="floatright">
@@ -188,11 +188,11 @@
             Lattice Public Key
           </div>
           <p class="transactionAddress">
-            {{this.from}}
+            {{this.txhash}}
           </p>
         </div>
         <div class="floatright">
-          <a href="/tx/{{this.txhash}}">View Transactions &gt;</a>
+          <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
         </div>
       </div>
       {{/if}}
