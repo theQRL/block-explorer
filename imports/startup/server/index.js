@@ -308,6 +308,125 @@ Meteor.methods({
     return result
   },
 
+
+  addressTransactions2(request) {
+    check(request, Object)
+
+    const targets = request.tx
+    let result = []
+    targets.forEach((arr) => {
+
+      const req = { query: Buffer.from(arr.txhash, 'hex') }
+
+      try {
+        const thisTxnHashResponse = Meteor.wrapAsync(getObject)(req)
+
+        if (thisTxnHashResponse.found === true && thisTxnHashResponse.result === 'transaction') {
+
+          thisTxnHashResponse.transaction.tx.addr_from =
+            'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.addr_from).toString('hex')
+          thisTxnHashResponse.transaction.tx.transaction_hash =
+            Buffer.from(thisTxnHashResponse.transaction.tx.transaction_hash).toString('hex')
+          
+          thisTxnHashResponse.transaction.tx.addr_to = ''
+          thisTxnHashResponse.transaction.tx.amount = ''
+
+          if (thisTxnHashResponse.transaction.coinbase) {
+            thisTxnHashResponse.transaction.tx.addr_to =
+              'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.coinbase.addr_to).toString('hex')
+            thisTxnHashResponse.transaction.tx.coinbase.addr_to =
+              'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.coinbase.addr_to).toString('hex')
+            thisTxnHashResponse.transaction.tx.amount = thisTxnHashResponse.transaction.tx.coinbase.amount / SHOR_PER_QUANTA
+          }
+
+          if (thisTxnHashResponse.transaction.tx.transfer) {
+            thisTxnHashResponse.transaction.tx.addr_to =
+              'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.transfer.addr_to).toString('hex')
+            thisTxnHashResponse.transaction.tx.transfer.addr_to =
+              'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.transfer.addr_to).toString('hex')
+            thisTxnHashResponse.transaction.tx.amount = thisTxnHashResponse.transaction.tx.transfer.amount / SHOR_PER_QUANTA
+          }
+
+          thisTxnHashResponse.transaction.tx.public_key = Buffer.from(thisTxnHashResponse.transaction.tx.public_key).toString('hex')
+          thisTxnHashResponse.transaction.tx.signature = Buffer.from(thisTxnHashResponse.transaction.tx.signature).toString('hex')
+        }
+
+        let thisTxn = {}
+
+        if (thisTxnHashResponse.transaction.tx.transactionType == "transfer") {
+          thisTxn = {
+            type: thisTxnHashResponse.transaction.tx.transactionType,
+            txhash: arr.txhash,
+            amount: thisTxnHashResponse.transaction.tx.amount,
+            from: thisTxnHashResponse.transaction.tx.addr_from,
+            to: thisTxnHashResponse.transaction.tx.addr_to,
+            ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
+            fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
+            block: thisTxnHashResponse.transaction.header.block_number,
+            timestamp: thisTxnHashResponse.transaction.header.timestamp_seconds,
+          }
+
+          result.push(thisTxn)
+        } else if (thisTxnHashResponse.transaction.tx.transactionType == "token") {
+          thisTxn = {
+            type: thisTxnHashResponse.transaction.tx.transactionType,
+            txhash: arr.txhash,
+            from: thisTxnHashResponse.transaction.tx.addr_from,
+            symbol: Buffer.from(thisTxnHashResponse.transaction.tx.token.symbol).toString(),
+            name: Buffer.from(thisTxnHashResponse.transaction.tx.token.name).toString(),
+            ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
+            fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
+            block: thisTxnHashResponse.transaction.header.block_number,
+            timestamp: thisTxnHashResponse.transaction.header.timestamp_seconds,
+          }
+
+          result.push(thisTxn)
+        } else if (thisTxnHashResponse.transaction.tx.transactionType == "transfer_token") {
+          // Request Token Symbol
+          const symbolRequest = {
+            query: Buffer.from(Buffer.from(thisTxnHashResponse.transaction.tx.transfer_token.token_txhash).toString('hex'), 'hex')
+          }
+
+          const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+          const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+
+          thisTxn = {
+            type: thisTxnHashResponse.transaction.tx.transactionType,
+            txhash: arr.txhash,
+            symbol: thisSymbol,
+            amount: thisTxnHashResponse.transaction.tx.transfer_token.amount / SHOR_PER_QUANTA,
+            from: thisTxnHashResponse.transaction.tx.addr_from,
+            to: 'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.transfer_token.addr_to).toString('hex'),
+            ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
+            fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
+            block: thisTxnHashResponse.transaction.header.block_number,
+            timestamp: thisTxnHashResponse.transaction.header.timestamp_seconds,
+          }
+
+          result.push(thisTxn)
+        } else if (thisTxnHashResponse.transaction.tx.transactionType == "coinbase") {
+          thisTxn = {
+            type: thisTxnHashResponse.transaction.tx.transactionType,
+            txhash: arr.txhash,
+            amount: thisTxnHashResponse.transaction.tx.coinbase.amount / SHOR_PER_QUANTA,
+            from: thisTxnHashResponse.transaction.tx.addr_from,
+            to: thisTxnHashResponse.transaction.tx.coinbase.addr_to,
+            ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
+            fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
+            block: thisTxnHashResponse.transaction.header.block_number,
+            timestamp: thisTxnHashResponse.transaction.header.timestamp_seconds,
+          }
+          result.push(thisTxn)
+        }
+
+      } catch (err) {
+        console.log(`Error fetching transaction hash in addressTransactions2 '${arr.txhash}' - ${err}`)
+      }
+    })
+
+    return result
+  },
+
   getStats(request = {}) {
     check(request, Object)
     this.unblock()

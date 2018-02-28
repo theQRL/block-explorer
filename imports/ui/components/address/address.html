@@ -1,117 +1,240 @@
 <template name="address">
-  {{#with address}} {{#if error}}
-  <h1>Address <i class="ui refresh red link icon"></i></h1>
-  <div class="ui negative message">
-    <i class="close icon"></i>
-    <div class="header">
-      Error reading address {{address.id}}
-    </div>
-    <p>{{address.error.message}}</p>
+
+
+
+
+
+
+
+
+
+<h2 class="ui pageHeader header">
+  <i class="tiny plus icon"></i>
+  <div class="content wordBreak">
+    {{address.state.address}}
   </div>
-  {{else}}
-  <div class="ui raised fluid card">
-    <div class="content">
-      <div class="header">
-        <h1>Address <i class="ui refresh red link icon"></i> <a class="ui big yellow label"><i
-                    class="qrcode icon"></i>{{address.state.address}}</a></h1> {{#if address.state.empty_warning}}
-        <div class="ui red header">
-          <h6>This appears to be an empty address.  It may be an offline wallet, but you should double-check before transacting Quanta to this wallet address.</h6></div>
-        {{/if}}
-      </div>
-      <div class="description">
-        <div class="ui hidden divider"></div>
-        <div class="ui stackable grid">
-          <div class="eight wide column">
-            <div class="ui basic center aligned segment">
-              <div class="ui statistic">
-                <div class="label">
-                  <div class="ui label">Balance</div>
-                </div>
-                <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
-                  {{address.state.balance}}
-                </div>
-                <div class="label">
-                  Quanta<br><small>USD ${{qrl}}</small>
-                </div>
-              </div>
+</h2>
+
+<div class="ui segment pageSegment">
+
+  <div class="description">
+    <div class="ui hidden divider"></div>
+    <div class="ui stackable grid">
+      <div class="twelve wide column">
+        <div class="ui basic center aligned segment">
+          <div class="ui statistic">
+            <div class="label">
+              <div class="ui label">Balance</div>
+            </div>
+            <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
+              {{address.state.balance}}
+            </div>
+            <div class="label">
+              Quanta<br><small>USD ${{qrl}}</small>
             </div>
           </div>
-          <div class="four wide column center aligned">
-            {{> QRCode text=QRtext size="128px"}}
-          </div>
         </div>
-        <div class="ui celled horizontal list">
-<!--           <div class="item">
-            <button class="ui mini blue button" id="ShowTx"><i class="down arrow icon"></i> Show transactions
-            </button>
-            <button class="ui mini blue button" id="HideTx"><i class="up arrow icon"></i> Hide transactions
-            </button>
-          </div> -->
-          <div class="item"><strong>Transactions</strong> {{state.txcount}}</div>
-          <div class="item"><strong>Nonce</strong> {{state.nonce}}</div>
-        </div>
-        <div class="ui active centered inline loader"></div>
-        <table class="ui striped table">
-          <thead>
-            <th>Time</th>
-            <th>Type</th>
-            <th>Amount</th>
-            <th>Fee</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Txhash</th>
-<!--             <th>Pubhash</th>
-            <th>OTS key</th> -->
-          </thead>
-          <tbody>
-            {{#each addressTx}}
-            <tr>
-              <td>
-                <div class="unbreakable">{{ts}}</div>
-              </td>
-              <td>
-                <div class="ui label {{color}}">{{this.transaction.tx.transactionType}}</div>
-              </td>
-              <td>
-                <div class="unbreakable">{{transaction.tx.amount}}</div>
-              </td>
-              <td>
-                <div class="unbreakable">{{transaction.tx.fee}}</div>
-              </td>
-              <td><a href="/a/{{transaction.tx.addr_from}}">{{transaction.tx.addr_from}}</a></td>
-              <td><a href="/a/{{transaction.tx.addr_to}}">{{transaction.tx.addr_to}}</a></td>
-              <td><a href="/tx/{{transaction.tx.transaction_hash}}">{{transaction.tx.transaction_hash}}</a></td>
-<!--               <td>{{public_key}}</td>
-              <td>{{this.ots_key}}</td> -->
-            </tr>
-            {{/each}}
-          </tbody>
-          {{#if pagination}}
-          <tfoot>
-              <tr><th colspan="7">
-                <div class="ui right floated pagination menu">
-                  {{#if pback}}
-                  <a qrl-data="back" class="icon item">
-                    <i qrl-data="back" class="left chevron icon"></i>
-                  </a>
-                  {{/if}}
-                  {{#each pages}}
-                  <a class="item {{isActive}}">{{this.number}}</a>
-                  {{/each}}
-                  {{#if pforward}}
-                  <a qrl-data="forward" class="icon item">
-                    <i qrl-data="forward" class="right chevron icon"></i>
-                  </a>
-                  {{/if}}
-                </div>
-              </th>
-            </tr></tfoot>
-            {{/if}}
-        </table>
-        <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
-        <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
+      </div>
+      <div class="four wide column center aligned">
+        {{> QRCode text=QRtext size="128px"}}
       </div>
     </div>
+    <div class="ui celled horizontal list">
+      <div class="item"><strong>Transactions</strong> {{address.state.txcount}}</div>
+      <div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>
+    </div>
   </div>
-  {{/if}} {{/with}}
+
+
+  <!-- Send/Receive Section -->
+  <div id="addressTabs" class="ui top attached tabular menu">
+    <a class="item active" data-tab="transactions">Transactions</a>
+    <a class="item" data-tab="tokenBalances">Token Balances</a>
+  </div>
+  <div class="ui bottom attached tab segment active" data-tab="transactions">
+
+    <h2 class="ui header">
+      <div class="content">
+        Transactions
+      </div>
+    </h2>
+
+    <div id="loadingTransactions" class="ui icon message">
+      <br /><br />
+      <i class="notched circle loading icon"></i>
+      <div class="content">
+        <div class="header">
+          Just a moment
+        </div>
+        <p id="relayingMsg">Transaction history loading ...</p>
+      </div>
+    </div>
+
+    {{#each addressTransactions}}
+      {{#if isTransfer this.type}}
+      <div class="ui icon message transactionRecord">
+        {{#if isThisAddress this.from}}
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        {{else}}
+        <img class="transactionTypeImage" src="/img/icons/receive.png" />
+        {{/if}}
+        <div class="content">
+          <div class="header">
+            {{#if isThisAddress this.from}}
+            Sent
+            {{else}}
+            Received
+            {{/if}}
+          </div>
+          <p class="transactionAddress">
+            {{#if isThisAddress this.from}}
+              {{this.to}}
+            {{else}}
+              {{this.from}}
+            {{/if}}
+          </p>
+        </div>
+        <div class="floatright">
+          <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isTokenCreation this.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            Token Creation - {{this.name}} ({{this.symbol}})
+          </div>
+          <p class="transactionAddress">
+            {{this.txhash}}
+          </p>
+        </div>
+        <div class="floatright">
+           <a href="/tx/{{this.txhash}}">{{this.symbol}} &gt;</a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isTokenTransfer this.type}}
+      <div class="ui icon message transactionRecord">
+        {{#if isThisAddress this.from}}
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        {{else}}
+        <img class="transactionTypeImage" src="/img/icons/receive.png" />
+        {{/if}}
+        <div class="content">
+          <div class="header">
+            {{#if isThisAddress this.from}}
+            Sent
+            {{else}}
+            Received
+            {{/if}}
+          </div>
+          <p class="transactionAddress">
+            {{#if isThisAddress this.from}}
+              {{this.to}}
+            {{else}}
+              {{this.from}}
+            {{/if}}
+          </p>
+        </div>
+        <div class="floatright">
+          <a href="/tx/{{this.txhash}}">{{this.amount}} {{this.symbol}} &gt;</a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isCoinbaseTxn this.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/receive.png" />
+        <div class="content">
+          <div class="header">
+            Coinbase Received
+          </div>
+          <p class="transactionAddress">
+            {{this.from}}
+          </p>
+        </div>
+        <div class="floatright">
+          <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
+        </div>
+      </div>
+      {{/if}}
+    {{/each}}
+      <table class="ui striped table">
+        {{#if pagination}}
+        <tfoot>
+            <tr><th colspan="7">
+              <div class="ui right floated pagination menu">
+                {{#if pback}}
+                <a qrl-data="back" class="icon item">
+                  <i qrl-data="back" class="left chevron icon"></i>
+                </a>
+                {{/if}}
+                {{#each pages}}
+                <a class="item {{isActive}}">{{this.number}}</a>
+                {{/each}}
+                {{#if pforward}}
+                <a qrl-data="forward" class="icon item">
+                  <i qrl-data="forward" class="right chevron icon"></i>
+                </a>
+                {{/if}}
+              </div>
+            </th>
+          </tr>
+        </tfoot>
+        {{/if}}
+      </table>
+    </div>
+
+
+      <!-- Token Balances -->
+      <div class="ui bottom attached tab segment" data-tab="tokenBalances">
+        <h2 class="ui header">
+          <div class="content">
+            Token Balances
+          </div>
+        </h2>
+
+        <div id="tokenBalancesLoading" class="ui icon message">
+          <br /><br />
+          <i class="notched circle loading icon"></i>
+          <div class="content">
+            <div class="header">
+              Just a moment
+            </div>
+            <p>Token balances are loading...</p>
+          </div>
+        </div>
+
+        <div class="ui middle aligned divided list">
+          {{#each tokensHeld}}
+          <div class="item">
+            <i class="large ticket middle aligned icon"></i>
+            <div class="content">
+              <p class="header">{{this.name}} ({{this.symbol}})</p>
+              <div class="description">{{this.balance}}</div>
+            </div>
+          </div>
+          {{/each}}
+        </div>
+      </div>
+
+
+    <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
+    <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
+    
+</div>
+
+
+
+
+
+
+
+
+
+
 </template>

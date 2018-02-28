@@ -5,6 +5,9 @@ import JSONFormatter from 'json-formatter-js'
 import './address.html'
 import '../../stylesheets/overrides.css'
 
+let tokensHeld = []
+
+
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
 const addressResultsRefactor = (res) => {
@@ -96,6 +99,85 @@ const getTxArray = (txArray) => {
   })
 }
 
+
+function loadAddressTransactions(txArray) {
+  const request = {
+    tx: txArray
+  }
+
+  Session.set('addressTransactions', [])
+  $('#loadingTransactions').show()
+  
+  Meteor.call('addressTransactions2', request, (err, res) => {
+    if (err) {
+      Session.set('addressTransactions', { error: err })
+    } else {
+      Session.set('addressTransactions', res)
+      Session.set('fetchedTx', true)
+    }
+    $('#loadingTransactions').hide()
+  })
+}
+
+
+const getTokenBalances = (getAddress, callback) => {
+  const request = {
+    address: addressForAPI(getAddress)
+  }
+
+  Meteor.call('getAddressState', request, (err, res) => {
+    if (err) {
+      // TODO - Error handling
+    } else {
+      if (res.state.address !== '') {
+        // Now for each res.state.token we find, go discover token name and symbol
+        for (let i in res.state.tokens) {
+          const tokenHash = i
+          const tokenBalance = res.state.tokens[i]
+
+          let thisToken = {}
+
+          const request = {
+            query: Buffer.from(tokenHash, 'hex')
+          }
+
+          Meteor.call('getObject', request, (err, res) => {
+            if (err) {
+              // TODO - Error handling here
+              console.log('err:', err)
+            } else {
+              // Check if this is a token hash.
+              if (res.transaction.tx.transactionType !== "token") {
+                // TODO - Error handling here
+              } else {
+                let tokenDetails = res.transaction.tx.token
+
+                thisToken.hash = tokenHash
+                thisToken.name = bytesToString(tokenDetails.name)
+                thisToken.symbol = bytesToString(tokenDetails.symbol)
+                thisToken.balance = tokenBalance / SHOR_PER_QUANTA
+
+                tokensHeld.push(thisToken)
+
+                Session.set('tokensHeld', tokensHeld)
+              }
+            }
+          })
+        }
+
+        callback()
+
+        // When done hide loading section
+        $('#loading').hide()
+      } else {
+        // Wallet not found, put together an empty response
+        callback()
+      }
+    }
+  })
+}
+
+
 const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
   if (aId) {
@@ -135,7 +217,8 @@ const renderAddressBlock = () => {
         if (txArray.length > 10) {
           txArray = txArray.slice(0, 9)
         }
-        getTxArray(txArray)
+        // getTxArray(txArray)
+        loadAddressTransactions(txArray)
       }
     })
   }
@@ -175,6 +258,24 @@ Template.address.helpers({
       ret = Session.get('addressTransactions')
     }
     return ret
+  },
+  addressTransactions() {
+    const transactions = []
+    _.each(Session.get('addressTransactions'), (transaction) => {
+      // Update timestamp from unix epoch to human readable time/date.
+      const x = moment.unix(transaction.timestamp)
+      const y = transaction
+      y.timestamp = moment(x).format('HH:mm D MMM YYYY')
+
+      transactions.push(y)
+    })
+    return transactions
+  },
+  isThisAddress(address) {
+    if(address == Session.get('address').state.address) {
+      return true
+    }
+    return false
   },
   QRtext() {
     return FlowRouter.getParam('aId')
@@ -245,6 +346,33 @@ Template.address.helpers({
     }
     return ret
   },
+  isTransfer(txType) {
+    if(txType == "transfer") {
+      return true
+    }
+    return false
+  },
+  isTokenCreation(txType) {
+    if(txType == "token") {
+      return true
+    }
+    return false
+  },
+  isTokenTransfer(txType) {
+    if(txType == "transfer_token") {
+      return true
+    }
+    return false
+  },
+  isCoinbaseTxn(txType) {
+    if(txType == "coinbase") {
+      return true
+    }
+    return false
+  },
+  tokensHeld() {
+    return Session.get('tokensHeld')
+  },
 })
 
 Template.address.events({
@@ -293,12 +421,15 @@ Template.address.events({
     console.log(txArray)
     $('.loader').show()
     Session.set('fetchedTx', false)
-    getTxArray(txArray)
+    //getTxArray(txArray)
+    loadAddressTransactions(txArray)
   },
 })
 
 Template.address.onRendered(() => {
   this.$('.value').popup()
+  $('#addressTabs .item').tab()
+
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('address', {})
@@ -309,4 +440,13 @@ Template.address.onRendered(() => {
     Session.set('fetchedTx', false)
     renderAddressBlock()
   })
+
+  tokensHeld = []
+  Session.set('tokensHeld', [])
+
+  // Get Tokens and Balances
+  getTokenBalances(FlowRouter.getParam('aId'), function() {
+    $('#tokenBalancesLoading').hide()
+  })
+
 })
