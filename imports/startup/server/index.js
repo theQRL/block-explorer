@@ -417,6 +417,20 @@ Meteor.methods({
             timestamp: thisTxnHashResponse.transaction.header.timestamp_seconds,
           }
           result.push(thisTxn)
+        } else if (thisTxnHashResponse.transaction.tx.transactionType == "slave") {
+          thisTxn = {
+            type: thisTxnHashResponse.transaction.tx.transactionType,
+            txhash: arr.txhash,
+            amount: 0,
+            from: thisTxnHashResponse.transaction.tx.addr_from,
+            to: '',
+            ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
+            fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
+            block: thisTxnHashResponse.transaction.header.block_number,
+            timestamp: thisTxnHashResponse.transaction.header.timestamp_seconds,
+          }
+
+          result.push(thisTxn)
         }
 
       } catch (err) {

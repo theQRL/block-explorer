@@ -370,6 +370,12 @@ Template.address.helpers({
     }
     return false
   },
+  isSlaveTxn(txType) {
+    if(txType == "slave") {
+      return true
+    }
+    return false
+  },
   tokensHeld() {
     return Session.get('tokensHeld')
   },
