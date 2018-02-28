@@ -15,3 +15,8 @@ bytesToHex = (byteArray) => {
 addressForAPI = (address) => {
   return Buffer.from(address.substring(1), 'hex')
 }
+
+// Convert bytes to string
+bytesToString = (buf) => {
+  return String.fromCharCode.apply(null, new Uint8Array(buf))
+}

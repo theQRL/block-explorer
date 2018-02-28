@@ -86,7 +86,7 @@ Template.status.helpers({
     const x = Session.get('status')
     let r = 'Undetermined'
     try {
-      r = x.node_info.block_height - 1
+      r = x.node_info.block_height
     } catch (e) {
       r = 'Error parsing API results'
     }
