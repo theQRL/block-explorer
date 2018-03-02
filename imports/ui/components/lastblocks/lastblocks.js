@@ -10,7 +10,6 @@ const addHex = (b) => {
 const sumValues = obj => Object.values(obj).reduce((a, b) => a + b)
 
 Template.lastblocks.onCreated(() => {
-  Session.set('lastblocks', {})
   Meteor.subscribe('blocks')
 })
 
