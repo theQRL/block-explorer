@@ -10,12 +10,33 @@ const refreshBlocks = () => {
 }
 
 function refreshLasttx() {
-  const request = { filter: 'TRANSACTIONS', offset: 0, quantity: 5 }
-  const response = Meteor.wrapAsync(getLatestData)(request)
-  response.transactions.forEach (function (item, index) {
+  // First get unconfirmed transactions
+  const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
+  unconfirmed.transactions_unconfirmed.forEach (function (item, index) {
+    unconfirmed.transactions_unconfirmed[index].tx.confirmed = "false"
     if (item.tx.transactionType == "token") {
       // Store plain text version of token symbol
-      response.transactions[index].tx.tokenSymbol = 
+      unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol = 
+        Buffer.from(item.tx.token.symbol).toString()
+    } else if (item.tx.transactionType == "transfer_token") {
+      // Request Token Symbol
+      const symbolRequest = {
+        query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')
+      }
+      const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+      // Store symbol in unconfirmed
+      unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol = 
+        Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+    }
+  })
+
+  // Now get confirmed transactions
+  const confirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 5 })
+  confirmed.transactions.forEach (function (item, index) {
+    confirmed.transactions[index].tx.confirmed = "true"
+    if (item.tx.transactionType == "token") {
+      // Store plain text version of token symbol
+      confirmed.transactions[index].tx.tokenSymbol = 
         Buffer.from(item.tx.token.symbol).toString()
     } else if (item.tx.transactionType == "transfer_token") {
       // Request Token Symbol
@@ -24,13 +45,20 @@ function refreshLasttx() {
       }
       const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
       // Store symbol in response
-      response.transactions[index].tx.tokenSymbol = 
+      confirmed.transactions[index].tx.tokenSymbol = 
         Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
     }
   })
 
+  // Merge the two together
+  const confirmedTxns = confirmed.transactions
+  const unconfirmedTxns = unconfirmed.transactions_unconfirmed
+  let merged = {}
+  merged.transactions = unconfirmedTxns.concat(confirmedTxns)
+
+  // Now clear and update the cache
   lasttx.remove({})
-  lasttx.insert(response)
+  lasttx.insert(merged)
 }
 
 function refreshHomeChart() {

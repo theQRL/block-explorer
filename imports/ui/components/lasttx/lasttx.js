@@ -1,26 +1,8 @@
 import { lasttx } from '/imports/api/index.js'
 import './lasttx.html'
 
-const renderLastTxBlock = () => {
-  /*
-  Meteor.call('lasttx', (err, res) => {
-    // The method call sets the Session variable to the callback value
-    if (err) {
-      Session.set('lasttx', { error: err })
-    } else {
-      Session.set('lasttx', res)
-    }
-  })
-  */
-
-  const res = lasttx.findOne()
-  Session.set('lasttx', res)
-}
-
 Template.lasttx.onCreated(() => {
-  Session.set('lasttx', {})
   Meteor.subscribe('lasttx')
-  renderLastTxBlock()
 })
 
 Template.lasttx.helpers({
@@ -53,7 +35,8 @@ Template.lasttx.helpers({
   },
   zeroCheck() {
     let ret = false
-    const x = Session.get('lasttx').transactions
+    //const x = Session.get('lasttx')
+    const x = lasttx.findOne()
     if (x) { if (x.length === 0) { ret = true } }
     if (x === undefined) { ret = true }
     return ret
@@ -93,14 +76,11 @@ Template.lasttx.helpers({
       return true
     }
     return false
+  },
+  isConfirmed(confirmed) {
+    if(confirmed == "true") {
+      return true
+    }
+    return false
   }
-})
-
-Template.lasttx.events({
-  'click .refresh': () => {
-    renderLastTxBlock()
-  },
-  'click .close': () => {
-    $('.message').hide()
-  },
 })
