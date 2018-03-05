@@ -124,7 +124,6 @@ Template.block.helpers({
   },
   fee() {
     if (this.transfer) {
-      console.log('fee: ' + this.fee)
       return this.fee
     }
     return ''

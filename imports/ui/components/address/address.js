@@ -427,10 +427,8 @@ Template.address.events({
       }
     }
     const startIndex = (b - 1) * 10
-    console.log(`active page: ${b}`)
     Session.set('active', b)
     const txArray = Session.get('address').state.transactions.reverse().slice(startIndex, startIndex + 10)
-    console.log(txArray)
     $('.loader').show()
     Session.set('fetchedTx', false)
     //getTxArray(txArray)
