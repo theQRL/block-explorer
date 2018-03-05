@@ -165,7 +165,7 @@ export const getObject = (request, callback) => {
   }
 }
 
-const apiCall = (apiUrl, callback) => {
+export const apiCall = (apiUrl, callback) => {
   try {
     const response = HTTP.get(apiUrl).data
     // Successful call

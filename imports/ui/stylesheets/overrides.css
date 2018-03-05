@@ -419,8 +419,12 @@ input {
 
 
 
-
-
+#chartSegment {
+  min-height: 240px;
+}
+#myChart {
+  min-height: 220px;
+}
 /* 
 SVG styling
 */
