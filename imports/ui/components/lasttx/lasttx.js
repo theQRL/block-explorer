@@ -7,7 +7,6 @@ Template.lasttx.onCreated(() => {
 
 Template.lasttx.helpers({
   lasttx() {    
-    //return Session.get('lasttx')
     const res = lasttx.findOne()
     return res
   },
@@ -35,7 +34,6 @@ Template.lasttx.helpers({
   },
   zeroCheck() {
     let ret = false
-    //const x = Session.get('lasttx')
     const x = lasttx.findOne()
     if (x) { if (x.length === 0) { ret = true } }
     if (x === undefined) { ret = true }

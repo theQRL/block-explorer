@@ -1,5 +1,5 @@
-import { getLatestData, getObject, getStats } from '/imports/startup/server/index.js'
-import { Blocks, lasttx, homechart } from '/imports/api/index.js'
+import { getLatestData, getObject, getStats, apiCall } from '/imports/startup/server/index.js'
+import { Blocks, lasttx, homechart, quantausd, status } from '/imports/api/index.js'
 
 
 const refreshBlocks = () => {
@@ -134,6 +134,23 @@ function refreshHomeChart() {
   homechart.insert(chartLineData)
 }
 
+const refreshQuantaUsd = () => {
+  const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl'
+  const apiUrlUSD = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=usdt-btc'
+  const response = Meteor.wrapAsync(apiCall)(apiUrl)
+  const responseUSD = Meteor.wrapAsync(apiCall)(apiUrlUSD)
+  const usd = response.result[0].Last * responseUSD.result[0].Last
+  let price = { "price": usd }
+  quantausd.remove({})
+  quantausd.insert(price)
+}
+
+const refreshStatus = () => {
+  const response = Meteor.wrapAsync(getStats)({})
+  status.remove({})
+  status.insert(response)
+}
+
 // Refresh blocks every 20 seconds
 Meteor.setInterval(() => {
   refreshBlocks()
@@ -149,11 +166,22 @@ Meteor.setInterval(() => {
   refreshHomeChart()
 }, 60000)
 
+// Refresh Quanta/USD Value every 30 seconds
+Meteor.setInterval(() => {
+  refreshQuantaUsd()
+}, 30000)
+
+// Refresh status every 20 seconds
+Meteor.setInterval(() => {
+  refreshStatus()
+}, 20000)
+
 
 // On first load - cache all elements.
 Meteor.setTimeout(() => {
   refreshBlocks()
   refreshLasttx()
   refreshHomeChart()
+  refreshQuantaUsd()
+  refreshStatus()
 }, 5000)
-
