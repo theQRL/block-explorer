@@ -5,3 +5,4 @@ node_modules/
 /public/img/offline.png
 
 \.idea/
+/production.json
