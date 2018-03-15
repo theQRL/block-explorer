@@ -10,7 +10,8 @@ const refreshBlocks = () => {
   const lastblocktime = response.blockheaders[4].header.timestamp_seconds
   const seconds = new Date().getTime() / 1000
   const timeDiff = Math.floor((seconds - lastblocktime) / 60)
-  if (timeDiff > 19) {
+  // needs refactor
+  if (timeDiff > 100000) {
     const httpPostMessage = {
       icon: 'https://vignette.wikia.nocookie.net/fantendo/images/3/3d/HC_Minion_Icon.png/revision/latest?cb=20140211171359',
       title: 'Block Explorer Warning',
