@@ -12,9 +12,15 @@ const renderTxBlock = () => {
     Meteor.call('txhash', txId, (err, res) => {
       if (err) {
         Session.set('txhash', { error: err, id: txId })
-      } else {
-        Session.set('txhash', res)
+        return false
       }
+      if (res.found) {
+        Session.set('txhash', res)
+      } else {
+        Session.set('txhash', { found: false, id: txId })
+        return false
+      }
+      return true
     })
     Meteor.call('QRLvalue', (err, res) => {
       if (err) {
@@ -33,30 +39,22 @@ const renderTxBlock = () => {
   }
 }
 
-Template.tx.onCreated(() => {
-  Session.set('txhash', {})
-  Session.set('qrl', 0)
-  Session.set('status', {})
-  renderTxBlock()
-
-  // Track changes to Flow Router Path
-  Tracker.autorun(function() {
-      FlowRouter.watchPathChange();
-      renderTxBlock()
-  });
-
-})
-
 Template.tx.helpers({
   tx() {
-    if (Session.get('txhash').found === true) {
-      let txhash = Session.get('txhash').transaction
-      let signature = txhash.tx.signature
-      txhash.tx.ots_key = parseInt(signature.substring(0, 8), 16)
+    if (Session.get('txhash')) {
+      const txhash = Session.get('txhash').transaction
       return txhash
     }
-    if (Session.get('txhash').found === false) {
-      return { notFound: true, parameter: FlowRouter.getParam('txId') }
+    return { found: false, parameter: FlowRouter.getParam('txId') }
+  },
+  id() {
+    return FlowRouter.getParam('txId')
+  },
+  ots_key() {
+    if (Session.get('txhash').found) {
+      const txhash = Session.get('txhash').transaction
+      const otsKey = parseInt(txhash.tx.signature.substring(0, 8), 16)
+      return otsKey
     }
     return ''
   },
@@ -154,4 +152,11 @@ Template.tx.events({
 
 Template.tx.onRendered(() => {
   this.$('.value').popup()
+  Tracker.autorun(() => {
+    FlowRouter.watchPathChange()
+    Session.set('txhash', {})
+    Session.set('qrl', 0)
+    Session.set('status', {})
+    renderTxBlock()
+  })
 })
