@@ -56,6 +56,26 @@ function refreshLasttx() {
       // Store symbol in unconfirmed
       unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol =
         Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+      unconfirmed.transactions_unconfirmed[index].tx.tokenDecimals = 
+          thisSymbolResponse.transaction.tx.token.decimals
+
+      // Calculate total transferred
+      let thisTotalTransferred = 0
+      _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
+        // Now update total transferred with the corresponding amount from this output
+        thisTotalTransferred = thisTotalTransferred + unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex]
+      })
+      thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
+      unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
+    } else if (item.tx.transactionType === 'transfer') {
+      // Calculate total transferred
+      let thisTotalTransferred = 0
+      _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
+        // Now update total transferred with the corresponding amount from this output
+        thisTotalTransferred = thisTotalTransferred + unconfirmed.transactions_unconfirmed[index].tx.transfer.amounts[aindex]
+      })
+      thisTotalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
+      unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
     }
   })
 
@@ -76,6 +96,26 @@ function refreshLasttx() {
       // Store symbol in response
       confirmed.transactions[index].tx.tokenSymbol =
         Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+      confirmed.transactions[index].tx.tokenDecimals = 
+          thisSymbolResponse.transaction.tx.token.decimals
+
+      // Calculate total transferred
+      let thisTotalTransferred = 0
+      _.each(confirmed.transactions[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
+        // Now update total transferred with the corresponding amount from this output
+        thisTotalTransferred = thisTotalTransferred + confirmed.transactions[index].tx.transfer_token.amounts[aindex]
+      })
+      thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
+      confirmed.transactions[index].tx.totalTransferred = thisTotalTransferred
+    } else if (item.tx.transactionType === 'transfer') {
+      // Calculate total transferred
+      let thisTotalTransferred = 0
+      _.each(confirmed.transactions[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
+        // Now update total transferred with the corresponding amount from this output
+        thisTotalTransferred = thisTotalTransferred + confirmed.transactions[index].tx.transfer.amounts[aindex]
+      })
+      thisTotalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
+      confirmed.transactions[index].tx.totalTransferred = thisTotalTransferred
     }
   })
 

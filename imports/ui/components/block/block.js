@@ -6,41 +6,6 @@ const calculateEpoch = (blockNumber) => {
   return Math.floor(blockNumber / blocksPerEpoch)
 }
 
-const blockResultsRefactor = (res) => {
-  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
-  const output = res
-  // console.log(res)
-  if (res.block.header) {
-    output.block.header.hash_header = Buffer.from(output.block.header.hash_header).toString('hex')
-    output.block.header.hash_header_prev = Buffer.from(output.block.header.hash_header_prev).toString('hex')
-    output.block.header.merkle_root = Buffer.from(output.block.header.merkle_root).toString('hex')
-    // output.block.header.mining_nonce = output.block.header.mining_nonce
-    output.block.header.PK = Buffer.from(output.block.header.PK).toString('hex')
-
-    // transactions
-    const transactions = []
-    output.block.transactions.forEach((value) => {
-      const adjusted = value
-      adjusted.addr_from = 'Q' + Buffer.from(adjusted.addr_from).toString('hex')
-      adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
-      adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
-      adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
-      if (value.transactionType === 'coinbase') {
-        adjusted.coinbase.addr_to = 'Q' + Buffer.from(adjusted.coinbase.addr_to).toString('hex')
-        adjusted.coinbase.headerhash = Buffer.from(adjusted.coinbase.headerhash).toString('hex')
-        // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
-        adjusted.transfer = adjusted.coinbase
-      }
-      if (value.transactionType === 'transfer') {
-        adjusted.transfer.addr_to = 'Q' + Buffer.from(adjusted.transfer.addr_to).toString('hex')
-      }
-      transactions.push(adjusted)
-    })
-    output.block.transactions = transactions
-  }
-  return output
-}
-
 const renderBlockBlock = (blockId) => {
   Meteor.call('block', blockId, (err, res) => {
     // The method call sets the Session variable to the callback value
@@ -51,7 +16,7 @@ const renderBlockBlock = (blockId) => {
       })
     } else {
       // console.log(res)
-      if (res.found) { Session.set('block', blockResultsRefactor(res)) }
+      if (res.found) { Session.set('block', res) }
     }
   })
 }
@@ -76,7 +41,7 @@ Template.block.helpers({
   },
   block_reward() {
     const rewardBlock = Session.get('block').block.header.reward_block
-    return (parseInt(rewardBlock, 10)  / SHOR_PER_QUANTA).toFixed(9)
+    return numberToString(parseInt(rewardBlock, 10)  / SHOR_PER_QUANTA)
   },
   block_epoch() {
     return calculateEpoch(Session.get('block').block.header.block_number)
@@ -112,13 +77,19 @@ Template.block.helpers({
       return this.coinbase.addr_to
     }
     if (this.transactionType === 'transfer') {
-      return this.transfer.addr_to
+      return this.transfer.totalOutputs + " outputs"
+    }
+    if (this.transactionType === 'transfer_token') {
+      return this.transfer_token.totalOutputs + " outputs"
     }
     return ''
   },
   amount() {
-    if (this.transfer) {
-      return (this.transfer.amount / SHOR_PER_QUANTA).toFixed(9)
+    if (this.transactionType === 'transfer') {
+      return numberToString(this.transfer.totalTransferred) + " Quanta"
+    }
+    if (this.transactionType === 'transfer_token') {
+      return numberToString(this.transfer_token.totalTransferred) + " " + this.transfer_token.tokenSymbol
     }
     return ''
   },
@@ -126,7 +97,22 @@ Template.block.helpers({
     if (this.transfer) {
       return this.fee
     }
+    if (this.token) {
+      return this.fee
+    }
     return ''
+  },
+  isTransfer(txType) {
+    if(txType == "transfer") {
+      return true
+    }
+    return false
+  },
+  isTokenTransfer(txType) {
+    if(txType == "transfer_token") {
+      return true
+    }
+    return false
   },
 })
 

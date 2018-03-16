@@ -213,54 +213,49 @@ Meteor.methods({
     return response
   },
 
-  lasttx() {
-    // avoid blocking other method calls from same client - *may need to remove for production*
-    this.unblock()
-    // asynchronous call to API
-    const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 5 })
-    response.transactions.forEach (function (item, index) {
-      if (item.tx.transactionType == "token") {
-        // Store plain text version of token symbol
-        response.transactions[index].tx.tokenSymbol = 
-          Buffer.from(item.tx.token.symbol).toString()
-      } else if (item.tx.transactionType == "transfer_token") {
-        // Request Token Symbol
-        const symbolRequest = {
-          query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')
-        }
-        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-        // Store symbol in response
-        response.transactions[index].tx.tokenSymbol = 
-          Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-      }
-    })
-
-    return response
-  },
-
   lastunconfirmedtx() {
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
-    const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
-    response.transactions_unconfirmed.forEach (function (item, index) {
-      if (item.tx.transactionType == "token") {
+    const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
+    unconfirmed.transactions_unconfirmed.forEach (function (item, index) {
+      unconfirmed.transactions_unconfirmed[index].tx.confirmed = 'false'
+      if (item.tx.transactionType === 'token') {
         // Store plain text version of token symbol
-        response.transactions_unconfirmed[index].tx.tokenSymbol = 
+        unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol =
           Buffer.from(item.tx.token.symbol).toString()
-      } else if (item.tx.transactionType == "transfer_token") {
+      } else if (item.tx.transactionType === 'transfer_token') {
         // Request Token Symbol
         const symbolRequest = {
-          query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex')
+          query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex'),
         }
         const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-        // Store symbol in response
-        response.transactions_unconfirmed[index].tx.tokenSymbol = 
+        // Store symbol in unconfirmed
+        unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol =
           Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+        unconfirmed.transactions_unconfirmed[index].tx.tokenDecimals = 
+            thisSymbolResponse.transaction.tx.token.decimals
+
+        // Calculate total transferred
+        let thisTotalTransferred = 0
+        _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
+          // Now update total transferred with the corresponding amount from this output
+          thisTotalTransferred = thisTotalTransferred + unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex]
+        })
+        thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
+        unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
+      } else if (item.tx.transactionType === 'transfer') {
+        // Calculate total transferred
+        let thisTotalTransferred = 0
+        _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
+          // Now update total transferred with the corresponding amount from this output
+          thisTotalTransferred = thisTotalTransferred + unconfirmed.transactions_unconfirmed[index].tx.transfer.amounts[aindex]
+        })
+        thisTotalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
+        unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
       }
     })
-
-    return response
+    return unconfirmed
   },
 
   txhash(txId) {
@@ -275,7 +270,186 @@ Meteor.methods({
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
-      return response
+
+      // refactor response data
+      const output = response
+      // console.log(res)
+      if (response.transaction.header) {
+        output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
+        output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
+        output.transaction.header.merkle_root = Buffer.from(output.transaction.header.merkle_root).toString('hex')
+        output.transaction.header.PK = Buffer.from(output.transaction.header.PK).toString('hex')
+
+        output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
+        output.transaction.tx.amount = ''
+
+        if (output.transaction.tx.transactionType === 'coinbase') {
+          output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+          output.transaction.tx.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
+          output.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
+          output.transaction.tx.amount = numberToString(output.transaction.tx.coinbase.amount / SHOR_PER_QUANTA)
+
+          output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+          output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+          output.transaction.tx.coinbase.headerhash = Buffer.from(output.transaction.tx.coinbase.headerhash).toString('hex')
+
+          output.transaction.explorer = {
+            from: '',
+            to: output.transaction.tx.addr_to,
+            type: 'COINBASE',
+          }
+        }
+      } else {
+        output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
+      }
+
+      if (output.transaction.tx.transactionType === 'token') {
+        const balances = []
+        output.transaction.tx.token.initial_balances.forEach((value) => {
+          const edit = value
+          edit.address = 'Q' + Buffer.from(edit.address).toString('hex'),
+          edit.amount = numberToString(edit.amount / Math.pow(10, output.transaction.tx.token.decimals))
+          balances.push(edit)
+        })
+
+        output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+
+        output.transaction.tx.token.symbol = ab2str(output.transaction.tx.token.symbol)
+        output.transaction.tx.token.name = ab2str(output.transaction.tx.token.name)
+        output.transaction.tx.token.owner = 'Q' + Buffer.from(output.transaction.tx.token.owner).toString('hex')
+
+        output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
+        output.transaction.explorer = {
+          from: output.transaction.tx.addr_from,
+          to: output.transaction.tx.addr_from,
+          signature: output.transaction.tx.signature,
+          publicKey: output.transaction.tx.public_key,
+          symbol: output.transaction.tx.token.symbol,
+          name: output.transaction.tx.token.name,
+          decimals: output.transaction.tx.token.decimals,
+          owner: output.transaction.tx.token.owner,
+          initialBalances: balances,
+          type: 'CREATE TOKEN',
+        }
+      }
+      
+      if (output.transaction.tx.transactionType === 'transfer') {
+        // Calculate total transferred, and generate a clean structure to display outputs from
+        let thisTotalTransferred = 0
+        let thisOutputs = []
+        _.each(output.transaction.tx.transfer.addrs_to, (thisAddress, index) => {
+          const thisOutput = {
+            address: 'Q' + Buffer.from(thisAddress).toString('hex'),
+            amount: numberToString(output.transaction.tx.transfer.amounts[index] / SHOR_PER_QUANTA)
+          }
+          thisOutputs.push(thisOutput)
+
+          // Now update total transferred with the corresponding amount from this output
+          thisTotalTransferred = thisTotalTransferred + output.transaction.tx.transfer.amounts[index]
+        })
+
+        output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+        output.transaction.tx.transfer.outputs = thisOutputs
+        output.transaction.tx.amount = numberToString(thisTotalTransferred / SHOR_PER_QUANTA)
+        output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
+        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+       
+        output.transaction.explorer = {
+          from: output.transaction.tx.addr_from,
+          outputs: thisOutputs,
+          totalTransferred: numberToString(thisTotalTransferred / SHOR_PER_QUANTA),
+          type: 'TRANSFER',
+        }
+      }
+
+      if (output.transaction.tx.transactionType === 'transfer_token') {
+
+        // Request Token Decimals / Symbol
+        const symbolRequest = {
+          query: Buffer.from(output.transaction.tx.transfer_token.token_txhash, 'hex'),
+        }
+        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+        const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+        const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
+
+        // Calculate total transferred, and generate a clean structure to display outputs from
+        let thisTotalTransferred = 0
+        let thisOutputs = []
+        _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
+          const thisOutput = {
+            address: 'Q' + Buffer.from(thisAddress).toString('hex'),
+            amount: numberToString(output.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals))
+          }
+          thisOutputs.push(thisOutput)
+
+          // Now update total transferred with the corresponding amount from this output
+          thisTotalTransferred = thisTotalTransferred + output.transaction.tx.transfer_token.amounts[index]
+        })
+
+        output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
+        output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+        output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
+        output.transaction.tx.transfer_token.outputs = thisOutputs
+        output.transaction.tx.totalTransferred = numberToString(thisTotalTransferred / Math.pow(10, thisDecimals))
+
+        output.transaction.explorer = {
+          from: output.transaction.tx.addr_from,
+          outputs: thisOutputs,
+          signature: output.transaction.tx.signature,
+          publicKey: output.transaction.tx.public_key,
+          token_txhash: output.transaction.tx.transfer_token.token_txhash,
+          totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
+          type: 'TRANSFER TOKEN',
+        }
+      }
+
+      if (output.transaction.tx.transactionType === 'slave') {
+        output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
+
+        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+        output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+
+        output.transaction.tx.slave.slave_pks.forEach((value, index) => {
+          output.transaction.tx.slave.slave_pks[index] = 
+            Buffer.from(value).toString('hex')
+        })
+
+        output.transaction.explorer = {
+          from: output.transaction.tx.addr_from,
+          to: '',
+          signature: output.transaction.tx.signature,
+          publicKey: output.transaction.tx.public_key,
+          amount: output.transaction.tx.amount,
+          type: 'SLAVE',
+        }
+      }
+
+      if (output.transaction.tx.transactionType === 'latticePK') {
+        output.transaction.tx.fee = output.transaction.tx.fee / SHOR_PER_QUANTA
+
+        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+        output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
+
+        output.transaction.tx.latticePK.kyber_pk = Buffer.from(output.transaction.tx.latticePK.kyber_pk).toString('hex')
+        output.transaction.tx.latticePK.dilithium_pk = Buffer.from(output.transaction.tx.latticePK.dilithium_pk).toString('hex')
+
+        output.transaction.explorer = {
+          from: output.transaction.tx.addr_from,
+          to: '',
+          signature: output.transaction.tx.signature,
+          publicKey: output.transaction.tx.public_key,
+          amount: output.transaction.tx.amount,
+          type: 'LATTICE PK',
+        }
+      }
+      return output
     }
   },
 
@@ -294,31 +468,72 @@ Meteor.methods({
         query: Buffer.from(blockId.toString()),
       }
       const response = Meteor.wrapAsync(getObject)(req)
+
+      if (response.block.header) {
+        response.block.header.hash_header = Buffer.from(response.block.header.hash_header).toString('hex')
+        response.block.header.hash_header_prev = Buffer.from(response.block.header.hash_header_prev).toString('hex')
+        response.block.header.merkle_root = Buffer.from(response.block.header.merkle_root).toString('hex')
+        // output.block.header.mining_nonce = response.block.header.mining_nonce
+        response.block.header.PK = Buffer.from(response.block.header.PK).toString('hex')
+
+        // transactions
+        const transactions = []
+        response.block.transactions.forEach((value) => {
+          const adjusted = value
+          adjusted.addr_from = 'Q' + Buffer.from(adjusted.addr_from).toString('hex')
+          adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
+          adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
+          adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
+          if (value.transactionType === 'coinbase') {
+            adjusted.coinbase.addr_to = 'Q' + Buffer.from(adjusted.coinbase.addr_to).toString('hex')
+            adjusted.coinbase.headerhash = Buffer.from(adjusted.coinbase.headerhash).toString('hex')
+            // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
+            adjusted.transfer = adjusted.coinbase
+          }
+
+          if (value.transactionType === 'transfer') {
+            // Calculate total transferred, and generate a clean structure to display outputs from
+            let thisTotalTransferred = 0
+            let totalOutputs = 0
+            _.each(adjusted.transfer.addrs_to, (thisAddress, index) => {
+              totalOutputs = totalOutputs + 1
+              thisTotalTransferred = thisTotalTransferred + adjusted.transfer.amounts[index]
+            })
+            adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
+            adjusted.transfer.totalOutputs = totalOutputs
+          }
+          if (value.transactionType === 'transfer_token') {
+            // Request Token Decimals / Symbol
+            const symbolRequest = {
+              query: Buffer.from(adjusted.transfer_token.token_txhash, 'hex'),
+            }
+            const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+
+            const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+            const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
+
+            // Calculate total transferred, and generate a clean structure to display outputs from
+            let thisTotalTransferred = 0
+            let totalOutputs = 0
+            _.each(adjusted.transfer_token.addrs_to, (thisAddress, index) => {
+              totalOutputs = totalOutputs + 1
+              thisTotalTransferred = thisTotalTransferred + adjusted.transfer_token.amounts[index]
+            })
+            adjusted.transfer_token.totalTransferred = thisTotalTransferred / Math.pow(10, thisDecimals)
+            adjusted.transfer_token.totalOutputs = totalOutputs
+            adjusted.transfer_token.tokenSymbol = thisSymbol
+          }
+
+          transactions.push(adjusted)
+        })
+
+        response.block.transactions = transactions
+      }
       return response
     }
   },
 
-  addressTransactions(targets) {
-    check(targets, Array)
-    this.unblock()
-
-    // TODO: throw an error if greater than 10
-    const result = []
-    targets.forEach((arr) => {
-      try {
-        const req = { query: Buffer.from(arr.txhash, 'hex') }
-        const response = Meteor.wrapAsync(getObject)(req)
-        response.txhash = arr.txhash
-        result.push(response)
-      } catch (error) {
-        throw new Meteor.Error('270', error)
-      }
-    })
-    return result
-  },
-
-
-  addressTransactions2(request) {
+  addressTransactions(request) {
     check(request, Object)
 
     const targets = request.tx
@@ -348,14 +563,6 @@ Meteor.methods({
             thisTxnHashResponse.transaction.tx.amount = thisTxnHashResponse.transaction.tx.coinbase.amount / SHOR_PER_QUANTA
           }
 
-          if (thisTxnHashResponse.transaction.tx.transfer) {
-            thisTxnHashResponse.transaction.tx.addr_to =
-              'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.transfer.addr_to).toString('hex')
-            thisTxnHashResponse.transaction.tx.transfer.addr_to =
-              'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.transfer.addr_to).toString('hex')
-            thisTxnHashResponse.transaction.tx.amount = thisTxnHashResponse.transaction.tx.transfer.amount / SHOR_PER_QUANTA
-          }
-
           thisTxnHashResponse.transaction.tx.public_key = Buffer.from(thisTxnHashResponse.transaction.tx.public_key).toString('hex')
           thisTxnHashResponse.transaction.tx.signature = Buffer.from(thisTxnHashResponse.transaction.tx.signature).toString('hex')
         }
@@ -363,12 +570,26 @@ Meteor.methods({
         let thisTxn = {}
 
         if (thisTxnHashResponse.transaction.tx.transactionType == "transfer") {
+          // Calculate total transferred, and generate a clean structure to display outputs from
+          let thisTotalTransferred = 0
+          let thisOutputs = []
+          _.each(thisTxnHashResponse.transaction.tx.transfer.addrs_to, (thisAddress, index) => {
+            const thisOutput = {
+              address: 'Q' + Buffer.from(thisAddress).toString('hex'),
+              amount: thisTxnHashResponse.transaction.tx.transfer.amounts[index] / SHOR_PER_QUANTA
+            }
+            thisOutputs.push(thisOutput)
+
+            // Now update total transferred with the corresponding amount from this output
+            thisTotalTransferred = thisTotalTransferred + thisTxnHashResponse.transaction.tx.transfer.amounts[index]
+          })
+
           thisTxn = {
             type: thisTxnHashResponse.transaction.tx.transactionType,
             txhash: arr.txhash,
-            amount: thisTxnHashResponse.transaction.tx.amount,
+            totalTransferred: thisTotalTransferred / SHOR_PER_QUANTA,
+            outputs: thisOutputs,
             from: thisTxnHashResponse.transaction.tx.addr_from,
-            to: thisTxnHashResponse.transaction.tx.addr_to,
             ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
             fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
             block: thisTxnHashResponse.transaction.header.block_number,
@@ -383,6 +604,7 @@ Meteor.methods({
             from: thisTxnHashResponse.transaction.tx.addr_from,
             symbol: Buffer.from(thisTxnHashResponse.transaction.tx.token.symbol).toString(),
             name: Buffer.from(thisTxnHashResponse.transaction.tx.token.name).toString(),
+            decimals: thisTxnHashResponse.transaction.tx.token.decimals,
             ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
             fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
             block: thisTxnHashResponse.transaction.header.block_number,
@@ -398,14 +620,29 @@ Meteor.methods({
 
           const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
           const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+          const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
+
+          // Calculate total transferred, and generate a clean structure to display outputs from
+          let thisTotalTransferred = 0
+          let thisOutputs = []
+          _.each(thisTxnHashResponse.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
+            const thisOutput = {
+              address: 'Q' + Buffer.from(thisAddress).toString('hex'),
+              amount: thisTxnHashResponse.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals)
+            }
+            thisOutputs.push(thisOutput)
+
+            // Now update total transferred with the corresponding amount from this output
+            thisTotalTransferred = thisTotalTransferred + thisTxnHashResponse.transaction.tx.transfer_token.amounts[index]
+          })
 
           thisTxn = {
             type: thisTxnHashResponse.transaction.tx.transactionType,
             txhash: arr.txhash,
             symbol: thisSymbol,
-            amount: thisTxnHashResponse.transaction.tx.transfer_token.amount / SHOR_PER_QUANTA,
+            totalTransferred: thisTotalTransferred / Math.pow(10, thisDecimals),
+            outputs: thisOutputs,
             from: thisTxnHashResponse.transaction.tx.addr_from,
-            to: 'Q' + Buffer.from(thisTxnHashResponse.transaction.tx.transfer_token.addr_to).toString('hex'),
             ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
             fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
             block: thisTxnHashResponse.transaction.header.block_number,
@@ -457,7 +694,7 @@ Meteor.methods({
         }
 
       } catch (err) {
-        console.log(`Error fetching transaction hash in addressTransactions2 '${arr.txhash}' - ${err}`)
+        console.log(`Error fetching transaction hash in addressTransactions '${arr.txhash}' - ${err}`)
       }
     })
 

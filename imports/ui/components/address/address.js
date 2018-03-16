@@ -7,7 +7,6 @@ import '../../stylesheets/overrides.css'
 
 let tokensHeld = []
 
-
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
 const addressResultsRefactor = (res) => {
@@ -87,18 +86,6 @@ const addressTransactionsRefactor = (res) => {
   return output
 }
 
-const getTxArray = (txArray) => {
-  Meteor.call('addressTransactions', txArray, (errTx, resTx) => {
-    if (errTx) {
-      Session.set('addressTransactions', { error: errTx })
-    } else {
-      Session.set('addressTransactions', addressTransactionsRefactor(resTx))
-      $('.loader').hide()
-      Session.set('fetchedTx', true)
-    }
-  })
-}
-
 
 function loadAddressTransactions(txArray) {
   const request = {
@@ -108,7 +95,7 @@ function loadAddressTransactions(txArray) {
   Session.set('addressTransactions', [])
   $('#loadingTransactions').show()
   
-  Meteor.call('addressTransactions2', request, (err, res) => {
+  Meteor.call('addressTransactions', request, (err, res) => {
     if (err) {
       Session.set('addressTransactions', { error: err })
     } else {
@@ -155,7 +142,7 @@ const getTokenBalances = (getAddress, callback) => {
                 thisToken.hash = tokenHash
                 thisToken.name = bytesToString(tokenDetails.name)
                 thisToken.symbol = bytesToString(tokenDetails.symbol)
-                thisToken.balance = tokenBalance / SHOR_PER_QUANTA
+                thisToken.balance = tokenBalance / Math.pow(10, tokenDetails.decimals)
 
                 tokensHeld.push(thisToken)
 
@@ -217,7 +204,6 @@ const renderAddressBlock = () => {
         if (txArray.length > 10) {
           txArray = txArray.slice(0, 9)
         }
-        // getTxArray(txArray)
         loadAddressTransactions(txArray)
       }
     })
@@ -353,7 +339,7 @@ Template.address.helpers({
     return false
   },
   isTokenCreation(txType) {
-    if(txType == "token") {
+    if(txType == "token") { 
       return true
     }
     return false
@@ -431,7 +417,6 @@ Template.address.events({
     const txArray = Session.get('address').state.transactions.reverse().slice(startIndex, startIndex + 10)
     $('.loader').show()
     Session.set('fetchedTx', false)
-    //getTxArray(txArray)
     loadAddressTransactions(txArray)
   },
 })
