@@ -205,8 +205,6 @@ Template.tx.helpers({
     return ''
   },
   notFound() {
-    console.log('BUGG>>')
-    console.log(Session.get('txhash'))
     if (Session.get('txhash').found === false) {
       return true
     }
