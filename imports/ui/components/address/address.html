@@ -71,6 +71,7 @@
     </div>
 
     {{#each addressTransactions}}
+
       {{#if isTransfer this.type}}
       <div class="ui icon message transactionRecord">
         {{#if isThisAddress this.from}}
@@ -97,7 +98,7 @@
           </p>
         </div>
         <div class="floatright">
-          <a href="/tx/{{this.txhash}}">{{this.totalTransferred}} Quanta &gt;</a>
+          <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} Quanta &gt;</a>
         </div>
       </div>
       {{/if}}

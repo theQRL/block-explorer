@@ -44,49 +44,6 @@ const addressResultsRefactor = (res) => {
   return output
 }
 
-const addressTransactionsRefactor = (res) => {
-  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
-  let output = res
-  if (res.length > 0) {
-    // transactions
-    const transactions = []
-    output.forEach((value) => {
-      const edit = value
-      if (edit.found) {
-        edit.transaction.header.hash_header = Buffer.from(edit.transaction.header.hash_header).toString('hex')
-        edit.transaction.header.hash_header_prev = Buffer.from(edit.transaction.header.hash_header_prev).toString('hex')
-        edit.transaction.header.merkle_root = Buffer.from(edit.transaction.header.merkle_root).toString('hex')
-        edit.transaction.tx.addr_from = 'Q' + Buffer.from(edit.transaction.tx.addr_from).toString('hex')
-        edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
-        edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
-        edit.transaction.tx.transaction_hash = Buffer.from(edit.transaction.tx.transaction_hash).toString('hex')
-        edit.transaction.tx.fee /= SHOR_PER_QUANTA
-
-        if (edit.transaction.tx.transactionType === 'coinbase') {
-          edit.transaction.tx.addr_to = 'Q' + Buffer.from(edit.transaction.tx.coinbase.addr_to).toString('hex')
-          edit.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(edit.transaction.tx.coinbase.addr_to).toString('hex')
-          edit.transaction.tx.coinbase.amount /= SHOR_PER_QUANTA
-          edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
-        }
-        if (edit.transaction.tx.transactionType === 'transfer') {
-          edit.transaction.tx.addr_to = 'Q' + Buffer.from(edit.transaction.tx.transfer.addr_to).toString('hex')
-          edit.transaction.tx.transfer.addr_to = 'Q' + Buffer.from(edit.transaction.tx.transfer.addr_to).toString('hex')
-          edit.transaction.tx.transfer.amount /= SHOR_PER_QUANTA
-          edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
-        }
-        if (edit.transaction.tx.transactionType === 'transfer_token') {
-          edit.transaction.tx.addr_to = 'Q' + Buffer.from(edit.transaction.tx.transfer_token.addr_to).toString('hex')
-          edit.transaction.tx.amount = edit.transaction.tx.transfer_token.amount / SHOR_PER_QUANTA
-        }
-      }
-      transactions.push(edit)
-    })
-    output = transactions
-  }
-  return output
-}
-
-
 function loadAddressTransactions(txArray) {
   const request = {
     tx: txArray
@@ -247,11 +204,23 @@ Template.address.helpers({
   },
   addressTransactions() {
     const transactions = []
+    const thisAddress = Session.get('address').state.address
     _.each(Session.get('addressTransactions'), (transaction) => {
       // Update timestamp from unix epoch to human readable time/date.
       const x = moment.unix(transaction.timestamp)
       const y = transaction
       y.timestamp = moment(x).format('HH:mm D MMM YYYY')
+
+      // Set total received amount if sent to this address
+      let thisReceivedAmount = 0
+      if ((transaction.type === 'transfer') || (transaction.type === 'transfer_token')) {
+        _.each(transaction.outputs, (output) => {
+          if(output.address == thisAddress) {
+            thisReceivedAmount += output.amount
+          }
+        })
+      }
+      y.thisReceivedAmount = thisReceivedAmount
 
       transactions.push(y)
     })

@@ -218,6 +218,7 @@ Meteor.methods({
     this.unblock()
     // asynchronous call to API
     const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
+    
     unconfirmed.transactions_unconfirmed.forEach (function (item, index) {
       unconfirmed.transactions_unconfirmed[index].tx.confirmed = 'false'
       if (item.tx.transactionType === 'token') {
@@ -240,7 +241,7 @@ Meteor.methods({
         let thisTotalTransferred = 0
         _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
           // Now update total transferred with the corresponding amount from this output
-          thisTotalTransferred = thisTotalTransferred + unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex]
+          thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex])
         })
         thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
         unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
@@ -249,7 +250,7 @@ Meteor.methods({
         let thisTotalTransferred = 0
         _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
           // Now update total transferred with the corresponding amount from this output
-          thisTotalTransferred = thisTotalTransferred + unconfirmed.transactions_unconfirmed[index].tx.transfer.amounts[aindex]
+          thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer.amounts[aindex])
         })
         thisTotalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
         unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
@@ -347,7 +348,7 @@ Meteor.methods({
           thisOutputs.push(thisOutput)
 
           // Now update total transferred with the corresponding amount from this output
-          thisTotalTransferred = thisTotalTransferred + output.transaction.tx.transfer.amounts[index]
+          thisTotalTransferred += parseInt(output.transaction.tx.transfer.amounts[index])
         })
 
         output.transaction.tx.addr_from = 'Q' + Buffer.from(output.transaction.tx.addr_from).toString('hex')
@@ -386,7 +387,7 @@ Meteor.methods({
           thisOutputs.push(thisOutput)
 
           // Now update total transferred with the corresponding amount from this output
-          thisTotalTransferred = thisTotalTransferred + output.transaction.tx.transfer_token.amounts[index]
+          thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[index])
         })
 
         output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
@@ -576,12 +577,12 @@ Meteor.methods({
           _.each(thisTxnHashResponse.transaction.tx.transfer.addrs_to, (thisAddress, index) => {
             const thisOutput = {
               address: 'Q' + Buffer.from(thisAddress).toString('hex'),
-              amount: thisTxnHashResponse.transaction.tx.transfer.amounts[index] / SHOR_PER_QUANTA
+              amount: parseInt(thisTxnHashResponse.transaction.tx.transfer.amounts[index]) / SHOR_PER_QUANTA
             }
             thisOutputs.push(thisOutput)
 
             // Now update total transferred with the corresponding amount from this output
-            thisTotalTransferred = thisTotalTransferred + thisTxnHashResponse.transaction.tx.transfer.amounts[index]
+            thisTotalTransferred += parseInt(thisTxnHashResponse.transaction.tx.transfer.amounts[index])
           })
 
           thisTxn = {
@@ -628,12 +629,12 @@ Meteor.methods({
           _.each(thisTxnHashResponse.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
             const thisOutput = {
               address: 'Q' + Buffer.from(thisAddress).toString('hex'),
-              amount: thisTxnHashResponse.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals)
+              amount: parseInt(thisTxnHashResponse.transaction.tx.transfer_token.amounts[index]) / Math.pow(10, thisDecimals)
             }
             thisOutputs.push(thisOutput)
 
             // Now update total transferred with the corresponding amount from this output
-            thisTotalTransferred = thisTotalTransferred + thisTxnHashResponse.transaction.tx.transfer_token.amounts[index]
+            thisTotalTransferred += parseInt(thisTxnHashResponse.transaction.tx.transfer_token.amounts[index])
           })
 
           thisTxn = {
