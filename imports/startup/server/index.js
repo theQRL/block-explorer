@@ -471,7 +471,7 @@ Meteor.methods({
 
       // Refactor for block_extended and extended_transactions
       response.block = response.block_extended
-      response.block.transactions = response.block.extended_transactions
+      response.block.transactions = response.block_extended.extended_transactions
 
       if (response.block.header) {
         response.block.header.hash_header = Buffer.from(response.block.header.hash_header).toString('hex')
