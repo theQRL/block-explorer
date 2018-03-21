@@ -7,6 +7,7 @@ const refreshBlocks = () => {
   const response = Meteor.wrapAsync(getLatestData)(request)
   Blocks.remove({})
   Blocks.insert(response)
+
   const lastblocktime = response.blockheaders[4].header.timestamp_seconds
   const seconds = new Date().getTime() / 1000
   const timeDiff = Math.floor((seconds - lastblocktime) / 60)
