@@ -278,7 +278,6 @@ Meteor.methods({
         output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
         output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
         output.transaction.header.merkle_root = Buffer.from(output.transaction.header.merkle_root).toString('hex')
-        output.transaction.header.PK = Buffer.from(output.transaction.header.PK).toString('hex')
 
         output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
         output.transaction.tx.amount = ''
@@ -288,16 +287,14 @@ Meteor.methods({
           output.transaction.tx.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
           output.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
           output.transaction.tx.amount = numberToString(output.transaction.tx.coinbase.amount / SHOR_PER_QUANTA)
-
-          output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-          output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-          output.transaction.tx.coinbase.headerhash = Buffer.from(output.transaction.tx.coinbase.headerhash).toString('hex')
-
+          
           output.transaction.explorer = {
             from: '',
             to: output.transaction.tx.addr_to,
             type: 'COINBASE',
           }
+        } else {
+          output.transaction.header.PK = Buffer.from(output.transaction.header.PK).toString('hex')
         }
       } else {
         output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
@@ -477,8 +474,6 @@ Meteor.methods({
         response.block.header.hash_header = Buffer.from(response.block.header.hash_header).toString('hex')
         response.block.header.hash_header_prev = Buffer.from(response.block.header.hash_header_prev).toString('hex')
         response.block.header.merkle_root = Buffer.from(response.block.header.merkle_root).toString('hex')
-        // output.block.header.mining_nonce = response.block.header.mining_nonce
-        response.block.header.PK = Buffer.from(response.block.header.PK).toString('hex')
 
         // transactions
         const transactions = []
@@ -491,7 +486,6 @@ Meteor.methods({
           adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
           if (adjusted.transactionType === 'coinbase') {
             adjusted.coinbase.addr_to = 'Q' + Buffer.from(adjusted.coinbase.addr_to).toString('hex')
-            adjusted.coinbase.headerhash = Buffer.from(adjusted.coinbase.headerhash).toString('hex')
             // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
             adjusted.transfer = adjusted.coinbase
           }
@@ -662,7 +656,7 @@ Meteor.methods({
             amount: thisTxnHashResponse.transaction.tx.coinbase.amount / SHOR_PER_QUANTA,
             from: thisTxnHashResponse.transaction.addr_from,
             to: thisTxnHashResponse.transaction.tx.coinbase.addr_to,
-            ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: "",
             fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
             block: thisTxnHashResponse.transaction.header.block_number,
             timestamp: thisTxnHashResponse.transaction.header.timestamp_seconds,
