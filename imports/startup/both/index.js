@@ -4,7 +4,7 @@
 SHOR_PER_QUANTA=1000000000
 
 // Explorer Version
-EXPLORER_VERSION="0.2.0"
+EXPLORER_VERSION="0.3.0"
 
 // Function to cleanly represent large decimal numbers without exponentional formatting.
 numberToString = (num) => {
