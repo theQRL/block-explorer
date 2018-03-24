@@ -60,6 +60,7 @@ function loadAddressTransactions(txArray) {
       Session.set('fetchedTx', true)
     }
     $('#loadingTransactions').hide()
+    $('#noTransactionsFound').show()
   })
 }
 
@@ -225,6 +226,12 @@ Template.address.helpers({
       transactions.push(y)
     })
     return transactions
+  },
+  addressHasTransactions() {
+    if(Session.get('addressTransactions').length > 0) {
+      return true
+    }
+    return false
   },
   isThisAddress(address) {
     if(address == Session.get('address').state.address) {
