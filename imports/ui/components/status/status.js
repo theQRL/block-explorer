@@ -40,6 +40,18 @@ Template.status.helpers({
     }
     return r
   },
+  emission_raw() {
+    const x = status.findOne()
+    let r = '?'
+    try {
+      r = (parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
+      r = r.toFixed(2)
+      r = r.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+    } catch (e) {
+      r = 'Error parsing API results'
+    }
+    return r
+  },
   staked() {
     const x = status.findOne()
     let r = 'Undetermined'
