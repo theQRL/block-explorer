@@ -287,14 +287,12 @@ Meteor.methods({
           output.transaction.tx.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
           output.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')
           output.transaction.tx.amount = numberToString(output.transaction.tx.coinbase.amount / SHOR_PER_QUANTA)
-          
+
           output.transaction.explorer = {
             from: '',
             to: output.transaction.tx.addr_to,
             type: 'COINBASE',
           }
-        } else {
-          output.transaction.header.PK = Buffer.from(output.transaction.header.PK).toString('hex')
         }
       } else {
         output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')

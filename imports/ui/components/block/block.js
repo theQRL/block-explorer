@@ -77,10 +77,10 @@ Template.block.helpers({
       return this.coinbase.addr_to
     }
     if (this.transactionType === 'transfer') {
-      return this.transfer.totalOutputs + " outputs"
+      return this.transfer.totalOutputs + " addresses"
     }
     if (this.transactionType === 'transfer_token') {
-      return this.transfer_token.totalOutputs + " outputs"
+      return this.transfer_token.totalOutputs + " addresses"
     }
     return ''
   },
@@ -90,6 +90,10 @@ Template.block.helpers({
     }
     if (this.transactionType === 'transfer_token') {
       return numberToString(this.transfer_token.totalTransferred) + " " + this.transfer_token.tokenSymbol
+    }
+    if (this.transactionType === 'coinbase') {
+      console.log(this)
+      return numberToString(this.coinbase.amount / SHOR_PER_QUANTA) + " Quanta"
     }
     return ''
   },

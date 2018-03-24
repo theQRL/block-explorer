@@ -29,10 +29,8 @@
         <th>Amount</th>
         <th>Fee (Shor)</th>
         <th>From</th>
-        <th>Outputs</th>
+        <th>To</th>
         <th>Txhash</th>
-        <th>Pubhash</th>
-        <th>OTS key</th>
         </thead>
         <tbody>
         {{#each transactions}}
@@ -51,8 +49,6 @@
             <td><a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a></td>
             {{/if}}
             <td><a href="/tx/{{transaction_hash}}">{{transaction_hash}}</a></td>
-            <td>{{public_key}}</td>
-            <td>{{this.xmss_ots_index}}</td>
           </tr>
         {{/each}}
         </tbody>
