@@ -7,7 +7,6 @@ import '../../stylesheets/overrides.css'
 
 let tokensHeld = []
 
-
 const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
 const addressResultsRefactor = (res) => {
@@ -45,61 +44,6 @@ const addressResultsRefactor = (res) => {
   return output
 }
 
-const addressTransactionsRefactor = (res) => {
-  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
-  let output = res
-  if (res.length > 0) {
-    // transactions
-    const transactions = []
-    output.forEach((value) => {
-      const edit = value
-      if (edit.found) {
-        edit.transaction.header.hash_header = Buffer.from(edit.transaction.header.hash_header).toString('hex')
-        edit.transaction.header.hash_header_prev = Buffer.from(edit.transaction.header.hash_header_prev).toString('hex')
-        edit.transaction.header.merkle_root = Buffer.from(edit.transaction.header.merkle_root).toString('hex')
-        edit.transaction.tx.addr_from = 'Q' + Buffer.from(edit.transaction.tx.addr_from).toString('hex')
-        edit.transaction.tx.public_key = Buffer.from(edit.transaction.tx.public_key).toString('hex')
-        edit.transaction.tx.signature = Buffer.from(edit.transaction.tx.signature).toString('hex')
-        edit.transaction.tx.transaction_hash = Buffer.from(edit.transaction.tx.transaction_hash).toString('hex')
-        edit.transaction.tx.fee /= SHOR_PER_QUANTA
-
-        if (edit.transaction.tx.transactionType === 'coinbase') {
-          edit.transaction.tx.addr_to = 'Q' + Buffer.from(edit.transaction.tx.coinbase.addr_to).toString('hex')
-          edit.transaction.tx.coinbase.addr_to = 'Q' + Buffer.from(edit.transaction.tx.coinbase.addr_to).toString('hex')
-          edit.transaction.tx.coinbase.amount /= SHOR_PER_QUANTA
-          edit.transaction.tx.amount = edit.transaction.tx.coinbase.amount
-        }
-        if (edit.transaction.tx.transactionType === 'transfer') {
-          edit.transaction.tx.addr_to = 'Q' + Buffer.from(edit.transaction.tx.transfer.addr_to).toString('hex')
-          edit.transaction.tx.transfer.addr_to = 'Q' + Buffer.from(edit.transaction.tx.transfer.addr_to).toString('hex')
-          edit.transaction.tx.transfer.amount /= SHOR_PER_QUANTA
-          edit.transaction.tx.amount = edit.transaction.tx.transfer.amount
-        }
-        if (edit.transaction.tx.transactionType === 'transfer_token') {
-          edit.transaction.tx.addr_to = 'Q' + Buffer.from(edit.transaction.tx.transfer_token.addr_to).toString('hex')
-          edit.transaction.tx.amount = edit.transaction.tx.transfer_token.amount / SHOR_PER_QUANTA
-        }
-      }
-      transactions.push(edit)
-    })
-    output = transactions
-  }
-  return output
-}
-
-const getTxArray = (txArray) => {
-  Meteor.call('addressTransactions', txArray, (errTx, resTx) => {
-    if (errTx) {
-      Session.set('addressTransactions', { error: errTx })
-    } else {
-      Session.set('addressTransactions', addressTransactionsRefactor(resTx))
-      $('.loader').hide()
-      Session.set('fetchedTx', true)
-    }
-  })
-}
-
-
 function loadAddressTransactions(txArray) {
   const request = {
     tx: txArray
@@ -108,7 +52,7 @@ function loadAddressTransactions(txArray) {
   Session.set('addressTransactions', [])
   $('#loadingTransactions').show()
   
-  Meteor.call('addressTransactions2', request, (err, res) => {
+  Meteor.call('addressTransactions', request, (err, res) => {
     if (err) {
       Session.set('addressTransactions', { error: err })
     } else {
@@ -116,6 +60,7 @@ function loadAddressTransactions(txArray) {
       Session.set('fetchedTx', true)
     }
     $('#loadingTransactions').hide()
+    $('#noTransactionsFound').show()
   })
 }
 
@@ -155,7 +100,7 @@ const getTokenBalances = (getAddress, callback) => {
                 thisToken.hash = tokenHash
                 thisToken.name = bytesToString(tokenDetails.name)
                 thisToken.symbol = bytesToString(tokenDetails.symbol)
-                thisToken.balance = tokenBalance / SHOR_PER_QUANTA
+                thisToken.balance = tokenBalance / Math.pow(10, tokenDetails.decimals)
 
                 tokensHeld.push(thisToken)
 
@@ -217,7 +162,6 @@ const renderAddressBlock = () => {
         if (txArray.length > 10) {
           txArray = txArray.slice(0, 9)
         }
-        // getTxArray(txArray)
         loadAddressTransactions(txArray)
       }
     })
@@ -261,15 +205,33 @@ Template.address.helpers({
   },
   addressTransactions() {
     const transactions = []
+    const thisAddress = Session.get('address').state.address
     _.each(Session.get('addressTransactions'), (transaction) => {
       // Update timestamp from unix epoch to human readable time/date.
       const x = moment.unix(transaction.timestamp)
       const y = transaction
       y.timestamp = moment(x).format('HH:mm D MMM YYYY')
 
+      // Set total received amount if sent to this address
+      let thisReceivedAmount = 0
+      if ((transaction.type === 'transfer') || (transaction.type === 'transfer_token')) {
+        _.each(transaction.outputs, (output) => {
+          if(output.address == thisAddress) {
+            thisReceivedAmount += output.amount
+          }
+        })
+      }
+      y.thisReceivedAmount = thisReceivedAmount
+
       transactions.push(y)
     })
     return transactions
+  },
+  addressHasTransactions() {
+    if(Session.get('addressTransactions').length > 0) {
+      return true
+    }
+    return false
   },
   isThisAddress(address) {
     if(address == Session.get('address').state.address) {
@@ -353,7 +315,7 @@ Template.address.helpers({
     return false
   },
   isTokenCreation(txType) {
-    if(txType == "token") {
+    if(txType == "token") { 
       return true
     }
     return false
@@ -431,7 +393,6 @@ Template.address.events({
     const txArray = Session.get('address').state.transactions.reverse().slice(startIndex, startIndex + 10)
     $('.loader').show()
     Session.set('fetchedTx', false)
-    //getTxArray(txArray)
     loadAddressTransactions(txArray)
   },
 })

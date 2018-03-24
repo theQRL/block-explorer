@@ -3,6 +3,6 @@
     "webhook": "INSERT GLIP WEBHOOK HTTPS:// ADDRESS HERE"
   },
   "api": {
-    "node": "127.0.0.1:9009"
+    "node": "35.178.105.77:9009"
   }
 }

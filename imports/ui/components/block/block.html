@@ -26,13 +26,11 @@
       <table class="ui striped table">
         <thead>
         <th>Type</th>
-        <th>Amount (Quanta)</th>
+        <th>Amount</th>
         <th>Fee (Shor)</th>
         <th>From</th>
         <th>To</th>
         <th>Txhash</th>
-        <th>Pubhash</th>
-        <th>OTS key</th>
         </thead>
         <tbody>
         {{#each transactions}}
@@ -43,10 +41,14 @@
             <td><div class="unbreakable">{{amount}}</div></td>
             <td><div class="unbreakable">{{fee}}</div></td>
             <td><a href="/a/{{addr_from_hex}}">{{addr_from_hex}}</a></td>
+            {{#if isTransfer this.transactionType}}
+            <td>{{addr_to_hex}}</td>
+            {{else if isTokenTransfer this.transactionType}}
+            <td>{{addr_to_hex}}</td>
+            {{else}}
             <td><a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a></td>
+            {{/if}}
             <td><a href="/tx/{{transaction_hash}}">{{transaction_hash}}</a></td>
-            <td>{{public_key}}</td>
-            <td>{{this.xmss_ots_index}}</td>
           </tr>
         {{/each}}
         </tbody>

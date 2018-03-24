@@ -44,7 +44,7 @@
                 <strong>{{explorer.name}} ({{explorer.symbol}})</strong><br>owned by:<br><a href="/a/{{explorer.owner}}">{{explorer.owner}}</a>
                 {{else}}
                 {{#if isTokenTransfer}}
-                <div class="value">{{explorer.amount}}</div>
+                <div class="value">{{explorer.totalTransferred}}</div>
                 Tokens transferred
                 <div class="label">Token creation transaction: </div>
                 <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
@@ -83,7 +83,19 @@
                 <td class="single line">
                   <div class="ui purple label"><i class="sign in icon"></i>to</div>
                 </td>
-                <td><a href="/a/{{explorer.to}}">{{explorer.to}}</a></td>
+                <td>
+                  {{#if isTransfer}}
+                    {{#each explorer.outputs}}
+                      <a href="/a/{{this.address}}">{{this.address}} - {{this.amount}}</a><br />
+                    {{/each}}
+                  {{else if isTokenTransfer}}
+                    {{#each explorer.outputs}}
+                      <a href="/a/{{this.address}}">{{this.address}} - {{this.amount}}</a><br />
+                    {{/each}}
+                  {{else}}
+                  <a href="/a/{{explorer.to}}">{{explorer.to}}</a>
+                  {{/if}}
+                </td>
               </tr>
               </tbody>
             </table>
@@ -93,8 +105,6 @@
               <div class="item"><strong>Nonce</strong> {{tx.tx.nonce}}</div>
               <div class="item"><strong>OTS key</strong> {{ots_key}}</div>
               <div class="item"><strong>Fee</strong> {{tx.tx.fee}} Quanta</div>
-              <!-- div class="item"><strong>Hexsize</strong> {{tx.hexsize}}</div>
-              <div class="item"><strong>Fee</strong> {{tx.fee}}</div> -->
             </div>
             <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
             <div class="ui raised segment jsonbox json unbreakable" style="display: none"></div>

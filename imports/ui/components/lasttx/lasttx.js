@@ -12,13 +12,13 @@ Template.lasttx.helpers({
   },
   amount() {
     if (this.tx.coinbase) {
-      return (this.tx.coinbase.amount / SHOR_PER_QUANTA).toFixed(9)
+      return numberToString(this.tx.coinbase.amount / SHOR_PER_QUANTA)
     }
     if (this.tx.transfer) {
-      return (this.tx.transfer.amount / SHOR_PER_QUANTA).toFixed(9)
+      return numberToString(this.tx.totalTransferred)
     }
     if(this.tx.transfer_token) {
-      return (this.tx.transfer_token.amount / SHOR_PER_QUANTA).toFixed(9)
+      return numberToString(this.tx.totalTransferred)
     }
     return ''
   },

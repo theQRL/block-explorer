@@ -8,12 +8,12 @@
 
 
 
-<h2 class="ui pageHeader header">
+<h3 class="ui pageHeader header">
   <i class="tiny plus icon"></i>
   <div class="content wordBreak">
     {{address.state.address}}
   </div>
-</h2>
+</h3>
 
 <div class="ui segment pageSegment">
 
@@ -70,206 +70,212 @@
       </div>
     </div>
 
-    {{#each addressTransactions}}
-      {{#if isTransfer this.type}}
-      <div class="ui icon message transactionRecord">
-        {{#if isThisAddress this.from}}
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
-        {{else}}
-        <img class="transactionTypeImage" src="/img/icons/receive.png" />
-        {{/if}}
-        <div class="content">
-          <div class="header">
-            {{#if isThisAddress this.from}}
-            Sent
-            {{else}}
-            Received
-            {{/if}}
-          </div>
-          <p class="transactionAddress">
-            {{#if isThisAddress this.from}}
-              {{this.to}}
-            {{else}}
-              {{this.from}}
-            {{/if}}
-          </p>
-        </div>
-        <div class="floatright">
-          <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
-        </div>
-      </div>
-      {{/if}}
-
-      {{#if isTokenCreation this.type}}
-      <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
-        <div class="content">
-          <div class="header">
-            Token Creation - {{this.name}} ({{this.symbol}})
-          </div>
-          <p class="transactionAddress">
-            {{this.txhash}}
-          </p>
-        </div>
-        <div class="floatright">
-           <a href="/tx/{{this.txhash}}">{{this.symbol}} &gt;</a>
-        </div>
-      </div>
-      {{/if}}
-
-      {{#if isTokenTransfer this.type}}
-      <div class="ui icon message transactionRecord">
-        {{#if isThisAddress this.from}}
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
-        {{else}}
-        <img class="transactionTypeImage" src="/img/icons/receive.png" />
-        {{/if}}
-        <div class="content">
-          <div class="header">
-            {{#if isThisAddress this.from}}
-            Sent
-            {{else}}
-            Received
-            {{/if}}
-          </div>
-          <p class="transactionAddress">
-            {{#if isThisAddress this.from}}
-              {{this.to}}
-            {{else}}
-              {{this.from}}
-            {{/if}}
-          </p>
-        </div>
-        <div class="floatright">
-          <a href="/tx/{{this.txhash}}">{{this.amount}} {{this.symbol}} &gt;</a>
-        </div>
-      </div>
-      {{/if}}
-
-      {{#if isCoinbaseTxn this.type}}
-      <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/receive.png" />
-        <div class="content">
-          <div class="header">
-            Coinbase Received
-          </div>
-          <p class="transactionAddress">
-            {{this.txhash}}
-          </p>
-        </div>
-        <div class="floatright">
-          <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
-        </div>
-      </div>
-      {{/if}}
-
-      {{#if isSlaveTxn this.type}}
-      <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
-        <div class="content">
-          <div class="header">
-            Slave Transaction
-          </div>
-          <p class="transactionAddress">
-            {{this.txhash}}
-          </p>
-        </div>
-        <div class="floatright">
-          <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
-        </div>
-      </div>
-      {{/if}}
-
-      {{#if isLatticePKTxn this.type}}
-      <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
-        <div class="content">
-          <div class="header">
-            Lattice Public Key
-          </div>
-          <p class="transactionAddress">
-            {{this.txhash}}
-          </p>
-        </div>
-        <div class="floatright">
-          <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
-        </div>
-      </div>
-      {{/if}}
-
-    {{/each}}
-      <table class="ui striped table">
-        {{#if pagination}}
-        <tfoot>
-            <tr><th colspan="7">
-              <div class="ui right floated pagination menu">
-                {{#if pback}}
-                <a qrl-data="back" class="icon item">
-                  <i qrl-data="back" class="left chevron icon"></i>
-                </a>
-                {{/if}}
-                {{#each pages}}
-                <a class="item {{isActive}}">{{this.number}}</a>
-                {{/each}}
-                {{#if pforward}}
-                <a qrl-data="forward" class="icon item">
-                  <i qrl-data="forward" class="right chevron icon"></i>
-                </a>
-                {{/if}}
-              </div>
-            </th>
-          </tr>
-        </tfoot>
-        {{/if}}
-      </table>
-    </div>
-
-
-      <!-- Token Balances -->
-      <div class="ui bottom attached tab segment" data-tab="tokenBalances">
-        <h2 class="ui header">
-          <div class="content">
-            Token Balances
-          </div>
-        </h2>
-
-        <div id="tokenBalancesLoading" class="ui icon message">
-          <br /><br />
-          <i class="notched circle loading icon"></i>
+    {{#if addressHasTransactions}}
+      {{#each addressTransactions}}
+        {{#if isTransfer this.type}}
+        <div class="ui icon message transactionRecord">
+          {{#if isThisAddress this.from}}
+          <img class="transactionTypeImage" src="/img/icons/send.png" />
+          {{else}}
+          <img class="transactionTypeImage" src="/img/icons/receive.png" />
+          {{/if}}
           <div class="content">
             <div class="header">
-              Just a moment
+              {{#if isThisAddress this.from}}
+              Sent
+              {{else}}
+              Received
+              {{/if}}
             </div>
-            <p>Token balances are loading...</p>
+            <p class="transactionAddress">
+              {{#if isThisAddress this.from}}
+                {{#each this.outputs}}
+                  {{this.address}} - {{this.amount}}<br />
+                {{/each}}
+              {{else}}
+                {{this.from}}
+              {{/if}}
+            </p>
+          </div>
+          <div class="floatright">
+            <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} Quanta &gt;</a>
           </div>
         </div>
+        {{/if}}
 
-        <div class="ui middle aligned divided list">
-          {{#each tokensHeld}}
-          <div class="item">
-            <i class="large ticket middle aligned icon"></i>
-            <div class="content">
-              <p class="header">{{this.name}} ({{this.symbol}})</p>
-              <div class="description">{{this.balance}}</div>
+        {{#if isTokenCreation this.type}}
+        <div class="ui icon message transactionRecord">
+          <img class="transactionTypeImage" src="/img/icons/send.png" />
+          <div class="content">
+            <div class="header">
+              Token Creation - {{this.name}} ({{this.symbol}})
             </div>
+            <p class="transactionAddress">
+              {{this.txhash}}
+            </p>
           </div>
-          {{/each}}
+          <div class="floatright">
+             <a href="/tx/{{this.txhash}}">{{this.symbol}} &gt;</a>
+          </div>
+        </div>
+        {{/if}}
+
+        {{#if isTokenTransfer this.type}}
+        <div class="ui icon message transactionRecord">
+          {{#if isThisAddress this.from}}
+          <img class="transactionTypeImage" src="/img/icons/send.png" />
+          {{else}}
+          <img class="transactionTypeImage" src="/img/icons/receive.png" />
+          {{/if}}
+          <div class="content">
+            <div class="header">
+              {{#if isThisAddress this.from}}
+              Sent
+              {{else}}
+              Received
+              {{/if}}
+            </div>
+            <p class="transactionAddress">
+              {{#if isThisAddress this.from}}
+                {{#each this.outputs}}
+                  {{this.address}} - {{this.amount}}<br />
+                {{/each}}
+              {{else}}
+                {{this.from}}
+              {{/if}}
+            </p>
+          </div>
+          <div class="floatright">
+            <a href="/tx/{{this.txhash}}">{{this.totalTransferred}} {{this.symbol}} &gt;</a>
+          </div>
+        </div>
+        {{/if}}
+
+        {{#if isCoinbaseTxn this.type}}
+        <div class="ui icon message transactionRecord">
+          <img class="transactionTypeImage" src="/img/icons/receive.png" />
+          <div class="content">
+            <div class="header">
+              Coinbase Received
+            </div>
+            <p class="transactionAddress">
+              {{this.txhash}}
+            </p>
+          </div>
+          <div class="floatright">
+            <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
+          </div>
+        </div>
+        {{/if}}
+
+        {{#if isSlaveTxn this.type}}
+        <div class="ui icon message transactionRecord">
+          <img class="transactionTypeImage" src="/img/icons/send.png" />
+          <div class="content">
+            <div class="header">
+              Slave Transaction
+            </div>
+            <p class="transactionAddress">
+              {{this.txhash}}
+            </p>
+          </div>
+          <div class="floatright">
+            <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
+          </div>
+        </div>
+        {{/if}}
+
+        {{#if isLatticePKTxn this.type}}
+        <div class="ui icon message transactionRecord">
+          <img class="transactionTypeImage" src="/img/icons/send.png" />
+          <div class="content">
+            <div class="header">
+              Lattice Public Key
+            </div>
+            <p class="transactionAddress">
+              {{this.txhash}}
+            </p>
+          </div>
+          <div class="floatright">
+            <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+          </div>
+        </div>
+        {{/if}}
+
+      {{/each}}
+    {{else}}
+      <div id="noTransactionsFound" style="display: none;" class="ui icon message">
+        <br /><br />
+        <div class="content">
+          <div class="header">
+            No transactions found
+          </div>
+        </div>
+      </div>
+    {{/if}}
+
+    <table class="ui striped table">
+      {{#if pagination}}
+      <tfoot>
+          <tr><th colspan="7">
+            <div class="ui right floated pagination menu">
+              {{#if pback}}
+              <a qrl-data="back" class="icon item">
+                <i qrl-data="back" class="left chevron icon"></i>
+              </a>
+              {{/if}}
+              {{#each pages}}
+              <a class="item {{isActive}}">{{this.number}}</a>
+              {{/each}}
+              {{#if pforward}}
+              <a qrl-data="forward" class="icon item">
+                <i qrl-data="forward" class="right chevron icon"></i>
+              </a>
+              {{/if}}
+            </div>
+          </th>
+        </tr>
+      </tfoot>
+      {{/if}}
+    </table>
+  </div>
+
+
+    <!-- Token Balances -->
+    <div class="ui bottom attached tab segment" data-tab="tokenBalances">
+      <h2 class="ui header">
+        <div class="content">
+          Token Balances
+        </div>
+      </h2>
+
+      <div id="tokenBalancesLoading" class="ui icon message">
+        <br /><br />
+        <i class="notched circle loading icon"></i>
+        <div class="content">
+          <div class="header">
+            Just a moment
+          </div>
+          <p>Token balances are loading...</p>
         </div>
       </div>
 
+      <div class="ui middle aligned divided list">
+        {{#each tokensHeld}}
+        <div class="item">
+          <i class="large ticket middle aligned icon"></i>
+          <div class="content">
+            <p class="header">{{this.name}} ({{this.symbol}})</p>
+            <div class="description">{{this.balance}}</div>
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
 
     <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
     <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
     
 </div>
-
-
-
-
-
-
-
-
-
 
 </template>
