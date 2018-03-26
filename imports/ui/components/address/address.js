@@ -221,7 +221,8 @@ Template.address.helpers({
           }
         })
       }
-      y.thisReceivedAmount = thisReceivedAmount
+      y.thisReceivedAmount = numberToString(thisReceivedAmount)
+      y.totalTransferred = numberToString(y.totalTransferred)
 
       transactions.push(y)
     })
