@@ -207,22 +207,26 @@ Template.address.helpers({
     const transactions = []
     const thisAddress = Session.get('address').state.address
     _.each(Session.get('addressTransactions'), (transaction) => {
-      // Update timestamp from unix epoch to human readable time/date.
-      const x = moment.unix(transaction.timestamp)
+      // Store modified transaction
       const y = transaction
-      y.timestamp = moment(x).format('HH:mm D MMM YYYY')
+      
+      // Update timestamp from unix epoch to human readable time/date.
+      if (moment.unix(transaction.timestamp).isValid()) {
+        y.timestamp = moment.unix(transaction.timestamp).format('HH:mm D MMM YYYY')
+      } else {
+        y.timestamp = 'Unconfirmed Tx'
+      }
 
       // Set total received amount if sent to this address
       let thisReceivedAmount = 0
       if ((transaction.type === 'transfer') || (transaction.type === 'transfer_token')) {
         _.each(transaction.outputs, (output) => {
           if(output.address == thisAddress) {
-            thisReceivedAmount += output.amount
+            thisReceivedAmount += parseFloat(output.amount)
           }
         })
       }
       y.thisReceivedAmount = numberToString(thisReceivedAmount)
-      y.totalTransferred = numberToString(y.totalTransferred)
 
       transactions.push(y)
     })
@@ -242,19 +246,6 @@ Template.address.helpers({
   },
   QRtext() {
     return FlowRouter.getParam('aId')
-  },
-  ts() {
-    let x = ''
-    if (Session.get('addressTransactions').length > 0) {
-      if (this.found) {
-        if (moment.unix(this.transaction.header.timestamp_seconds).isValid()) {
-          x = moment.unix(this.transaction.header.timestamp_seconds)
-        }
-      } else {
-        x = 'Unconfirmed Tx'
-      }
-    }
-    return x
   },
   qrl() {
     const address = Session.get('address')
