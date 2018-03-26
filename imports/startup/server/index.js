@@ -495,6 +495,8 @@ Meteor.methods({
             _.each(adjusted.transfer.addrs_to, (thisAddress, index) => {
               totalOutputs = totalOutputs + 1
               thisTotalTransferred = thisTotalTransferred + parseInt(adjusted.transfer.amounts[index])
+
+              adjusted.transfer.addrs_to[index] = 'Q' + Buffer.from(adjusted.transfer.addrs_to[index]).toString('hex')
             })
             adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
             adjusted.transfer.totalOutputs = totalOutputs
@@ -515,6 +517,8 @@ Meteor.methods({
             _.each(adjusted.transfer_token.addrs_to, (thisAddress, index) => {
               totalOutputs = totalOutputs + 1
               thisTotalTransferred = thisTotalTransferred + parseInt(adjusted.transfer_token.amounts[index])
+
+              adjusted.transfer_token.addrs_to[index] = 'Q' + Buffer.from(adjusted.transfer_token.addrs_to[index]).toString('hex')
             })
             adjusted.transfer_token.totalTransferred = thisTotalTransferred / Math.pow(10, thisDecimals)
             adjusted.transfer_token.totalOutputs = totalOutputs

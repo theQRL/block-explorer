@@ -77,10 +77,18 @@ Template.block.helpers({
       return this.coinbase.addr_to
     }
     if (this.transactionType === 'transfer') {
-      return this.transfer.totalOutputs + " addresses"
+      if(this.transfer.totalOutputs == 1) {
+        return this.transfer.addrs_to[0]
+      } else {
+        return this.transfer.totalOutputs + " addresses"
+      }
     }
     if (this.transactionType === 'transfer_token') {
-      return this.transfer_token.totalOutputs + " addresses"
+      if(this.transfer_token.totalOutputs == 1) {
+        return this.transfer_token.addrs_to[0]
+      } else {
+        return this.transfer_token.totalOutputs + " addresses"
+      }
     }
     return ''
   },
@@ -92,7 +100,6 @@ Template.block.helpers({
       return numberToString(this.transfer_token.totalTransferred) + " " + this.transfer_token.tokenSymbol
     }
     if (this.transactionType === 'coinbase') {
-      console.log(this)
       return numberToString(this.coinbase.amount / SHOR_PER_QUANTA) + " Quanta"
     }
     return ''
@@ -118,6 +125,12 @@ Template.block.helpers({
     }
     return false
   },
+  singleOutput(outputs) {
+    if(this.transfer.totalOutputs == 1) {
+      return true
+    }
+    return false
+  }
 })
 
 Template.block.events({

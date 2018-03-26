@@ -41,13 +41,23 @@
             <td><div class="unbreakable">{{amount}}</div></td>
             <td><div class="unbreakable">{{fee}}</div></td>
             <td><a href="/a/{{addr_from_hex}}">{{addr_from_hex}}</a></td>
+            <td>
             {{#if isTransfer this.transactionType}}
-            <td>{{addr_to_hex}}</td>
+              {{#if singleOutput this.transfer.totalOutputs}}
+                <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
+              {{else}}
+                {{addr_to_hex}}
+              {{/if}}
             {{else if isTokenTransfer this.transactionType}}
-            <td>{{addr_to_hex}}</td>
+              {{#if singleOutput this.transfer.totalOutputs}}
+                <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
+              {{else}}
+                {{addr_to_hex}}
+              {{/if}}
             {{else}}
-            <td><a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a></td>
+              <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
             {{/if}}
+            </td>
             <td><a href="/tx/{{transaction_hash}}">{{transaction_hash}}</a></td>
           </tr>
         {{/each}}
