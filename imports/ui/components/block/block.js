@@ -126,7 +126,7 @@ Template.block.helpers({
     return false
   },
   singleOutput(outputs) {
-    if(this.transfer.totalOutputs == 1) {
+    if(outputs == 1) {
       return true
     }
     return false

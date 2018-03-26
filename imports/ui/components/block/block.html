@@ -49,7 +49,7 @@
                 {{addr_to_hex}}
               {{/if}}
             {{else if isTokenTransfer this.transactionType}}
-              {{#if singleOutput this.transfer.totalOutputs}}
+              {{#if singleOutput this.transfer_token.totalOutputs}}
                 <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
               {{else}}
                 {{addr_to_hex}}
