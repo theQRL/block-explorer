@@ -10,6 +10,7 @@
     "fs": "0.0.1-security",
     "grpc": "^1.7.1",
     "json-formatter-js": "^2.2.0",
+    "mathjs": "4.0.1",
     "meteor-babel-helpers": "0.0.3",
     "meteor-node-stubs": "^0.3.2",
     "path": "^0.12.7",

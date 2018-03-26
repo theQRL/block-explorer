@@ -12,7 +12,7 @@ const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 // The address of the API node used
 
 // defaults to Testnet if run without config file
-let API_NODE_ADDRESS = '104.237.3.185:9009' // Testnet
+let API_NODE_ADDRESS = '35.177.60.137:9009' // Testnet
 // let API_NODE_ADDRESS = '35.177.114.111:9009' // Devnet
 try {
   if (Meteor.settings.api.node.length > 0) {
