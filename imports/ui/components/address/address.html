@@ -1,13 +1,5 @@
 <template name="address">
 
-
-
-
-
-
-
-
-
 <h3 class="ui pageHeader header">
   <i class="tiny plus icon"></i>
   <div class="content wordBreak">
@@ -42,6 +34,10 @@
     <div class="ui celled horizontal list">
       <div class="item"><strong>Transactions</strong> {{address.state.txcount}}</div>
       <div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>
+      <div class="item"><strong>Signature Scheme</strong> {{addressValidation.signatureScheme}}</div>
+      <div class="item"><strong>Tree Height</strong> {{addressValidation.height}}</div>
+      <div class="item"><strong>Total Signatures</strong> {{addressValidation.totalSignatures}}</div>
+      <div class="item"><strong>Hash Function</strong> {{addressValidation.hashFunction}}</div>
     </div>
   </div>
 
