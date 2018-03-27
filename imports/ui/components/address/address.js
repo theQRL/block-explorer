@@ -2,6 +2,7 @@
 /* ^^^ remove once testing complete
  */
 import JSONFormatter from 'json-formatter-js'
+import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import './address.html'
 import '../../stylesheets/overrides.css'
 
@@ -338,6 +339,18 @@ Template.address.helpers({
   },
   tokensHeld() {
     return Session.get('tokensHeld')
+  },
+  addressValidation() {
+    const thisAddress = Session.get('address').state.address
+    const validationResult = qrlAddressValdidator.hexString(thisAddress)
+
+    let result = {}
+    result.height = validationResult.sig.height
+    result.totalSignatures = validationResult.sig.number
+    result.signatureScheme = validationResult.sig.type
+    result.hashFunction = validationResult.hash.function
+
+    return result
   },
 })
 
