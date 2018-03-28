@@ -5,8 +5,28 @@ import { HTTP } from 'meteor/http'
 const refreshBlocks = () => {
   const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 5 }
   const response = Meteor.wrapAsync(getLatestData)(request)
-  Blocks.remove({})
-  Blocks.insert(response)
+
+  // Fetch current data
+  const current = Blocks.findOne()
+
+  // Only update if data has changed.
+  let newData = false
+  _.each(response.blockheaders, (newBlock) => {
+    let thisFound = false
+    _.each(current.blockheaders, (currentBlock) => {
+      if(currentBlock.header.block_number == newBlock.header.block_number) {
+        thisFound = true
+      }
+    })
+    if(thisFound == false) {
+      newData = true
+    }
+  })
+  if(newData == true) {
+    // Clear and update cache as it's changed
+    Blocks.remove({})
+    Blocks.insert(response)
+  }
 
   const lastblocktime = response.blockheaders[4].header.timestamp_seconds
   const seconds = new Date().getTime() / 1000
@@ -126,9 +146,27 @@ function refreshLasttx() {
   const merged = {}
   merged.transactions = unconfirmedTxns.concat(confirmedTxns)
 
-  // Now clear and update the cache
-  lasttx.remove({})
-  lasttx.insert(merged)
+  // Fetch current data
+  const current = lasttx.findOne()
+
+  // Only update if data has changed.
+  let newData = false
+  _.each(current.transactions, (currentTxn) => {
+    let thisFound = false
+    _.each(merged.transactions, (newTxn) => {
+      if(Buffer.from(currentTxn.tx.transaction_hash).toString('hex') == Buffer.from(newTxn.tx.transaction_hash).toString('hex')) {
+        thisFound = true
+      }
+    })
+    if(thisFound == false) {
+      newData = true
+    }
+  })
+  if(newData == true) {
+    // Clear and update cache as it's changed
+    lasttx.remove({})
+    lasttx.insert(merged)
+  }
 }
 
 function refreshHomeChart() {
