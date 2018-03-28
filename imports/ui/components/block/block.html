@@ -1,70 +1,86 @@
 <template name="block">
-  {{#with block}}
-    {{#if error}}
-      <h1>Block
-        <div class="ui big label"><i class="cube icon"></i>{{block.id}}</div>
-      </h1>
-      <div class="ui negative message">
-        <i class="close icon"></i>
+
+<h3 class="ui pageHeader header">
+  <i class="block layout icon"></i>
+  <div class="content wordBreak">
+    Block {{header.block_number}}
+  </div>
+</h3>
+
+<div class="ui segment pageSegment">
+  <div class="description">
+    <div class="ui celled horizontal list">
+      <div class="item"><strong>Transactions</strong> {{block.transactions.length}}</div>
+      <div class="item"><strong>Timestamp</strong> {{ts}}</div>
+      <div class="item"><strong>Epoch</strong> {{block_epoch}}</div>
+      <div class="item"><strong>Reward</strong> {{block_reward}} Quanta</div>
+      <div class="item"><strong>Mining Nonce</strong> {{mining_nonce}}</div>
+    </div>
+    <div class="ui hidden divider"></div>
+  </div>
+
+  <div class="ui bottom attached tab segment active">
+    <h2 class="ui header">
+      <div class="content">
+        Transactions
+      </div>
+    </h2>
+
+    <div id="loadingTransactions" class="ui icon message">
+      <br /><br />
+      <i class="notched circle loading icon"></i>
+      <div class="content">
         <div class="header">
-          Error reading block
+          Just a moment
         </div>
-        <p>{{block.error.reason}}</p>
+        <p id="relayingMsg">Block transactions loading ...</p>
       </div>
-    {{else}}
-      <h1>Block
-        <div class="ui big label"><i class="cube icon"></i>{{header.block_number}}</div>
-      </h1>
-      <div class="ui celled horizontal list">
-        <div class="item"><strong>Transactions</strong> {{block.transactions.length}}</div>
-        <div class="item"><strong>Timestamp</strong> {{ts}}</div>
-        <div class="item"><strong>Epoch</strong> {{block_epoch}}</div>
-        <div class="item"><strong>Reward</strong> {{block_reward}} Quanta</div>
-        <div class="item"><strong>Mining Nonce</strong> {{mining_nonce}}</div>
-      </div>
-      <h3>Block transactions</h3>
-      <table class="ui striped table">
-        <thead>
-        <th>Type</th>
-        <th>Amount</th>
-        <th>Fee (Shor)</th>
-        <th>From</th>
-        <th>To</th>
-        <th>Txhash</th>
-        </thead>
-        <tbody>
-        {{#each transactions}}
-          <tr>
-            <td>
-              <div class="ui label {{color}}">{{this.transactionType}}</div>
-            </td>
-            <td><div class="unbreakable">{{amount}}</div></td>
-            <td><div class="unbreakable">{{fee}}</div></td>
-            <td><a href="/a/{{addr_from_hex}}">{{addr_from_hex}}</a></td>
-            <td>
-            {{#if isTransfer this.transactionType}}
-              {{#if singleOutput this.transfer.totalOutputs}}
-                <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
-              {{else}}
-                {{addr_to_hex}}
-              {{/if}}
-            {{else if isTokenTransfer this.transactionType}}
-              {{#if singleOutput this.transfer_token.totalOutputs}}
-                <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
-              {{else}}
-                {{addr_to_hex}}
-              {{/if}}
-            {{else}}
+    </div>
+
+    <table class="ui striped table">
+      <thead>
+      <th>Type</th>
+      <th>Amount</th>
+      <th>Fee (Shor)</th>
+      <th>From</th>
+      <th>To</th>
+      <th>Txhash</th>
+      </thead>
+      <tbody>
+      {{#each transactions}}
+        <tr>
+          <td>
+            <div class="ui label {{color}}">{{this.transactionType}}</div>
+          </td>
+          <td><div class="unbreakable">{{amount}}</div></td>
+          <td><div class="unbreakable">{{fee}}</div></td>
+          <td><a href="/a/{{addr_from_hex}}">{{addr_from_hex}}</a></td>
+          <td>
+          {{#if isTransfer this.transactionType}}
+            {{#if singleOutput this.transfer.totalOutputs}}
               <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
+            {{else}}
+              {{addr_to_hex}}
             {{/if}}
-            </td>
-            <td><a href="/tx/{{transaction_hash}}">{{transaction_hash}}</a></td>
-          </tr>
-        {{/each}}
-        </tbody>
-      </table>
-      <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
-      <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
-    {{/if}}
-  {{/with}}
+          {{else if isTokenTransfer this.transactionType}}
+            {{#if singleOutput this.transfer_token.totalOutputs}}
+              <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
+            {{else}}
+              {{addr_to_hex}}
+            {{/if}}
+          {{else}}
+            <a href="/a/{{addr_to_hex}}">{{addr_to_hex}}</a>
+          {{/if}}
+          </td>
+          <td><a href="/tx/{{transaction_hash}}">{{transaction_hash}}</a></td>
+        </tr>
+      {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
+  <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
+</div>
+
 </template>
