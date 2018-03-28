@@ -15,8 +15,8 @@ const renderBlockBlock = (blockId) => {
         id: blockId,
       })
     } else {
-      // console.log(res)
       if (res.found) { Session.set('block', res) }
+      $('#loadingTransactions').hide()
     }
   })
 }
@@ -51,7 +51,8 @@ Template.block.helpers({
   },
   ts() {
     try {
-      const x = moment.unix(this.header.timestamp_seconds)
+      const thisHeader = Session.get('block').block.header
+      const x = moment.unix(thisHeader.timestamp_seconds)
       return moment(x).format('HH:mm D MMM YYYY')
     } catch (e) {
       return ' '

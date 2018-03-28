@@ -9,9 +9,9 @@ import '../../stylesheets/overrides.css'
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
   if (txId) {
-    Meteor.call('txhash', txId, (err, res) => {
+    Meteor.call('txhash', txId, (err, res) => {      
       if (err) {
-        Session.set('txhash', { error: err, id: txId })
+        Session.set('txhash', { error: err, id: txId, found: false })
         return false
       }
       if (res.found) {
@@ -41,11 +41,12 @@ const renderTxBlock = () => {
 
 Template.tx.helpers({
   tx() {
-    if (Session.get('txhash')) {
+    if (Session.get('txhash').error) {
+      return { found: false, parameter: FlowRouter.getParam('txId') }
+    } else {
       const txhash = Session.get('txhash').transaction
       return txhash
     }
-    return { found: false, parameter: FlowRouter.getParam('txId') }
   },
   id() {
     return FlowRouter.getParam('txId')
@@ -59,10 +60,14 @@ Template.tx.helpers({
     return ''
   },
   notFound() {
-    if (Session.get('txhash').found === false) {
-      return true
+    try{
+      if (Session.get('txhash').found === false) {
+        return true
+      }
+      return false
+    } catch(e) {
+      return false
     }
-    return false
   },
   header() {
     return Session.get('txhash').transaction.header
@@ -130,6 +135,12 @@ Template.tx.helpers({
   },
   isTokenTransfer() {
     if (this.explorer.type === 'TRANSFER TOKEN') {
+      return true
+    }
+    return false
+  },
+  isNotCoinbase() {
+    if (this.explorer.type != 'COINBASE') {
       return true
     }
     return false
