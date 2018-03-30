@@ -106,6 +106,7 @@ const getAddressState = (request, callback) => {
             }
           }
 
+          // Add in OTS fields to response
           response.ots = {}
           response.ots.keys = newOtsBitfield
           response.ots.nextKey = lowestUnusedOtsKey
