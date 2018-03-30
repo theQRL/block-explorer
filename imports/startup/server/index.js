@@ -102,7 +102,7 @@ const getAddressState = (request, callback) => {
             if(response.state.ots_counter == "0") {
               lowestUnusedOtsKey = otsBitfieldLength
             } else {
-              lowestUnusedOtsKey = response.state.ots_counter
+              lowestUnusedOtsKey = parseInt(response.state.ots_counter) + 1
             }
           }
 
