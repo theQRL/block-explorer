@@ -71,6 +71,7 @@ const getAddressState = (request, callback) => {
           // Parse OTS Bitfield, and grab the lowest unused key
           let newOtsBitfield = {}
           let lowestUnusedOtsKey = -1
+          let otsBitfieldLength = 0
 
           let thisOtsBitfield = response.state.ots_bitfield
           thisOtsBitfield.forEach (function (item, index) {
@@ -90,12 +91,19 @@ const getAddressState = (request, callback) => {
               if((thisBinary[i] == 0) && ((thisOtsIndex < lowestUnusedOtsKey) || (lowestUnusedOtsKey == -1))) {
                 lowestUnusedOtsKey = thisOtsIndex
               }
+
+              // Increment otsBitfieldLength
+              otsBitfieldLength += 1
             }
           })
 
           // If all keys in bitfield are used, lowest key will be what is shown in ots_counter + 1
           if(lowestUnusedOtsKey == -1) {
-            lowestUnusedOtsKey = response.state.ots_counter
+            if(response.state.ots_counter == "0") {
+              lowestUnusedOtsKey = otsBitfieldLength
+            } else {
+              lowestUnusedOtsKey = response.state.ots_counter
+            }
           }
 
           response.ots = {}
