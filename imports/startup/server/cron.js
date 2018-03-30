@@ -9,25 +9,29 @@ const refreshBlocks = () => {
   // Fetch current data
   const current = Blocks.findOne()
 
-  // Only update if data has changed.
-  let newData = false
-  _.each(response.blockheaders, (newBlock) => {
-    let thisFound = false
-    _.each(current.blockheaders, (currentBlock) => {
-      if(currentBlock.header.block_number == newBlock.header.block_number) {
-        thisFound = true
+  // On vanilla build, current will be undefined so we can just insert data
+  if (current === undefined) {
+    Blocks.insert(response)
+  } else {
+    // Only update if data has changed.
+    let newData = false
+    _.each(response.blockheaders, (newBlock) => {
+      let thisFound = false
+      _.each(current.blockheaders, (currentBlock) => {
+        if(currentBlock.header.block_number == newBlock.header.block_number) {
+          thisFound = true
+        }
+      })
+      if(thisFound == false) {
+        newData = true
       }
     })
-    if(thisFound == false) {
-      newData = true
+    if(newData == true) {
+      // Clear and update cache as it's changed
+      Blocks.remove({})
+      Blocks.insert(response)
     }
-  })
-  if(newData == true) {
-    // Clear and update cache as it's changed
-    Blocks.remove({})
-    Blocks.insert(response)
   }
-
   const lastblocktime = response.blockheaders[4].header.timestamp_seconds
   const seconds = new Date().getTime() / 1000
   const timeDiff = Math.floor((seconds - lastblocktime) / 60)
@@ -61,7 +65,7 @@ const refreshBlocks = () => {
 
 function refreshLasttx() {
   // First get unconfirmed transactions
-  const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
+  const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 10 })
   unconfirmed.transactions_unconfirmed.forEach((item, index) => {
     unconfirmed.transactions_unconfirmed[index].tx.confirmed = 'false'
     if (item.tx.transactionType === 'token') {
@@ -101,7 +105,7 @@ function refreshLasttx() {
   })
 
   // Now get confirmed transactions
-  const confirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 5 })
+  const confirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 10 })
   confirmed.transactions.forEach((item, index) => {
     confirmed.transactions[index].tx.confirmed = 'true'
     if (item.tx.transactionType === 'token') {
@@ -149,35 +153,40 @@ function refreshLasttx() {
   // Fetch current data
   const current = lasttx.findOne()
 
-  // Only update if data has changed.
-  let newData = false
-  _.each(merged.transactions, (newTxn) => {
-    let thisFound = false
-    _.each(current.transactions, (currentTxn) => {
-      // Find a matching pair of transactions by transaction hash
-      if(Buffer.from(currentTxn.tx.transaction_hash).toString('hex') == Buffer.from(newTxn.tx.transaction_hash).toString('hex')) {
-        try {
-          // If they both have null header (unconfirmed) there is no change
-          if((currentTxn.header === null) && (newTxn.header === null)) {
-            thisFound = true
-          // If they have same block number, there is also no change.
-          } else if(currentTxn.header.block_number == newTxn.header.block_number) {
-            thisFound = true
+  // On vanilla build, current will be undefined so we can just insert data
+  if (current === undefined) {
+    lasttx.insert(merged)
+  } else {
+    // Only update if data has changed.
+    let newData = false
+    _.each(merged.transactions, (newTxn) => {
+      let thisFound = false
+      _.each(current.transactions, (currentTxn) => {
+        // Find a matching pair of transactions by transaction hash
+        if(Buffer.from(currentTxn.tx.transaction_hash).toString('hex') == Buffer.from(newTxn.tx.transaction_hash).toString('hex')) {
+          try {
+            // If they both have null header (unconfirmed) there is no change
+            if((currentTxn.header === null) && (newTxn.header === null)) {
+              thisFound = true
+            // If they have same block number, there is also no change.
+            } else if(currentTxn.header.block_number == newTxn.header.block_number) {
+              thisFound = true
+            }
+          } catch(e) {
+            // Header in cached unconfirmed txn not found, we located a change
+            thisFound = false
           }
-        } catch(e) {
-          // Header in cached unconfirmed txn not found, we located a change
-          thisFound = false
         }
+      })
+      if(thisFound == false) {
+        newData = true
       }
     })
-    if(thisFound == false) {
-      newData = true
+    if(newData == true) {
+      // Clear and update cache as it's changed
+      lasttx.remove({})
+      lasttx.insert(merged)
     }
-  })
-  if(newData == true) {
-    // Clear and update cache as it's changed
-    lasttx.remove({})
-    lasttx.insert(merged)
   }
 }
 
