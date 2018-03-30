@@ -80,8 +80,9 @@ Meteor.call('getLatestData', req, (err, res) => {
   }
 })
 
+const address = Buffer.from('Q010600647bdcb1548622afa0a92ec1ba7b5d0fc212a3f2ae69fd830ac6ce01de5d94f1a66a7699'.substring(1), 'hex')
 req = {
-  address: Buffer.from('Qa02d909723512ecd1606c96f52f5a4121946f068986e612a57c75353952ab3624ddd0bd6', 'ascii'),
+  address,
 }
 Meteor.call('getAddressState', req, (err, res) => {
   if (err) {
