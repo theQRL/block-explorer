@@ -91,12 +91,12 @@ const getAddressState = (request, callback) => {
                 lowestUnusedOtsKey = thisOtsIndex
               }
             }
-
-            // If all keys in bitfield are used, lowest key will be what is shown in ots_counter + 1
-            if(lowestUnusedOtsKey == -1) {
-              lowestUnusedOtsKey = response.state.ots_counter
-            }
           })
+
+          // If all keys in bitfield are used, lowest key will be what is shown in ots_counter + 1
+          if(lowestUnusedOtsKey == -1) {
+            lowestUnusedOtsKey = response.state.ots_counter
+          }
 
           response.ots = {}
           response.ots.keys = newOtsBitfield
