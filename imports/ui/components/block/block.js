@@ -33,6 +33,10 @@ Template.block.helpers({
   block() {
     return Session.get('block').block
   },
+  blockSize() {
+    const bytes = Session.get('block').block.size
+    return formatBytes(bytes)
+  },
   header() {
     return Session.get('block').block.header
   },

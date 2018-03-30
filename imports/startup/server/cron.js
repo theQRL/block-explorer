@@ -151,11 +151,23 @@ function refreshLasttx() {
 
   // Only update if data has changed.
   let newData = false
-  _.each(current.transactions, (currentTxn) => {
+  _.each(merged.transactions, (newTxn) => {
     let thisFound = false
-    _.each(merged.transactions, (newTxn) => {
+    _.each(current.transactions, (currentTxn) => {
+      // Find a matching pair of transactions by transaction hash
       if(Buffer.from(currentTxn.tx.transaction_hash).toString('hex') == Buffer.from(newTxn.tx.transaction_hash).toString('hex')) {
-        thisFound = true
+        try {
+          // If they both have null header (unconfirmed) there is no change
+          if((currentTxn.header === null) && (newTxn.header === null)) {
+            thisFound = true
+          // If they have same block number, there is also no change.
+          } else if(currentTxn.header.block_number == newTxn.header.block_number) {
+            thisFound = true
+          }
+        } catch(e) {
+          // Header in cached unconfirmed txn not found, we located a change
+          thisFound = false
+        }
       }
     })
     if(thisFound == false) {

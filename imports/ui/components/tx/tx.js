@@ -48,6 +48,10 @@ Template.tx.helpers({
       return txhash
     }
   },
+  txSize() {
+    const bytes = Session.get('txhash').transaction.size
+    return formatBytes(bytes)
+  },
   id() {
     return FlowRouter.getParam('txId')
   },
