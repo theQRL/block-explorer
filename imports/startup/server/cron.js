@@ -151,9 +151,9 @@ function refreshLasttx() {
 
   // Only update if data has changed.
   let newData = false
-  _.each(current.transactions, (currentTxn) => {
+  _.each(merged.transactions, (newTxn) => {
     let thisFound = false
-    _.each(merged.transactions, (newTxn) => {
+    _.each(current.transactions, (currentTxn) => {
       if(Buffer.from(currentTxn.tx.transaction_hash).toString('hex') == Buffer.from(newTxn.tx.transaction_hash).toString('hex')) {
         thisFound = true
       }
