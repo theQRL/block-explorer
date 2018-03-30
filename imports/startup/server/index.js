@@ -67,6 +67,41 @@ const getAddressState = (request, callback) => {
           //   console.log('Going to add this one...')
           //   Addresses.insert({ Address: response.state.address })
           // }
+
+          // Parse OTS Bitfield, and grab the lowest unused key
+          let newOtsBitfield = {}
+          let lowestUnusedOtsKey = -1
+
+          let thisOtsBitfield = response.state.ots_bitfield
+          thisOtsBitfield.forEach (function (item, index) {
+            const thisDecimal = new Uint8Array(item)[0]
+            const thisBinary = decimalToBinary(thisDecimal).reverse()
+
+            const startIndex = index * 8
+            const endIndex = startIndex + 7
+
+            for(let i = 0; i < 8; i++) {
+              const thisOtsIndex = startIndex + i
+
+              // Add to parsed array
+              newOtsBitfield[thisOtsIndex] = thisBinary[i]
+
+              // Check if this is lowest unused key
+              if((thisBinary[i] == 0) && ((thisOtsIndex < lowestUnusedOtsKey) || (lowestUnusedOtsKey == -1))) {
+                lowestUnusedOtsKey = thisOtsIndex
+              }
+            }
+
+            // If all keys in bitfield are used, lowest key will be what is shown in ots_counter + 1
+            if(lowestUnusedOtsKey == -1) {
+              lowestUnusedOtsKey = response.state.ots_counter
+            }
+          })
+
+          response.ots = {}
+          response.ots.keys = newOtsBitfield
+          response.ots.nextKey = lowestUnusedOtsKey
+
           callback(null, response)
         }
       })
