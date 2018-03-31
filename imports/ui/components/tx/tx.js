@@ -101,10 +101,21 @@ Template.tx.helpers({
 
     return ''
   },
+  isConfirmed() {
+    const x = Session.get('status')
+    try {
+      if(this.header.block_number !== null) {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
   confirmations() {
     const x = Session.get('status')
     try {
-      return x.node_info.block_height - this.header.block_number
+      return x.node_info.block_height - this.header.block_number + 1
     } catch (e) {
       return 0
     }
