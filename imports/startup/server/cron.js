@@ -88,7 +88,7 @@ function refreshLasttx() {
       let thisTotalTransferred = 0
       _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
         // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred = thisTotalTransferred + unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex]
+        thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex])
       })
       thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
       unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
