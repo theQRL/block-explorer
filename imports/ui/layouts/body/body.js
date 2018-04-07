@@ -1,6 +1,6 @@
 import './body.html'
 import './sidebar.html'
-/* global WALLET_VERSION */
+import { EXPLORER_VERSION } from '../../../startup/both/index.js'
 
 BlazeLayout.setRoot('body')
 Template.appBody.onRendered(() => {

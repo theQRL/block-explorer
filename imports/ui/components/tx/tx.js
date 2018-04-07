@@ -4,12 +4,13 @@
 import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
-
+import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+import { formatBytes } from '../../../startup/client/index.js'
 
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
   if (txId) {
-    Meteor.call('txhash', txId, (err, res) => {      
+    Meteor.call('txhash', txId, (err, res) => {
       if (err) {
         Session.set('txhash', { error: err, id: txId, found: false })
         return false
@@ -41,40 +42,55 @@ const renderTxBlock = () => {
 
 Template.tx.helpers({
   tx() {
-    if (Session.get('txhash').error) {
-      return { found: false, parameter: FlowRouter.getParam('txId') }
-    } else {
+    try {
+      if (Session.get('txhash').error) {
+        return { found: false, parameter: FlowRouter.getParam('txId') }
+      }
       const txhash = Session.get('txhash').transaction
       return txhash
+    } catch (e) {
+      return false
     }
   },
   txSize() {
-    const bytes = Session.get('txhash').transaction.size
-    return formatBytes(bytes)
+    try {
+      const bytes = Session.get('txhash').transaction.size
+      return formatBytes(bytes)
+    } catch (e) {
+      return false
+    }
   },
   id() {
     return FlowRouter.getParam('txId')
   },
   ots_key() {
-    if (Session.get('txhash').found) {
-      const txhash = Session.get('txhash').transaction
-      const otsKey = parseInt(txhash.tx.signature.substring(0, 8), 16)
-      return otsKey
+    try {
+      if (Session.get('txhash').found) {
+        const txhash = Session.get('txhash').transaction
+        const otsKey = parseInt(txhash.tx.signature.substring(0, 8), 16)
+        return otsKey
+      }
+      return ''
+    } catch (e) {
+      return false
     }
-    return ''
   },
   notFound() {
-    try{
+    try {
       if (Session.get('txhash').found === false) {
         return true
       }
       return false
-    } catch(e) {
+    } catch (e) {
       return false
     }
   },
   header() {
-    return Session.get('txhash').transaction.header
+    try {
+      return Session.get('txhash').transaction.header
+    } catch (e) {
+      return false
+    }
   },
   qrl() {
     const txhash = Session.get('txhash')
@@ -93,18 +109,18 @@ Template.tx.helpers({
       return numberToString(this.tx.coinbase.amount / SHOR_PER_QUANTA)
     }
     if (this.tx.transactionType === 'transfer') {
-      return numberToString(this.tx.transfer.totalTransferred) + " Quanta"
+      return `${numberToString(this.tx.transfer.totalTransferred)} Quanta`
     }
     if (this.tx.transactionType === 'transfer_token') {
-      return numberToString(this.tx.transfer_token.totalTransferred) + " " + this.tx.transfer_token.tokenSymbol
+      return `${numberToString(this.tx.transfer_token.totalTransferred)} ${this.tx.transfer_token.tokenSymbol}`
     }
 
     return ''
   },
   isConfirmed() {
-    const x = Session.get('status')
+    // const x = Session.get('status')
     try {
-      if(this.header.block_number !== null) {
+      if (this.header.block_number !== null) {
         return true
       }
       return false
@@ -155,7 +171,7 @@ Template.tx.helpers({
     return false
   },
   isNotCoinbase() {
-    if (this.explorer.type != 'COINBASE') {
+    if (this.explorer.type !== 'COINBASE') {
       return true
     }
     return false
