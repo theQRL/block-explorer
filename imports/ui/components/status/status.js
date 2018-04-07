@@ -1,5 +1,6 @@
 import { quantausd, status } from '/imports/api/index.js'
 import './status.html'
+import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 
 Template.status.onCreated(() => {
   Meteor.subscribe('quantausd')
@@ -9,16 +10,16 @@ Template.status.onCreated(() => {
 Template.status.helpers({
   quantaUsd() {
     let price = quantausd.findOne().price.toFixed(2)
-    price = price.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+    price = price.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
     return price
   },
   marketCap() {
     const x = status.findOne()
-    let price = quantausd.findOne().price.toFixed(2)
-    let coinsInCirculation = Math.round(parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
+    const price = quantausd.findOne().price.toFixed(2)
+    const coinsInCirculation = Math.round(parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
     let marketCap = Math.round(price * coinsInCirculation)
     marketCap = marketCap.toFixed(2)
-    marketCap = marketCap.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+    marketCap = marketCap.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
     return marketCap
   },
   status() {
@@ -34,6 +35,7 @@ Template.status.helpers({
     const x = status.findOne()
     let r = 'Undetermined'
     try {
+      // eslint-disable-next-line
       r = Math.round(((parseFloat(x.coins_emitted) / SHOR_PER_QUANTA) / parseFloat(x.coins_total_supply)) * 100)
     } catch (e) {
       r = 'Error parsing API results'
@@ -46,7 +48,7 @@ Template.status.helpers({
     try {
       r = (parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
       r = r.toFixed(2)
-      r = r.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+      r = r.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
     } catch (e) {
       r = 'Error parsing API results'
     }
@@ -78,7 +80,7 @@ Template.status.helpers({
     try {
       r = parseFloat(x.coins_total_supply) - (parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
       r = r.toFixed(2)
-      r = r.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")
+      r = r.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
     } catch (e) {
       r = 'Error parsing API results'
     }
@@ -93,5 +95,5 @@ Template.status.helpers({
       r = 'Error parsing API results'
     }
     return r
-  }
+  },
 })

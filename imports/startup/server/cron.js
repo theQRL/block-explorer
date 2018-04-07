@@ -1,6 +1,8 @@
+import { HTTP } from 'meteor/http'
 import { getLatestData, getObject, getStats, apiCall } from '/imports/startup/server/index.js'
 import { Blocks, lasttx, homechart, quantausd, status } from '/imports/api/index.js'
-import { HTTP } from 'meteor/http'
+import { SHOR_PER_QUANTA } from '../both/index.js'
+
 
 const refreshBlocks = () => {
   const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 5 }

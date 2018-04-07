@@ -1,12 +1,13 @@
 import { lasttx } from '/imports/api/index.js'
 import './lasttx.html'
+import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 
 Template.lasttx.onCreated(() => {
   Meteor.subscribe('lasttx')
 })
 
 Template.lasttx.helpers({
-  lasttx() {    
+  lasttx() {
     const res = lasttx.findOne()
     return res
   },
@@ -17,7 +18,7 @@ Template.lasttx.helpers({
     if (this.tx.transfer) {
       return numberToString(this.tx.totalTransferred)
     }
-    if(this.tx.transfer_token) {
+    if (this.tx.transfer_token) {
       return numberToString(this.tx.totalTransferred)
     }
     return ''
@@ -40,45 +41,45 @@ Template.lasttx.helpers({
     return ret
   },
   isTransfer(txType) {
-    if(txType == "transfer") {
+    if (txType === 'transfer') {
       return true
     }
     return false
   },
   isTokenCreation(txType) {
-    if(txType == "token") {
+    if (txType === 'token') {
       return true
     }
     return false
   },
   isTokenTransfer(txType) {
-    if(txType == "transfer_token") {
+    if (txType === 'transfer_token') {
       return true
     }
     return false
   },
   isCoinbaseTxn(txType) {
-    if(txType == "coinbase") {
+    if (txType === 'coinbase') {
       return true
     }
     return false
   },
   isSlaveTxn(txType) {
-    if(txType == "slave") {
+    if (txType === 'slave') {
       return true
     }
     return false
   },
   isLatticePKTxn(txType) {
-    if(txType == "latticePK") {
+    if (txType === 'latticePK') {
       return true
     }
     return false
   },
   isConfirmed(confirmed) {
-    if(confirmed == "true") {
+    if (confirmed === 'true') {
       return true
     }
     return false
-  }
+  },
 })

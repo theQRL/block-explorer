@@ -1,5 +1,6 @@
 import { Blocks } from '/imports/api/index.js'
 import './lastblocks.html'
+import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 
 const addHex = (b) => {
   const result = b
