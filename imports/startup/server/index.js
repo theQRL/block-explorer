@@ -6,46 +6,178 @@ import fs from 'fs'
 import { check } from 'meteor/check'
 import '/imports/api/index.js'
 import '/imports/startup/server/cron.js'
-import { SHOR_PER_QUANTA, numberToString, decimalToBinary } from '../both/index.js'
+import { EXPLORER_VERSION, SHOR_PER_QUANTA, numberToString, decimalToBinary } from '../both/index.js'
 
-const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
-
-// The address of the API node used
-
-// defaults to Testnet if run without config file
 let API_NODE_ADDRESS = '35.177.60.137:9009' // Testnet
-// let API_NODE_ADDRESS = '35.177.114.111:9009' // Devnet
+
+
+// The addresses of the API nodes and their state
+// defaults to Testnet if run without config file
+// state true is connected, false is disconnected
+let API_NODES = [
+  {
+    'address' : '35.177.60.137:9009',
+    'state' : false
+  },
+  {
+    'address' : '104.251.219.40:9009',
+    'state' : false
+  },
+  {
+    'address' : '104.237.3.185:9009',
+    'state' : false
+  },
+]
+
+// Grab config and set API nodes if set
 try {
-  if (Meteor.settings.api.node.length > 0) {
-    API_NODE_ADDRESS = Meteor.settings.api.node
+  if (Meteor.settings.api.primaryNode.length > 0) {
+    // Reset API_NODES
+    API_NODES = []
+    // Set primary node
+    API_NODES.push({
+      'address' : Meteor.settings.api.primaryNode,
+      'state' : false
+    })
+  }
+  if (Meteor.settings.api.secondaryNode.length > 0) {
+    // Set secondary node
+    API_NODES.push({
+      'address' : Meteor.settings.api.secondaryNode,
+      'state' : false
+    })
+  }
+  if (Meteor.settings.api.tertiaryNode.length > 0) {
+    // Set tertiary node
+    API_NODES.push({
+      'address' : Meteor.settings.api.tertiaryNode,
+      'state' : false
+    })
   }
 } catch (e) {
   // no configuration file used
 }
 
-// Create a temp file to store the qrl.proto file in
-const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
+// Store qrl api connections
 const qrlClient = []
 
-// Load qrlbase.proto and fetch current qrl.proto from node
-const baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
-const client = new baseGrpcObject.qrl.Base(API_NODE_ADDRESS, grpc.credentials.createInsecure())
+// Connect to all nodes
+const connectNodes = () => {
+  API_NODES.forEach((node, index) => {
+    const endpoint = node.address
+    console.log(`Attempting to create gRPC connection to node: ${endpoint} ...`)
+    connectToNode(endpoint, (err, res) => {
+      if (err) {
+        console.log(`Failed to connect to node ${endpoint}`)
+        API_NODES[index].state = false
+      } else {
+        console.log(`Connected to ${endpoint}`)
+        API_NODES[index].state = true
+      }
+    })
+  })
+}
 
-client.getNodeInfo({}, (err, res) => {
-  if (err) {
-    console.log(`Error fetching qrl.proto from ${API_NODE_ADDRESS}`)
+// Server Startup
+if (Meteor.isServer) {
+  Meteor.startup(() => {
+    console.log(`QRL Explorer Starting - Version: ${EXPLORER_VERSION}`)
+    // Attempt to create connections with all nodes
+    connectNodes()
+  })
+}
+
+// Maintain node connection status
+Meteor.setInterval(() => {
+  console.log('Refreshing node connection status')
+  // Maintain state of connections to all nodes
+  connectNodes()
+}, 20000)
+
+// Establish a connection with a remote node.
+// If there is no active server side connection for the requested node,
+// this function will call loadGrpcClient to establish one.
+const connectToNode = (endpoint, callback) => {
+  // First check if there is an existing object to store the gRPC connection
+  if (qrlClient.hasOwnProperty(endpoint) === true) {
+    console.log('Existing connection found for ', endpoint, ' - attempting getNodeState')
+    // There is already a gRPC object for this server stored.
+    // Attempt to connect to it.
+    try {
+      qrlClient[endpoint].getNodeState({}, (err, response) => {
+        if (err) {
+          console.log('Error fetching node state for ', endpoint)
+          // If it errors, we're going to remove the object and attempt to connect again.
+          delete qrlClient[endpoint]
+
+          console.log('Attempting re-connection to ', endpoint)
+
+          loadGrpcClient(endpoint, (loadErr, loadResponse) => {
+            if (loadErr) {
+              console.log(`Failed to re-connect to node ${endpoint}`)
+              const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
+              callback(myError, null)
+            } else {
+              console.log(`Connected to ${endpoint}`)
+              callback(null, loadResponse)
+            }
+          })
+        } else {
+          console.log(`Node state for ${endpoint} ok`)
+          callback(null, response)
+        }
+      })
+    } catch (err) {
+      console.log('node state error exception')
+      const myError = errorCallback(err, 'Cannot access API/getNodeState', '**ERROR/getNodeState**')
+      callback(myError, null)
+    }
   } else {
-    fs.writeFile(qrlProtoFilePath, res.grpcProto, (FSerr) => {
-      if (FSerr) throw FSerr
-      const grpcObject = grpc.load(qrlProtoFilePath)
-      // Create area to store this grpc connection
-      qrlClient.push('API')
-      qrlClient.API = new grpcObject.qrl
-        .PublicAPI(API_NODE_ADDRESS, grpc.credentials.createInsecure())
-      console.log(`qrlClient.API loaded for ${API_NODE_ADDRESS}`)
+    console.log(`Establishing new connection to ${endpoint}`)
+    // We've not connected to this node before, let's establish a connection to it.
+    loadGrpcClient(endpoint, (err, response) => {
+      if (err) {
+        console.log(`Failed to connect to node ${endpoint}`)
+        const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
+        callback(myError, null)
+      } else {
+        console.log(`Connected to ${endpoint}`)
+        callback(null, response)
+      }
     })
   }
-})
+}
+
+// Load the qrl.proto gRPC client into qrlClient from a remote node.
+const loadGrpcClient = (endpoint, callback) => {
+  // Load qrlbase.proto and fetch current qrl.proto from node
+  const baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
+  const client = new baseGrpcObject.qrl.Base(endpoint, grpc.credentials.createInsecure())
+
+  client.getNodeInfo({}, (err, res) => {
+    if (err) {
+      console.log(`Error fetching qrl.proto from ${endpoint}`)
+      callback(err, null)
+    } else {
+      // Write a new temp file for this grpc connection
+      const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
+
+      fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
+        if (fsErr) throw fsErr
+
+        const grpcObject = grpc.load(qrlProtoFilePath)
+
+        // Create the gRPC Connection
+        qrlClient[endpoint] =
+          new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
+
+        console.log(`qrlClient loaded for ${endpoint}`)
+
+        callback(null, true)
+      })
+    }
+  })
+}
 
 const errorCallback = (error, message, alert) => {
   const d = new Date()
@@ -55,167 +187,141 @@ const errorCallback = (error, message, alert) => {
   return meteorError
 }
 
-const getAddressState = (request, callback) => {
-  if (qrlClient.length !== 0) {
-    try {
-      qrlClient.API.GetAddressState(request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
-          callback(myError, null)
-        } else {
-          // server side buffering being added here
-          // if (!(Addresses.findOne({ Address: response.state.address }))) {
-          //   console.log('Going to add this one...')
-          //   Addresses.insert({ Address: response.state.address })
-          // }
+// Wrapper to provide highly available API results in the event
+// the primary or secondary nodes go offline
+const qrlApi = (api, request, callback) => {
+  let activeNodes = []
 
-          // Parse OTS Bitfield, and grab the lowest unused key
-          const newOtsBitfield = {}
-          let lowestUnusedOtsKey = -1
-          let otsBitfieldLength = 0
-
-          const thisOtsBitfield = response.state.ots_bitfield
-          thisOtsBitfield.forEach((item, index) => {
-            const thisDecimal = new Uint8Array(item)[0]
-            const thisBinary = decimalToBinary(thisDecimal).reverse()
-
-            const startIndex = index * 8
-            // const endIndex = startIndex + 7 <--- JPL: never used
-
-            for (let i = 0; i < 8; i += 1) {
-              const thisOtsIndex = startIndex + i
-
-              // Add to parsed array
-              newOtsBitfield[thisOtsIndex] = thisBinary[i]
-
-              // Check if this is lowest unused key
-              if ((thisBinary[i] === 0) &&
-               ((thisOtsIndex < lowestUnusedOtsKey) || (lowestUnusedOtsKey === -1))) {
-                lowestUnusedOtsKey = thisOtsIndex
-              }
-
-              // Increment otsBitfieldLength
-              otsBitfieldLength += 1
-            }
-          })
-
-          // If all keys in bitfield are used, lowest key will be what is shown in ots_counter + 1
-          if (lowestUnusedOtsKey === -1) {
-            if (response.state.ots_counter === '0') {
-              lowestUnusedOtsKey = otsBitfieldLength
-            } else {
-              lowestUnusedOtsKey = parseInt(response.state.ots_counter, 10) + 1
-            }
-          }
-
-          // Add in OTS fields to response
-          response.ots = {}
-          response.ots.keys = newOtsBitfield
-          response.ots.nextKey = lowestUnusedOtsKey
-
-          callback(null, response)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
-      callback(myError, null)
+  // Determine current active nodes
+  API_NODES.forEach((node) => {
+    if(node.state === true) {
+      activeNodes.push(node.address)
     }
+  })
+
+  // If all three nodes have gone offline, fail
+  if(activeNodes.length === 0) {
+    const myError = errorCallback('The block explorer server cannot connect to any API node', 'Cannot connect to API', '**ERROR/noActiveNodes/b**')
+    callback(myError, null)
   } else {
-    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
+    // Make the API call
+    qrlClient[activeNodes[0]][api](request, (error, response) => {
+      callback(error, response)
+    })
+  }
+}
+
+const getAddressState = (request, callback) => {
+  try {
+    qrlApi('GetAddressState', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
+        callback(myError, null)
+      } else {
+        // server side buffering being added here
+        // if (!(Addresses.findOne({ Address: response.state.address }))) {
+        //   console.log('Going to add this one...')
+        //   Addresses.insert({ Address: response.state.address })
+        // }
+
+        // Parse OTS Bitfield, and grab the lowest unused key
+        const newOtsBitfield = {}
+        let lowestUnusedOtsKey = -1
+        let otsBitfieldLength = 0
+
+        const thisOtsBitfield = response.state.ots_bitfield
+        thisOtsBitfield.forEach((item, index) => {
+          const thisDecimal = new Uint8Array(item)[0]
+          const thisBinary = decimalToBinary(thisDecimal).reverse()
+
+          const startIndex = index * 8
+          // const endIndex = startIndex + 7 <--- JPL: never used
+
+          for (let i = 0; i < 8; i += 1) {
+            const thisOtsIndex = startIndex + i
+
+            // Add to parsed array
+            newOtsBitfield[thisOtsIndex] = thisBinary[i]
+
+            // Check if this is lowest unused key
+            if ((thisBinary[i] === 0) &&
+             ((thisOtsIndex < lowestUnusedOtsKey) || (lowestUnusedOtsKey === -1))) {
+              lowestUnusedOtsKey = thisOtsIndex
+            }
+
+            // Increment otsBitfieldLength
+            otsBitfieldLength += 1
+          }
+        })
+
+        // If all keys in bitfield are used, lowest key will be what is shown in ots_counter + 1
+        if (lowestUnusedOtsKey === -1) {
+          if (response.state.ots_counter === '0') {
+            lowestUnusedOtsKey = otsBitfieldLength
+          } else {
+            lowestUnusedOtsKey = parseInt(response.state.ots_counter, 10) + 1
+          }
+        }
+
+        // Add in OTS fields to response
+        response.ots = {}
+        response.ots.keys = newOtsBitfield
+        response.ots.nextKey = lowestUnusedOtsKey
+
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/GetAddressState**')
     callback(myError, null)
   }
 }
 
 export const getLatestData = (request, callback) => {
-  if (qrlClient.length !== 0) {
-    try {
-      qrlClient.API.GetLatestData(request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/getLatestData** ')
-          callback(myError, null)
-        } else {
-          callback(null, response)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
-      callback(myError, null)
-    }
-  } else {
-    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
+  try {
+    qrlApi('GetLatestData', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/GetLatestData** ')
+        callback(myError, null)
+      } else {
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/GetLatestData**')
     callback(myError, null)
   }
 }
 
 export const getStats = (request, callback) => {
-  if (qrlClient.length !== 0) {
-    try {
-      qrlClient.API.GetStats(request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(error, 'Cannot access API/GetStats/a', '**ERROR/getStats/a** ')
-          callback(myError, null)
-        } else {
-          callback(null, response)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(error, 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
-      callback(myError, null)
-    }
-  } else {
-    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
-    callback(myError, null)
-  }
-}
-
-const getStakers = (request, callback) => {
-  if (qrlClient.length !== 0) {
-    try {
-      qrlClient.API.GetStakers(request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers** ')
-          callback(myError, null)
-        } else {
-          const currentStakers = []
-          response.stakers.forEach((staker) => {
-            currentStakers.push({
-              address: ab2str(staker.address_state.address),
-              balance: staker.address_state.balance / SHOR_PER_QUANTA,
-              nonce: staker.address_state.nonce,
-              hash_terminator: staker.terminator_hash.toString('hex'),
-            })
-          })
-          callback(null, currentStakers)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(error, 'Cannot access API/GetStakers', '**ERROR/getStakers**')
-      callback(myError, null)
-    }
-  } else {
-    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
+  try {
+    qrlApi('GetStats', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetStats/a', '**ERROR/GetStats/a** ')
+        callback(myError, null)
+      } else {
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetStats/b', '**ERROR/GetStats/b**')
     callback(myError, null)
   }
 }
 
 export const getObject = (request, callback) => {
-  if (qrlClient.length !== 0) {
-    try {
-      qrlClient.API.GetObject(request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
-          callback(myError, null)
-        } else {
-          // console.log(response)
-          callback(null, response)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/getObject**')
-      callback(myError, null)
-    }
-  } else {
-    const myError = errorCallback('The block explorer server cannot connect to the API node', 'Cannot access API/GetStats/b', '**ERROR/getStats/b**')
+  try {
+    qrlApi('GetObject', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/GetObject**')
+        callback(myError, null)
+      } else {
+        // console.log(response)
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/GetObject**')
     callback(myError, null)
   }
 }
