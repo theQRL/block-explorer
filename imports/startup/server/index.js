@@ -888,6 +888,23 @@ Meteor.methods({
     return response
   },
 
+  connectionStatus() {
+    this.unblock()
+    let activeNodes = []
+    API_NODES.forEach((node) => {
+      if(node.state === true) {
+        activeNodes.push(node.address)
+      }
+    })
+    if(activeNodes.length === 0) {
+      const res = { colour: 'red' }
+      return res
+    } else {
+      const res = { colour: 'green' }
+      return res
+    }
+  },
+
   // Switch node --> remove for production
   // cyyber(request) {
   //   check(request, String)

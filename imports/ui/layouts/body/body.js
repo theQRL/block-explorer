@@ -7,6 +7,15 @@ Template.appBody.onRendered(() => {
   $('.ui.dropdown').dropdown()
   $('.modal').modal()
   //$('.sidebar').first().sidebar('attach events', '#hamburger', 'show')
+
+  Session.set('connectionStatus', {})
+  Meteor.call('connectionStatus', (err, res) => {
+    if (err) {
+      Session.set('connectionStatus', { error: err, colour: 'red' })
+    } else {
+      Session.set('connectionStatus', res)
+    }
+  })
 })
 
 const identifySearch = (str) => {
@@ -84,10 +93,12 @@ Template.appBody.helpers({
       return 'active'
     }
   },
-
   qrlExplorerVersion() {
     return EXPLORER_VERSION
   },
+  connectionStatus() {
+    return Session.get('connectionStatus')
+  }
 })
 
 Template.sidebar.events({
