@@ -217,6 +217,13 @@
       {{#if pagination}}
       <tfoot>
           <tr><th colspan="7">
+            <div class="ui left floated menu">
+            <div class="ui right labeled fluid input">
+              <label for="paginator" class="ui label">Page </label>
+              <input type="text" placeholder="{{currentPage}}" id="paginator">
+              <div class="ui label"> of {{totalPages}}</div>
+            </div>
+          </div>
             <div class="ui right floated pagination menu">
               {{#if pback}}
               <a qrl-data="back" class="icon item">

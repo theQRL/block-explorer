@@ -492,3 +492,7 @@ Ellipsis Animation
     width: 1em;
   } 
 }
+#paginator {
+  background-color: #fff!important;
+  width: 80px!important;
+}

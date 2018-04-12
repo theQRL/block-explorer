@@ -129,11 +129,11 @@ const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
   let tPage = FlowRouter.getParam('tPage')
   tPage = parseInt(tPage, 10)
+  if (!tPage) { tPage = 1 }
   if (aId) {
     const req = {
       address: addressForAPI(aId),
     }
-
     Meteor.call('getAddressState', req, (err, res) => {
       if (err) {
         Session.set('address', { error: err, id: aId })
@@ -163,19 +163,21 @@ const renderAddressBlock = () => {
         }
         let txArray = null
         Session.set('pages', pages)
-        if (tPage) {
-          if (tPage > numPages) {
-            tPage = numPages
-          }
-          if (tPage < 1) {
-            tPage = 1
-          }
-          Session.set('active', tPage)
-          const startIndex = (tPage - 1) * 10
-          txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
-        } else {
-          txArray = res.state.transactions.reverse()
+        // if (tPage) {
+        if (tPage > numPages) {
+          tPage = numPages
+          FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${numPages}`)
         }
+        if (tPage < 1) {
+          tPage = 1
+          FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/1`)
+        }
+        Session.set('active', tPage)
+        const startIndex = (tPage - 1) * 10
+        txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
+        // } else {
+        //   txArray = res.state.transactions.reverse()
+        // }
         Session.set('fetchedTx', false)
         loadAddressTransactions(txArray)
       }
@@ -331,6 +333,9 @@ Template.address.helpers({
     }
     return ret
   },
+  currentPage() {
+    return Session.get('active')
+  },
   isTransfer(txType) {
     if (txType === 'transfer') {
       return true
@@ -386,9 +391,24 @@ Template.address.helpers({
       return false
     }
   },
+  totalPages() {
+    if (Session.get('pages')) {
+      return Session.get('pages').length
+    }
+    return false
+  },
 })
 
 Template.address.events({
+  'keypress #paginator': (event) => {
+    if (event.keyCode === 13) {
+      const x = $('#paginator').val()
+      const max = Session.get('pages').length
+      if ((x < (max + 1)) && (x > 0)) {
+        FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${x}`)
+      }
+    }
+  },
   'click .refresh': () => {
     Session.set('address', {})
     renderAddressBlock()
@@ -413,7 +433,7 @@ Template.address.events({
     } else {
       const a = event.target.getAttribute('qrl-data')
       b = Session.get('active')
-      const c = Session.get('pages')
+      const c = Session.get('pages').length
       if (a === 'forward') {
         b += 1
       }
