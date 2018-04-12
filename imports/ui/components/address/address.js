@@ -127,6 +127,8 @@ const getTokenBalances = (getAddress, callback) => {
 
 const renderAddressBlock = () => {
   const aId = FlowRouter.getParam('aId')
+  let tPage = FlowRouter.getParam('tPage')
+  tPage = parseInt(tPage, 10)
   if (aId) {
     const req = {
       address: addressForAPI(aId),
@@ -159,11 +161,22 @@ const renderAddressBlock = () => {
             to: ((pages.length + 1) * 10) + 10,
           })
         }
+        let txArray = null
         Session.set('pages', pages)
-        let txArray = res.state.transactions.reverse()
-        if (txArray.length > 10) {
-          txArray = txArray.slice(0, 9)
+        if (tPage) {
+          if (tPage > numPages) {
+            tPage = numPages
+          }
+          if (tPage < 1) {
+            tPage = 1
+          }
+          Session.set('active', tPage)
+          const startIndex = (tPage - 1) * 10
+          txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
+        } else {
+          txArray = res.state.transactions.reverse()
         }
+        Session.set('fetchedTx', false)
         loadAddressTransactions(txArray)
       }
     })
@@ -289,7 +302,8 @@ Template.address.helpers({
   },
   isActive() {
     let ret = ''
-    if (this.number === Session.get('active')) {
+    const tPage = parseInt(FlowRouter.getParam('tPage'), 10)
+    if ((this.number === Session.get('active')) || (tPage === this.number)) {
       ret = 'active'
     }
     return ret
@@ -411,12 +425,12 @@ Template.address.events({
         b = 1
       }
     }
-    const startIndex = (b - 1) * 10
+    // const startIndex = (b - 1) * 10
     Session.set('active', b)
-    const txArray = Session.get('address').state.transactions.reverse().slice(startIndex, startIndex + 10)
-    $('.loader').show()
     Session.set('fetchedTx', false)
-    loadAddressTransactions(txArray)
+    $('.loader').show()
+    $('#loadingTransactions').show()
+    FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${b}`)
   },
 })
 
