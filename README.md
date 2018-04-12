@@ -27,4 +27,4 @@ Edit `development.json`
 
 or
 
-  meteor --settings development.json
+	meteor --settings development.json

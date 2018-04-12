@@ -8,24 +8,24 @@ import '/imports/api/index.js'
 import '/imports/startup/server/cron.js'
 import { EXPLORER_VERSION, SHOR_PER_QUANTA, numberToString, decimalToBinary } from '../both/index.js'
 
-let API_NODE_ADDRESS = '35.177.60.137:9009' // Testnet
-
-
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
 // state true is connected, false is disconnected
 let API_NODES = [
   {
     'address' : '35.177.60.137:9009',
-    'state' : false
+    'state' : false,
+    'height': 0
   },
   {
     'address' : '104.251.219.40:9009',
-    'state' : false
+    'state' : false,
+    'height': 0
   },
   {
     'address' : '104.237.3.185:9009',
-    'state' : false
+    'state' : false,
+    'height': 0
   },
 ]
 
@@ -37,21 +37,24 @@ try {
     // Set primary node
     API_NODES.push({
       'address' : Meteor.settings.api.primaryNode,
-      'state' : false
+      'state' : false,
+      'height': 0
     })
   }
   if (Meteor.settings.api.secondaryNode.length > 0) {
     // Set secondary node
     API_NODES.push({
       'address' : Meteor.settings.api.secondaryNode,
-      'state' : false
+      'state' : false,
+      'height': 0
     })
   }
   if (Meteor.settings.api.tertiaryNode.length > 0) {
     // Set tertiary node
     API_NODES.push({
       'address' : Meteor.settings.api.tertiaryNode,
-      'state' : false
+      'state' : false,
+      'height': 0
     })
   }
 } catch (e) {
@@ -70,9 +73,11 @@ const connectNodes = () => {
       if (err) {
         console.log(`Failed to connect to node ${endpoint}`)
         API_NODES[index].state = false
+        API_NODES[index].height = 0
       } else {
         console.log(`Connected to ${endpoint}`)
         API_NODES[index].state = true
+        API_NODES[index].height = parseInt(res.info.block_height)
       }
     })
   })
@@ -90,6 +95,7 @@ if (Meteor.isServer) {
 // Maintain node connection status
 Meteor.setInterval(() => {
   console.log('Refreshing node connection status')
+
   // Maintain state of connections to all nodes
   connectNodes()
 }, 20000)
@@ -142,7 +148,15 @@ const connectToNode = (endpoint, callback) => {
         callback(myError, null)
       } else {
         console.log(`Connected to ${endpoint}`)
-        callback(null, response)
+        qrlClient[endpoint].getNodeState({}, (err, response) => {
+          if(err) {
+            console.log(`Failed to query node state ${endpoint}`)
+            const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
+            callback(myError, null)
+          } else {
+            callback(null, response)
+          }
+        })
       }
     })
   }
@@ -195,17 +209,28 @@ const qrlApi = (api, request, callback) => {
   // Determine current active nodes
   API_NODES.forEach((node) => {
     if(node.state === true) {
-      activeNodes.push(node.address)
+      activeNodes.push(node)
     }
   })
 
+  // Determine node with highest block height and set as bestNode
+  let bestNode = {}
+  bestNode.address = ''
+  bestNode.height = 0
+  activeNodes.forEach((node) => {
+    if(node.height > bestNode.height) {
+      bestNode.address = node.address
+      bestNode.height = node.height
+    }
+  })
+  
   // If all three nodes have gone offline, fail
   if(activeNodes.length === 0) {
     const myError = errorCallback('The block explorer server cannot connect to any API node', 'Cannot connect to API', '**ERROR/noActiveNodes/b**')
     callback(myError, null)
   } else {
     // Make the API call
-    qrlClient[activeNodes[0]][api](request, (error, response) => {
+    qrlClient[bestNode.address][api](request, (error, response) => {
       callback(error, response)
     })
   }
@@ -904,34 +929,4 @@ Meteor.methods({
       return res
     }
   },
-
-  // Switch node --> remove for production
-  // cyyber(request) {
-  //   check(request, String)
-  //   API_NODE_ADDRESS = `${request}:9009`
-
-  //   // Create a temp file to store the qrl.proto file in
-  //   qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
-  //   qrlClient = []
-
-  //   // Load qrlbase.proto and fetch current qrl.proto from node
-  //   baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
-  //   client = new baseGrpcObject.qrl.Base(API_NODE_ADDRESS, grpc.credentials.createInsecure())
-
-  //   client.getNodeInfo({}, (err, res) => {
-  //     if (err) {
-  //       console.log(`Error fetching qrl.proto from ${API_NODE_ADDRESS}`)
-  //     } else {
-  //       fs.writeFile(qrlProtoFilePath, res.grpcProto, (FSerr) => {
-  //         if (FSerr) throw FSerr
-  //         const grpcObject = grpc.load(qrlProtoFilePath)
-  //         // Create area to store this grpc connection
-  //         qrlClient.push('API')
-  //         qrlClient.API = new grpcObject.qrl
-  //           .PublicAPI(API_NODE_ADDRESS, grpc.credentials.createInsecure())
-  //         console.log(`qrlClient.API loaded for ${API_NODE_ADDRESS}`)
-  //       })
-  //     }
-  //   })
-  // },
 })
