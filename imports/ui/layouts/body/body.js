@@ -52,7 +52,7 @@ Template.appBody.events({
     const s = $(event.currentTarget).prev().val()
     postSearch(identifySearch(s))
   },
-  'keypress input': (event) => {
+  'keypress #mainSearch': (event) => {
     if (event.keyCode === 13) {
       // console.log('search clicked')
       if ($(':focus').is('input')) {
