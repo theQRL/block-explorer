@@ -324,7 +324,10 @@ Template.address.helpers({
   },
   pagination() {
     let ret = false
-    if (Session.get('pages').length > 1) {
+    if (Session.get('pages')) {
+      if (Session.get('pages').length > 1) {
+        ret = true
+      }
       ret = true
     }
     return ret
