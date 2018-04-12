@@ -177,7 +177,10 @@ const loadGrpcClient = (endpoint, callback) => {
       const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
 
       fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
-        if (fsErr) throw fsErr
+        if (fsErr) {
+          console.log(fsErr)
+          throw fsErr
+        }
 
         const grpcObject = grpc.load(qrlProtoFilePath)
 
@@ -223,7 +226,7 @@ const qrlApi = (api, request, callback) => {
       bestNode.height = node.height
     }
   })
-  
+
   // If all three nodes have gone offline, fail
   if(activeNodes.length === 0) {
     const myError = errorCallback('The block explorer server cannot connect to any API node', 'Cannot connect to API', '**ERROR/noActiveNodes/b**')
@@ -243,12 +246,6 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
         callback(myError, null)
       } else {
-        // server side buffering being added here
-        // if (!(Addresses.findOne({ Address: response.state.address }))) {
-        //   console.log('Going to add this one...')
-        //   Addresses.insert({ Address: response.state.address })
-        // }
-
         // Parse OTS Bitfield, and grab the lowest unused key
         const newOtsBitfield = {}
         let lowestUnusedOtsKey = -1
@@ -258,9 +255,7 @@ const getAddressState = (request, callback) => {
         thisOtsBitfield.forEach((item, index) => {
           const thisDecimal = new Uint8Array(item)[0]
           const thisBinary = decimalToBinary(thisDecimal).reverse()
-
           const startIndex = index * 8
-          // const endIndex = startIndex + 7 <--- JPL: never used
 
           for (let i = 0; i < 8; i += 1) {
             const thisOtsIndex = startIndex + i
@@ -288,10 +283,25 @@ const getAddressState = (request, callback) => {
           }
         }
 
+        // Calculate number of keys that are consumed
+        let totalKeysConsumed = 0
+        // First add all tracked keys from bitfield
+        for (let i = 0; i < otsBitfieldLength; i += 1) {
+          if(newOtsBitfield[i] === 1)  {
+            totalKeysConsumed += 1
+          }
+        }
+
+        // Then add any extra from `otsBitfieldLength` to `ots_counter`
+        if (response.state.ots_counter != '0') {
+          totalKeysConsumed += parseInt(response.state.ots_counter, 10) - (otsBitfieldLength - 1)
+        }
+
         // Add in OTS fields to response
         response.ots = {}
         response.ots.keys = newOtsBitfield
         response.ots.nextKey = lowestUnusedOtsKey
+        response.ots.keysConsumed = totalKeysConsumed
 
         callback(null, response)
       }

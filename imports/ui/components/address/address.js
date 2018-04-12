@@ -357,10 +357,12 @@ Template.address.helpers({
   addressValidation() {
     try {
       const thisAddress = Session.get('address').state.address
+      const keysConsumed = Session.get('address').ots.keysConsumed
       const validationResult = qrlAddressValdidator.hexString(thisAddress)
       const result = {}
       result.height = validationResult.sig.height
       result.totalSignatures = validationResult.sig.number
+      result.keysRemaining = result.totalSignatures - keysConsumed
       result.signatureScheme = validationResult.sig.type
       result.hashFunction = validationResult.hash.function
       return result
