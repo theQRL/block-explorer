@@ -46,7 +46,7 @@ FlowRouter.route('/block/:blockId', {
     BlazeLayout.render('appBody', { main: 'block' })
   },
 })
-FlowRouter.route('/a/:aId', {
+FlowRouter.route('/a/:aId/:tPage?', {
   name: 'Address.home',
   action() {
     BlazeLayout.render('appBody', { main: 'address' })
