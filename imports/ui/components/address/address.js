@@ -328,7 +328,6 @@ Template.address.helpers({
       if (Session.get('pages').length > 1) {
         ret = true
       }
-      ret = true
     }
     return ret
   },
