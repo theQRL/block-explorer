@@ -378,7 +378,8 @@ Template.address.helpers({
   addressValidation() {
     try {
       const thisAddress = Session.get('address').state.address
-      const keysConsumed = Session.get('address').ots.keysConsumed
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
+      const { keysConsumed } = Session.get('address').ots
       const validationResult = qrlAddressValdidator.hexString(thisAddress)
       const result = {}
       result.height = validationResult.sig.height
