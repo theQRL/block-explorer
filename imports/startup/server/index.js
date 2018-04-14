@@ -3,29 +3,31 @@
 import grpc from 'grpc'
 import tmp from 'tmp'
 import fs from 'fs'
+import txhash from '@theqrl/explorer-helpers'
 import { check } from 'meteor/check'
 import '/imports/api/index.js'
 import '/imports/startup/server/cron.js'
 import { EXPLORER_VERSION, SHOR_PER_QUANTA, numberToString, decimalToBinary } from '../both/index.js'
+
 
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
 // state true is connected, false is disconnected
 let API_NODES = [
   {
-    'address' : '35.177.60.137:9009',
-    'state' : false,
-    'height': 0
+    address: '35.177.60.137:9009',
+    state: false,
+    height: 0,
   },
   {
-    'address' : '104.251.219.40:9009',
-    'state' : false,
-    'height': 0
+    address: '104.251.219.40:9009',
+    state: false,
+    height: 0,
   },
   {
-    'address' : '104.237.3.185:9009',
-    'state' : false,
-    'height': 0
+    address: '104.237.3.185:9009',
+    state: false,
+    height: 0,
   },
 ]
 
@@ -36,25 +38,25 @@ try {
     API_NODES = []
     // Set primary node
     API_NODES.push({
-      'address' : Meteor.settings.api.primaryNode,
-      'state' : false,
-      'height': 0
+      address: Meteor.settings.api.primaryNode,
+      state: false,
+      height: 0,
     })
   }
   if (Meteor.settings.api.secondaryNode.length > 0) {
     // Set secondary node
     API_NODES.push({
-      'address' : Meteor.settings.api.secondaryNode,
-      'state' : false,
-      'height': 0
+      address: Meteor.settings.api.secondaryNode,
+      state: false,
+      height: 0,
     })
   }
   if (Meteor.settings.api.tertiaryNode.length > 0) {
     // Set tertiary node
     API_NODES.push({
-      'address' : Meteor.settings.api.tertiaryNode,
-      'state' : false,
-      'height': 0
+      address: Meteor.settings.api.tertiaryNode,
+      state: false,
+      height: 0,
     })
   }
 } catch (e) {
@@ -64,41 +66,47 @@ try {
 // Store qrl api connections
 const qrlClient = []
 
-// Connect to all nodes
-const connectNodes = () => {
-  API_NODES.forEach((node, index) => {
-    const endpoint = node.address
-    console.log(`Attempting to create gRPC connection to node: ${endpoint} ...`)
-    connectToNode(endpoint, (err, res) => {
-      if (err) {
-        console.log(`Failed to connect to node ${endpoint}`)
-        API_NODES[index].state = false
-        API_NODES[index].height = 0
-      } else {
-        console.log(`Connected to ${endpoint}`)
-        API_NODES[index].state = true
-        API_NODES[index].height = parseInt(res.info.block_height)
-      }
-    })
+// Load the qrl.proto gRPC client into qrlClient from a remote node.
+const loadGrpcClient = (endpoint, callback) => {
+  // Load qrlbase.proto and fetch current qrl.proto from node
+  const baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
+  const client = new baseGrpcObject.qrl.Base(endpoint, grpc.credentials.createInsecure())
+
+  client.getNodeInfo({}, (err, res) => {
+    if (err) {
+      console.log(`Error fetching qrl.proto from ${endpoint}`)
+      callback(err, null)
+    } else {
+      // Write a new temp file for this grpc connection
+      const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
+
+      fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
+        if (fsErr) {
+          console.log(fsErr)
+          throw fsErr
+        }
+
+        const grpcObject = grpc.load(qrlProtoFilePath)
+
+        // Create the gRPC Connection
+        qrlClient[endpoint] =
+          new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
+
+        console.log(`qrlClient loaded for ${endpoint}`)
+
+        callback(null, true)
+      })
+    }
   })
 }
 
-// Server Startup
-if (Meteor.isServer) {
-  Meteor.startup(() => {
-    console.log(`QRL Explorer Starting - Version: ${EXPLORER_VERSION}`)
-    // Attempt to create connections with all nodes
-    connectNodes()
-  })
+const errorCallback = (error, message, alert) => {
+  const d = new Date()
+  const getTime = d.toUTCString()
+  console.log(`${alert} [Timestamp: ${getTime}] ${error}`)
+  const meteorError = new Meteor.Error(500, `[${getTime}] ${message} (${error})`)
+  return meteorError
 }
-
-// Maintain node connection status
-Meteor.setInterval(() => {
-  console.log('Refreshing node connection status')
-
-  // Maintain state of connections to all nodes
-  connectNodes()
-}, 20000)
 
 // Establish a connection with a remote node.
 // If there is no active server side connection for the requested node,
@@ -149,7 +157,7 @@ const connectToNode = (endpoint, callback) => {
       } else {
         console.log(`Connected to ${endpoint}`)
         qrlClient[endpoint].getNodeState({}, (err, response) => {
-          if(err) {
+          if (err) {
             console.log(`Failed to query node state ${endpoint}`)
             const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
             callback(myError, null)
@@ -162,73 +170,67 @@ const connectToNode = (endpoint, callback) => {
   }
 }
 
-// Load the qrl.proto gRPC client into qrlClient from a remote node.
-const loadGrpcClient = (endpoint, callback) => {
-  // Load qrlbase.proto and fetch current qrl.proto from node
-  const baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
-  const client = new baseGrpcObject.qrl.Base(endpoint, grpc.credentials.createInsecure())
-
-  client.getNodeInfo({}, (err, res) => {
-    if (err) {
-      console.log(`Error fetching qrl.proto from ${endpoint}`)
-      callback(err, null)
-    } else {
-      // Write a new temp file for this grpc connection
-      const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
-
-      fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
-        if (fsErr) {
-          console.log(fsErr)
-          throw fsErr
-        }
-
-        const grpcObject = grpc.load(qrlProtoFilePath)
-
-        // Create the gRPC Connection
-        qrlClient[endpoint] =
-          new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
-
-        console.log(`qrlClient loaded for ${endpoint}`)
-
-        callback(null, true)
-      })
-    }
+// Connect to all nodes
+const connectNodes = () => {
+  API_NODES.forEach((node, index) => {
+    const endpoint = node.address
+    console.log(`Attempting to create gRPC connection to node: ${endpoint} ...`)
+    connectToNode(endpoint, (err, res) => {
+      if (err) {
+        console.log(`Failed to connect to node ${endpoint}`)
+        API_NODES[index].state = false
+        API_NODES[index].height = 0
+      } else {
+        console.log(`Connected to ${endpoint}`)
+        API_NODES[index].state = true
+        API_NODES[index].height = parseInt(res.info.block_height, 10)
+      }
+    })
   })
 }
 
-const errorCallback = (error, message, alert) => {
-  const d = new Date()
-  const getTime = d.toUTCString()
-  console.log(`${alert} [Timestamp: ${getTime}] ${error}`)
-  const meteorError = new Meteor.Error(500, `[${getTime}] ${message} (${error})`)
-  return meteorError
+// Server Startup
+if (Meteor.isServer) {
+  Meteor.startup(() => {
+    console.log(`QRL Explorer Starting - Version: ${EXPLORER_VERSION}`)
+    // Attempt to create connections with all nodes
+    connectNodes()
+  })
 }
+
+// Maintain node connection status
+Meteor.setInterval(() => {
+  console.log('Refreshing node connection status')
+
+  // Maintain state of connections to all nodes
+  connectNodes()
+}, 20000)
 
 // Wrapper to provide highly available API results in the event
 // the primary or secondary nodes go offline
 const qrlApi = (api, request, callback) => {
-  let activeNodes = []
+  const activeNodes = []
 
   // Determine current active nodes
   API_NODES.forEach((node) => {
-    if(node.state === true) {
+    if (node.state === true) {
       activeNodes.push(node)
     }
   })
 
   // Determine node with highest block height and set as bestNode
-  let bestNode = {}
+  const bestNode = {}
   bestNode.address = ''
   bestNode.height = 0
   activeNodes.forEach((node) => {
-    if(node.height > bestNode.height) {
+    if (node.height > bestNode.height) {
       bestNode.address = node.address
       bestNode.height = node.height
     }
   })
 
   // If all three nodes have gone offline, fail
-  if(activeNodes.length === 0) {
+  if (activeNodes.length === 0) {
     const myError = errorCallback('The block explorer server cannot connect to any API node', 'Cannot connect to API', '**ERROR/noActiveNodes/b**')
     callback(myError, null)
   } else {
@@ -287,13 +289,13 @@ const getAddressState = (request, callback) => {
         let totalKeysConsumed = 0
         // First add all tracked keys from bitfield
         for (let i = 0; i < otsBitfieldLength; i += 1) {
-          if(newOtsBitfield[i] === 1)  {
+          if(newOtsBitfield[i] === 1) {
             totalKeysConsumed += 1
           }
         }
 
         // Then add any extra from `otsBitfieldLength` to `ots_counter`
-        if (response.state.ots_counter != '0') {
+        if (response.state.ots_counter !== '0') {
           totalKeysConsumed += parseInt(response.state.ots_counter, 10) - (otsBitfieldLength - 1)
         }
 
@@ -462,177 +464,8 @@ Meteor.methods({
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
-
-      // refactor response data
-      const output = response
-      if (response.transaction.header) {
-        output.transaction.header.hash_header = Buffer.from(output.transaction.header.hash_header).toString('hex')
-        output.transaction.header.hash_header_prev = Buffer.from(output.transaction.header.hash_header_prev).toString('hex')
-        output.transaction.header.merkle_root = Buffer.from(output.transaction.header.merkle_root).toString('hex')
-
-        output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
-        output.transaction.tx.amount = ''
-
-        if (output.transaction.tx.transactionType === 'coinbase') {
-          output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
-          output.transaction.tx.addr_to = `Q${Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')}`
-          output.transaction.tx.coinbase.addr_to = `Q${Buffer.from(output.transaction.tx.coinbase.addr_to).toString('hex')}`
-          // eslint-disable-next-line
-          output.transaction.tx.amount = numberToString(output.transaction.tx.coinbase.amount / SHOR_PER_QUANTA)
-
-          output.transaction.explorer = {
-            from: '',
-            to: output.transaction.tx.addr_to,
-            type: 'COINBASE',
-          }
-        }
-      } else {
-        output.transaction.tx.transaction_hash = Buffer.from(output.transaction.tx.transaction_hash).toString('hex')
-      }
-
-      if (output.transaction.tx.transactionType === 'token') {
-        const balances = []
-        output.transaction.tx.token.initial_balances.forEach((value) => {
-          const edit = value
-          edit.address = `Q${Buffer.from(edit.address).toString('hex')}`
-          // eslint-disable-next-line
-          edit.amount = numberToString(edit.amount / Math.pow(10, output.transaction.tx.token.decimals))
-          balances.push(edit)
-        })
-
-        output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
-        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-        // eslint-disable-next-line
-        output.transaction.tx.token.symbol = Buffer.from(output.transaction.tx.token.symbol).toString()
-        output.transaction.tx.token.name = Buffer.from(output.transaction.tx.token.name).toString()
-        output.transaction.tx.token.owner = `Q${Buffer.from(output.transaction.tx.token.owner).toString('hex')}`
-
-        output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-        output.transaction.explorer = {
-          from: output.transaction.tx.addr_from,
-          to: output.transaction.tx.addr_from,
-          signature: output.transaction.tx.signature,
-          publicKey: output.transaction.tx.public_key,
-          symbol: output.transaction.tx.token.symbol,
-          name: output.transaction.tx.token.name,
-          decimals: output.transaction.tx.token.decimals,
-          owner: output.transaction.tx.token.owner,
-          initialBalances: balances,
-          type: 'CREATE TOKEN',
-        }
-      }
-
-      if (output.transaction.tx.transactionType === 'transfer') {
-        // Calculate total transferred, and generate a clean structure to display outputs from
-        let thisTotalTransferred = 0
-        const thisOutputs = []
-        _.each(output.transaction.tx.transfer.addrs_to, (thisAddress, index) => {
-          const thisOutput = {
-            address: `Q${Buffer.from(thisAddress).toString('hex')}`,
-            amount: numberToString(output.transaction.tx.transfer.amounts[index] / SHOR_PER_QUANTA),
-          }
-          thisOutputs.push(thisOutput)
-          // Now update total transferred with the corresponding amount from this output
-          thisTotalTransferred += parseInt(output.transaction.tx.transfer.amounts[index], 10)
-        })
-        output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
-        output.transaction.tx.transfer.outputs = thisOutputs
-        output.transaction.tx.amount = numberToString(thisTotalTransferred / SHOR_PER_QUANTA)
-        output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-        output.transaction.explorer = {
-          from: output.transaction.tx.addr_from,
-          outputs: thisOutputs,
-          totalTransferred: numberToString(thisTotalTransferred / SHOR_PER_QUANTA),
-          type: 'TRANSFER',
-        }
-      }
-
-      if (output.transaction.tx.transactionType === 'transfer_token') {
-        // Request Token Decimals / Symbol
-        const symbolRequest = {
-          query: Buffer.from(output.transaction.tx.transfer_token.token_txhash, 'hex'),
-        }
-        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-        /* FIXME: thisSymbol is not used! */
-        // eslint-disable-next-line
-        const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-        const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
-
-        // Calculate total transferred, and generate a clean structure to display outputs from
-        let thisTotalTransferred = 0
-        const thisOutputs = []
-        _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
-          const thisOutput = {
-            address: `Q${Buffer.from(thisAddress).toString('hex')}`,
-            // eslint-disable-next-line
-            amount: numberToString(output.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals)),
-          }
-          thisOutputs.push(thisOutput)
-          // Now update total transferred with the corresponding amount from this output
-          thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[index], 10)
-        })
-        output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-        output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
-        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-        output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
-        output.transaction.tx.transfer_token.outputs = thisOutputs
-        // eslint-disable-next-line
-        output.transaction.tx.totalTransferred = numberToString(thisTotalTransferred / Math.pow(10, thisDecimals))
-
-        output.transaction.explorer = {
-          from: output.transaction.tx.addr_from,
-          outputs: thisOutputs,
-          signature: output.transaction.tx.signature,
-          publicKey: output.transaction.tx.public_key,
-          token_txhash: output.transaction.tx.transfer_token.token_txhash,
-          // eslint-disable-next-line
-          totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
-          type: 'TRANSFER TOKEN',
-        }
-      }
-
-      if (output.transaction.tx.transactionType === 'slave') {
-        output.transaction.tx.fee /= SHOR_PER_QUANTA
-
-        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-        output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
-        output.transaction.tx.slave.slave_pks.forEach((value, index) => {
-          output.transaction.tx.slave.slave_pks[index] =
-            Buffer.from(value).toString('hex')
-        })
-
-        output.transaction.explorer = {
-          from: output.transaction.tx.addr_from,
-          to: '',
-          signature: output.transaction.tx.signature,
-          publicKey: output.transaction.tx.public_key,
-          amount: output.transaction.tx.amount,
-          type: 'SLAVE',
-        }
-      }
-
-      if (output.transaction.tx.transactionType === 'latticePK') {
-        output.transaction.tx.fee /= SHOR_PER_QUANTA
-        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-        output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
-        output.transaction.tx.latticePK.kyber_pk = Buffer.from(output.transaction.tx.latticePK.kyber_pk).toString('hex')
-        output.transaction.tx.latticePK.dilithium_pk = Buffer.from(output.transaction.tx.latticePK.dilithium_pk).toString('hex')
-
-        output.transaction.explorer = {
-          from: output.transaction.tx.addr_from,
-          to: '',
-          signature: output.transaction.tx.signature,
-          publicKey: output.transaction.tx.public_key,
-          amount: output.transaction.tx.amount,
-          type: 'LATTICE PK',
-        }
-      }
+      // use explorer-helpers npm module to format the reponse
+      const output = txhash(response)
       return output
     }
   },
