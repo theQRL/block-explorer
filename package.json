@@ -11,7 +11,7 @@
     "crypto": "^1.0.1",
     "es5-shim": "^4.5.10",
     "fs": "0.0.1-security",
-    "grpc": "^1.10.1",
+    "grpc": "1.7.1",
     "json-formatter-js": "^2.2.0",
     "mathjs": "4.0.1",
     "meteor-babel-helpers": "0.0.3",
