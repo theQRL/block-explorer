@@ -474,9 +474,8 @@ Meteor.methods({
             query: Buffer.from(output.transaction.tx.transfer_token.token_txhash, 'hex'),
           }
           const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-          /* FIXME: thisSymbol is not used! */
-          // eslint-disable-next-line
           const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+          const thisName = Buffer.from(thisSymbolResponse.transaction.tx.token.name).toString()
           const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
 
           // Calculate total transferred, and generate a clean structure to display outputs from
@@ -510,6 +509,8 @@ Meteor.methods({
             token_txhash: output.transaction.tx.transfer_token.token_txhash,
             // eslint-disable-next-line
             totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
+            tokenSymbol: thisSymbol,
+            tokenName: thisName,
             type: 'TRANSFER TOKEN',
           }
         }
