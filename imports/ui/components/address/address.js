@@ -76,19 +76,21 @@ const getTokenBalances = (getAddress, callback) => {
     if (err) {
       // TODO - Error handling
     } else {
+      // Now for each res.state.token we find, go discover token name and symbol
+      // eslint-disable-next-line
       if (res.state.address !== '') {
-        // Now for each res.state.token we find, go discover token name and symbol
+
         for (let i in res.state.tokens) {
           const tokenHash = i
           const tokenBalance = res.state.tokens[i]
 
-          let thisToken = {}
+          const thisToken = {}
 
-          const request = {
-            query: Buffer.from(tokenHash, 'hex')
+          const req = {
+            query: Buffer.from(tokenHash, 'hex'),
           }
 
-          Meteor.call('getObject', request, (err, res) => {
+          Meteor.call('getObject', req, (err, res) => {
             if (err) {
               // TODO - Error handling here
               console.log('err:', err)
@@ -97,7 +99,7 @@ const getTokenBalances = (getAddress, callback) => {
               if (res.transaction.tx.transactionType !== "token") {
                 // TODO - Error handling here
               } else {
-                let tokenDetails = res.transaction.tx.token
+                const tokenDetails = res.transaction.tx.token
 
                 thisToken.hash = tokenHash
                 thisToken.name = bytesToString(tokenDetails.name)
@@ -163,21 +165,9 @@ const renderAddressBlock = () => {
         }
         let txArray = null
         Session.set('pages', pages)
-        // if (tPage) {
-        if (tPage > numPages) {
-          tPage = numPages
-          FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${numPages}`)
-        }
-        if (tPage < 1) {
-          tPage = 1
-          FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/1`)
-        }
         Session.set('active', tPage)
         const startIndex = (tPage - 1) * 10
         txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
-        // } else {
-        //   txArray = res.state.transactions.reverse()
-        // }
         Session.set('fetchedTx', false)
         loadAddressTransactions(txArray)
       }
