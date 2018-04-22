@@ -1,4 +1,5 @@
 import './lastunconfirmedtx.html'
+import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 
 Template.lastunconfirmedtx.onCreated(() => {
   Session.set('lastunconfirmedtx', {})
