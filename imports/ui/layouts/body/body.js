@@ -98,6 +98,14 @@ Template.appBody.helpers({
     }
     return ''
   },
+  menuPeersActive() {
+    if (
+      (FlowRouter.getRouteName() === 'Peerstats.home')
+    ) {
+      return 'active'
+    }
+    return ''
+  },
   qrlExplorerVersion() {
     return EXPLORER_VERSION
   },

@@ -346,6 +346,22 @@ export const getStats = (request, callback) => {
   }
 }
 
+export const getPeersStat = (request, callback) => {
+  try {
+    qrlApi('GetPeersStat', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetPeersStat/a', '**ERROR/GetPeersStat/a** ')
+        callback(myError, null)
+      } else {
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetPeersStat/b', '**ERROR/GetPeersStat/b**')
+    callback(myError, null)
+  }
+}
+
 export const getObject = (request, callback) => {
   try {
     qrlApi('GetObject', request, (error, response) => {

@@ -6,3 +6,4 @@ node_modules/
 
 \.idea/
 /production.json
+/localhost.json
