@@ -8,7 +8,7 @@ export const lasttx = new Mongo.Collection('lasttx')
 export const homechart = new Mongo.Collection('homechart')
 export const quantausd = new Mongo.Collection('quantausd')
 export const status = new Mongo.Collection('status')
-
+export const peerstats = new Mongo.Collection('peerstats')
 
 if (Meteor.isServer) {
   // This code only runs on the server
@@ -19,7 +19,8 @@ if (Meteor.isServer) {
   homechart.remove({})
   quantausd.remove({})
   status.remove({})
-  
+  peerstats.remove({})
+
   // then publish collection
   Meteor.publish('blocks', function blocksPublication() { // eslint-disable-line prefer-arrow-callback
     return Blocks.find()
@@ -39,5 +40,9 @@ if (Meteor.isServer) {
 
   Meteor.publish('status', function statusPublication() { // eslint-disable-line prefer-arrow-callback
     return status.find()
+  })
+
+  Meteor.publish('peerstats', function statusPublication() { // eslint-disable-line prefer-arrow-callback
+    return peerstats.find()
   })
 }

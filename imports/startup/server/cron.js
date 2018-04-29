@@ -1,6 +1,6 @@
 import { HTTP } from 'meteor/http'
-import { getLatestData, getObject, getStats, apiCall } from '/imports/startup/server/index.js'
-import { Blocks, lasttx, homechart, quantausd, status } from '/imports/api/index.js'
+import { getLatestData, getObject, getStats, getPeersStat, apiCall } from '/imports/startup/server/index.js'
+import { Blocks, lasttx, homechart, quantausd, status, peerstats } from '/imports/api/index.js'
 import { SHOR_PER_QUANTA } from '../both/index.js'
 
 
@@ -282,6 +282,24 @@ const refreshStatus = () => {
   status.insert(response)
 }
 
+const refreshPeerStats = () => {
+  const response = Meteor.wrapAsync(getPeersStat)({})
+
+  // Convert bytes to string in response object
+  _.each(response.peers_stat, (peer, index) => {
+    response.peers_stat[index].peer_ip =
+      Buffer.from(peer.peer_ip).toString()
+    response.peers_stat[index].node_chain_state.header_hash =
+      Buffer.from(peer.node_chain_state.header_hash).toString('hex')
+    response.peers_stat[index].node_chain_state.cumulative_difficulty =
+      parseInt(Buffer.from(peer.node_chain_state.cumulative_difficulty).toString('hex'), 16)
+  })
+
+  // Update mongo collection
+  peerstats.remove({})
+  peerstats.insert(response)
+}
+
 // Refresh blocks every 20 seconds
 Meteor.setInterval(() => {
   refreshBlocks()
@@ -307,6 +325,10 @@ Meteor.setInterval(() => {
   refreshStatus()
 }, 20000)
 
+// Refresh peer stats every 20 seconds
+Meteor.setInterval(() => {
+  refreshPeerStats()
+}, 20000)
 
 // On first load - cache all elements.
 Meteor.setTimeout(() => {
@@ -315,4 +337,5 @@ Meteor.setTimeout(() => {
   refreshHomeChart()
   refreshQuantaUsd()
   refreshStatus()
+  refreshPeerStats()
 }, 5000)

@@ -1,0 +1,43 @@
+<template name="peerstats">
+
+<h4 class="ui pageHeader header">
+  <div class="content">
+    Block Explorer Peers
+  </div>
+</h4>
+
+{{#with peerstats}} {{#if zeroCheck}}
+<div class="ui negative message">
+  <i class="close icon"></i>
+  <div class="header">
+    No peers found.
+  </div>
+</div>
+{{else}}
+<table class="ui padded table">
+  <thead>
+    <tr>
+      <th>IP</th>
+      <th>Port</th>
+      <th>Block #</th>
+      <th>Header Hash</th>
+      <th>Cumulative Difficulty</th>
+      <th>Last Update</th>
+    </tr>
+  </thead>
+  <tbody>
+  {{#each peerstats.peers_stat}}
+    <tr>
+      <td>{{this.peer_ip}}</td>
+      <td>{{this.port}}</td>
+      <td>{{this.node_chain_state.block_number}}</td>
+      <td>{{this.node_chain_state.header_hash}}</td>
+      <td>{{this.node_chain_state.cumulative_difficulty}}</td>
+      <td>{{ts}}</td>
+    </tr>
+  {{/each}}
+  </tbody>
+</table>
+
+{{/if}} {{/with}}
+</template>

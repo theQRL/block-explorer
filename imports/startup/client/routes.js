@@ -14,6 +14,7 @@ import '../../ui/components/lasttx/lasttx.js'
 import '../../ui/components/lastunconfirmedtx/lastunconfirmedtx.js'
 import '../../ui/components/richlist/richlist.js'
 import '../../ui/components/block/block.js'
+import '../../ui/components/peerstats/peerstats.js'
 
 // Set up all routes in the app
 FlowRouter.route('/', {
@@ -74,6 +75,12 @@ FlowRouter.route('/richlist', {
   name: 'Richlist.home',
   action() {
     BlazeLayout.render('appBody', { main: 'richlist' })
+  },
+})
+FlowRouter.route('/peers', {
+  name: 'Peerstats.home',
+  action() {
+    BlazeLayout.render('appBody', { main: 'peerstats' })
   },
 })
 FlowRouter.notFound = {
