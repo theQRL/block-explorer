@@ -149,15 +149,15 @@ const connectToNode = (endpoint, callback) => {
   } else {
     console.log(`Establishing new connection to ${endpoint}`)
     // We've not connected to this node before, let's establish a connection to it.
-    loadGrpcClient(endpoint, (err, response) => {
+    loadGrpcClient(endpoint, (err) => {
       if (err) {
         console.log(`Failed to connect to node ${endpoint}`)
         const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
         callback(myError, null)
       } else {
         console.log(`Connected to ${endpoint}`)
-        qrlClient[endpoint].getNodeState({}, (err, response) => {
-          if (err) {
+        qrlClient[endpoint].getNodeState({}, (errState, response) => {
+          if (errState) {
             console.log(`Failed to query node state ${endpoint}`)
             const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
             callback(myError, null)
@@ -289,7 +289,7 @@ const getAddressState = (request, callback) => {
         let totalKeysConsumed = 0
         // First add all tracked keys from bitfield
         for (let i = 0; i < otsBitfieldLength; i += 1) {
-          if(newOtsBitfield[i] === 1) {
+          if (newOtsBitfield[i] === 1) {
             totalKeysConsumed += 1
           }
         }
@@ -392,6 +392,7 @@ export const apiCall = (apiUrl, callback) => {
 
 Meteor.methods({
   QRLvalue() {
+    console.log('QRLvalue method called')
     this.unblock()
     const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl'
     const apiUrlUSD = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=usdt-btc'
@@ -403,6 +404,7 @@ Meteor.methods({
   },
 
   status() {
+    console.log('status method called')
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
@@ -411,6 +413,7 @@ Meteor.methods({
   },
 
   lastblocks() {
+    console.log('lastblocks method called')
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
@@ -419,6 +422,7 @@ Meteor.methods({
   },
 
   lastunconfirmedtx() {
+    console.log('lastunconfirmedtx method called')
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
@@ -469,9 +473,10 @@ Meteor.methods({
   },
 
   txhash(txId) {
+    check(txId, String)
+    console.log(`txhash method called for: ${txId}`)
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
-    check(txId, String)
     if (!((Match.test(txId, String)) && (txId.length === 64))) {
       const errorCode = 400
       const errorMessage = 'Badly formed transaction ID'
@@ -539,9 +544,11 @@ Meteor.methods({
 
   block(blockId) {
     check(blockId, Number)
-    if (!(Match.test(blockId, Number))) {
+    console.log(`block Method called for: ${blockId}`)
+    if (!(Match.test(blockId, Number)) || (Number.isNaN(blockId))) {
       const errorCode = 400
       const errorMessage = 'Invalid block number'
+      console.log('Throwing invalid block number error')
       throw new Meteor.Error(errorCode, errorMessage)
     } else {
       // avoid blocking other method calls from same client - *may need to remove for production*
@@ -622,6 +629,7 @@ Meteor.methods({
 
   addressTransactions(request) {
     check(request, Object)
+    console.log(`addressTransactions method called for ${request.tx.length} transactions`)
     const targets = request.tx
     const result = []
     targets.forEach((arr) => {
@@ -809,12 +817,12 @@ Meteor.methods({
     return response
   },
 
-  stakers(request) {
-    check(request, Object)
-    this.unblock()
-    const response = Meteor.wrapAsync(getStakers)(request)
-    return response
-  },
+  // stakers(request) {
+  //   check(request, Object)
+  //   this.unblock()
+  //   const response = Meteor.wrapAsync(getStakers)(request)
+  //   return response
+  // },
 
   getAddressState(request) {
     check(request, Object)
@@ -824,19 +832,19 @@ Meteor.methods({
   },
 
   connectionStatus() {
+    console.log('connectionStatus method called')
     this.unblock()
-    let activeNodes = []
+    const activeNodes = []
     API_NODES.forEach((node) => {
-      if(node.state === true) {
+      if (node.state === true) {
         activeNodes.push(node.address)
       }
     })
-    if(activeNodes.length === 0) {
+    if (activeNodes.length === 0) {
       const res = { colour: 'red' }
       return res
-    } else {
-      const res = { colour: 'green' }
-      return res
     }
+    const res = { colour: 'green' }
+    return res
   },
 })
