@@ -35,7 +35,7 @@
         </div>
       </h3>
 
-      <div class="ui segment pageSegment">
+      <div id="txnPageSegment" class="ui segment pageSegment">
 
         <div class="description">
           <div class="ui celled horizontal list">
@@ -72,7 +72,7 @@
                       <div class="label">Token creation transaction: </div>
                       <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
                     {{else}}
-                      <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
+                      <div id="transferAmount" class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
                         {{tx.tx.amount}}
                       </div>
                       <div class="label">
