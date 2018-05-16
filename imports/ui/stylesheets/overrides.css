@@ -496,3 +496,96 @@ Ellipsis Animation
   background-color: #fff!important;
   width: 80px!important;
 }
+
+.rv-vanilla-modal-fi {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  width: 45%;
+  min-height: 300px;
+  margin: -300px 0 0 -22.5%;
+  background: #fff;
+  z-index: 10;
+  -webkit-transition: 0.3s all ease-out;
+  transition: 0.3s all ease-out;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
+}
+
+.rv-vanilla-modal-is-open {
+  top: 50%;
+}
+
+.rv-vanilla-modal-overlay-fi {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  display: none;
+  -webkit-transition: .4s opacity linear;
+  transition: 0.4s opacity linear;
+}
+
+.rv-vanilla-modal-overlay-fi.is-shown {
+  opacity: 1;
+  display: block;
+  position: fixed;
+}
+
+.rv-vanilla-modal-header {
+  padding: 20px;
+  background: #1b1c1d;
+  border-radius: 4px 4px 0 0;
+}
+
+.rv-vanilla-modal-body {
+  padding: 25px 20px 20px;
+  overflow: auto;
+  color: #1d2951;
+  font-family: 'Titillium Web';
+}
+
+.rv-vanilla-modal-body p {
+  /*line-height: 40px;*/
+  margin: 0 0 1em;
+}
+
+.rv-vanilla-modal-title {
+  font-family: 'Titillium Web';
+  color: #fff;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 300;
+}
+
+.rv-vanilla-modal-close {
+  color: #fff;
+  font-family: 'Titillium Web';
+  font-size: 20px;
+  float: right;
+  display: inline-block;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.4);
+  -webkit-transition: all .2s linear;
+  transition: all 0.2s linear;
+}
+
+.rv-vanilla-modal-close .text {
+  position: relative;
+  top: -3px;
+}
+
+.rv-vanilla-modal-close:hover {
+  color: #a50b5e;
+  background: rgba(255, 255, 255, 0.5);
+}

@@ -6,7 +6,7 @@ import './routes.js'
 
 // Convert bytes to hex
 export function bytesToHex(byteArray) {
-  return Array.from(byteArray, function(byte) {
+  return Array.from(byteArray, (byte) => {
     return ('00' + (byte & 0xFF).toString(16)).slice(-2)
   }).join('')
 }
@@ -31,3 +31,48 @@ export function formatBytes(bytes, decimals) {
   // eslint-disable-next-line
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
+
+let disconnectTimer = null
+
+// disconnect after 1 hr
+// const disconnectTime = 60 * 60 * 1000
+const disconnectTime = 5000
+const disconnectVoids = []
+
+export function removeDisconnectTimeout() {
+  if (disconnectTimer) {
+    clearTimeout(disconnectTimer)
+  }
+}
+
+function createDisconnectTimeout() {
+  removeDisconnectTimeout()
+  disconnectTimer = setTimeout(() => {
+    Meteor.disconnect()
+    console.log('disconnected due to idle state')
+    $('.rv-vanilla-modal-overlay-fi').addClass('is-shown')
+    $('.rv-vanilla-modal-overlay-fi').show()
+    $('.rv-vanilla-modal-fi').addClass('rv-vanilla-modal-is-open')
+    $('#target-modal').show()
+  }, disconnectTime)
+}
+
+export function disconnectIfHidden() {
+  removeDisconnectTimeout()
+  if (document.hidden) {
+    createDisconnectTimeout()
+  } else {
+    // we *could* automatically reconnect if the tab becomes visible again...
+    // Meteor.reconnect()
+  }
+}
+
+disconnectIfHidden()
+
+document.addEventListener('visibilitychange', disconnectIfHidden)
+
+if (Meteor.isCordova) {
+  document.addEventListener('resume', () => { Meteor.reconnect() })
+  document.addEventListener('pause', () => { createDisconnectTimeout() })
+}
+
