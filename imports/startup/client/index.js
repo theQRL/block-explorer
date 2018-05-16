@@ -34,9 +34,10 @@ export function formatBytes(bytes, decimals) {
 
 let disconnectTimer = null
 
-// disconnect after 1 hr
-// const disconnectTime = 60 * 60 * 1000
-const disconnectTime = 5000
+// disconnect after 5 mins in background
+const disconnectTime = 5 * 60 * 1000
+// for testing:
+// const disconnectTime = 5000
 const disconnectVoids = []
 
 export function removeDisconnectTimeout() {
