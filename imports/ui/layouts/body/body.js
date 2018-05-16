@@ -67,6 +67,13 @@ Template.appBody.events({
   'click #sidebarConnectionStatus': () => {
     // TODO: modal here
   },
+  'click #reconnect, click #reconnect-close': () => {
+    Meteor.reconnect()
+    $('.rv-vanilla-modal-overlay-fi').removeClass('is-shown')
+    $('.rv-vanilla-modal-overlay-fi').hide()
+    $('.rv-vanilla-modal-fi').removeClass('rv-vanilla-modal-is-open')
+    $('#target-modal').hide()
+  },
 })
 
 Template.appBody.helpers({
