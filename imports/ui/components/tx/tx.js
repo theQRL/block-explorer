@@ -137,8 +137,13 @@ Template.tx.helpers({
     }
   },
   ts() {
-    const x = moment.unix(this.header.timestamp_seconds)
-    return moment(x).format('HH:mm D MMM YYYY')
+    if (this.header) {
+      const x = moment.unix(this.header.timestamp_seconds)
+      return moment(x).format('HH:mm D MMM YYYY')
+    } else {
+      const x = moment.unix(this.timestamp_seconds)
+      return moment(x).format('HH:mm D MMM YYYY')
+    }
   },
   color() {
     if (this.tx.transactionType === 'coinbase') {
