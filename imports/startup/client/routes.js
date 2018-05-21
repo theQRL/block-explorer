@@ -23,18 +23,6 @@ FlowRouter.route('/', {
     BlazeLayout.render('appBody', { main: 'appHome' })
   },
 })
-FlowRouter.route('/stakers', {
-  name: 'Stakers.home',
-  action() {
-    BlazeLayout.render('appBody', { main: 'stakers' })
-  },
-})
-FlowRouter.route('/nextstakers', {
-  name: 'NextStakers.home',
-  action() {
-    BlazeLayout.render('appBody', { main: 'nextstakers' })
-  },
-})
 FlowRouter.route('/tx/:txId', {
   name: 'Tx.home',
   action() {
@@ -69,12 +57,6 @@ FlowRouter.route('/unconfirmed', {
   name: 'Lastunconfirmedtx.home',
   action() {
     BlazeLayout.render('appBody', { main: 'lastunconfirmedtx' })
-  },
-})
-FlowRouter.route('/richlist', {
-  name: 'Richlist.home',
-  action() {
-    BlazeLayout.render('appBody', { main: 'richlist' })
   },
 })
 FlowRouter.route('/peers', {
