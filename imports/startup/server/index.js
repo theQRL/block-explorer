@@ -817,13 +817,6 @@ Meteor.methods({
     return response
   },
 
-  // stakers(request) {
-  //   check(request, Object)
-  //   this.unblock()
-  //   const response = Meteor.wrapAsync(getStakers)(request)
-  //   return response
-  // },
-
   getAddressState(request) {
     check(request, Object)
     this.unblock()
