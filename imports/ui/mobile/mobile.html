@@ -1,0 +1,37 @@
+<template name="mobile">
+  <div class="mobile-explorer">
+<div class="ui labeled icon bottom fixed four item menu">
+  <a class="item" href="/status">
+    <i class="share alternate icon"></i>
+    Status
+  </a>
+  <a class="item" href="/lasttx">
+    <i class="send mail icon"></i>
+    Transactions
+  </a>
+  <a class="item" href="/lastblocks">
+    <i class="cube icon"></i>
+    Blocks
+  </a>
+  <a class="item" href="/search">
+    <i class="search icon"></i>
+    Search
+  </a>
+</div>
+{{> Template.dynamic template=main}}
+<div class="footer">
+              <div class="ui center aligned container">
+                <p>The Quantum Resistant Ledger<br><strong>Block Explorer</strong></p>
+                <a href="/">
+                  <img class="footerLogo" src="/img/Q@2x.png">
+                </a>
+                <br />
+                <div class="ui horizontal small divided link list">
+                  <a class="item" target="_blank" href="https://theqrl.org/">theQRL.org</a>
+                  <a class="item" target="_blank" href="https://github.com/theQRL/block-explorer/issues">Found a Problem?</a>
+                  <a class="item" target="_blank" href="https://github.com/theQRL/block-explorer">qrl-explorer v{{qrlExplorerVersion}}</a>
+                </div>
+              </div>
+            </div>
+</div>
+</template>
