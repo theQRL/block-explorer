@@ -589,3 +589,63 @@ Ellipsis Animation
   color: #a50b5e;
   background: rgba(255, 255, 255, 0.5);
 }
+
+.only-mobile {
+  display: none;
+}
+
+.mobile-explorer {
+  padding-bottom: 85px;
+}
+
+.mobile-explorer > h4.ui.header, h3.ui.header {
+ font-size: 1.5em;
+ text-align: center;
+ font-weight: 300;
+ margin-top: 0px;
+ padding-top: 10px;
+ padding-bottom: 10px;
+ color: #fff;
+ background: #1b1c1d;
+ display: block !important;
+}
+
+.mobile-explorer > h3.ui.header > i.icon {
+  display: none;
+}
+
+
+
+.mobile-explorer > div.ui.selection.floatright {
+  float: none;
+}
+#mainSearch {
+  width:400px !important;
+}
+.mobile-explorer > div.ui.selection.floatright > div.ui.icon.fluid.input > input#mainSearch {
+    width: 90% !important;
+    display: flex !important;
+    margin-left: 5%;
+    margin-right: 5% !important;
+}
+.mobile-explorer > div.ui.selection.floatright > div.ui.icon.fluid.input > i.search.link.icon {
+margin-right: 5% !important;
+}
+.mobile-explorer > div.ui.icon.message {
+  width: 95% !important;
+  margin-left: 2.5%;
+  margin-right: 2.5%;
+  display: flex;
+}
+.mobile-explorer > div.ui.segment.pageSegment {
+  width: 95% !important;
+  margin-left: 2.5%;
+  margin-right: 2.5%;
+  /*display: flex;*/
+}
+.mobile-explorer > div > .float-right {
+  box-sizing: initial;
+}
+.mobile-explorer > div.footer {
+  padding-top: 50px !important;
+}
