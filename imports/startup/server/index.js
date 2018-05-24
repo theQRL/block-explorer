@@ -554,7 +554,6 @@ Meteor.methods({
       // avoid blocking other method calls from same client - *may need to remove for production*
       this.unblock()
       // asynchronous call to API
-      check(blockId, Number)
       const req = {
         query: Buffer.from(blockId.toString()),
       }
