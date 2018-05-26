@@ -8,7 +8,16 @@ import { check } from 'meteor/check'
 import '/imports/api/index.js'
 import '/imports/startup/server/cron.js'
 import { EXPLORER_VERSION, SHOR_PER_QUANTA, numberToString, decimalToBinary } from '../both/index.js'
+import { BrowserPolicy } from 'meteor/browser-policy-common'
 
+// Apply BrowserPolicy
+BrowserPolicy.content.disallowInlineScripts()
+BrowserPolicy.content.allowStyleOrigin('fonts.googleapis.com')
+BrowserPolicy.content.allowStyleOrigin('cdn.jsdelivr.net')
+BrowserPolicy.content.allowFontOrigin('fonts.gstatic.com')
+BrowserPolicy.content.allowFontOrigin('cdn.jsdelivr.net')
+BrowserPolicy.content.allowScriptOrigin('cdn.jsdelivr.net')
+BrowserPolicy.content.allowFontDataUrl()
 
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
