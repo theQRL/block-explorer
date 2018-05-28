@@ -445,12 +445,18 @@ Template.address.events({
     $('#loadingTransactions').show()
     FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${b}`)
   },
+  'click #clickHelp': () => {
+    window.open('https://docs.theqrl.org', '_blank')
+  },
 })
 
 Template.address.onRendered(() => {
   this.$('.value').popup()
   $('#addressTabs .item').tab()
-
+  $('#clickHelp')
+    .popup({
+      on: 'hover',
+    })
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('address', {})
@@ -469,4 +475,7 @@ Template.address.onRendered(() => {
   getTokenBalances(FlowRouter.getParam('aId'), () => {
     $('#tokenBalancesLoading').hide()
   })
+
+  // Render identicon
+  jdenticon.update('#identicon', FlowRouter.getParam('aId')) /* eslint no-undef:0 */
 })
