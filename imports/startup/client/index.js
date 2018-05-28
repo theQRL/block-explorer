@@ -1,8 +1,12 @@
 // Import client startup through a single index entry point
 import './routes.js'
+import { EXPLORER_VERSION } from '../both/index.js'
 
-// a few client console test gRPC calls
-// import './grpc-console-tests.js'
+// Developer note
+console.log('block-explorer - ',EXPLORER_VERSION)
+console.log('We\'re hiring! https://angel.co/theqrl/jobs')
+console.log('Found a security bug? security@theqrl.org')
+console.log('Found a problem? https://github.com/theQRL/block-explorer/issues')
 
 // Convert bytes to hex
 export function bytesToHex(byteArray) {
