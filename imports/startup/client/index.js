@@ -1,6 +1,9 @@
 // Import client startup through a single index entry point
 import './routes.js'
 
+// disable hot code push
+Meteor._reload.onMigrate(() => [false]) /* eslint no-underscore-dangle: 0 */
+
 // a few client console test gRPC calls
 // import './grpc-console-tests.js'
 
