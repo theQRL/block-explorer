@@ -18,11 +18,8 @@ import '../../ui/mobile/mobile.js'
 // Set up all routes in the app
 
 function useMobile() {
-  // detect Retina display:
-  const retina = window.matchMedia('(-webkit-min-device-pixel-ratio: 2)').matches
   // set mobile limits
-  let mobileLimit = 640
-  if (retina) { mobileLimit *= 2 }
+  const mobileLimit = 640
   // route based on screensize
   if (window.matchMedia(`(min-width: ${mobileLimit}px)`).matches) {
     return true
