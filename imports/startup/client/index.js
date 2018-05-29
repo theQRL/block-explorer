@@ -2,11 +2,14 @@
 import './routes.js'
 import { EXPLORER_VERSION } from '../both/index.js'
 
+// disable hot code push
+Meteor._reload.onMigrate(() => [false]) /* eslint no-underscore-dangle: 0 */
+
 // Developer note
-console.log('block-explorer - ',EXPLORER_VERSION)
-console.log('We\'re hiring! https://angel.co/theqrl/jobs')
-console.log('Found a security bug? security@theqrl.org')
-console.log('Found a problem? https://github.com/theQRL/block-explorer/issues')
+console.log('block-explorer - ', EXPLORER_VERSION) /* eslint no-console: 0 */
+console.log('We\'re hiring! Tell us about yourself at jobs@theqrl.org') /* eslint no-console: 0 */
+console.log('Found a security bug? security@theqrl.org') /* eslint no-console: 0 */
+console.log('Found a problem? https://github.com/theQRL/block-explorer/issues') /* eslint no-console: 0 */
 
 // Convert bytes to hex
 export function bytesToHex(byteArray) {
