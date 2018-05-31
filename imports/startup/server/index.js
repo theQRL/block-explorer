@@ -5,10 +5,10 @@ import tmp from 'tmp'
 import fs from 'fs'
 import helpers from '@theqrl/explorer-helpers'
 import { check } from 'meteor/check'
+import { BrowserPolicy } from 'meteor/qrl:browser-policy'
 import '/imports/api/index.js'
 import '/imports/startup/server/cron.js'
 import { EXPLORER_VERSION, SHOR_PER_QUANTA, numberToString, decimalToBinary } from '../both/index.js'
-import { BrowserPolicy } from 'meteor/browser-policy-common'
 
 // Apply BrowserPolicy
 BrowserPolicy.content.disallowInlineScripts()
