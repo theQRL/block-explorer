@@ -9,7 +9,6 @@ blaze@2.3.2
 blaze-html-templates@1.1.2
 blaze-tools@1.0.10
 boilerplate-generator@1.4.0
-browser-policy@1.1.0
 browser-policy-common@1.0.11
 browser-policy-content@1.1.0
 browser-policy-framing@1.1.0
@@ -73,6 +72,8 @@ practicalmeteor:mocha@2.4.5_6
 practicalmeteor:mocha-core@1.0.1
 practicalmeteor:sinon@1.14.1_2
 promise@0.10.2
+qrl:browser-policy@1.1.1
+qrl:browser-policy-common@1.0.13
 random@1.1.0
 reactive-dict@1.2.0
 reactive-var@1.0.11
