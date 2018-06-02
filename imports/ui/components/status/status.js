@@ -29,7 +29,6 @@ Template.status.helpers({
   uptime() {
     let x = status.findOne()
     x = x.uptime_network
-    console.log(x)
     return moment('1900-01-01 00:00:00').add(x, 'seconds').format('DDD[d] h[h] mm[min]')
   },
   emission() {
