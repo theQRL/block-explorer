@@ -131,7 +131,9 @@ Template.tx.helpers({
   confirmations() {
     const x = Session.get('status')
     try {
-      return x.node_info.block_height - this.header.block_number + 1
+      let confirmations = x.node_info.block_height - this.header.block_number
+      confirmations += 1
+      return confirmations
     } catch (e) {
       return 0
     }
@@ -140,10 +142,9 @@ Template.tx.helpers({
     if (this.header) {
       const x = moment.unix(this.header.timestamp_seconds)
       return moment(x).format('HH:mm D MMM YYYY')
-    } else {
-      const x = moment.unix(this.timestamp_seconds)
-      return moment(x).format('HH:mm D MMM YYYY')
     }
+    const x = moment.unix(this.timestamp_seconds)
+    return moment(x).format('HH:mm D MMM YYYY')
   },
   color() {
     if (this.tx.transactionType === 'coinbase') {
