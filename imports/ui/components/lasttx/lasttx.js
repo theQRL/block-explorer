@@ -33,10 +33,9 @@ Template.lasttx.helpers({
     if (this.header) {
       const x = moment.unix(this.header.timestamp_seconds)
       return moment(x).format('HH:mm D MMM YYYY')
-    } else {
-      const x = moment.unix(this.timestamp_seconds)
-      return moment(x).format('HH:mm D MMM YYYY')
     }
+    const x = moment.unix(this.timestamp_seconds)
+    return moment(x).format('HH:mm D MMM YYYY')
   },
   zeroCheck() {
     let ret = false
@@ -88,3 +87,11 @@ Template.lasttx.helpers({
     return false
   },
 })
+
+Template.lasttx.events({
+  'click .transactionRecord': (event) => {
+    const route = event.currentTarget.childNodes[5].childNodes[1].attributes[0].nodeValue
+    FlowRouter.go(route)
+  },
+})
+

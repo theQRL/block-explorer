@@ -382,6 +382,12 @@ input {
   background-color: #fff !important;
   border-radius: 0px !important;
   padding-left: 1em !important;
+  transition: background 0.3s linear;
+  -webkit-transition: background 0.3s linear;
+  -moz-transition: background 0.3s linear;
+}
+.transactionRecord:hover {
+  background: #eee !important;
 }
 .transactionRecordInternal {
   background-color: #fff !important;
@@ -651,4 +657,7 @@ margin-right: 5% !important;
 }
 .qr-code-container {
   display: inline;
+}
+.ta-c {
+  text-align: center;
 }
