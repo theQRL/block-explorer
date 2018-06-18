@@ -67,4 +67,8 @@ Template.lastblocks.events({
   'click .close': () => {
     $('.message').hide()
   },
+  'click .lastBlocks': (event) => {
+    const route = event.currentTarget.childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[3].childNodes[0].getAttribute('href')
+    FlowRouter.go(route)
+  },
 })
