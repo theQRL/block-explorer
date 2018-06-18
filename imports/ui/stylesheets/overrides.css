@@ -661,3 +661,73 @@ margin-right: 5% !important;
 .ta-c {
   text-align: center;
 }
+.ta-r {
+  text-align: right;
+}
+.lastBlocks {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  padding-left: 10px !important;
+  background: #fff !important;
+  transition: background 0.3s linear;
+  -webkit-transition: background 0.3s linear;
+  -moz-transition: background 0.3s linear;
+}
+.lastBlocks:hover {
+  background: #eee !important;
+}
+.bl-head {
+  font-family: Roboto;
+  font-size: 12px;
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-align: center;
+  color: #9b9b9b;
+  margin-bottom: 0px !important;
+  padding-bottom: 0px !important;
+}
+.bl-num {
+  font-family: Quicksand;
+    font-size: 14px;
+    font-weight: 500;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 2;
+    letter-spacing: 1px;
+    text-align: center;
+}
+.text-lipstick {
+  color: #dc255d;
+}
+.bl-data {
+  font-family: Roboto;
+  font-size: 12px;
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color: #4a4a4a;
+  padding-top: 6px !important;
+  padding-bottom: 10px !important;
+  padding-left: 0px !important;
+  text-overflow: ellipsis;
+  white-space: nowrap; 
+      overflow: hidden;
+}
+.bl-first-col {
+  padding-bottom: 2px !important;
+  padding-top: 10px !important;
+}
+.bl-more {
+  padding-bottom: 10px !important;
+  padding-top: 16px !important;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+.statusBoard {
+  background: #fff !important;
+}
