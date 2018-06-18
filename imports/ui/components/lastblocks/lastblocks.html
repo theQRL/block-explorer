@@ -14,34 +14,43 @@
   </div>
   {{else}}
     {{#each lastblocks.blockheaders}}
-    <div class="ui icon message transactionRecord">
-      <div class="ui stackable grid fullWidth">
-        <div class="two wide column">
+    <div class="ui icon message lastBlocks">
+      <div class="ui grid fullWidth">
+        <div class="three wide column bl-first-col">
 
           <div class="item">
             <div class="content">
               <div class="header">
-                <a href="/block/{{this.header.block_number}}">{{this.header.block_number}}</a>
+                <p class="bl-head">Block No.</p>
+                <div class="bl-num"><a href="/block/{{this.header.block_number}}" class="text-lipstick">{{this.header.block_number}}</a></div>
               </div>
             </div>
           </div>
 
         </div>
-        <div class="nine wide column">
-          <div class="ui stackable two column grid">
-            <div class="column">{{tsReadable}}</div>
-            <div class="column">{{ts}}</div>
+        <div class="eight wide column bl-data">
+          <div class="ui two column grid">
+            <div class="five wide large screen only column">{{tsReadable}}</div>
+            <div class="seven wide column">{{ts}}</div>
           </div>
           <span class="hack breakable"><small>{{this.header.hash_header_hex}}</small></span>
         </div>
-        <div class="four wide column">
-          Transactions: {{numberTransactions}}<br />
-          Reward: {{reward(this.header.reward_block)}}
+        <div class="four wide column bl-data">
+          <strong>Transactions:</strong> {{numberTransactions}}<br />
+          <strong>Reward:</strong> {{reward(this.header.reward_block)}}
         </div>
-      </div>
-      <div class="one wide column">
-        <div class="floatright">
-          <a href="/block/{{this.header.block_number}}">View</a>
+        <div class="one wide right aligned column bl-more">
+        <svg width="9px" height="14px" viewbox="0 0 9 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <g id="Home" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                <g id="BlockEx-Home" transform="translate(-720.000000, -726.000000)" fill="#DC255D">
+                    <g id="LATEST-BLOCKS" transform="translate(129.000000, 438.000000)">
+                        <g id="Group-5-Copy-11" transform="translate(0.000000, 265.000000)">
+                            <path d="M589.189129,26.2789565 L589.189129,26.2789565 C588.936957,26.5876973 588.936957,27.0875256 589.189129,27.3954767 L594.535811,33.9248302 C595.040801,34.5423117 595.860035,34.5423117 596.365024,33.9248302 L601.751149,27.3480997 C602.000734,27.0425174 602.003967,26.549006 601.757615,26.2394756 C601.50609,25.9236283 601.091624,25.9196802 600.836219,26.2307898 L595.907883,32.2500498 C595.655065,32.5587906 595.245771,32.5587906 594.992953,32.2500498 L590.103412,26.2789565 C589.85124,25.9702158 589.441947,25.9702158 589.189129,26.2789565" id="Arrow-Copy-2" transform="translate(595.470188, 30.193971) rotate(-90.000000) translate(-595.470188, -30.193971) "></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </svg>
         </div>
       </div>
     </div>
