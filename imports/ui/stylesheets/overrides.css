@@ -739,3 +739,6 @@ margin-right: 5% !important;
 .break-word {
   word-break: break-word;
 }
+.ui.attached.segment {
+  background: #fff;
+}
