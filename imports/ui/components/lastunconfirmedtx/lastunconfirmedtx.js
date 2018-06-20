@@ -34,7 +34,7 @@ Template.lastunconfirmedtx.helpers({
     if (this.tx.transfer) {
       return numberToString(this.tx.totalTransferred)
     }
-    if(this.tx.transfer_token) {
+    if (this.tx.transfer_token) {
       return numberToString(this.tx.totalTransferred)
     }
     return ''
@@ -56,35 +56,35 @@ Template.lastunconfirmedtx.helpers({
     return ret
   },
   isTransfer(txType) {
-    if(txType == "transfer") {
+    if (txType === 'transfer') {
       return true
     }
     return false
   },
   isTokenCreation(txType) {
-    if(txType == "token") {
+    if (txType === 'token') {
       return true
     }
     return false
   },
   isTokenTransfer(txType) {
-    if(txType == "transfer_token") {
+    if (txType === 'transfer_token') {
       return true
     }
     return false
   },
   isCoinbaseTxn(txType) {
-    if(txType == "coinbase") {
+    if (txType === 'coinbase') {
       return true
     }
     return false
   },
   isSlaveTxn(txType) {
-    if(txType == "slave") {
+    if (txType === 'slave') {
       return true
     }
     return false
-  }
+  },
 })
 
 Template.lastunconfirmedtx.events({

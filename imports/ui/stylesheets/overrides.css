@@ -261,8 +261,8 @@ td .unbreakable {
   min-height: 100%;
   padding: 20px;
 
-  background-image: url(/img/bg/right-bottom-key.png) !important;
-  background-position: right bottom !important;
+  background-image: url(/img/dots.png) !important;
+  background-position: left top !important;
   background-repeat: no-repeat !important;
 }
 
@@ -288,6 +288,7 @@ td .unbreakable {
   color: #fff;
   margin: 0px !important;
   font-family: 'Quicksand', sans-serif;
+  font-weight: 400 !important;
   padding: 10px;
 }
 .ui .pageHeader .icon {
@@ -379,7 +380,7 @@ input {
 
 /* Transactions */
 .transactionRecord {
-  background-color: #fff !important;
+  background-color: #eee !important;
   border-radius: 0px !important;
   padding-left: 1em !important;
   transition: background 0.3s linear;
@@ -387,7 +388,7 @@ input {
   -moz-transition: background 0.3s linear;
 }
 .transactionRecord:hover {
-  background: #eee !important;
+  background: #fff !important;
 }
 .transactionRecordInternal {
   background-color: #fff !important;
@@ -464,7 +465,7 @@ SVG styling
 */
 .snapshot__loading {
   position: relative;
-  font-family: "Apex Sans", "Helvetica", sans-serif;
+  font-family: "Roboto", sans-serif;
   height: 150px;
   padding-top: 20px;
   text-align: center; 
@@ -552,7 +553,7 @@ Ellipsis Animation
   padding: 25px 20px 20px;
   overflow: auto;
   color: #1d2951;
-  font-family: 'Titillium Web';
+  font-family: 'Roboto';
 }
 
 .rv-vanilla-modal-body p {
@@ -561,7 +562,7 @@ Ellipsis Animation
 }
 
 .rv-vanilla-modal-title {
-  font-family: 'Titillium Web';
+  font-family: 'Quicksand';
   color: #fff;
   margin: 0;
   font-size: 18px;
@@ -570,7 +571,7 @@ Ellipsis Animation
 
 .rv-vanilla-modal-close {
   color: #fff;
-  font-family: 'Titillium Web';
+  font-family: 'Roboto';
   font-size: 20px;
   float: right;
   display: inline-block;
@@ -605,6 +606,7 @@ Ellipsis Animation
 }
 
 .mobile-explorer > h4.ui.header, h3.ui.header {
+ font-family: Quicksand;
  font-size: 1.5em;
  text-align: center;
  font-weight: 300;
@@ -668,13 +670,13 @@ margin-right: 5% !important;
   padding-top: 0px !important;
   padding-bottom: 0px !important;
   padding-left: 10px !important;
-  background: #fff !important;
+  background: #eee !important;
   transition: background 0.3s linear;
   -webkit-transition: background 0.3s linear;
   -moz-transition: background 0.3s linear;
 }
 .lastBlocks:hover {
-  background: #eee !important;
+  background: #fff !important;
 }
 .bl-head {
   font-family: Roboto;
@@ -729,5 +731,14 @@ margin-right: 5% !important;
   padding-right: 0px !important;
 }
 .statusBoard {
-  background: #fff !important;
+  background: #eee !important;
+}
+.ui.segment {
+  background: #eee;
+}
+.break-word {
+  word-break: break-word;
+}
+.ui.attached.segment {
+  background: #fff;
 }
