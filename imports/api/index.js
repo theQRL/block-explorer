@@ -12,7 +12,6 @@ export const peerstats = new Mongo.Collection('peerstats')
 
 if (Meteor.isServer) {
   // This code only runs on the server
-  
   // empty cache of each collection on startup in case of breaking gRPC changes
   Blocks.remove({})
   lasttx.remove({})
@@ -21,28 +20,11 @@ if (Meteor.isServer) {
   status.remove({})
   peerstats.remove({})
 
-  // then publish collection
-  Meteor.publish('blocks', function blocksPublication() { // eslint-disable-line prefer-arrow-callback
-    return Blocks.find()
-  })
-
-  Meteor.publish('lasttx', function lasttxPublication() { // eslint-disable-line prefer-arrow-callback
-    return lasttx.find()
-  })
-
-  Meteor.publish('homechart', function homeChartPublication() { // eslint-disable-line prefer-arrow-callback
-    return homechart.find()
-  })
-
-  Meteor.publish('quantausd', function quantausdPublication() { // eslint-disable-line prefer-arrow-callback
-    return quantausd.find()
-  })
-
-  Meteor.publish('status', function statusPublication() { // eslint-disable-line prefer-arrow-callback
-    return status.find()
-  })
-
-  Meteor.publish('peerstats', function statusPublication() { // eslint-disable-line prefer-arrow-callback
-    return peerstats.find()
-  })
+  // then publish collections
+  Meteor.publish('blocks', () => Blocks.find())
+  Meteor.publish('lasttx', () => lasttx.find())
+  Meteor.publish('homechart', () => homechart.find())
+  Meteor.publish('quantausd', () => quantausd.find())
+  Meteor.publish('status', () => status.find())
+  Meteor.publish('peerstats', () => peerstats.find())
 }

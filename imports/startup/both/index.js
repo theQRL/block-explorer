@@ -8,7 +8,8 @@ export const EXPLORER_VERSION = '0.4.0'
 
 // Function to cleanly represent large decimal numbers without exponentional formatting.
 export function numberToString(num) {
-  const math = require('mathjs')
+  // should move to import here
+  const math = require('mathjs') // eslint-disable-line
   return math.format(num, { notation: 'fixed', lowerExp: 1e-100, upperExp: Infinity })
 }
 
@@ -17,7 +18,7 @@ export function decimalToBinary(decimalNumber) {
   const binaryArray = []
   while (decimalNumber >= 1) {
     binaryArray.unshift(decimalNumber % 2)
-    decimalNumber = Math.floor(decimalNumber / 2)
+    decimalNumber = Math.floor(decimalNumber / 2) // eslint-disable-line
   }
   // Pad start of array with 0s if not a full byte
   while (binaryArray.length < 8) {

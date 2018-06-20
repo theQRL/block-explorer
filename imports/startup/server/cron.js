@@ -1,3 +1,4 @@
+/* eslint max-len: 0 */
 import { HTTP } from 'meteor/http'
 import { getLatestData, getObject, getStats, getPeersStat, apiCall } from '/imports/startup/server/index.js'
 import { Blocks, lasttx, homechart, quantausd, status, peerstats } from '/imports/api/index.js'
@@ -20,15 +21,15 @@ const refreshBlocks = () => {
     _.each(response.blockheaders, (newBlock) => {
       let thisFound = false
       _.each(current.blockheaders, (currentBlock) => {
-        if(currentBlock.header.block_number == newBlock.header.block_number) {
+        if (currentBlock.header.block_number === newBlock.header.block_number) {
           thisFound = true
         }
       })
-      if(thisFound == false) {
+      if (thisFound === false) {
         newData = true
       }
     })
-    if(newData == true) {
+    if (newData === true) {
       // Clear and update cache as it's changed
       Blocks.remove({})
       Blocks.insert(response)
@@ -83,15 +84,16 @@ function refreshLasttx() {
       // Store symbol in unconfirmed
       unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol =
         Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-      unconfirmed.transactions_unconfirmed[index].tx.tokenDecimals = 
+      unconfirmed.transactions_unconfirmed[index].tx.tokenDecimals =
           thisSymbolResponse.transaction.tx.token.decimals
 
       // Calculate total transferred
       let thisTotalTransferred = 0
       _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
         // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex])
+        thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex], 10)
       })
+      // eslint-disable-next-line
       thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
       unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
     } else if (item.tx.transactionType === 'transfer') {
@@ -99,9 +101,9 @@ function refreshLasttx() {
       let thisTotalTransferred = 0
       _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
         // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer.amounts[aindex])
+        thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer.amounts[aindex], 10)
       })
-      thisTotalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
+      thisTotalTransferred /= SHOR_PER_QUANTA
       unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
     }
   })
@@ -123,15 +125,15 @@ function refreshLasttx() {
       // Store symbol in response
       confirmed.transactions[index].tx.tokenSymbol =
         Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-      confirmed.transactions[index].tx.tokenDecimals = 
-          thisSymbolResponse.transaction.tx.token.decimals
+      confirmed.transactions[index].tx.tokenDecimals = thisSymbolResponse.transaction.tx.token.decimals
 
       // Calculate total transferred
       let thisTotalTransferred = 0
       _.each(confirmed.transactions[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
         // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred += parseInt(confirmed.transactions[index].tx.transfer_token.amounts[aindex])
+        thisTotalTransferred += parseInt(confirmed.transactions[index].tx.transfer_token.amounts[aindex], 10)
       })
+      // eslint-disable-next-line
       thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
       confirmed.transactions[index].tx.totalTransferred = thisTotalTransferred
     } else if (item.tx.transactionType === 'transfer') {
@@ -139,9 +141,9 @@ function refreshLasttx() {
       let thisTotalTransferred = 0
       _.each(confirmed.transactions[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
         // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred += parseInt(confirmed.transactions[index].tx.transfer.amounts[aindex])
+        thisTotalTransferred += parseInt(confirmed.transactions[index].tx.transfer.amounts[aindex], 10)
       })
-      thisTotalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
+      thisTotalTransferred /= SHOR_PER_QUANTA
       confirmed.transactions[index].tx.totalTransferred = thisTotalTransferred
     }
   })
@@ -165,26 +167,26 @@ function refreshLasttx() {
       let thisFound = false
       _.each(current.transactions, (currentTxn) => {
         // Find a matching pair of transactions by transaction hash
-        if(Buffer.from(currentTxn.tx.transaction_hash).toString('hex') == Buffer.from(newTxn.tx.transaction_hash).toString('hex')) {
+        if (Buffer.from(currentTxn.tx.transaction_hash).toString('hex') === Buffer.from(newTxn.tx.transaction_hash).toString('hex')) {
           try {
             // If they both have null header (unconfirmed) there is no change
-            if((currentTxn.header === null) && (newTxn.header === null)) {
+            if ((currentTxn.header === null) && (newTxn.header === null)) {
               thisFound = true
             // If they have same block number, there is also no change.
-            } else if(currentTxn.header.block_number == newTxn.header.block_number) {
+            } else if (currentTxn.header.block_number === newTxn.header.block_number) {
               thisFound = true
             }
-          } catch(e) {
+          } catch (e) {
             // Header in cached unconfirmed txn not found, we located a change
             thisFound = false
           }
         }
       })
-      if(thisFound == false) {
+      if (thisFound === false) {
         newData = true
       }
     })
-    if(newData == true) {
+    if (newData === true) {
       // Clear and update cache as it's changed
       lasttx.remove({})
       lasttx.insert(merged)
