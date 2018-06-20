@@ -1,4 +1,3 @@
-/* eslint no-console: 0 */
 import JSONFormatter from 'json-formatter-js'
 import './block.html'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
@@ -182,20 +181,21 @@ Template.block.onCreated(() => {
     Session.set('activeBlock', blockId)
     renderBlockBlock(blockId)
   } else {
-    console.log('bad block in route')
+    // console.log('bad block in route')
     FlowRouter.go('/404')
   }
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     const bId = parseInt(FlowRouter.getParam('blockId'), 10)
-    console.log(`Tracked: ${bId} and activeBlock: ${Session.get('activeBlock')}`)
+    // console.log(`Tracked: ${bId} and activeBlock: ${Session.get('activeBlock')}`)
     if (!Number.isNaN(bId)) {
       if (parseInt(Session.get('activeBlock'), 10) !== bId) {
-        console.log('rendering...')
+        // console.log('rendering...')
         renderBlockBlock(bId)
       }
-    } else {
-      console.log('ignoring NaN')
     }
+    // else {
+    // console.log('ignoring NaN')
+    // }
   })
 })

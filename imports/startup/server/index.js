@@ -122,7 +122,7 @@ const errorCallback = (error, message, alert) => {
 // this function will call loadGrpcClient to establish one.
 const connectToNode = (endpoint, callback) => {
   // First check if there is an existing object to store the gRPC connection
-  if (qrlClient.hasOwnProperty(endpoint) === true) {
+  if (qrlClient.hasOwnProperty(endpoint) === true) { // eslint-disable-line
     console.log('Existing connection found for ', endpoint, ' - attempting getNodeState')
     // There is already a gRPC object for this server stored.
     // Attempt to connect to it.

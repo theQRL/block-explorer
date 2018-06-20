@@ -10,67 +10,63 @@ function renderChart() {
   const chartLineData = homechart.findOne()
 
   // Only render chart if we get valid data back
-  if(chartLineData !== undefined) {
+  if (chartLineData !== undefined) {
     // Hide loading svg
-    $('#chartLoading').hide();
+    $('#chartLoading').hide()
 
     // Draw chart
     const ctx = document.getElementById('myChart').getContext('2d')
-    let myChart = new Chart(ctx, {
+    // eslint-disable-next-line
+    const myChart = new Chart(ctx, {
       type: 'line',
       data: chartLineData,
       options: {
         tooltips: {
-          mode: 'index'
+          mode: 'index',
         },
         responsive: true,
         maintainAspectRatio: false,
         hoverMode: 'index',
         stacked: false,
         scales: {
-          xAxes: [
-            {
-              scaleLabel: {
-                display: true,
-                labelString: "Block Number"
-              }
-            }
-          ],
-          yAxes: [
-            {
-              type: "linear",
+          xAxes: [{
+            scaleLabel: {
               display: true,
-              position: "left",
-              id: "y-axis-1",
-              ticks: {
-                beginAtZero: true,
-                max: 150
-              },
-              scaleLabel: {
-                display: true,
-                labelString: "Seconds"
-              }
-            },{
-              type: "linear",
+              labelString: 'Block Number',
+            },
+          }],
+          yAxes: [{
+            type: 'linear',
+            display: true,
+            position: 'left',
+            id: 'y-axis-1',
+            ticks: {
+              beginAtZero: true,
+              max: 150,
+            },
+            scaleLabel: {
               display: true,
-              position: "right",
-              id: "y-axis-2",
-              gridLines: {
-                drawOnChartArea: false,
-              },
-              scaleLabel: {
-                display: true,
-                labelString: "Hashes Per Second"
-              }
-            }
-          ],
-        }
-      }
-    }) /* eslint no-undef:0, no-unused-vars:0 */
+              labelString: 'Seconds',
+            },
+          }, {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            id: 'y-axis-2',
+            gridLines: {
+              drawOnChartArea: false,
+            },
+            scaleLabel: {
+              display: true,
+              labelString: 'Hashes Per Second',
+            },
+          }],
+        },
+      },
+    })
 
     // Clear Interval
     Meteor.clearInterval(chartIntervalHandle)
-
   }
 }
 
@@ -83,17 +79,15 @@ Template.appHome.onRendered(() => {
   const h = $('#statusSegment').height()
   const canvas = $('canvas')
   const newWidth = canvas.parent().width()
-  const newHeight = canvas.parent().height()
+  const newHeight = canvas.parent().height() // eslint-disable-line
   canvas.prop({
     width: newWidth,
     height: h,
   })
   $('#chart').parent().height(h)
- 
-  
+
   // Display chart - wait for data if it doesn't yet exist in mongo
   chartIntervalHandle = Meteor.setInterval(() => {
     renderChart()
   }, 500)
-
 })

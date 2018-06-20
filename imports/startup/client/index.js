@@ -2,16 +2,18 @@
 import './routes.js'
 import { EXPLORER_VERSION } from '../both/index.js'
 
-// Developer note
-console.log('block-explorer - ', EXPLORER_VERSION) /* eslint no-console: 0 */
-console.log('We\'re hiring! Tell us about yourself at jobs@theqrl.org') /* eslint no-console: 0 */
-console.log('Found a security bug? security@theqrl.org') /* eslint no-console: 0 */
-console.log('Found a problem? https://github.com/theQRL/block-explorer/issues') /* eslint no-console: 0 */
+// Developer note console messages
+/* eslint-disable no-console */
+console.log('block-explorer - ', EXPLORER_VERSION)
+console.log('We\'re hiring! Tell us about yourself at jobs@theqrl.org')
+console.log('Found a security bug? security@theqrl.org')
+console.log('Found a problem? https://github.com/theQRL/block-explorer/issues')
+/* eslint-enable no-console */
 
 // Convert bytes to hex
 export function bytesToHex(byteArray) {
-  return Array.from(byteArray, (byte) => {
-    return ('00' + (byte & 0xFF).toString(16)).slice(-2)
+  return Array.from(byteArray, (byte) => { // eslint-disable-line
+    return ('00' + (byte & 0xFF).toString(16)).slice(-2) // eslint-disable-line
   }).join('')
 }
 
@@ -42,7 +44,7 @@ let disconnectTimer = null
 const disconnectTime = 5 * 60 * 1000
 // for testing:
 // const disconnectTime = 5000
-const disconnectVoids = []
+const disconnectVoids = [] // eslint-disable-line
 
 export function removeDisconnectTimeout() {
   if (disconnectTimer) {
@@ -54,7 +56,7 @@ function createDisconnectTimeout() {
   removeDisconnectTimeout()
   disconnectTimer = setTimeout(() => {
     Meteor.disconnect()
-    console.log('disconnected due to idle state')
+    console.log('disconnected due to idle state') // eslint-disable-line
     $('.rv-vanilla-modal-overlay-fi').addClass('is-shown')
     $('.rv-vanilla-modal-overlay-fi').show()
     $('.rv-vanilla-modal-fi').addClass('rv-vanilla-modal-is-open')
