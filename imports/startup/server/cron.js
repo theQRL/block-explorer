@@ -5,7 +5,7 @@ import { SHOR_PER_QUANTA } from '../both/index.js'
 
 
 const refreshBlocks = () => {
-  const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 5 }
+  const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 14 }
   const response = Meteor.wrapAsync(getLatestData)(request)
 
   // Fetch current data

@@ -448,6 +448,10 @@ Template.address.events({
   'click #clickHelp': () => {
     window.open('https://docs.theqrl.org', '_blank')
   },
+  'click .transactionRecord': (event) => {
+    const route = event.currentTarget.childNodes[5].childNodes[1].getAttribute('href')
+    FlowRouter.go(route)
+  },
 })
 
 Template.address.onRendered(() => {
