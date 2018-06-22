@@ -17,6 +17,7 @@
     "meteor-babel-helpers": "0.0.3",
     "meteor-node-stubs": "^0.3.3",
     "path": "^0.12.7",
+    "sha512": "0.0.1",
     "tmp": "0.0.33"
   },
   "private": true,

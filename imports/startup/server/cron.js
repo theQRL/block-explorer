@@ -1,5 +1,6 @@
 /* eslint max-len: 0 */
 import { HTTP } from 'meteor/http'
+import sha512 from 'sha512'
 import { getLatestData, getObject, getStats, getPeersStat, apiCall } from '/imports/startup/server/index.js'
 import { Blocks, lasttx, homechart, quantausd, status, peerstats } from '/imports/api/index.js'
 import { SHOR_PER_QUANTA } from '../both/index.js'
@@ -290,7 +291,7 @@ const refreshPeerStats = () => {
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
     response.peers_stat[index].peer_ip =
-      Buffer.from(peer.peer_ip).toString()
+      sha512(Buffer.from(peer.peer_ip).toString()).toString('hex').slice(0, 10)
     response.peers_stat[index].node_chain_state.header_hash =
       Buffer.from(peer.node_chain_state.header_hash).toString('hex')
     response.peers_stat[index].node_chain_state.cumulative_difficulty =
