@@ -23,22 +23,31 @@ BrowserPolicy.content.allowFontDataUrl()
 // defaults to Testnet if run without config file
 // state true is connected, false is disconnected
 let API_NODES = [
-  {
-    address: '35.177.60.137:9009',
-    state: false,
-    height: 0,
-  },
-  {
-    address: '104.251.219.40:9009',
-    state: false,
-    height: 0,
-  },
-  {
-    address: '104.237.3.185:9009',
-    state: false,
-    height: 0,
-  },
-]
+      {
+        id: 'testnet-1',
+        address: 'testnet-1.automated.theqrl.org:19009',
+        state: false,
+        height: 0,
+      },
+      {
+        id: 'testnet-2',
+        address: 'testnet-2.automated.theqrl.org:19009',
+        state: false,
+        height: 0,
+      },
+      {
+        id: 'testnet-3',
+        address: 'testnet-3.automated.theqrl.org:19009',
+        state: false,
+        height: 0,
+      },
+      {
+        id: 'testnet-4',
+        address: 'testnet-4.automated.theqrl.org:19009',
+        state: false,
+        height: 0,
+      }
+    ]
 
 // Grab config and set API nodes if set
 try {
