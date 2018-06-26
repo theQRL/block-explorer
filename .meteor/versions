@@ -64,6 +64,7 @@ mongo@1.4.5
 mongo-dev-server@1.1.0
 mongo-id@1.0.7
 npm-mongo@2.2.34
+oaf:moment-duration-format@1.3.2
 observe-sequence@1.0.16
 ordered-dict@1.1.0
 practicalmeteor:chai@2.1.0_1

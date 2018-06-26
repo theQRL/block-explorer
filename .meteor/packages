@@ -32,3 +32,4 @@ kadira:flow-router
 force-ssl@1.1.0
 juliancwirko:postcss
 qrl:browser-policy
+oaf:moment-duration-format
