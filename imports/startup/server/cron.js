@@ -266,6 +266,13 @@ function refreshHomeChart() {
   // Save in mongo
   homechart.remove({})
   homechart.insert(chartLineData)
+
+  // Update status data with block time and std dev
+  const updateStatus = status.findOne()
+  updateStatus.block_time_mean = res.block_time_mean
+  updateStatus.block_time_sd = res.block_time_sd
+  status.remove({})
+  status.insert(updateStatus)
 }
 
 const refreshQuantaUsd = () => {
@@ -337,8 +344,8 @@ Meteor.setInterval(() => {
 Meteor.setTimeout(() => {
   refreshBlocks()
   refreshLasttx()
+  refreshStatus()
   refreshHomeChart()
   refreshQuantaUsd()
-  refreshStatus()
   refreshPeerStats()
 }, 5000)
