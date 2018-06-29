@@ -3,8 +3,8 @@
     "webhook": "INSERT GLIP WEBHOOK HTTPS:// ADDRESS HERE"
   },
   "api": {
-    "primaryNode": "35.177.60.137:9009",
-    "secondaryNode": "104.251.219.40:9009",
-    "tertiaryNode": "104.237.3.185:9009"
+    "primaryNode": "testnet-1.automated.theqrl.org:19009",
+    "secondaryNode": "testnet-2.automated.theqrl.org:19009",
+    "tertiaryNode": "testnet-3.automated.theqrl.org:19009"
   }
 }
