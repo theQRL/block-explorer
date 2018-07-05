@@ -26,11 +26,11 @@
           </div>
           Transfer | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{tx_hash}}">{{amount}}<br><small>Quanta</small></a>
+          <a href="/tx/{{this.tx.transaction_hash}}">{{amount}}<br><small>Quanta</small></a>
         </div>
       </div>
       {{/if}}
@@ -44,11 +44,11 @@
           </div>
           Token Creation - ({{this.tx.tokenSymbol}}) | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-           <a href="/tx/{{tx_hash}}">{{this.tx.tokenSymbol}}<br><small>Creation</small></a>
+           <a href="/tx/{{this.tx.transaction_hash}}">{{this.tx.tokenSymbol}}<br><small>Creation</small></a>
         </div>
       </div>
       {{/if}}
@@ -62,11 +62,11 @@
           </div>
           Token Transfer - ({{this.tx.tokenSymbol}}) | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{tx_hash}}">{{amount}} {{this.tx.tokenSymbol}}</a>
+          <a href="/tx/{{this.tx.transaction_hash}}">{{amount}} {{this.tx.tokenSymbol}}</a>
         </div>
       </div>
       {{/if}}
@@ -80,11 +80,11 @@
           </div>
           Coinbase Received | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{tx_hash}}">{{this.amount}}<br><small>Quanta</small></a>
+          <a href="/tx/{{this.tx.transaction_hash}}">{{this.amount}}<br><small>Quanta</small></a>
         </div>
       </div>
       {{/if}}
@@ -98,11 +98,11 @@
           </div>
           Slave Transaction | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{tx_hash}}">View<br>Transaction</a>
+          <a href="/tx/{{this.tx.transaction_hash}}">View<br>Transaction</a>
         </div>
       </div>
       {{/if}}
@@ -116,11 +116,47 @@
           </div>
           Lattice Public Key | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{tx_hash}}">View<br>Transaction</a>
+          <a href="/tx/{{this.tx.transaction_hash}}">View<br>Transaction</a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isMessageTxn this.explorer.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            {{ts}}
+          </div>
+          Message | Block <a href="/block/{{block}}">{{block}}</a>
+          <p class="transactionAddress value">
+            {{this.tx.transaction_hash}}
+          </p>
+        </div>
+        <div class="floatright ta-c">
+          <a href="/tx/{{this.tx.transaction_hash}}">View<br>Transaction</a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isDocumentNotarisation this.explorer.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            {{ts}}
+          </div>
+          Document Notarisation | Block <a href="/block/{{block}}">{{block}}</a>
+          <p class="transactionAddress value">
+            {{this.tx.transaction_hash}}
+          </p>
+        </div>
+        <div class="floatright ta-c">
+          <a href="/tx/{{this.tx.transaction_hash}}">View<br>Transaction</a>
         </div>
       </div>
       {{/if}}
@@ -133,15 +169,14 @@
         <img class="transactionTypeImage" src="/img/icons/send.png" />
         <div class="content">
           <div class="header">
-            Unconfirmed | <small>First Seen: {{ts}}</small>
+            Transfer | Unconfirmed | First Seen: {{ts}}
           </div>
-          Transfer
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{tx_hash}}">{{amount}} Quanta</a>
+          <a href="/tx/{{this.tx.transaction_hash}}">{{amount}} Quanta</a>
         </div>
       </div>
       {{/if}}
@@ -151,15 +186,14 @@
         <img class="transactionTypeImage" src="/img/icons/send.png" />
         <div class="content">
           <div class="header">
-            Unconfirmed
+            Token Creation - ({{this.tx.tokenSymbol}}) | Unconfirmed | First Seen: {{ts}}
           </div>
-          Token Creation - ({{this.tx.tokenSymbol}})
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-           <a href="/tx/{{tx_hash}}">{{this.tx.tokenSymbol}}<br><small>Creation</small></a>
+           <a href="/tx/{{this.tx.transaction_hash}}">{{this.tx.tokenSymbol}}<br><small>Creation</small></a>
         </div>
       </div>
       {{/if}}
@@ -169,15 +203,14 @@
         <img class="transactionTypeImage" src="/img/icons/send.png" />
         <div class="content">
           <div class="header">
-            Unconfirmed
+            Token Transfer - ({{this.tx.tokenSymbol}}) | Unconfirmed | First Seen: {{ts}}
           </div>
-          Token Transfer - ({{this.tx.tokenSymbol}})
           <p class="transactionAddress">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{tx_hash}}">{{amount}}<br><small>{{this.tx.tokenSymbol}}</small></a>
+          <a href="/tx/{{this.tx.transaction_hash}}">{{amount}}<br><small>{{this.tx.tokenSymbol}}</small></a>
         </div>
       </div>
       {{/if}}
@@ -187,15 +220,65 @@
         <img class="transactionTypeImage" src="/img/icons/receive.png" />
         <div class="content">
           <div class="header">
-            Unconfirmed
+            Slave Transaction | Unconfirmed | First Seen: {{ts}}
           </div>
-          Slave Transaction
           <p class="transactionAddress value">
-            {{tx_hash}}
+            {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{tx_hash}}">View<br>Transaction</a>
+          <a href="/tx/{{this.tx.transaction_hash}}">View<br>Transaction</a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isLatticePKTxn this.tx.transactionType}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            Lattice Public Key | Unconfirmed | First Seen: {{ts}}
+          </div>
+          <p class="transactionAddress value">
+            {{this.tx.transaction_hash}}
+          </p>
+        </div>
+        <div class="floatright ta-c">
+          <a href="/tx/{{this.tx.transaction_hash}}">View<br>Transaction</a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isMessageTxn this.explorer.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            Message | Unconfirmed | First Seen: {{ts}}
+          </div>
+          <p class="transactionAddress value">
+            {{this.tx.transaction_hash}}
+          </p>
+        </div>
+        <div class="floatright ta-c">
+          <a href="/tx/{{this.tx.transaction_hash}}">View<br>Transaction</a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isDocumentNotarisation this.explorer.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            Document Notarisation | Unconfirmed | First Seen: {{ts}}
+          </div>
+          <p class="transactionAddress value">
+            {{this.tx.transaction_hash}}
+          </p>
+        </div>
+        <div class="floatright ta-c">
+          <a href="/tx/{{this.tx.transaction_hash}}">View<br>Transaction</a>
         </div>
       </div>
       {{/if}}

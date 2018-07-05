@@ -4,7 +4,7 @@
 export const SHOR_PER_QUANTA = 1000000000
 
 // Explorer Version
-export const EXPLORER_VERSION = '1.0.0'
+export const EXPLORER_VERSION = '1.0.1'
 
 // Function to cleanly represent large decimal numbers without exponentional formatting.
 export function numberToString(num) {

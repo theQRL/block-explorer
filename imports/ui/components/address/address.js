@@ -362,6 +362,18 @@ Template.address.helpers({
     }
     return false
   },
+  isMessageTxn(txType) {
+    if (txType === 'MESSAGE') {
+      return true
+    }
+    return false
+  },
+  isDocumentNotarisation(txType) {
+    if (txType === 'DOCUMENT_NOTARISATION') {
+      return true
+    }
+    return false
+  },
   tokensHeld() {
     return Session.get('tokensHeld')
   },
