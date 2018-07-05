@@ -179,6 +179,24 @@ Template.tx.helpers({
     }
     return false
   },
+  isMessage() {
+    if (this.explorer.type === 'MESSAGE') {
+      return true
+    }
+    return false
+  },
+  isDocumentNotarisation() {
+    if (this.explorer.type === 'DOCUMENT_NOTARISATION') {
+      return true
+    }
+    return false
+  },
+  isNotMessage() {
+    if ((this.explorer.type !== 'MESSAGE') && (this.explorer.type !== 'DOCUMENT_NOTARISATION')) {
+      return true
+    }
+    return false
+  },
 })
 
 Template.tx.events({
