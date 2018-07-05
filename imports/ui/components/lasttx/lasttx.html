@@ -42,13 +42,13 @@
           <div class="header">
             {{ts}}
           </div>
-          Token Creation - ({{this.tx.tokenSymbol}}) | Block <a href="/block/{{block}}">{{block}}</a>
+          Token Creation - ({{this.explorer.symbol}}) | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
             {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-           <a href="/tx/{{this.tx.transaction_hash}}">{{this.tx.tokenSymbol}}<br><small>Creation</small></a>
+           <a href="/tx/{{this.tx.transaction_hash}}">{{this.explorer.symbol}}<br><small>Creation</small></a>
         </div>
       </div>
       {{/if}}
@@ -60,13 +60,13 @@
           <div class="header">
             {{ts}}
           </div>
-          Token Transfer - ({{this.tx.tokenSymbol}}) | Block <a href="/block/{{block}}">{{block}}</a>
+          Token Transfer - ({{this.explorer.symbol}}) | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
             {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{this.tx.transaction_hash}}">{{amount}} {{this.tx.tokenSymbol}}</a>
+          <a href="/tx/{{this.tx.transaction_hash}}">{{amount}} {{this.explorer.symbol}}</a>
         </div>
       </div>
       {{/if}}
@@ -186,14 +186,14 @@
         <img class="transactionTypeImage" src="/img/icons/send.png" />
         <div class="content">
           <div class="header">
-            Token Creation - ({{this.tx.tokenSymbol}}) | Unconfirmed | First Seen: {{ts}}
+            Token Creation - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
           </div>
           <p class="transactionAddress value">
             {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-           <a href="/tx/{{this.tx.transaction_hash}}">{{this.tx.tokenSymbol}}<br><small>Creation</small></a>
+           <a href="/tx/{{this.tx.transaction_hash}}">{{this.explorer.symbol}}<br><small>Creation</small></a>
         </div>
       </div>
       {{/if}}
@@ -203,14 +203,14 @@
         <img class="transactionTypeImage" src="/img/icons/send.png" />
         <div class="content">
           <div class="header">
-            Token Transfer - ({{this.tx.tokenSymbol}}) | Unconfirmed | First Seen: {{ts}}
+            Token Transfer - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
           </div>
           <p class="transactionAddress">
             {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-          <a href="/tx/{{this.tx.transaction_hash}}">{{amount}}<br><small>{{this.tx.tokenSymbol}}</small></a>
+          <a href="/tx/{{this.tx.transaction_hash}}">{{amount}}<br><small>{{this.explorer.symbol}}</small></a>
         </div>
       </div>
       {{/if}}
