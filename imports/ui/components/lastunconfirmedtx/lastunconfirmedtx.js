@@ -28,19 +28,13 @@ Template.lastunconfirmedtx.helpers({
     return false
   },
   amount() {
-    if (this.tx.coinbase) {
-      return numberToString(this.tx.coinbase.amount / SHOR_PER_QUANTA)
-    }
     if (this.tx.transfer) {
-      return numberToString(this.tx.totalTransferred)
+      return this.explorer.totalTransferred
     }
     if (this.tx.transfer_token) {
-      return numberToString(this.tx.totalTransferred)
+      return this.explorer.totalTransferred
     }
     return ''
-  },
-  tx_hash() {
-    return Buffer.from(this.tx.transaction_hash).toString('hex')
   },
   block() {
     return this.header.block_number
@@ -81,6 +75,18 @@ Template.lastunconfirmedtx.helpers({
   },
   isSlaveTxn(txType) {
     if (txType === 'slave') {
+      return true
+    }
+    return false
+  },
+  isMessageTxn(txType) {
+    if (txType === 'MESSAGE') {
+      return true
+    }
+    return false
+  },
+  isDocumentNotarisation(txType) {
+    if (txType === 'DOCUMENT_NOTARISATION') {
       return true
     }
     return false

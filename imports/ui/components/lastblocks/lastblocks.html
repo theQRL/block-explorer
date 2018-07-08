@@ -33,7 +33,10 @@
             <div class="five wide large screen only column">{{tsReadable}}</div>
             <div class="seven wide column">{{ts}}</div>
           </div>
-          <span class="hack breakable"><small>{{this.header.hash_header_hex}}</small></span>
+          <!-- <span class="hack breakable"><small>{{this.header.hash_header_hex}}</small></span> -->
+          <span class="hack breakable">
+            <div class="miner">{{{miner}}}</div>
+          </span>
         </div>
         <div class="four wide column bl-data">
           <strong>{{numberTransactions}}</strong> Transactions<br />
