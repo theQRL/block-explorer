@@ -11,6 +11,20 @@ const refreshBlocks = () => {
   const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 14 }
   const response = Meteor.wrapAsync(getLatestData)(request)
 
+
+  // add miner
+  response.blockheaders.forEach((value, key) => {
+    const req = {
+      query: Buffer.from(value.header.block_number.toString()),
+    }
+    const res = Meteor.wrapAsync(getObject)(req)
+    res.block_extended.extended_transactions.forEach((val) => {
+      if (val.tx.transactionType === 'coinbase') {
+        response.blockheaders[key].minedBy = `Q${Buffer.from(val.tx.coinbase.addr_to).toString('hex')}`
+      }
+    })
+  })
+
   // Fetch current data
   const current = Blocks.findOne()
 
@@ -37,6 +51,7 @@ const refreshBlocks = () => {
       Blocks.insert(response)
     }
   }
+
   const lastblocktime = response.blockheaders[4].header.timestamp_seconds
   const seconds = new Date().getTime() / 1000
   const timeDiff = Math.floor((seconds - lastblocktime) / 60)
