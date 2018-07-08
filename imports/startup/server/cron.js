@@ -4,6 +4,7 @@ import sha512 from 'sha512'
 import { getLatestData, getObject, getStats, getPeersStat, apiCall } from '/imports/startup/server/index.js'
 import { Blocks, lasttx, homechart, quantausd, status, peerstats } from '/imports/api/index.js'
 import { SHOR_PER_QUANTA } from '../both/index.js'
+import helpers from '@theqrl/explorer-helpers'
 
 
 const refreshBlocks = () => {
@@ -86,82 +87,31 @@ function refreshLasttx() {
   // First get unconfirmed transactions
   const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 10 })
   unconfirmed.transactions_unconfirmed.forEach((item, index) => {
-    unconfirmed.transactions_unconfirmed[index].tx.confirmed = 'false'
-    if (item.tx.transactionType === 'token') {
-      // Store plain text version of token symbol
-      unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol =
-        Buffer.from(item.tx.token.symbol).toString()
-    } else if (item.tx.transactionType === 'transfer_token') {
-      // Request Token Symbol
-      const symbolRequest = {
-        query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex'),
-      }
-      const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-      // Store symbol in unconfirmed
-      unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol =
-        Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-      unconfirmed.transactions_unconfirmed[index].tx.tokenDecimals =
-          thisSymbolResponse.transaction.tx.token.decimals
+    // Add a transaction object to the returned transaction so we can use txhash helper
+    var temp = []
+    temp.transaction = unconfirmed.transactions_unconfirmed[index]
 
-      // Calculate total transferred
-      let thisTotalTransferred = 0
-      _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
-        // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex], 10)
-      })
-      // eslint-disable-next-line
-      thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
-      unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
-    } else if (item.tx.transactionType === 'transfer') {
-      // Calculate total transferred
-      let thisTotalTransferred = 0
-      _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
-        // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer.amounts[aindex], 10)
-      })
-      thisTotalTransferred /= SHOR_PER_QUANTA
-      unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
-    }
+    // Parse the transaction
+    const output = helpers.txhash(temp)
+
+    // Now put it back
+    unconfirmed.transactions_unconfirmed[index] = output.transaction
+    unconfirmed.transactions_unconfirmed[index].tx.confirmed = 'false'
   })
 
   // Now get confirmed transactions
   const confirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 10 })
   confirmed.transactions.forEach((item, index) => {
-    confirmed.transactions[index].tx.confirmed = 'true'
-    if (item.tx.transactionType === 'token') {
-      // Store plain text version of token symbol
-      confirmed.transactions[index].tx.tokenSymbol =
-        Buffer.from(item.tx.token.symbol).toString()
-    } else if (item.tx.transactionType === 'transfer_token') {
-      // Request Token Symbol
-      const symbolRequest = {
-        query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex'),
-      }
-      const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-      // Store symbol in response
-      confirmed.transactions[index].tx.tokenSymbol =
-        Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-      confirmed.transactions[index].tx.tokenDecimals = thisSymbolResponse.transaction.tx.token.decimals
+    // Add a transaction object to the returned transaction so we can use txhash helper
+    var temp = []
+    temp.transaction = confirmed.transactions[index]
 
-      // Calculate total transferred
-      let thisTotalTransferred = 0
-      _.each(confirmed.transactions[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
-        // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred += parseInt(confirmed.transactions[index].tx.transfer_token.amounts[aindex], 10)
-      })
-      // eslint-disable-next-line
-      thisTotalTransferred = thisTotalTransferred / Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
-      confirmed.transactions[index].tx.totalTransferred = thisTotalTransferred
-    } else if (item.tx.transactionType === 'transfer') {
-      // Calculate total transferred
-      let thisTotalTransferred = 0
-      _.each(confirmed.transactions[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
-        // Now update total transferred with the corresponding amount from this output
-        thisTotalTransferred += parseInt(confirmed.transactions[index].tx.transfer.amounts[aindex], 10)
-      })
-      thisTotalTransferred /= SHOR_PER_QUANTA
-      confirmed.transactions[index].tx.totalTransferred = thisTotalTransferred
-    }
+    // Parse the transaction
+    const output = helpers.txhash(temp)
+
+    // Now put it back
+    confirmed.transactions[index] = output.transaction
+    confirmed.transactions[index].tx.confirmed = 'true'
   })
 
   // Merge the two together
@@ -169,6 +119,7 @@ function refreshLasttx() {
   const unconfirmedTxns = unconfirmed.transactions_unconfirmed
   const merged = {}
   merged.transactions = unconfirmedTxns.concat(confirmedTxns)
+
 
   // Fetch current data
   const current = lasttx.findOne()
@@ -183,7 +134,7 @@ function refreshLasttx() {
       let thisFound = false
       _.each(current.transactions, (currentTxn) => {
         // Find a matching pair of transactions by transaction hash
-        if (Buffer.from(currentTxn.tx.transaction_hash).toString('hex') === Buffer.from(newTxn.tx.transaction_hash).toString('hex')) {
+        if (currentTxn.tx.transaction_hash == newTxn.tx.transaction_hash) {
           try {
             // If they both have null header (unconfirmed) there is no change
             if ((currentTxn.header === null) && (newTxn.header === null)) {
@@ -202,6 +153,7 @@ function refreshLasttx() {
         newData = true
       }
     })
+
     if (newData === true) {
       // Clear and update cache as it's changed
       lasttx.remove({})
@@ -210,9 +162,14 @@ function refreshLasttx() {
   }
 }
 
-function refreshHomeChart() {
+function refreshStats() {
   const res = Meteor.wrapAsync(getStats)({ include_timeseries: true })
 
+  // Save status object
+  status.remove({})
+  status.insert(res)
+
+  // Start modifying data for home chart object
   const chartLineData = {
     labels: [],
     datasets: [],
@@ -281,13 +238,6 @@ function refreshHomeChart() {
   // Save in mongo
   homechart.remove({})
   homechart.insert(chartLineData)
-
-  // Update status data with block time and std dev
-  const updateStatus = status.findOne()
-  updateStatus.block_time_mean = res.block_time_mean
-  updateStatus.block_time_sd = res.block_time_sd
-  status.remove({})
-  status.insert(updateStatus)
 }
 
 const refreshQuantaUsd = () => {
@@ -299,12 +249,6 @@ const refreshQuantaUsd = () => {
   const price = { price: usd }
   quantausd.remove({})
   quantausd.insert(price)
-}
-
-const refreshStatus = () => {
-  const response = Meteor.wrapAsync(getStats)({})
-  status.remove({})
-  status.insert(response)
 }
 
 const refreshPeerStats = () => {
@@ -335,20 +279,15 @@ Meteor.setInterval(() => {
   refreshLasttx()
 }, 10000)
 
-// Refresh Home Chart Data every minute
+// Refresh Status / Home Chart Data 20 seconds
 Meteor.setInterval(() => {
-  refreshHomeChart()
-}, 60000)
+  refreshStats()
+}, 20000)
 
 // Refresh Quanta/USD Value every 120 seconds
 Meteor.setInterval(() => {
   refreshQuantaUsd()
 }, 120000)
-
-// Refresh status every 20 seconds
-Meteor.setInterval(() => {
-  refreshStatus()
-}, 20000)
 
 // Refresh peer stats every 20 seconds
 Meteor.setInterval(() => {
@@ -359,8 +298,7 @@ Meteor.setInterval(() => {
 Meteor.setTimeout(() => {
   refreshBlocks()
   refreshLasttx()
-  refreshStatus()
-  refreshHomeChart()
+  refreshStats()
   refreshQuantaUsd()
   refreshPeerStats()
 }, 5000)
