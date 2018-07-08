@@ -1,6 +1,7 @@
 import { Blocks } from '/imports/api/index.js'
 import './lastblocks.html'
 import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+import { MINING_POOLS } from '../../../startup/client/mining-pools.js'
 
 const addHex = (b) => {
   const result = b
@@ -34,6 +35,19 @@ Template.lastblocks.helpers({
   tsReadable() {
     const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).fromNow()
+  },
+  miner() {
+    const x = this.minedBy
+    let ret = ''
+    MINING_POOLS.forEach((value) => {
+      if (value.address === x) {
+        ret = `Mined by <a href='${value.link}' target="_blank">${value.name}</a>`
+      }
+    })
+    if (ret === '') {
+      return `Mined by ${x}`
+    }
+    return ret
   },
   interval() {
     const x = Math.round(this.block_interval)
@@ -71,4 +85,5 @@ Template.lastblocks.events({
     const route = event.currentTarget.childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[3].childNodes[0].getAttribute('href')
     FlowRouter.go(route)
   },
+
 })
