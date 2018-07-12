@@ -446,50 +446,19 @@ Meteor.methods({
     // asynchronous call to API
     const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
     unconfirmed.transactions_unconfirmed.forEach((item, index) => {
-      unconfirmed.transactions_unconfirmed[index].tx.confirmed = 'false'
-      if (item.tx.transactionType === 'token') {
-        // Store plain text version of token symbol
-        unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol =
-          Buffer.from(item.tx.token.symbol).toString()
-      } else if (item.tx.transactionType === 'transfer_token') {
-        // Request Token Symbol
-        const symbolRequest = {
-          query: Buffer.from(item.tx.transfer_token.token_txhash, 'hex'),
-        }
-        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-        // Store symbol in unconfirmed
-        unconfirmed.transactions_unconfirmed[index].tx.tokenSymbol =
-          Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-        unconfirmed.transactions_unconfirmed[index].tx.tokenDecimals =
-            thisSymbolResponse.transaction.tx.token.decimals
+      // Add a transaction object to the returned transaction so we can use txhash helper
+      var temp = []
+      temp.transaction = unconfirmed.transactions_unconfirmed[index]
 
-        // Calculate total transferred
-        let thisTotalTransferred = 0
-        // eslint-disable-next-line
-        _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.addrs_to, (thisAddress, aindex) => {
-          // Now update total transferred with the corresponding amount from this output
-          // eslint-disable-next-line
-          thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer_token.amounts[aindex], 10)
-        })
-        // eslint-disable-next-line
-        thisTotalTransferred /= Math.pow(10, thisSymbolResponse.transaction.tx.token.decimals)
-        unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
-      } else if (item.tx.transactionType === 'transfer') {
-        // Calculate total transferred
-        let thisTotalTransferred = 0
-        // eslint-disable-next-line
-        _.each(unconfirmed.transactions_unconfirmed[index].tx.transfer.addrs_to, (thisAddress, aindex) => {
-          // Now update total transferred with the corresponding amount from this output
-          // eslint-disable-next-line
-          thisTotalTransferred += parseInt(unconfirmed.transactions_unconfirmed[index].tx.transfer.amounts[aindex], 10)
-        })
-        thisTotalTransferred /= SHOR_PER_QUANTA
-        unconfirmed.transactions_unconfirmed[index].tx.totalTransferred = thisTotalTransferred
-      }
+      // Parse the transaction
+      const output = helpers.txhash(temp)
+
+      // Now put it back
+      unconfirmed.transactions_unconfirmed[index] = output.transaction
+      unconfirmed.transactions_unconfirmed[index].tx.confirmed = 'false'
     })
     return unconfirmed
   },
-
   txhash(txId) {
     check(txId, String)
     console.log(`txhash method called for: ${txId}`)
