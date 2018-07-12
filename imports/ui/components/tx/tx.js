@@ -3,6 +3,7 @@ import './tx.html'
 import '../../stylesheets/overrides.css'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 import { formatBytes } from '../../../startup/client/index.js'
+import CryptoJS from 'crypto-js'
 
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
@@ -197,6 +198,14 @@ Template.tx.helpers({
     }
     return false
   },
+  documentNotarisationVerificationMessage() {
+    const message = Session.get('documentNotarisationVerificationMessage')
+    return message
+  },
+  documentNotarisationError() {
+    const message = Session.get('documentNotarisationError')
+    return message
+  },
 })
 
 Template.tx.events({
@@ -210,6 +219,77 @@ Template.tx.events({
       $('.json').html(formatter.render())
     }
     $('.jsonbox').toggle()
+  },
+  'submit #notariseVerificationForm': (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    $('#documentVerified').hide()
+    $('#documentVerifcationFailed').hide()
+
+    let notaryDocuments = $('#notaryDocument').prop('files')
+    const notaryDocument = notaryDocuments[0]
+
+    // Get notary details from txn
+    const txhash = Session.get('txhash').transaction
+    const txnHashFunction = txhash.explorer.hash_function
+    const txnFileHash = txhash.explorer.hash
+    const txnNotary = txhash.explorer.from
+    let txnNotaryDate
+    if (txhash.header) {
+      const x = moment.unix(txhash.header.timestamp_seconds)
+      txnNotaryDate = moment(x).format('HH:mm D MMM YYYY')
+    } else {
+      const x = moment.unix(txhash.timestamp_seconds)
+      txnNotaryDate = moment(x).format('HH:mm D MMM YYYY')
+    }
+
+    // Verify user supplied file against txn hash
+    const reader = new FileReader()
+    reader.onloadend = function() {
+      try {
+        let fileHash
+
+        // Convert FileReader ArrayBuffer to WordArray first
+        var resultWordArray = CryptoJS.lib.WordArray.create(reader.result);
+
+        if(txnHashFunction == "SHA1") {
+          fileHash = CryptoJS.SHA1(resultWordArray).toString(CryptoJS.enc.Hex);
+        } else if(txnHashFunction == "SHA256") {
+          fileHash = CryptoJS.SHA256(resultWordArray).toString(CryptoJS.enc.Hex);
+        } else if(txnHashFunction == "MD5") {
+          fileHash = CryptoJS.MD5(resultWordArray).toString(CryptoJS.enc.Hex);
+        }
+
+        // Verify the txnFileHash is the same as provided file
+        if(txnFileHash == fileHash) {
+          // Valid document notarisation
+          let successMessage = String.raw`The file '${notaryDocument.name}' has been verifiably
+          notarised by '${txnNotary}' on ${txnNotaryDate} using the hash function '${txnHashFunction}'
+          resulting in the hash '${txnFileHash}'.`
+
+          Session.set('documentNotarisationVerificationMessage', successMessage)
+          $('#documentVerified').show()
+        } else {
+          Session.set('documentNotarisationError', 'The file provided does not match the notary hash in this transaction.')
+          $('#documentVerifcationFailed').show()
+        }
+      } catch (err) {
+        console.log(err)
+        // Invalid file format
+        Session.set('documentNotarisationError', 'Unable to open Document - Are you sure you selected a document to verify?')
+        $('#documentVerifcationFailed').show()
+      }
+    }
+
+    // Verify user selected a document to notarise
+    if (notaryDocument === undefined) {
+      Session.set('documentNotarisationError', 'Unable to open Document - Are you sure you selected a document to verify?')
+      $('#documentVerifcationFailed').show()
+    } else {
+      console.log('reading file ', notaryDocument)
+      reader.readAsArrayBuffer(notaryDocument)
+    }
   },
 })
 
