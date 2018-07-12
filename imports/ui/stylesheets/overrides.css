@@ -681,9 +681,6 @@ margin-right: 5% !important;
 .miner {
   text-overflow: ellipsis;
   white-space: nowrap;
-  z-index: 200;
-  position: relative;
-  display: block;
   overflow: hidden;
 }
 .bl-head {
@@ -698,6 +695,9 @@ margin-right: 5% !important;
   color: #9b9b9b;
   margin-bottom: 0px !important;
   padding-bottom: 0px !important;
+    text-overflow: ellipsis;
+  white-space: nowrap; 
+      overflow: hidden;
 }
 .bl-num {
   font-family: Quicksand;
@@ -749,4 +749,7 @@ margin-right: 5% !important;
 }
 .ui.attached.segment {
   background: #fff;
+}
+.p0 {
+  padding: 0px;
 }
