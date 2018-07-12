@@ -8,7 +8,13 @@ export const MINING_POOLS = [
   {
     address: 'Q010600286a4c7bcc7f701dc7cf0389fd9be402b610894e306aad35078539599398f9681c64e56c',
     email: 'qrlmining@gmail.com',
-    link: 'https://QRLmining.info',
+    link: 'http://QRLmining.info',
     name: 'qrlmining.info',
+  },
+  {
+    address: 'Q010600968c3408cba5192d75c11cec909e803fc590e82463216b5a04ce8e447f76b4e02c0d3d81',
+    email: 'gasgeverij@gmail.com',
+    link: 'http://quantapool.com/',
+    name: 'quantapool.com',
   },
 ]
