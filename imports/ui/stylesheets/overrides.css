@@ -512,7 +512,7 @@ Ellipsis Animation
   min-height: 300px;
   margin: -300px 0 0 -22.5%;
   background: #fff;
-  z-index: 10;
+  z-index: 1000;
   -webkit-transition: 0.3s all ease-out;
   transition: 0.3s all ease-out;
   border-radius: 4px;
@@ -677,6 +677,14 @@ margin-right: 5% !important;
 }
 .lastBlocks:hover {
   background: #fff !important;
+}
+.miner {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  z-index: 200;
+  position: relative;
+  display: block;
+  overflow: hidden;
 }
 .bl-head {
   font-family: Roboto;

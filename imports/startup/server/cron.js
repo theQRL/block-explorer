@@ -11,6 +11,20 @@ const refreshBlocks = () => {
   const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 14 }
   const response = Meteor.wrapAsync(getLatestData)(request)
 
+
+  // add miner
+  response.blockheaders.forEach((value, key) => {
+    const req = {
+      query: Buffer.from(value.header.block_number.toString()),
+    }
+    const res = Meteor.wrapAsync(getObject)(req)
+    res.block_extended.extended_transactions.forEach((val) => {
+      if (val.tx.transactionType === 'coinbase') {
+        response.blockheaders[key].minedBy = `Q${Buffer.from(val.tx.coinbase.addr_to).toString('hex')}`
+      }
+    })
+  })
+
   // Fetch current data
   const current = Blocks.findOne()
 
@@ -37,6 +51,7 @@ const refreshBlocks = () => {
       Blocks.insert(response)
     }
   }
+
   const lastblocktime = response.blockheaders[4].header.timestamp_seconds
   const seconds = new Date().getTime() / 1000
   const timeDiff = Math.floor((seconds - lastblocktime) / 60)
@@ -147,9 +162,14 @@ function refreshLasttx() {
   }
 }
 
-function refreshHomeChart() {
+function refreshStats() {
   const res = Meteor.wrapAsync(getStats)({ include_timeseries: true })
 
+  // Save status object
+  status.remove({})
+  status.insert(res)
+
+  // Start modifying data for home chart object
   const chartLineData = {
     labels: [],
     datasets: [],
@@ -218,13 +238,6 @@ function refreshHomeChart() {
   // Save in mongo
   homechart.remove({})
   homechart.insert(chartLineData)
-
-  // Update status data with block time and std dev
-  const updateStatus = status.findOne()
-  updateStatus.block_time_mean = res.block_time_mean
-  updateStatus.block_time_sd = res.block_time_sd
-  status.remove({})
-  status.insert(updateStatus)
 }
 
 const refreshQuantaUsd = () => {
@@ -236,12 +249,6 @@ const refreshQuantaUsd = () => {
   const price = { price: usd }
   quantausd.remove({})
   quantausd.insert(price)
-}
-
-const refreshStatus = () => {
-  const response = Meteor.wrapAsync(getStats)({})
-  status.remove({})
-  status.insert(response)
 }
 
 const refreshPeerStats = () => {
@@ -272,20 +279,15 @@ Meteor.setInterval(() => {
   refreshLasttx()
 }, 10000)
 
-// Refresh Home Chart Data every minute
+// Refresh Status / Home Chart Data 20 seconds
 Meteor.setInterval(() => {
-  refreshHomeChart()
-}, 60000)
+  refreshStats()
+}, 20000)
 
 // Refresh Quanta/USD Value every 120 seconds
 Meteor.setInterval(() => {
   refreshQuantaUsd()
 }, 120000)
-
-// Refresh status every 20 seconds
-Meteor.setInterval(() => {
-  refreshStatus()
-}, 20000)
 
 // Refresh peer stats every 20 seconds
 Meteor.setInterval(() => {
@@ -296,8 +298,7 @@ Meteor.setInterval(() => {
 Meteor.setTimeout(() => {
   refreshBlocks()
   refreshLasttx()
-  refreshStatus()
-  refreshHomeChart()
+  refreshStats()
   refreshQuantaUsd()
   refreshPeerStats()
 }, 5000)
