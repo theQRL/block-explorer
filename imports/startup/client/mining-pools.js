@@ -17,4 +17,10 @@ export const MINING_POOLS = [
     link: 'http://quantapool.com/',
     name: 'quantapool.com',
   },
+  {
+    address: 'Q0106004b6f0a3ceeab20b340836e418f60a33f49d5235f74b1effda410f5fe4fd4dbd6cb667c37',
+    email: 'support@computer-pig.net',
+    link: 'http://minilaro.computer-pig.net',
+    name: 'Minilaro',
+  },
 ]
