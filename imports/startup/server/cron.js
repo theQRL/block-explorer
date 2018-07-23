@@ -3,7 +3,7 @@ import { HTTP } from 'meteor/http'
 import sha512 from 'sha512'
 import { getLatestData, getObject, getStats, getPeersStat, apiCall } from '/imports/startup/server/index.js'
 import { Blocks, lasttx, homechart, quantausd, status, peerstats } from '/imports/api/index.js'
-import { SHOR_PER_QUANTA } from '../both/index.js'
+import { SHOR_PER_QUANTA, numberToString } from '../both/index.js'
 import helpers from '@theqrl/explorer-helpers'
 
 
@@ -88,11 +88,63 @@ function refreshLasttx() {
   const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 10 })
   unconfirmed.transactions_unconfirmed.forEach((item, index) => {
     // Add a transaction object to the returned transaction so we can use txhash helper
-    var temp = []
+    const temp = []
     temp.transaction = unconfirmed.transactions_unconfirmed[index]
 
     // Parse the transaction
     const output = helpers.txhash(temp)
+
+    // we need another Grpc call for transfer token so this stays here for now
+    try {
+      if (output.transaction.tx.transactionType === 'transfer_token') {
+        // Request Token Decimals / Symbol
+        const symbolRequest = {
+          query: Buffer.from(output.transaction.tx.transfer_token.token_txhash, 'hex'),
+        }
+        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+        const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
+        const thisName = Buffer.from(thisSymbolResponse.transaction.tx.token.name).toString()
+        const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
+
+        // Calculate total transferred, and generate a clean structure to display outputs from
+        let thisTotalTransferred = 0
+        const thisOutputs = []
+        _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, indexB) => {
+          const thisOutput = {
+            address: `Q${Buffer.from(thisAddress).toString('hex')}`,
+            // eslint-disable-next-line
+            amount: numberToString(output.transaction.tx.transfer_token.amounts[indexB] / Math.pow(10, thisDecimals)),
+          }
+          thisOutputs.push(thisOutput)
+          // Now update total transferred with the corresponding amount from this output
+          // eslint-disable-next-line
+          thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[indexB], 10)
+        })
+        output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
+        output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
+        output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
+        output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
+        output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
+        output.transaction.tx.transfer_token.outputs = thisOutputs
+        // eslint-disable-next-line
+        output.transaction.tx.totalTransferred = numberToString(thisTotalTransferred / Math.pow(10, thisDecimals))
+
+        output.transaction.explorer = {
+          from: output.transaction.tx.addr_from,
+          outputs: thisOutputs,
+          signature: output.transaction.tx.signature,
+          publicKey: output.transaction.tx.public_key,
+          token_txhash: output.transaction.tx.transfer_token.token_txhash,
+          // eslint-disable-next-line
+          totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
+          tokenSymbol: thisSymbol,
+          tokenName: thisName,
+          type: 'TRANSFER TOKEN',
+        }
+      }
+    } catch (e) {
+      //
+    }
 
     // Now put it back
     unconfirmed.transactions_unconfirmed[index] = output.transaction
@@ -103,7 +155,7 @@ function refreshLasttx() {
   const confirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 10 })
   confirmed.transactions.forEach((item, index) => {
     // Add a transaction object to the returned transaction so we can use txhash helper
-    var temp = []
+    const temp = []
     temp.transaction = confirmed.transactions[index]
 
     // Parse the transaction
