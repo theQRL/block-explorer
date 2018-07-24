@@ -28,5 +28,5 @@ export const MINING_POOLS = [
     email: 'support@computer-pig.net',
     link: 'http://minilaro.computer-pig.net',
     name: 'Minilaro',
-  }
+  },
 ]
