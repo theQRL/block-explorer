@@ -682,15 +682,16 @@ Meteor.methods({
             thisTotalTransferred +=
             parseInt(thisTxnHashResponse.transaction.tx.transfer_token.amounts[index], 10)
           })
-
+          
+          thisTxnHashResponse.transaction.tx.signature = Buffer.from(thisTxnHashResponse.transaction.tx.signature).toString('hex')
           thisTxn = {
             type: thisTxnHashResponse.transaction.tx.transactionType,
-            txhash: arr.txhash,
+            txhash: Buffer.from(arr.txhash).toString('hex'),
             symbol: thisSymbol,
             // eslint-disable-next-line
             totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
             outputs: thisOutputs,
-            from: thisTxnHashResponse.transaction.addr_from,
+            from: `Q${Buffer.from(thisTxnHashResponse.transaction.addr_from).toString('hex')}`,
             ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
             fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
             block: thisTxnHashResponse.transaction.header.block_number,
