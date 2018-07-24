@@ -137,8 +137,8 @@ function refreshLasttx() {
           token_txhash: output.transaction.tx.transfer_token.token_txhash,
           // eslint-disable-next-line
           totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
-          tokenSymbol: thisSymbol,
-          tokenName: thisName,
+          symbol: thisSymbol,
+          name: thisName,
           type: 'TRANSFER TOKEN',
         }
       }
@@ -204,8 +204,8 @@ function refreshLasttx() {
           token_txhash: output.transaction.tx.transfer_token.token_txhash,
           // eslint-disable-next-line
           totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
-          tokenSymbol: thisSymbol,
-          tokenName: thisName,
+          symbol: thisSymbol,
+          name: thisName,
           type: 'TRANSFER TOKEN',
         }
       }
