@@ -17,4 +17,10 @@ export const MINING_POOLS = [
     link: 'http://quantapool.com/',
     name: 'quantapool.com',
   },
+  {
+    address: 'Q010600f306fd843d956796abe370868648fc5cbed552bc7dbdcfc8d9f246beea13309e2058d5f8',
+    email: 'daniel@easyhash.io',
+    link: 'https://easyhash.io/qrl',
+    name: 'easyhash.io',
+  },
 ]
