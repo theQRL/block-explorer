@@ -686,7 +686,7 @@ Meteor.methods({
           thisTxnHashResponse.transaction.tx.signature = Buffer.from(thisTxnHashResponse.transaction.tx.signature).toString('hex')
           thisTxn = {
             type: thisTxnHashResponse.transaction.tx.transactionType,
-            txhash: Buffer.from(arr.txhash).toString('hex'),
+            txhash: arr.txhash,
             symbol: thisSymbol,
             // eslint-disable-next-line
             totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
