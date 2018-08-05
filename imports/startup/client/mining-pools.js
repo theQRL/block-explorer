@@ -29,4 +29,10 @@ export const MINING_POOLS = [
     link: 'http://minilaro.computer-pig.net',
     name: 'Minilaro',
   },
+  {
+    address: 'Q010600aa1d6cf6180f4f74d56469dc55e68ca6f8049c6a6237cdc9a1728ab4a1923d1f8b8c1d52',
+    email: 'cluster2k@protonmail.com',
+    link: 'http://www.qrlpool.com',
+    name: 'www.qrlpool.com',
+  },
 ]
