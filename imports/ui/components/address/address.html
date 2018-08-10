@@ -152,7 +152,13 @@
             </p>
           </div>
           <div class="floatright">
-            <a href="/tx/{{this.txhash}}">{{this.totalTransferred}} {{this.symbol}} &gt;</a>
+            <a href="/tx/{{this.txhash}}">
+            {{#if isThisAddress this.from}}
+              {{this.totalTransferred}} {{this.symbol}} &gt;
+            {{else}}
+              {{this.thisReceivedAmount}} {{this.symbol}} &gt;
+            {{/if}}
+            </a>
           </div>
         </div>
         {{/if}}
