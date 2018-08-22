@@ -35,4 +35,10 @@ export const MINING_POOLS = [
     link: 'http://www.qrlpool.com',
     name: 'www.qrlpool.com',
   },
+  {
+    address: 'Q010800dd14a340e6daf28d4dab9e42a534177db5bf06ef1bb300452f606a17331bacca9453aac1',
+    email: 'support@cryptopool.space',
+    link: 'https://qrl.cryptopool.space',
+    name: 'TheQRL CryptoPool.Space',
+  }
 ]
