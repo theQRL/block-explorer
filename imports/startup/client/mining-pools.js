@@ -47,4 +47,4 @@ export const MINING_POOLS = [
     link: 'https://mineqrl.net',
     name: 'mineQRL.net',
   },
-];
+]
