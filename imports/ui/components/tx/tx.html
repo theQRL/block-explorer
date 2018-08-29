@@ -111,7 +111,7 @@
                     <td class="single line">
                       <div class="ui red label"><i class="sign out icon"></i>from</div>
                     </td>
-                    <td><a href="/a/{{explorer.from}}">{{explorer.from}}</a></td>
+                    <td><a href="/a/{{renderAddress rawAddress=explorer.from}}">{{renderAddress rawAddress=explorer.from}}</a></td>
                   </tr>
                 </tbody>
               </table>
@@ -123,7 +123,7 @@
             {{else}}
               {{#if isDocumentNotarisation}}
                 <h3>Document Notarisation</h3>
-                <span>Notary <a class="ui">{{explorer.from}}</a></span>
+                <span>Notary <a class="ui">{{renderAddress rawAddress=explorer.from}}</a></span>
                 <br />
                 <span>Hash Function <a class="ui">{{explorer.hash_function}}</a></span>
                 <br />
@@ -168,20 +168,20 @@
                     {{#if isTransfer}}
                       {{#each explorer.outputs}}
                         <tr>
-                          <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
+                          <td><a href="/a/{{renderAddress rawAddress=this.address}}">{{renderAddress rawAddress=this.address}}</a></td>
                           <td>{{this.amount}}</td>
                         </tr>
                       {{/each}}
                     {{else if isTokenTransfer}}
                       {{#each explorer.outputs}}
                         <tr>
-                          <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
+                          <td><a href="/a/{{renderAddress rawAddress=this.address}}">{{renderAddress rawAddress=this.address}}</a></td>
                           <td>{{this.amount}}</td>
                         </tr>
                       {{/each}}
                     {{else}}
                       <tr>
-                        <td><a href="/a/{{explorer.to}}">{{explorer.to}}</a></td>
+                        <td><a href="/a/{{renderAddress rawAddress=explorer.to}}">{{renderAddress rawAddress=explorer.to}}</a></td>
                         <td>{{tx.tx.amount}}</td>
                       </tr>
                     {{/if}}
