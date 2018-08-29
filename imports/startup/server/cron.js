@@ -111,7 +111,7 @@ function refreshLasttx() {
         const thisOutputs = []
         _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, indexB) => {
           const thisOutput = {
-            address: `Q${Buffer.from(thisAddress).toString('hex')}`,
+            address: thisAddress,
             // eslint-disable-next-line
             amount: numberToString(output.transaction.tx.transfer_token.amounts[indexB] / Math.pow(10, thisDecimals)),
           }
@@ -121,7 +121,7 @@ function refreshLasttx() {
           thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[indexB], 10)
         })
         output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-        output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
+        output.transaction.tx.addr_from = output.transaction.addr_from
         output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
         output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
         output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
@@ -178,7 +178,7 @@ function refreshLasttx() {
         const thisOutputs = []
         _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, indexB) => {
           const thisOutput = {
-            address: `Q${Buffer.from(thisAddress).toString('hex')}`,
+            address: thisAddress,
             // eslint-disable-next-line
             amount: numberToString(output.transaction.tx.transfer_token.amounts[indexB] / Math.pow(10, thisDecimals)),
           }
@@ -188,7 +188,7 @@ function refreshLasttx() {
           thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[indexB], 10)
         })
         output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-        output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
+        output.transaction.tx.addr_from = output.transaction.addr_from
         output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
         output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
         output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
