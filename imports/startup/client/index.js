@@ -47,6 +47,10 @@ export function hexOrB32(rawAddress) {
   return `Q${Buffer.from(rawAddress).toString('hex')}`
 }
 
+export function rawAddressToHex(rawAddress) {
+  return `Q${Buffer.from(rawAddress).toString('hex')}`
+}
+
 let disconnectTimer = null
 
 // disconnect after 5 mins in background
