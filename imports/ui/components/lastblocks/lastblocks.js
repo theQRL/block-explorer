@@ -2,6 +2,7 @@ import { Blocks } from '/imports/api/index.js'
 import './lastblocks.html'
 import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 import { MINING_POOLS } from '../../../startup/client/mining-pools.js'
+import { hexOrB32 } from '../../../startup/client/index.js'
 
 const addHex = (b) => {
   const result = b
@@ -37,7 +38,7 @@ Template.lastblocks.helpers({
     return moment(x).fromNow()
   },
   miner() {
-    const x = this.minedBy
+    const x = hexOrB32(this.minedBy)
     let ret = ''
     MINING_POOLS.forEach((value) => {
       if (value.address === x) {
