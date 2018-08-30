@@ -6,7 +6,7 @@ import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import './address.html'
 import '../../stylesheets/overrides.css'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
-import { addressForAPI, bytesToString, anyAddressToRaw, hexOrB32 } from '../../../startup/client/index.js'
+import { bytesToString, anyAddressToRaw, hexOrB32 } from '../../../startup/client/index.js'
 
 let tokensHeld = []
 
@@ -491,6 +491,18 @@ Template.address.onRendered(() => {
     renderAddressBlock()
   })
 
+  Tracker.autorun(() => {
+    if (Session.equals('addressFormat', 'bech32') || Session.equals('addressFormat', 'hex')) {
+      addressToRender = hexOrB32(Session.get('address').state.address)
+
+      // Re-render identicon
+      jdenticon.update('#identicon', addressToRender)
+      // Re-render QR Code
+      $('.qr-code-container').empty()
+      $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
+    }
+  })
+
   tokensHeld = []
   Session.set('tokensHeld', [])
 
@@ -499,6 +511,7 @@ Template.address.onRendered(() => {
     $('#tokenBalancesLoading').hide()
   })
 
-  // Render identicon
+  // Render identicon (needs to be here for initial load). 
+  // Also Session.get('address') is blank at this point
   jdenticon.update('#identicon', FlowRouter.getParam('aId')) /* eslint no-undef:0 */
 })
