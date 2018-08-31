@@ -39,6 +39,9 @@ const renderTxBlock = () => {
 }
 
 Template.tx.helpers({
+  bech32() {
+    return Session.equals('addressFormat', 'bech32')
+  },
   tx() {
     try {
       if (Session.get('txhash').error) {

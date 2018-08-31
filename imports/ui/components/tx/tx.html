@@ -111,7 +111,7 @@
                     <td class="single line">
                       <div class="ui red label"><i class="sign out icon"></i>from</div>
                     </td>
-                    <td><a href="/a/{{explorer.from}}">{{explorer.from}}</a></td>
+                    <td><a href="/a/{{# if bech32}}{{explorer.fromB32}}{{else}}{{explorer.from}}{{/if}}">{{# if bech32 }}{{explorer.fromB32}}{{else}}{{explorer.from}}{{/if}}</a></td>
                   </tr>
                 </tbody>
               </table>
@@ -168,14 +168,14 @@
                     {{#if isTransfer}}
                       {{#each explorer.outputs}}
                         <tr>
-                          <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
+                          <td><a href="/a/{{# if bech32}}{{this.addressB32}}{{else}}{{this.address}}{{/if}}">{{# if bech32}}{{this.addressB32}}{{else}}{{this.address}}{{/if}}</a></td>
                           <td>{{this.amount}}</td>
                         </tr>
                       {{/each}}
                     {{else if isTokenTransfer}}
                       {{#each explorer.outputs}}
                         <tr>
-                          <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
+                          <td><a href="/a/{{# if bech32}}{{this.addressB32}}{{else}}{{this.address}}{{/if}}">{{# if bech32}}{{this.addressB32}}{{else}}{{this.address}}{{/if}}</a></td>
                           <td>{{this.amount}}</td>
                         </tr>
                       {{/each}}
