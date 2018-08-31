@@ -543,7 +543,6 @@ Meteor.methods({
           const thisOutputs = []
           _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
             const thisOutput = {
-              address: `Q${Buffer.from(thisAddress).toString('hex')}`,
               // eslint-disable-next-line
               amount: numberToString(output.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals)),
             }
@@ -552,8 +551,20 @@ Meteor.methods({
             // eslint-disable-next-line
             thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[index], 10)
           })
+
+          const outputsForExplorer = []
+          _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
+            const o = {
+              address_hex: helpers.rawAddressToHexAddress(thisAddress),
+              address_b32: helpers.rawAddressToB32Address(thisAddress),
+              // eslint-disable-next-line
+              amount: numberToString(output.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals)),
+            }
+            outputsForExplorer.push(o)
+          })
+
           output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-          output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
+          output.transaction.tx.addr_from = output.transaction.addr_from
           output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
           output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
           output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
@@ -562,8 +573,9 @@ Meteor.methods({
           output.transaction.tx.totalTransferred = numberToString(thisTotalTransferred / Math.pow(10, thisDecimals))
 
           output.transaction.explorer = {
-            from: output.transaction.tx.addr_from,
-            outputs: thisOutputs,
+            from_hex: helpers.rawAddressToHexAddress(output.transaction.tx.addr_from),
+            from_b32: helpers.rawAddressToB32Address(output.transaction.tx.addr_from),
+            outputs: outputsForExplorer,
             signature: output.transaction.tx.signature,
             publicKey: output.transaction.tx.public_key,
             token_txhash: output.transaction.tx.transfer_token.token_txhash,
