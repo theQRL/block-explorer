@@ -64,7 +64,7 @@
                     {{#if isToken}}
                       <strong>{{explorer.name}} ({{explorer.symbol}})</strong><br />
                       owned by:<br />
-                      <a href="/a/{{explorer.owner}}">{{explorer.owner}}</a>
+                      <a href="/a/{{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}">{{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}</a>
                     {{else}}
                       {{#if isTokenTransfer}}
                         <div class="value">{{explorer.totalTransferred}}</div>
@@ -97,7 +97,7 @@
               <tbody>
                 {{#each explorer.initialBalances}}
                   <tr>
-                    <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
+                    <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
                     <td>{{this.amount}}</td>
                   </tr>
                 {{/each}}
@@ -111,7 +111,7 @@
                     <td class="single line">
                       <div class="ui red label"><i class="sign out icon"></i>from</div>
                     </td>
-                    <td><a href="/a/{{# if bech32}}{{explorer.fromB32}}{{else}}{{explorer.from}}{{/if}}">{{# if bech32 }}{{explorer.fromB32}}{{else}}{{explorer.from}}{{/if}}</a></td>
+                    <td><a href="/a/{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}">{{# if bech32 }}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</a></td>
                   </tr>
                 </tbody>
               </table>
@@ -123,7 +123,7 @@
             {{else}}
               {{#if isDocumentNotarisation}}
                 <h3>Document Notarisation</h3>
-                <span>Notary <a class="ui">{{explorer.from}}</a></span>
+                <span>Notary <a class="ui">{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</a></span>
                 <br />
                 <span>Hash Function <a class="ui">{{explorer.hash_function}}</a></span>
                 <br />
@@ -168,20 +168,20 @@
                     {{#if isTransfer}}
                       {{#each explorer.outputs}}
                         <tr>
-                          <td><a href="/a/{{# if bech32}}{{this.addressB32}}{{else}}{{this.address}}{{/if}}">{{# if bech32}}{{this.addressB32}}{{else}}{{this.address}}{{/if}}</a></td>
+                          <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
                           <td>{{this.amount}}</td>
                         </tr>
                       {{/each}}
                     {{else if isTokenTransfer}}
                       {{#each explorer.outputs}}
                         <tr>
-                          <td><a href="/a/{{# if bech32}}{{this.addressB32}}{{else}}{{this.address}}{{/if}}">{{# if bech32}}{{this.addressB32}}{{else}}{{this.address}}{{/if}}</a></td>
+                          <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
                           <td>{{this.amount}}</td>
                         </tr>
                       {{/each}}
                     {{else}}
                       <tr>
-                        <td><a href="/a/{{explorer.to}}">{{explorer.to}}</a></td>
+                        <td><a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}">{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}</a></td>
                         <td>{{tx.tx.amount}}</td>
                       </tr>
                     {{/if}}
