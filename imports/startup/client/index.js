@@ -1,5 +1,6 @@
 // Import client startup through a single index entry point
 import './routes.js'
+import { rawAddressToB32Address, b32AddressToRawAddress, b32Decode } from '@theqrl/explorer-helpers'
 import { EXPLORER_VERSION } from '../both/index.js'
 
 // Developer note console messages
@@ -36,6 +37,26 @@ export function formatBytes(bytes, decimals) {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   // eslint-disable-next-line
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
+// wrapper to decide which format should addresses be converted to
+export function hexOrB32(rawAddress) {
+  if (Session.get('addressFormat') === 'bech32') {
+    return rawAddressToB32Address(rawAddress)
+  }
+  return `Q${Buffer.from(rawAddress).toString('hex')}`
+}
+
+export function rawAddressToHex(rawAddress) {
+  return `Q${Buffer.from(rawAddress).toString('hex')}`
+}
+
+export function anyAddressToRaw(address) {
+  if (address[0] === 'q') {
+    answer = b32AddressToRawAddress(address)
+    return answer
+  }
+  return addressForAPI(address)
 }
 
 let disconnectTimer = null
@@ -82,4 +103,3 @@ if (Meteor.isCordova) {
   document.addEventListener('resume', () => { Meteor.reconnect() })
   document.addEventListener('pause', () => { createDisconnectTimeout() })
 }
-

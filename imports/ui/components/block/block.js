@@ -1,7 +1,7 @@
 import JSONFormatter from 'json-formatter-js'
 import './block.html'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
-import { formatBytes } from '../../../startup/client/index.js'
+import { formatBytes, hexOrB32, rawAddressToHex } from '../../../startup/client/index.js'
 
 const calculateEpoch = (blockNumber) => {
   const blocksPerEpoch = 100
@@ -96,26 +96,29 @@ Template.block.helpers({
     }
     return ''
   },
-  addr_from_hex() {
-    return Buffer.from(this.addr_from)
+  render_addr_from() {
+    return hexOrB32(this.addr_from)
   },
-  addr_to_hex() {
+  render_addr_to() {
     if (this.transactionType === 'coinbase') {
-      return this.coinbase.addr_to
+      return hexOrB32(this.coinbase.addr_to)
     }
     if (this.transactionType === 'transfer') {
       if (this.transfer.totalOutputs === 1) {
-        return this.transfer.addrs_to[0]
+        return hexOrB32(this.transfer.addrs_to[0])
       }
       return `${this.transfer.totalOutputs} addresses`
     }
     if (this.transactionType === 'transfer_token') {
       if (this.transfer_token.totalOutputs === 1) {
-        return this.transfer_token.addrs_to[0]
+        return hexOrB32(this.transfer_token.addrs_to[0])
       }
       return `${this.transfer_token.totalOutputs} addresses`
     }
     return ''
+  },
+  renderHexAddress(rawAddress) {
+    return rawAddressToHex(rawAddress.hash.rawAddress)
   },
   amount() {
     if (this.transactionType === 'transfer') {

@@ -1,8 +1,10 @@
 import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
+import { hexAddressToB32Address } from '@theqrl/explorer-helpers'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
-import { formatBytes } from '../../../startup/client/index.js'
+import { formatBytes, hexOrB32, rawAddressToHex } from '../../../startup/client/index.js'
+
 import CryptoJS from 'crypto-js'
 
 const renderTxBlock = () => {
@@ -49,6 +51,20 @@ Template.tx.helpers({
     } catch (e) {
       return false
     }
+  },
+  renderAddress(rawAddress) {
+    console.log('renderAddress this', this)
+    console.log('renderAddress', rawAddress)
+
+    // rawAddress may be empty when it is the recipient of a SlaveTransaction
+    if (rawAddress.hash.rawAddress == '') {
+      return ''
+    }
+    return hexOrB32(rawAddress.hash.rawAddress)
+  },
+  renderHexAddress(rawAddress) {
+    console.log('renderHexAddress', rawAddress)
+    return rawAddressToHex(rawAddress.hash.rawAddress)
   },
   txSize() {
     try {
