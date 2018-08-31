@@ -25,6 +25,14 @@ Template.appBody.events({
     $('.ui.sidebar').sidebar('toggle')
   },
   */
+  'change #addressFormatCheckbox': () => {
+    const checked = $('#addressFormatCheckbox').prop('checked')
+    if (checked) {
+      Session.set('addressFormat', 'bech32')
+    } else {
+      Session.set('addressFormat', 'hex')
+    }
+  },
   'click #sidebarConnectionStatus': () => {
     // TODO: modal here
   },

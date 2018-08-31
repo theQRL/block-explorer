@@ -6,7 +6,7 @@ import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import './address.html'
 import '../../stylesheets/overrides.css'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
-import { addressForAPI, bytesToString } from '../../../startup/client/index.js'
+import { bytesToString, anyAddressToRaw, hexOrB32 } from '../../../startup/client/index.js'
 
 let tokensHeld = []
 
@@ -69,7 +69,7 @@ function loadAddressTransactions(txArray) {
 
 const getTokenBalances = (getAddress, callback) => {
   const request = {
-    address: addressForAPI(getAddress),
+    address: anyAddressToRaw(getAddress),
   }
 
   Meteor.call('getAddressState', request, (err, res) => {
@@ -134,14 +134,13 @@ const renderAddressBlock = () => {
   if (!tPage) { tPage = 1 }
   if (aId) {
     const req = {
-      address: addressForAPI(aId),
+      address: anyAddressToRaw(aId),
     }
     Meteor.call('getAddressState', req, (err, res) => {
       if (err) {
         Session.set('address', { error: err, id: aId })
       } else {
         if (res) {
-          res.state.address = `Q${Buffer.from(res.state.address).toString('hex')}`
           res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(9)
           if (!(res.state.address)) {
             res.state.address = aId
@@ -400,6 +399,14 @@ Template.address.helpers({
     }
     return false
   },
+  renderAddress(a) {
+    // Sometimes this helper is called with a = undefined.
+    // It's known: https://stackoverflow.com/questions/30760668/how-to-pass-multiple-arguments-to-spacebars-helper-from-meteor-template
+    if (a.hash.a === undefined) {
+      return null
+    }
+    return hexOrB32(a.hash.a)
+  },
 })
 
 Template.address.events({
@@ -484,6 +491,18 @@ Template.address.onRendered(() => {
     renderAddressBlock()
   })
 
+  Tracker.autorun(() => {
+    if (Session.equals('addressFormat', 'bech32') || Session.equals('addressFormat', 'hex')) {
+      addressToRender = hexOrB32(Session.get('address').state.address)
+
+      // Re-render identicon
+      jdenticon.update('#identicon', addressToRender)
+      // Re-render QR Code
+      $('.qr-code-container').empty()
+      $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
+    }
+  })
+
   tokensHeld = []
   Session.set('tokensHeld', [])
 
@@ -492,6 +511,7 @@ Template.address.onRendered(() => {
     $('#tokenBalancesLoading').hide()
   })
 
-  // Render identicon
+  // Render identicon (needs to be here for initial load). 
+  // Also Session.get('address') is blank at this point
   jdenticon.update('#identicon', FlowRouter.getParam('aId')) /* eslint no-undef:0 */
 })

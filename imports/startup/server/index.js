@@ -543,7 +543,7 @@ Meteor.methods({
           const thisOutputs = []
           _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
             const thisOutput = {
-              address: `Q${Buffer.from(thisAddress).toString('hex')}`,
+              address: thisAddress,
               // eslint-disable-next-line
               amount: numberToString(output.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals)),
             }
@@ -553,7 +553,7 @@ Meteor.methods({
             thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[index], 10)
           })
           output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-          output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
+          output.transaction.tx.addr_from = output.transaction.addr_from
           output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
           output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
           output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
@@ -611,12 +611,12 @@ Meteor.methods({
         const transactions = []
         response.block.transactions.forEach((value) => {
           const adjusted = value.tx
-          adjusted.addr_from = `Q${Buffer.from(value.addr_from).toString('hex')}`
+          adjusted.addr_from = value.addr_from
           adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
           adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
           adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
           if (adjusted.transactionType === 'coinbase') {
-            adjusted.coinbase.addr_to = `Q${Buffer.from(adjusted.coinbase.addr_to).toString('hex')}`
+            adjusted.coinbase.addr_to = adjusted.coinbase.addr_to
             // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
             adjusted.transfer = adjusted.coinbase
           }
@@ -628,7 +628,7 @@ Meteor.methods({
             _.each(adjusted.transfer.addrs_to, (thisAddress, index) => {
               totalOutputs += 1
               thisTotalTransferred += parseInt(adjusted.transfer.amounts[index], 10)
-              adjusted.transfer.addrs_to[index] = `Q${Buffer.from(adjusted.transfer.addrs_to[index]).toString('hex')}`
+              adjusted.transfer.addrs_to[index] = adjusted.transfer.addrs_to[index]
             })
             adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
             adjusted.transfer.totalOutputs = totalOutputs
@@ -648,14 +648,13 @@ Meteor.methods({
             _.each(adjusted.transfer_token.addrs_to, (thisAddress, index) => {
               totalOutputs += 1
               thisTotalTransferred += parseInt(adjusted.transfer_token.amounts[index], 10)
-              adjusted.transfer_token.addrs_to[index] = `Q${Buffer.from(adjusted.transfer_token.addrs_to[index]).toString('hex')}`
+              adjusted.transfer_token.addrs_to[index] = adjusted.transfer_token.addrs_to[index]
             })
             // eslint-disable-next-line
             adjusted.transfer_token.totalTransferred = thisTotalTransferred / Math.pow(10, thisDecimals)
             adjusted.transfer_token.totalOutputs = totalOutputs
             adjusted.transfer_token.tokenSymbol = thisSymbol
           }
-
           transactions.push(adjusted)
         })
 
@@ -724,7 +723,7 @@ Meteor.methods({
           // eslint-disable-next-line
           _.each(thisTxnHashResponse.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
             const thisOutput = {
-              address: `Q${Buffer.from(thisAddress).toString('hex')}`,
+              address: thisAddress,
               // eslint-disable-next-line
               amount: numberToString(parseInt(thisTxnHashResponse.transaction.tx.transfer_token.amounts[index], 10) / Math.pow(10, thisDecimals)),
             }
@@ -743,7 +742,7 @@ Meteor.methods({
             // eslint-disable-next-line
             totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
             outputs: thisOutputs,
-            from: `Q${Buffer.from(thisTxnHashResponse.transaction.addr_from).toString('hex')}`,
+            from: thisTxnHashResponse.transaction.addr_from,
             ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
             fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
             block: thisTxnHashResponse.transaction.header.block_number,
