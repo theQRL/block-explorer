@@ -485,6 +485,18 @@ Template.address.onRendered(() => {
     renderAddressBlock()
   })
 
+  Tracker.autorun(() => {
+    if (Session.equals('addressFormat', 'bech32') || Session.equals('addressFormat', 'hex')) {
+      addressToRender = hexOrB32(Session.get('address').state.address)
+
+      // Re-render identicon
+      jdenticon.update('#identicon', addressToRender)
+      // Re-render QR Code
+      $('.qr-code-container').empty()
+      $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
+    }
+  })
+
   tokensHeld = []
   Session.set('tokensHeld', [])
 
@@ -493,6 +505,8 @@ Template.address.onRendered(() => {
     $('#tokenBalancesLoading').hide()
   })
 
-  // Render identicon
+  // Render identicon (needs to be here for initial load).
+  // Also Session.get('address') is blank at this point
+  $('.qr-code-container').qrcode({ width: 100, height: 100, text: FlowRouter.getParam('aId') })
   jdenticon.update('#identicon', FlowRouter.getParam('aId')) /* eslint no-undef:0 */
 })
