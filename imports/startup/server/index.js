@@ -623,12 +623,12 @@ Meteor.methods({
         const transactions = []
         response.block.transactions.forEach((value) => {
           const adjusted = value.tx
-          adjusted.addr_from = `Q${Buffer.from(value.addr_from).toString('hex')}`
+          adjusted.addr_from = value.addr_from
           adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
           adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
           adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
           if (adjusted.transactionType === 'coinbase') {
-            adjusted.coinbase.addr_to = `Q${Buffer.from(adjusted.coinbase.addr_to).toString('hex')}`
+            adjusted.coinbase.addr_to = adjusted.coinbase.addr_to
             // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
             adjusted.transfer = adjusted.coinbase
           }
@@ -640,7 +640,7 @@ Meteor.methods({
             _.each(adjusted.transfer.addrs_to, (thisAddress, index) => {
               totalOutputs += 1
               thisTotalTransferred += parseInt(adjusted.transfer.amounts[index], 10)
-              adjusted.transfer.addrs_to[index] = `Q${Buffer.from(adjusted.transfer.addrs_to[index]).toString('hex')}`
+              adjusted.transfer.addrs_to[index] = adjusted.transfer.addrs_to[index]
             })
             adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
             adjusted.transfer.totalOutputs = totalOutputs
@@ -660,7 +660,7 @@ Meteor.methods({
             _.each(adjusted.transfer_token.addrs_to, (thisAddress, index) => {
               totalOutputs += 1
               thisTotalTransferred += parseInt(adjusted.transfer_token.amounts[index], 10)
-              adjusted.transfer_token.addrs_to[index] = `Q${Buffer.from(adjusted.transfer_token.addrs_to[index]).toString('hex')}`
+              adjusted.transfer_token.addrs_to[index] = adjusted.transfer_token.addrs_to[index]
             })
             // eslint-disable-next-line
             adjusted.transfer_token.totalTransferred = thisTotalTransferred / Math.pow(10, thisDecimals)
