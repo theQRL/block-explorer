@@ -20,7 +20,7 @@ const refreshBlocks = () => {
     const res = Meteor.wrapAsync(getObject)(req)
     res.block_extended.extended_transactions.forEach((val) => {
       if (val.tx.transactionType === 'coinbase') {
-        response.blockheaders[key].minedBy = `Q${Buffer.from(val.tx.coinbase.addr_to).toString('hex')}`
+        response.blockheaders[key].minedBy = val.tx.coinbase.addr_to
       }
     })
   })
