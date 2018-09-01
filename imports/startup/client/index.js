@@ -1,6 +1,6 @@
 // Import client startup through a single index entry point
 import './routes.js'
-import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
+import { rawAddressToB32Address, rawAddressToHexAddress, b32AddressToRawAddress } from '@theqrl/explorer-helpers'
 import { EXPLORER_VERSION } from '../both/index.js'
 
 // Developer note console messages
@@ -45,6 +45,14 @@ export function hexOrB32(rawAddress) {
     return rawAddressToB32Address(rawAddress)
   }
   return rawAddressToHexAddress(rawAddress)
+}
+
+export function anyAddressToRaw(address) {
+  if (address[0] === 'q') {
+    const answer = b32AddressToRawAddress(address)
+    return answer
+  }
+  return addressForAPI(address)
 }
 
 
