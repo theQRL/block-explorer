@@ -1,5 +1,7 @@
 import { Blocks } from '/imports/api/index.js'
 import './lastblocks.html'
+import { rawAddressToHexAddress } from '@theqrl/explorer-helpers'
+import { hexOrB32 } from '../../../startup/client/index.js'
 import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 import { MINING_POOLS } from '../../../startup/client/mining-pools.js'
 
@@ -40,12 +42,12 @@ Template.lastblocks.helpers({
     const x = this.minedBy
     let ret = ''
     MINING_POOLS.forEach((value) => {
-      if (value.address === x) {
+      if (value.address === rawAddressToHexAddress(x)) {
         ret = `Mined by <a href='${value.link}' target="_blank">${value.name}</a>`
       }
     })
     if (ret === '') {
-      return `Mined by ${x}`
+      return `Mined by ${hexOrB32(x)}`
     }
     return ret
   },
