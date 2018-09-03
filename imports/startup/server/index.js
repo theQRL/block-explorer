@@ -524,71 +524,23 @@ Meteor.methods({
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
-      // use explorer-helpers npm module to format the reponse
-      const output = helpers.txhash(response)
       // we need another Grpc call for transfer token so this stays here for now
       try {
-        if (output.transaction.tx.transactionType === 'transfer_token') {
+        if (response.transaction.tx.transactionType === 'transfer_token') {
           // Request Token Decimals / Symbol
           const symbolRequest = {
-            query: Buffer.from(output.transaction.tx.transfer_token.token_txhash, 'hex'),
+            query: response.transaction.tx.transfer_token.token_txhash,
           }
           const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-          const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-          const thisName = Buffer.from(thisSymbolResponse.transaction.tx.token.name).toString()
-          const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
 
-          // Calculate total transferred, and generate a clean structure to display outputs from
-          let thisTotalTransferred = 0
-          const thisOutputs = []
-          _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
-            const thisOutput = {
-              // eslint-disable-next-line
-              amount: numberToString(output.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals)),
-            }
-            thisOutputs.push(thisOutput)
-            // Now update total transferred with the corresponding amount from this output
-            // eslint-disable-next-line
-            thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[index], 10)
-          })
-
-          const outputsForExplorer = []
-          _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
-            const o = {
-              address_hex: helpers.rawAddressToHexAddress(thisAddress),
-              address_b32: helpers.rawAddressToB32Address(thisAddress),
-              // eslint-disable-next-line
-              amount: numberToString(output.transaction.tx.transfer_token.amounts[index] / Math.pow(10, thisDecimals)),
-            }
-            outputsForExplorer.push(o)
-          })
-
-          output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-          output.transaction.tx.addr_from = output.transaction.addr_from
-          output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-          output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-          output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
-          output.transaction.tx.transfer_token.outputs = thisOutputs
-          // eslint-disable-next-line
-          output.transaction.tx.totalTransferred = numberToString(thisTotalTransferred / Math.pow(10, thisDecimals))
-
-          output.transaction.explorer = {
-            from_hex: helpers.rawAddressToHexAddress(output.transaction.tx.addr_from),
-            from_b32: helpers.rawAddressToB32Address(output.transaction.tx.addr_from),
-            outputs: outputsForExplorer,
-            signature: output.transaction.tx.signature,
-            publicKey: output.transaction.tx.public_key,
-            token_txhash: output.transaction.tx.transfer_token.token_txhash,
-            // eslint-disable-next-line
-            totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
-            tokenSymbol: thisSymbol,
-            tokenName: thisName,
-            type: 'TRANSFER TOKEN',
-          }
+          const output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, response)
+          return output
         }
       } catch (e) {
         //
       }
+      // use explorer-helpers npm module to format the reponse
+      const output = helpers.txhash(response)
       return output
     }
   },
