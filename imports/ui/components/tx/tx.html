@@ -57,7 +57,7 @@
                 <div class="ui statistic">
 
                   <div class="label">
-                    <div class="ui {{color}} label">{{explorer.type}}{{#if isTokenTransfer}}: {{explorer.tokenSymbol}} {{/if}}</div>
+                    <div class="ui {{color}} label">{{explorer.type}}{{#if isTokenTransfer}}: {{explorer.symbol}} {{/if}}</div>
                   </div>
 
                   {{#if isNotMessage}}
@@ -68,7 +68,7 @@
                     {{else}}
                       {{#if isTokenTransfer}}
                         <div class="value">{{explorer.totalTransferred}}</div>
-                        {{explorer.tokenSymbol}} ({{explorer.tokenName}})<br />
+                        {{explorer.symbol}} ({{explorer.name}})<br />
                         tokens transferred
                         <div class="label">Token creation transaction: </div>
                         <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>

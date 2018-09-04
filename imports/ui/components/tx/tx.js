@@ -113,7 +113,7 @@ Template.tx.helpers({
       return `${numberToString(this.tx.transfer.totalTransferred)} Quanta`
     }
     if (this.tx.transactionType === 'transfer_token') {
-      return `${numberToString(this.tx.transfer_token.totalTransferred)} ${this.tx.transfer_token.tokenSymbol}`
+      return `${numberToString(this.tx.transfer_token.totalTransferred)} ${this.tx.transfer_token.symbol}`
     }
 
     return ''
