@@ -408,6 +408,41 @@ export const apiCall = (apiUrl, callback) => {
   }
 }
 
+export const makeTxHumanReadable = (item) => {
+  let output
+  if (item.transaction.tx.transactionType === 'transfer_token') {
+    try {
+      // Request Token Decimals / Symbol
+      const symbolRequest = { query: item.transaction.tx.transfer_token.token_txhash }
+      const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+      output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
+    } catch (e) {
+      console.log('ERROR in makeTxHumanReadable', e)
+    }
+  } else {
+    output = helpers.txhash(item)
+  }
+  return output
+}
+
+export const makeTxListHumanReadable = (txList, confirmed) => {
+  const outputList = []
+
+  txList.forEach((item) => {
+    // Add a transaction object to the returned transaction so we can use txhash helper
+    const output = makeTxHumanReadable({ transaction: item })
+    // Now put it back
+    if (confirmed) {
+      output.transaction.tx.confirmed = 'true'
+    } else {
+      output.transaction.tx.confirmed = 'false'
+    }
+    outputList.push(output.transaction)
+  })
+
+  return outputList
+}
+
 Meteor.methods({
   QRLvalue() {
     console.log('QRLvalue method called')
@@ -444,73 +479,12 @@ Meteor.methods({
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
-    const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
-    unconfirmed.transactions_unconfirmed.forEach((item, index) => {
-      // Add a transaction object to the returned transaction so we can use txhash helper
-      var temp = []
-      temp.transaction = unconfirmed.transactions_unconfirmed[index]
-
-      // Parse the transaction
-      const output = helpers.txhash(temp)
-
-      // we need another Grpc call for transfer token so this stays here for now
-      try {
-        if (output.transaction.tx.transactionType === 'transfer_token') {
-          // Request Token Decimals / Symbol
-          const symbolRequest = {
-            query: Buffer.from(output.transaction.tx.transfer_token.token_txhash, 'hex'),
-          }
-          const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-          const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-          const thisName = Buffer.from(thisSymbolResponse.transaction.tx.token.name).toString()
-          const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
-
-          // Calculate total transferred, and generate a clean structure to display outputs from
-          let thisTotalTransferred = 0
-          const thisOutputs = []
-          _.each(output.transaction.tx.transfer_token.addrs_to, (thisAddress, indexB) => {
-            const thisOutput = {
-              address: `Q${Buffer.from(thisAddress).toString('hex')}`,
-              // eslint-disable-next-line
-              amount: numberToString(output.transaction.tx.transfer_token.amounts[indexB] / Math.pow(10, thisDecimals)),
-            }
-            thisOutputs.push(thisOutput)
-            // Now update total transferred with the corresponding amount from this output
-            // eslint-disable-next-line
-            thisTotalTransferred += parseInt(output.transaction.tx.transfer_token.amounts[indexB], 10)
-          })
-          output.transaction.tx.fee = numberToString(output.transaction.tx.fee / SHOR_PER_QUANTA)
-          output.transaction.tx.addr_from = `Q${Buffer.from(output.transaction.addr_from).toString('hex')}`
-          output.transaction.tx.public_key = Buffer.from(output.transaction.tx.public_key).toString('hex')
-          output.transaction.tx.signature = Buffer.from(output.transaction.tx.signature).toString('hex')
-          output.transaction.tx.transfer_token.token_txhash = Buffer.from(output.transaction.tx.transfer_token.token_txhash).toString('hex')
-          output.transaction.tx.transfer_token.outputs = thisOutputs
-          // eslint-disable-next-line
-          output.transaction.tx.totalTransferred = numberToString(thisTotalTransferred / Math.pow(10, thisDecimals))
-
-          output.transaction.explorer = {
-            from: output.transaction.tx.addr_from,
-            outputs: thisOutputs,
-            signature: output.transaction.tx.signature,
-            publicKey: output.transaction.tx.public_key,
-            token_txhash: output.transaction.tx.transfer_token.token_txhash,
-            // eslint-disable-next-line
-            totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
-            symbol: thisSymbol,
-            name: thisName,
-            type: 'TRANSFER TOKEN',
-          }
-        }
-      } catch (e) {
-        //
-      }
-      
-      // Now put it back
-      unconfirmed.transactions_unconfirmed[index] = output.transaction
-      unconfirmed.transactions_unconfirmed[index].tx.confirmed = 'false'
-    })
-    return unconfirmed
+    const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
+    const unconfirmedReadable = makeTxListHumanReadable(response.transactions_unconfirmed, false)
+    response.transactions_unconfirmed = unconfirmedReadable
+    return response
   },
+
   txhash(txId) {
     check(txId, String)
     console.log(`txhash method called for: ${txId}`)
@@ -524,24 +498,7 @@ Meteor.methods({
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
-      // we need another Grpc call for transfer token so this stays here for now
-      try {
-        if (response.transaction.tx.transactionType === 'transfer_token') {
-          // Request Token Decimals / Symbol
-          const symbolRequest = {
-            query: response.transaction.tx.transfer_token.token_txhash,
-          }
-          const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-
-          const output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, response)
-          return output
-        }
-      } catch (e) {
-        //
-      }
-      // use explorer-helpers npm module to format the reponse
-      const output = helpers.txhash(response)
-      return output
+      return makeTxHumanReadable(response)
     }
   },
 
