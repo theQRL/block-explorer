@@ -7,6 +7,7 @@ import './address.html'
 import '../../stylesheets/overrides.css'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 import { bytesToString, anyAddressToRaw, hexOrB32 } from '../../../startup/client/index.js'
+import { rawAddressToB32Address } from '@theqrl/explorer-helpers'
 
 let tokensHeld = []
 
@@ -182,6 +183,9 @@ const renderAddressBlock = () => {
 }
 
 Template.address.helpers({
+  bech32() {
+    return Session.equals('addressFormat', 'bech32')
+  },
   address() {
     const address = Session.get('address')
     address.state.address = hexOrB32(address.state.address)
@@ -215,7 +219,7 @@ Template.address.helpers({
   addressTransactions() {
     try {
       const transactions = []
-      const thisAddress = Session.get('address').state.address
+      const thisAddress = rawAddressToB32Address(Session.get('address').state.address)
       _.each(Session.get('addressTransactions'), (transaction) => {
         // Store modified transaction
         const y = transaction
@@ -231,7 +235,7 @@ Template.address.helpers({
         let thisReceivedAmount = 0
         if ((transaction.type === 'transfer') || (transaction.type === 'transfer_token')) {
           _.each(transaction.outputs, (output) => {
-            if (output.address === thisAddress) {
+            if (output.address_b32 === thisAddress) {
               thisReceivedAmount += parseFloat(output.amount)
             }
           })
@@ -257,7 +261,7 @@ Template.address.helpers({
   },
   isThisAddress(address) {
     try {
-      if (address === Session.get('address').state.address) {
+      if (address === rawAddressToB32Address(Session.get('address').state.address)) {
         return true
       }
       return false
