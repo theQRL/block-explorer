@@ -76,177 +76,173 @@
 
     {{#if addressHasTransactions}}
       {{#each addressTransactions}}
-        {{#if isTransfer this.type}}
-        <div class="ui icon message transactionRecord">
-          {{#if isThisAddress this.from}}
-          <img class="transactionTypeImage" src="/img/icons/send.png" />
-          {{else}}
-          <img class="transactionTypeImage" src="/img/icons/receive.png" />
-          {{/if}}
-          <div class="content">
-            <div class="header">
-              {{#if isThisAddress this.from}}
-              Sent
-              {{else}}
-              Received
-              {{/if}}
-               | {{this.timestamp}}
-            </div>
-            <p class="transactionAddress">
-              {{#if isThisAddress this.from}}
-                {{#each this.outputs}}
-                  {{this.address}} - {{this.amount}}<br />
-                {{/each}}
-              {{else}}
-                {{this.from}}
-              {{/if}}
-            </p>
-          </div>
-          <div class="floatright">
-            <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} Quanta &gt;</a>
-          </div>
-        </div>
-        {{/if}}
 
-        {{#if isTokenCreation this.type}}
-        <div class="ui icon message transactionRecord">
-          <img class="transactionTypeImage" src="/img/icons/send.png" />
-          <div class="content">
-            <div class="header">
-              Token Creation - {{this.name}} ({{this.symbol}}) | {{this.timestamp}}
-            </div>
-            <p class="transactionAddress">
-              {{this.txhash}}
-            </p>
-          </div>
-          <div class="floatright">
-             <a href="/tx/{{this.txhash}}">{{this.symbol}} &gt;</a>
-          </div>
-        </div>
-        {{/if}}
 
-        {{#if isTokenTransfer this.type}}
-        <div class="ui icon message transactionRecord">
-          {{#if isThisAddress this.from}}
-          <img class="transactionTypeImage" src="/img/icons/send.png" />
-          {{else}}
-          <img class="transactionTypeImage" src="/img/icons/receive.png" />
-          {{/if}}
-          <div class="content">
-            <div class="header">
-              {{#if isThisAddress this.from}}
-              Sent Token
-              {{else}}
-              Received Token
-              {{/if}}
-               | {{this.timestamp}}
-            </div>
-            <p class="transactionAddress">
-              {{#if isThisAddress this.from}}
-                {{#each this.outputs}}
-                  {{this.address}} - {{this.amount}}<br />
-                {{/each}}
-              {{else}}
-                {{this.from}}
-              {{/if}}
-            </p>
-          </div>
-          <div class="floatright">
-            <a href="/tx/{{this.txhash}}">
-            {{#if isThisAddress this.from}}
-              {{this.totalTransferred}} {{this.symbol}} &gt;
+          {{#if isTransfer this.type}}
+          <div class="ui icon message transactionRecord">
+            {{#if isThisAddress this.from_b32}}
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
             {{else}}
-              {{this.thisReceivedAmount}} {{this.symbol}} &gt;
+            <img class="transactionTypeImage" src="/img/icons/receive.png" />
             {{/if}}
-            </a>
-          </div>
-        </div>
-        {{/if}}
-
-        {{#if isCoinbaseTxn this.type}}
-        <div class="ui icon message transactionRecord">
-          <img class="transactionTypeImage" src="/img/icons/receive.png" />
-          <div class="content">
-            <div class="header">
-              Coinbase Received | {{this.timestamp}}
+            <div class="content">
+              <div class="header">
+                {{#if isThisAddress this.from_b32}}
+                Sent
+                {{else}}
+                Received
+                {{/if}}
+                 | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{#if isThisAddress this.from_b32}}
+                  {{#each this.outputs}}
+                    {{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}} - {{this.amount}}<br />
+                  {{/each}}
+                {{else}}
+                  {{# if bech32}}{{this.from_b32}}{{else}}{{this.from_hex}}{{/if}}
+                {{/if}}
+              </p>
             </div>
-            <p class="transactionAddress">
-              {{this.txhash}}
-            </p>
-          </div>
-          <div class="floatright">
-            <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
-          </div>
-        </div>
-        {{/if}}
-
-        {{#if isSlaveTxn this.type}}
-        <div class="ui icon message transactionRecord">
-          <img class="transactionTypeImage" src="/img/icons/send.png" />
-          <div class="content">
-            <div class="header">
-              Slave Transaction | {{this.timestamp}}
+            <div class="floatright">
+              <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from_b32}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} Quanta &gt;</a>
             </div>
-            <p class="transactionAddress">
-              {{this.txhash}}
-            </p>
           </div>
-          <div class="floatright">
-            <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
-          </div>
-        </div>
-        {{/if}}
+          {{/if}}
 
-        {{#if isLatticePKTxn this.type}}
-        <div class="ui icon message transactionRecord">
-          <img class="transactionTypeImage" src="/img/icons/send.png" />
-          <div class="content">
-            <div class="header">
-              Lattice Public Key | {{this.timestamp}}
+          {{#if isTokenCreation this.type}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                Token Creation - {{this.name}} ({{this.symbol}}) | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{this.txhash}}
+              </p>
             </div>
-            <p class="transactionAddress">
-              {{this.txhash}}
-            </p>
+            <div class="floatright">
+               <a href="/tx/{{this.txhash}}">{{this.symbol}} &gt;</a>
+            </div>
           </div>
-          <div class="floatright">
-            <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
-          </div>
-        </div>
-        {{/if}}
+          {{/if}}
 
-        {{#if isMessageTxn this.type}}
-        <div class="ui icon message transactionRecord">
-          <img class="transactionTypeImage" src="/img/icons/send.png" />
-          <div class="content">
-            <div class="header">
-              Message | {{this.timestamp}}
+          {{#if isTokenTransfer this.type}}
+          <div class="ui icon message transactionRecord">
+            {{#if isThisAddress this.from_b32}}
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            {{else}}
+            <img class="transactionTypeImage" src="/img/icons/receive.png" />
+            {{/if}}
+            <div class="content">
+              <div class="header">
+                {{#if isThisAddress this.from_b32}}
+                Sent
+                {{else}}
+                Received
+                {{/if}}
+                 | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{#if isThisAddress this.from_b32}}
+                  {{#each this.outputs}}
+                    {{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}} - {{this.amount}}<br />
+                  {{/each}}
+                {{else}}
+                  {{this.from}}
+                {{/if}}
+              </p>
             </div>
-            <p class="transactionAddress">
-              {{this.txhash}}
-            </p>
+            <div class="floatright">
+              <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from_b32}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} {{this.symbol}} &gt;</a>
+            </div>
           </div>
-          <div class="floatright">
-            <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
-          </div>
-        </div>
-        {{/if}}
+          {{/if}}
 
-        {{#if isDocumentNotarisation this.type}}
-        <div class="ui icon message transactionRecord">
-          <img class="transactionTypeImage" src="/img/icons/send.png" />
-          <div class="content">
-            <div class="header">
-              Document Notarisation | {{this.timestamp}}
+          {{#if isCoinbaseTxn this.type}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/receive.png" />
+            <div class="content">
+              <div class="header">
+                Coinbase Received | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{# if bech32}}{{this.from_b32}}{{else}}{{this.from_hex}}{{/if}}
+              </p>
             </div>
-            <p class="transactionAddress">
-              {{this.txhash}}
-            </p>
+            <div class="floatright">
+              <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
+            </div>
           </div>
-          <div class="floatright">
-            <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+          {{/if}}
+
+          {{#if isSlaveTxn this.type}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                Slave Transaction | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{this.txhash}}
+              </p>
+            </div>
+            <div class="floatright">
+              <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
+            </div>
           </div>
-        </div>
-        {{/if}}
+          {{/if}}
+
+          {{#if isLatticePKTxn this.type}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                Lattice Public Key | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{this.txhash}}
+              </p>
+            </div>
+            <div class="floatright">
+              <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
+          {{#if isMessageTxn this.type}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                Message | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{this.txhash}}
+              </p>
+            </div>
+            <div class="floatright">
+              <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
+          {{#if isDocumentNotarisation this.type}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                Document Notarisation | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{this.txhash}}
+              </p>
+            </div>
+            <div class="floatright">
+              <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+            </div>
+          </div>
+          {{/if}}
 
       {{/each}}
     {{else}}
