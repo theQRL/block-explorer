@@ -607,7 +607,8 @@ Meteor.methods({
             txhash: arr.txhash,
             totalTransferred: output.transaction.explorer.totalTransferred,
             outputs: output.transaction.explorer.outputs,
-            from: output.transaction.explorer.from,
+            from_hex: output.transaction.explorer.from_hex,
+            from_b32: output.transaction.explorer.from_b32,
             ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
             fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
@@ -618,7 +619,8 @@ Meteor.methods({
           thisTxn = {
             type: output.transaction.tx.transactionType,
             txhash: arr.txhash,
-            from: output.transaction.explorer.from,
+            from_hex: output.transaction.explorer.from_hex,
+            from_b32: output.transaction.explorer.from_b32,
             symbol: output.transaction.tx.token.symbol,
             name: output.transaction.tx.token.name,
             decimals: output.transaction.tx.token.decimals,
@@ -634,41 +636,21 @@ Meteor.methods({
           const symbolRequest = {
             query: Buffer.from(Buffer.from(thisTxnHashResponse.transaction.tx.transfer_token.token_txhash).toString('hex'), 'hex'),
           }
-
           const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-          const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-          const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
-
-          // Calculate total transferred, and generate a clean structure to display outputs from
-          let thisTotalTransferred = 0
-          const thisOutputs = []
-          // eslint-disable-next-line
-          _.each(thisTxnHashResponse.transaction.tx.transfer_token.addrs_to, (thisAddress, index) => {
-            const thisOutput = {
-              address: `Q${Buffer.from(thisAddress).toString('hex')}`,
-              // eslint-disable-next-line
-              amount: numberToString(parseInt(thisTxnHashResponse.transaction.tx.transfer_token.amounts[index], 10) / Math.pow(10, thisDecimals)),
-            }
-            thisOutputs.push(thisOutput)
-
-            // Now update total transferred with the corresponding amount from this output
-            thisTotalTransferred +=
-            parseInt(thisTxnHashResponse.transaction.tx.transfer_token.amounts[index], 10)
-          })
-          
-          thisTxnHashResponse.transaction.tx.signature = Buffer.from(thisTxnHashResponse.transaction.tx.signature).toString('hex')
+          const helpersResponse = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, thisTxnHashResponse)
           thisTxn = {
-            type: thisTxnHashResponse.transaction.tx.transactionType,
+            type: helpersResponse.transaction.tx.transactionType,
             txhash: arr.txhash,
-            symbol: thisSymbol,
+            symbol: helpersResponse.transaction.explorer.symbol,
             // eslint-disable-next-line
-            totalTransferred: numberToString(thisTotalTransferred / Math.pow(10, thisDecimals)),
-            outputs: thisOutputs,
-            from: `Q${Buffer.from(thisTxnHashResponse.transaction.addr_from).toString('hex')}`,
-            ots_key: parseInt(thisTxnHashResponse.transaction.tx.signature.substring(0, 8), 16),
-            fee: thisTxnHashResponse.transaction.tx.fee / SHOR_PER_QUANTA,
-            block: thisTxnHashResponse.transaction.header.block_number,
-            timestamp: thisTxnHashResponse.transaction.header.timestamp_seconds,
+            totalTransferred: helpersResponse.transaction.explorer.totalTransferred,
+            outputs: helpersResponse.transaction.explorer.outputs,
+            from_hex: helpersResponse.transaction.explorer.from_hex,
+            from_b32: helpersResponse.transaction.explorer.from_b32,
+            ots_key: parseInt(helpersResponse.transaction.tx.signature.substring(0, 8), 16),
+            fee: helpersResponse.transaction.tx.fee / SHOR_PER_QUANTA,
+            block: helpersResponse.transaction.header.block_number,
+            timestamp: helpersResponse.transaction.header.timestamp_seconds,
           }
 
           result.push(thisTxn)
@@ -677,7 +659,8 @@ Meteor.methods({
             type: output.transaction.tx.transactionType,
             txhash: arr.txhash,
             amount: output.transaction.tx.coinbase.amount / SHOR_PER_QUANTA,
-            from: output.transaction.explorer.from,
+            from_hex: output.transaction.explorer.from_hex,
+            from_b32: output.transaction.explorer.from_b32,
             to: output.transaction.tx.coinbase.addr_to,
             ots_key: '',
             fee: output.transaction.tx.fee / SHOR_PER_QUANTA,
@@ -690,7 +673,8 @@ Meteor.methods({
             type: output.transaction.tx.transactionType,
             txhash: arr.txhash,
             amount: 0,
-            from: output.transaction.explorer.from,
+            from_hex: output.transaction.explorer.from_hex,
+            from_b32: output.transaction.explorer.from_b32,
             to: '',
             ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
             fee: output.transaction.tx.fe,
@@ -703,7 +687,8 @@ Meteor.methods({
             type: output.transaction.tx.transactionType,
             txhash: arr.txhash,
             amount: 0,
-            from: output.transaction.explorer.from,
+            from_hex: output.transaction.explorer.from_hex,
+            from_b32: output.transaction.explorer.from_b32,
             to: '',
             ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
             fee: output.transaction.tx.fee,
@@ -716,7 +701,8 @@ Meteor.methods({
             type: output.transaction.explorer.type,
             txhash: arr.txhash,
             amount: 0,
-            from: output.transaction.explorer.from,
+            from_hex: output.transaction.explorer.from_hex,
+            from_b32: output.transaction.explorer.from_b32,
             to: '',
             ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
             fee: output.transaction.tx.fee,
@@ -729,7 +715,8 @@ Meteor.methods({
             type: output.transaction.explorer.type,
             txhash: arr.txhash,
             amount: 0,
-            from: output.transaction.explorer.from,
+            from_hex: output.transaction.explorer.from_hex,
+            from_b32: output.transaction.explorer.from_b32,
             to: '',
             ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
             fee: output.transaction.tx.fee,
@@ -741,6 +728,11 @@ Meteor.methods({
       } catch (err) {
         console.log(`Error fetching transaction hash in addressTransactions '${arr.txhash}' - ${err}`)
       }
+
+
+
+
+
     })
     
     return result
