@@ -237,8 +237,8 @@ Template.tx.events({
     const txhash = Session.get('txhash').transaction
     const txnHashFunction = txhash.explorer.hash_function
     const txnFileHash = txhash.explorer.hash
-    const txnNotary
-    if(Session.equals('addressFormat', 'bech32')) {
+    let txnNotary
+    if (Session.equals('addressFormat', 'bech32')) {
       txnNotary = txhash.explorer.from_b32
     } else {
       txnNotary = txhash.explorer.from_hex
