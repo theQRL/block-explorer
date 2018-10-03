@@ -84,11 +84,11 @@ const refreshBlocks = () => {
 }
 
 function refreshLasttx() {
-  // First get unconfirmed transactions
-  const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 10 })
-
-  // Now get confirmed transactions
+  // First get confirmed transactions
   const confirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 10 })
+
+  // Now get unconfirmed transactions
+  const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 10 })
 
   // Merge the two together
   const confirmedTxns = makeTxListHumanReadable(confirmed.transactions, true)
