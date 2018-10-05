@@ -6,7 +6,8 @@ import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import './address.html'
 import '../../stylesheets/overrides.css'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
-import { addressForAPI, bytesToString } from '../../../startup/client/index.js'
+import { bytesToString, anyAddressToRaw, hexOrB32 } from '../../../startup/client/index.js'
+import { rawAddressToB32Address } from '@theqrl/explorer-helpers'
 
 let tokensHeld = []
 
@@ -69,7 +70,7 @@ function loadAddressTransactions(txArray) {
 
 const getTokenBalances = (getAddress, callback) => {
   const request = {
-    address: addressForAPI(getAddress),
+    address: anyAddressToRaw(getAddress),
   }
 
   Meteor.call('getAddressState', request, (err, res) => {
@@ -134,14 +135,13 @@ const renderAddressBlock = () => {
   if (!tPage) { tPage = 1 }
   if (aId) {
     const req = {
-      address: addressForAPI(aId),
+      address: anyAddressToRaw(aId),
     }
     Meteor.call('getAddressState', req, (err, res) => {
       if (err) {
         Session.set('address', { error: err, id: aId })
       } else {
         if (res) {
-          res.state.address = `Q${Buffer.from(res.state.address).toString('hex')}`
           res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(9)
           if (!(res.state.address)) {
             res.state.address = aId
@@ -183,8 +183,13 @@ const renderAddressBlock = () => {
 }
 
 Template.address.helpers({
+  bech32() {
+    return Session.equals('addressFormat', 'bech32')
+  },
   address() {
-    return Session.get('address')
+    const address = Session.get('address')
+    address.state.address = hexOrB32(address.state.address)
+    return address
   },
   pages() {
     let ret = []
@@ -214,7 +219,7 @@ Template.address.helpers({
   addressTransactions() {
     try {
       const transactions = []
-      const thisAddress = Session.get('address').state.address
+      const thisAddress = rawAddressToB32Address(Session.get('address').state.address)
       _.each(Session.get('addressTransactions'), (transaction) => {
         // Store modified transaction
         const y = transaction
@@ -230,7 +235,7 @@ Template.address.helpers({
         let thisReceivedAmount = 0
         if ((transaction.type === 'transfer') || (transaction.type === 'transfer_token')) {
           _.each(transaction.outputs, (output) => {
-            if (output.address === thisAddress) {
+            if (output.address_b32 === thisAddress) {
               thisReceivedAmount += parseFloat(output.amount)
             }
           })
@@ -256,7 +261,7 @@ Template.address.helpers({
   },
   isThisAddress(address) {
     try {
-      if (address === Session.get('address').state.address) {
+      if (address === rawAddressToB32Address(Session.get('address').state.address)) {
         return true
       }
       return false
@@ -484,6 +489,18 @@ Template.address.onRendered(() => {
     renderAddressBlock()
   })
 
+  Tracker.autorun(() => {
+    if (Session.equals('addressFormat', 'bech32') || Session.equals('addressFormat', 'hex')) {
+      addressToRender = hexOrB32(Session.get('address').state.address)
+
+      // Re-render identicon
+      jdenticon.update('#identicon', addressToRender)
+      // Re-render QR Code
+      $('.qr-code-container').empty()
+      $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
+    }
+  })
+
   tokensHeld = []
   Session.set('tokensHeld', [])
 
@@ -492,6 +509,8 @@ Template.address.onRendered(() => {
     $('#tokenBalancesLoading').hide()
   })
 
-  // Render identicon
+  // Render identicon (needs to be here for initial load).
+  // Also Session.get('address') is blank at this point
+  $('.qr-code-container').qrcode({ width: 100, height: 100, text: FlowRouter.getParam('aId') })
   jdenticon.update('#identicon', FlowRouter.getParam('aId')) /* eslint no-undef:0 */
 })

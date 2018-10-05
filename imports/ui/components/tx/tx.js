@@ -39,6 +39,9 @@ const renderTxBlock = () => {
 }
 
 Template.tx.helpers({
+  bech32() {
+    return Session.equals('addressFormat', 'bech32')
+  },
   tx() {
     try {
       if (Session.get('txhash').error) {
@@ -110,7 +113,7 @@ Template.tx.helpers({
       return `${numberToString(this.tx.transfer.totalTransferred)} Quanta`
     }
     if (this.tx.transactionType === 'transfer_token') {
-      return `${numberToString(this.tx.transfer_token.totalTransferred)} ${this.tx.transfer_token.tokenSymbol}`
+      return `${numberToString(this.tx.transfer_token.totalTransferred)} ${this.tx.transfer_token.symbol}`
     }
 
     return ''
@@ -234,7 +237,13 @@ Template.tx.events({
     const txhash = Session.get('txhash').transaction
     const txnHashFunction = txhash.explorer.hash_function
     const txnFileHash = txhash.explorer.hash
-    const txnNotary = txhash.explorer.from
+    let txnNotary
+    if (Session.equals('addressFormat', 'bech32')) {
+      txnNotary = txhash.explorer.from_b32
+    } else {
+      txnNotary = txhash.explorer.from_hex
+    }
+
     let txnNotaryDate
     if (txhash.header) {
       const x = moment.unix(txhash.header.timestamp_seconds)
