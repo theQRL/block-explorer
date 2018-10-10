@@ -7,7 +7,7 @@ import './address.html'
 import '../../stylesheets/overrides.css'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 import { bytesToString, anyAddressToRaw, hexOrB32 } from '../../../startup/client/index.js'
-import { rawAddressToB32Address } from '@theqrl/explorer-helpers'
+import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 
 let tokensHeld = []
 
@@ -384,7 +384,7 @@ Template.address.helpers({
   },
   addressValidation() {
     try {
-      const thisAddress = Session.get('address').state.address
+      const thisAddress = rawAddressToHexAddress(Session.get('address').state.address)
       // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
       const { keysConsumed } = Session.get('address').ots
       const validationResult = qrlAddressValdidator.hexString(thisAddress)
