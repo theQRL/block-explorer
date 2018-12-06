@@ -55,7 +55,7 @@ Template.lastblocks.helpers({
     const x = Math.round(this.block_interval)
     return `${x} seconds`
   },
-  reward(rew) {
+  transacted(rew) {
     let r = 'Undetermined'
     try {
       const x = (parseInt(rew, 10) / SHOR_PER_QUANTA).toFixed(9)
