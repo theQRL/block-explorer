@@ -11,18 +11,27 @@ const refreshBlocks = () => {
   const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 14 }
   const response = Meteor.wrapAsync(getLatestData)(request)
 
-
-  // add miner
+  // identify miner and calculate total transacted in block
   response.blockheaders.forEach((value, key) => {
     const req = {
       query: Buffer.from(value.header.block_number.toString()),
     }
     const res = Meteor.wrapAsync(getObject)(req)
+    let totalTransacted = 0
     res.block_extended.extended_transactions.forEach((val) => {
+      totalTransacted += parseInt(val.tx.fee)
+
       if (val.tx.transactionType === 'coinbase') {
         response.blockheaders[key].minedBy = val.tx.coinbase.addr_to
+        totalTransacted += parseInt(val.tx.coinbase.amount)
+      }
+      if(val.tx.transactionType === 'transfer') {
+        val.tx.transfer.amounts.forEach((xferAmount) => {
+          totalTransacted += parseInt(xferAmount)
+        })
       }
     })
+    response.blockheaders[key].totalTransacted = totalTransacted
   })
 
   // Fetch current data
