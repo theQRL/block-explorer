@@ -1,4 +1,4 @@
-import { quantausd, status } from '/imports/api/index.js'
+import { quantausd } from '/imports/api/index.js'
 import './status.html'
 import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 
@@ -14,7 +14,7 @@ Template.status.helpers({
     return price
   },
   marketCap() {
-    const x = status.findOne()
+    const x = Session.get('explorer-status')
     const price = quantausd.findOne().price.toFixed(2)
     const coinsInCirculation = Math.round(parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
     let marketCap = Math.round(price * coinsInCirculation)
@@ -23,16 +23,16 @@ Template.status.helpers({
     return marketCap
   },
   status() {
-    const response = status.findOne()
+    const response = Session.get('explorer-status')
     return response
   },
   uptime() {
-    let x = status.findOne()
+    const x = Session.get('explorer-status')
     const uptime = moment.duration(parseInt(x.uptime_network, 10), 'seconds')
     return moment.duration(uptime, 'seconds').format('D[d] h[h] m[min]')
   },
   emission() {
-    const x = status.findOne()
+    const x = Session.get('explorer-status')
     let r = 'Undetermined'
     try {
       // eslint-disable-next-line
@@ -43,7 +43,7 @@ Template.status.helpers({
     return r
   },
   emission_raw() {
-    const x = status.findOne()
+    const x = Session.get('explorer-status')
     let r = '?'
     try {
       r = (parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
@@ -55,7 +55,7 @@ Template.status.helpers({
     return r
   },
   staked() {
-    const x = status.findOne()
+    const x = Session.get('explorer-status')
     let r = 'Undetermined'
     try {
       r = Math.round((parseFloat(x.coins_atstake) / parseFloat(x.coins_emitted)) * 10000) / 100
@@ -75,7 +75,7 @@ Template.status.helpers({
     return r
   },
   unmined() {
-    const x = status.findOne()
+    const x = Session.get('explorer-status')
     let r = 'Undetermined'
     try {
       r = parseFloat(x.coins_total_supply) - (parseFloat(x.coins_emitted) / SHOR_PER_QUANTA)
@@ -87,7 +87,7 @@ Template.status.helpers({
     return r
   },
   max_block_index() {
-    const x = status.findOne()
+    const x = Session.get('explorer-status')
     let r = 'Undetermined'
     try {
       r = x.node_info.block_height

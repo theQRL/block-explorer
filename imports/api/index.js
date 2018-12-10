@@ -28,3 +28,11 @@ if (Meteor.isServer) {
   Meteor.publish('status', () => status.find())
   Meteor.publish('peerstats', () => peerstats.find())
 }
+
+if (Meteor.isClient) {
+  status.find({}).observe({
+    added: (doc) => {
+      Session.set('explorer-status', doc)
+    },
+  })
+}
