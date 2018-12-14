@@ -78,7 +78,7 @@ td .unbreakable {
 
 .ui.inverted.segment,
 .ui.primary.inverted.segment {
-  background: #1d2951;
+  background: #0d0820;
 }
 
 .footbanner {
@@ -570,14 +570,14 @@ Ellipsis Animation
 
 .rv-vanilla-modal-header {
   padding: 20px;
-  background: #1b1c1d;
+  background: #0d0820;
   border-radius: 4px 4px 0 0;
 }
 
 .rv-vanilla-modal-body {
   padding: 25px 20px 20px;
   overflow: auto;
-  color: #1d2951;
+  color: #0d0820;
   font-family: 'Roboto';
 }
 
@@ -639,7 +639,7 @@ Ellipsis Animation
  padding-top: 10px;
  padding-bottom: 10px;
  color: #fff;
- background: #1b1c1d;
+ background: #0d0820;
  display: block !important;
 }
 
@@ -681,6 +681,10 @@ margin-right: 5% !important;
 }
 .mobile-explorer > div.footer {
   padding-top: 50px !important;
+  color: #a0a0a0 !important;
+}
+.mobile-explorer > div.footer strong {
+  color: #f0f0f0 !important;
 }
 .qr-code-container {
   display: inline;
