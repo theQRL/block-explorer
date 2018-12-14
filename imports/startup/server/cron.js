@@ -183,8 +183,8 @@ function refreshStats() {
   }
   const movingAverage = {
     label: 'Block Time Average (s)',
-    borderColor: '#0A0724',
-    backgroundColor: '#0A0724',
+    borderColor: '#20E7C9',
+    backgroundColor: '#20E7C9',
     fill: false,
     data: [],
     yAxisID: 'y-axis-1',
@@ -193,8 +193,8 @@ function refreshStats() {
   }
   const blockTime = {
     label: 'Block Time (s)',
-    borderColor: '#1EE9CB',
-    backgroundColor: '#1EE9CB',
+    borderColor: '#AAAAAA',
+    backgroundColor: '#AAAAAA',
     fill: false,
     showLine: false,
     data: [],
