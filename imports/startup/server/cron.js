@@ -8,7 +8,7 @@ import helpers from '@theqrl/explorer-helpers'
 
 
 const refreshBlocks = () => {
-  const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 14 }
+  const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 10 }
   const response = Meteor.wrapAsync(getLatestData)(request)
 
   // identify miner and calculate total transacted in block

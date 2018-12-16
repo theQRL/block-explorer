@@ -118,63 +118,6 @@ td .unbreakable {
   width: 100% !important;
 }
 
-/* Mobile */
-@media only screen and (max-width: 767px) {
-    .mobile.hidden,
-    .tablet.only,
-    .computer.only,
-    .large.monitor.only,
-    .widescreen.monitor.only {
-        display: none !important;
-    }
-}
-
-/* Tablet / iPad Portrait */
-@media only screen and (min-width: 768px) and (max-width: 991px) {
-    .mobile.only,
-    .tablet.hidden,
-    .computer.only,
-    .large.monitor.only,
-    .widescreen.monitor.only {
-        display: none !important;
-    }
-}
-
-/* Computer / Desktop / iPad Landscape */
-@media only screen and (min-width: 992px) and (max-width: 1199px) {
-    .mobile.only,
-    .tablet.only,
-    .computer.hidden,
-    .large.monitor.only,
-    .widescreen.monitor.only {
-        display: none !important;
-    }
-}
-
-/* Large Monitor */
-@media only screen and (min-width: 1200px) and (max-width: 1919px) {
-    .mobile.only,
-    .tablet.only,
-    .computer.only,
-    .large.monitor.hidden,
-    .widescreen.monitor.only {
-        display: none !important;
-    }
-}
-
-/* Widescreen Monitor */
-@media only screen and (min-width: 1920px) {
-    .mobile.only,
-    .tablet.only,
-    .computer.only,
-    .large.monitor.only,
-    .widescreen.monitor.hidden  {
-        display: none !important;
-    }
-}
-
-
-
 .main-menu-logo {
   margin-top: 10px;
   margin-bottom: 0px;
@@ -696,28 +639,24 @@ margin-right: 5% !important;
   text-align: right;
 }
 .lastBlocks {
-  padding-top: 0px !important;
+/*  padding-top: 0px !important;
   padding-bottom: 0px !important;
-  padding-left: 10px !important;
+  padding-left: 10px !important;*/
   background: #eee !important;
-  transition: background 0.3s linear;
-  -webkit-transition: background 0.3s linear;
-  -moz-transition: background 0.3s linear;
+  transition: all 0.3s linear;
+  -webkit-transition: all 0.3s linear;
+  -moz-transition: all 0.3s linear;
+
   border-radius: 0px !important;
 }
 .lastBlocks:hover {
-  background: #fff !important;
-}
-.lastBlocks:hover .bl-data {
+  background: #fafafa !important;
   color: #0f0f0f !important;
 }
-.lastBlocks:hover .bl-head {
+.lastBlocks:hover .plain {
   color: #0f0f0f !important;
 }
-.lastBlocks:hover .text-lipstick {
-  color: #dc255d !important;
-}
-.lastBlocks:hover .bl-more {
+.lastBlocks:hover .cyan {
   color: #dc255d !important;
 }
 .miner {
@@ -822,4 +761,57 @@ html {
 }
 .ui.negative.message .close.icon {
   color: #dc255d !important;
+}
+#lastBlocks {
+  max-width: 1288px;
+    min-width: 100px;
+  background: #2E3C5A;
+  color: #fff;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.ofe {
+  font-family: Roboto;
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+.cyan {
+  color: #1FE6C8;
+}
+.plain {
+  color: #fff;
+  font-family: Hack;
+  font-size: 13px;
+}
+.t-c {
+  text-align: center !important;
+}
+.t-l {
+  text-align: left !important;
+}
+.mb-0 {
+  margin-bottom: 0px !important;
+}
+.mt-0 {
+  margin-top: 0px !important;
+}
+.pb-0 {
+  padding-bottom: 0px !important;
+}
+.pt-0 {
+  padding-top: 0px !important;
+}
+.pb-5 {
+  padding-bottom: 5px !important;
+}
+.pl-0 {
+  padding-left: 0px !important;
+}
+.pr-0 {
+  padding-right: 0px !important;
 }
