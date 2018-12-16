@@ -10,7 +10,7 @@
 <br />
 {{#with status}} {{#if error}}
 <div class="ui stackable three column grid">
-  <div class="column">
+  <div class="stretched column">
     <div class="ui icon message statusBoard">
       <div class="content">
         <strong>Status</strong><br />
@@ -21,9 +21,8 @@
   </div>
 </div>
 {{else}}
-<div class="ui stackable three column grid">
-  <div class="stretched row">
-    <div class="column">
+<div class="ui equal width grid">
+    <div class="stretched column">
       <div class="ui message statusBoard">
         <div class="content">
           <strong>Network Status</strong><br />
@@ -37,7 +36,7 @@
         </div>
       </div>
     </div>
-    <div class="column">
+    <div class="stretched column">
       <div class="ui message statusBoard">
         <div class="content">
           <strong>Blocks</strong><br />
@@ -49,7 +48,7 @@
         </div>
       </div>
     </div>
-    <div class="column">
+    <div class="stretched column">
       <div class="ui message statusBoard">
         <div class="content">
           <strong>Coin Supply</strong><br />
@@ -61,7 +60,6 @@
         </div>
       </div>
     </div>
-  </div>
 </div>
 {{/if}} {{/with}}
 

@@ -78,7 +78,7 @@ td .unbreakable {
 
 .ui.inverted.segment,
 .ui.primary.inverted.segment {
-  background: #1d2951;
+  background: #0d0820;
 }
 
 .footbanner {
@@ -117,63 +117,6 @@ td .unbreakable {
 .fullWidth {
   width: 100% !important;
 }
-
-/* Mobile */
-@media only screen and (max-width: 767px) {
-    .mobile.hidden,
-    .tablet.only,
-    .computer.only,
-    .large.monitor.only,
-    .widescreen.monitor.only {
-        display: none !important;
-    }
-}
-
-/* Tablet / iPad Portrait */
-@media only screen and (min-width: 768px) and (max-width: 991px) {
-    .mobile.only,
-    .tablet.hidden,
-    .computer.only,
-    .large.monitor.only,
-    .widescreen.monitor.only {
-        display: none !important;
-    }
-}
-
-/* Computer / Desktop / iPad Landscape */
-@media only screen and (min-width: 992px) and (max-width: 1199px) {
-    .mobile.only,
-    .tablet.only,
-    .computer.hidden,
-    .large.monitor.only,
-    .widescreen.monitor.only {
-        display: none !important;
-    }
-}
-
-/* Large Monitor */
-@media only screen and (min-width: 1200px) and (max-width: 1919px) {
-    .mobile.only,
-    .tablet.only,
-    .computer.only,
-    .large.monitor.hidden,
-    .widescreen.monitor.only {
-        display: none !important;
-    }
-}
-
-/* Widescreen Monitor */
-@media only screen and (min-width: 1920px) {
-    .mobile.only,
-    .tablet.only,
-    .computer.only,
-    .large.monitor.only,
-    .widescreen.monitor.hidden  {
-        display: none !important;
-    }
-}
-
-
 
 .main-menu-logo {
   margin-top: 10px;
@@ -570,14 +513,14 @@ Ellipsis Animation
 
 .rv-vanilla-modal-header {
   padding: 20px;
-  background: #1b1c1d;
+  background: #0d0820;
   border-radius: 4px 4px 0 0;
 }
 
 .rv-vanilla-modal-body {
   padding: 25px 20px 20px;
   overflow: auto;
-  color: #1d2951;
+  color: #0d0820;
   font-family: 'Roboto';
 }
 
@@ -639,7 +582,7 @@ Ellipsis Animation
  padding-top: 10px;
  padding-bottom: 10px;
  color: #fff;
- background: #1b1c1d;
+ background: #0d0820;
  display: block !important;
 }
 
@@ -681,6 +624,10 @@ margin-right: 5% !important;
 }
 .mobile-explorer > div.footer {
   padding-top: 50px !important;
+  color: #a0a0a0 !important;
+}
+.mobile-explorer > div.footer strong {
+  color: #f0f0f0 !important;
 }
 .qr-code-container {
   display: inline;
@@ -692,28 +639,24 @@ margin-right: 5% !important;
   text-align: right;
 }
 .lastBlocks {
-  padding-top: 0px !important;
+/*  padding-top: 0px !important;
   padding-bottom: 0px !important;
-  padding-left: 10px !important;
+  padding-left: 10px !important;*/
   background: #eee !important;
-  transition: background 0.3s linear;
-  -webkit-transition: background 0.3s linear;
-  -moz-transition: background 0.3s linear;
+  transition: all 0.3s linear;
+  -webkit-transition: all 0.3s linear;
+  -moz-transition: all 0.3s linear;
+
   border-radius: 0px !important;
 }
 .lastBlocks:hover {
-  background: #fff !important;
-}
-.lastBlocks:hover .bl-data {
+  background: #fafafa !important;
   color: #0f0f0f !important;
 }
-.lastBlocks:hover .bl-head {
+.lastBlocks:hover .plain {
   color: #0f0f0f !important;
 }
-.lastBlocks:hover .text-lipstick {
-  color: #dc255d !important;
-}
-.lastBlocks:hover .bl-more {
+.lastBlocks:hover .cyan {
   color: #dc255d !important;
 }
 .miner {
@@ -818,4 +761,57 @@ html {
 }
 .ui.negative.message .close.icon {
   color: #dc255d !important;
+}
+#lastBlocks {
+  max-width: 1288px;
+    min-width: 100px;
+  background: #2E3C5A;
+  color: #fff;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.ofe {
+  font-family: Roboto;
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+.cyan {
+  color: #1FE6C8;
+}
+.plain {
+  color: #fff;
+  font-family: Hack;
+  font-size: 13px;
+}
+.t-c {
+  text-align: center !important;
+}
+.t-l {
+  text-align: left !important;
+}
+.mb-0 {
+  margin-bottom: 0px !important;
+}
+.mt-0 {
+  margin-top: 0px !important;
+}
+.pb-0 {
+  padding-bottom: 0px !important;
+}
+.pt-0 {
+  padding-top: 0px !important;
+}
+.pb-5 {
+  padding-bottom: 5px !important;
+}
+.pl-0 {
+  padding-left: 0px !important;
+}
+.pr-0 {
+  padding-right: 0px !important;
 }

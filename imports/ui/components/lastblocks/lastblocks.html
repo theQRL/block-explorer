@@ -1,9 +1,14 @@
 <template name="lastblocks">
-  <h4 class="ui pageHeader header">
-    <div class="content">
-      Latest Blocks
-    </div>
-  </h4>
+  <div class="center aligned ui responsive container grid">
+  <div class="sixteen wide column pb-5 pl-0 pr-0"><h4 class="ui t-l pageHeader header">
+      <div class="t-l content">
+        Latest Blocks
+      </div>
+    </h4>
+  </div>
+</div>
+
+
   {{#with lastblocks}} {{#if error}}
   <div class="ui negative message">
     <i class="close icon"></i>
@@ -13,37 +18,61 @@
     <p>{{error.error}} : {{error.reason}}</p>
   </div>
   {{else}}
-    {{#each lastblocks.blockheaders}}
-    <div class="ui icon message lastBlocks">
-      <div class="ui grid fullWidth">
-        <div class="three wide column bl-first-col">
-
-          <div class="item">
-            <div class="content">
-              <div class="header">
-                <p class="bl-head">Block No.</p>
-                <div class="bl-num"><a href="/block/{{this.header.block_number}}" class="text-lipstick">{{this.header.block_number}}</a></div>
-              </div>
-            </div>
-          </div>
-
+    <div class="center aligned ui grid container">
+  {{#each lastblocks.blockheaders}}
+  <div class="row pt-0 pb-0">
+    <div class="ui message lastBlocks" id="lastBlocks" data-dest="{{this.header.block_number}}">
+      <div class="ui responsive computer only grid container">
+        <div class="two column row pt-0">
+          <div class="ofe column t-l">{{tsReadable}}</div>
+          <div class="right aligned column ofe">{{ts}}</div>
         </div>
-        <div class="nine wide column bl-data">
-          <div class="ui two column grid">
-            <div class="five wide large screen only column">{{tsReadable}}</div>
-            <div class="seven wide column">{{ts}}</div>
+        <div class="cyan row pt-0">
+          <div class="ofe three wide left aligned column">
+            Block<br>
+            <span class="plain">{{this.header.block_number}}</span>
           </div>
-          <!-- <span class="hack breakable"><small>{{this.header.hash_header_hex}}</small></span> -->
-          <div class="hack breakable p0">
-            <div class="miner">{{{miner}}}</div>
+          <div class="ofe two wide t-c column">
+            Transactions<br>
+            <span class="plain">{{numberTransactions}}</span>
+          </div>
+          <div class="ofe two wide t-c column">
+            Quanta<br>
+            <span class="plain">{{transacted(this.totalTransacted)}}</span>
+          </div>
+          <div class="nine wide right aligned ofe column">
+            Mined by<br>
+            <span class="plain">{{{miner}}}</span>
           </div>
         </div>
-        <div class="four wide column bl-data">
-          <strong>{{numberTransactions}}</strong> Transactions<br />
-          <strong>{{transacted(this.totalTransacted)}}</strong> Quanta
+      </div>
+      <div class="ui responsive mobile tablet only grid container pt-0 mt-0">
+        <div class="two column row pt-0">
+          <div class="ofe column t-l">{{tsReadable}}</div>
+          <div class="right aligned column ofe">{{ts}}</div>
+        </div>
+        <div class="cyan row pt-0 pb-0">
+          <div class="ofe four wide left aligned column">
+            Block<br>
+            <span class="plain">{{this.header.block_number}}</span>
+          </div>
+          <div class="ofe four wide t-c column">
+            Transactions<br>
+            <span class="plain">{{numberTransactions}}</span>
+          </div>
+          <div class="ofe four wide t-c column">
+            Quanta<br>
+            <span class="plain">{{transacted(this.totalTransacted)}}</span>
+          </div>
+          <div class="four wide right aligned ofe column">
+            Mined by<br>
+            <span class="plain">{{{miner}}}</span>
+          </div>
         </div>
       </div>
     </div>
-    {{/each}}
+</div>
+  {{/each}}
+    </div>
   {{/if}} {{/with}}
 </template>
