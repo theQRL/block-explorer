@@ -183,6 +183,12 @@ Template.tx.helpers({
     }
     return false
   },
+  isKeybase() {
+    if (this.explorer.type !== 'KEYBASE') {
+      return false
+    }
+    return true
+  },
   isMessage() {
     if (this.explorer.type === 'MESSAGE') {
       return true
@@ -196,7 +202,7 @@ Template.tx.helpers({
     return false
   },
   isNotMessage() {
-    if ((this.explorer.type !== 'MESSAGE') && (this.explorer.type !== 'DOCUMENT_NOTARISATION')) {
+    if ((this.explorer.type !== 'MESSAGE') && (this.explorer.type !== 'DOCUMENT_NOTARISATION') && (this.tx.transactionType !== 'message')) {
       return true
     }
     return false

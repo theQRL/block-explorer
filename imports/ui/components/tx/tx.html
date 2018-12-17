@@ -158,35 +158,53 @@
 
                 <br /><br />
               {{else}}
-                <h3>To</h3>
-                <table class="ui stackable table">
-                  <thead>
-                    <th>Address</th>
-                    <th>Amount</th>
-                  </thead>
-                  <tbody>
-                    {{#if isTransfer}}
-                      {{#each explorer.outputs}}
+                {{#if isKeybase}}
+                    <h4>Keybase Message Transaction</h4>
+                    <table class="ui stackable table">
+                      <thead>
+                        <th>Action</th>
+                        <th>Keybase User ID</th>
+                        <th>Keybase Hash</th>
+                      </thead>
+                      <tbody>
                         <tr>
-                          <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
-                          <td>{{this.amount}}</td>
+                          <td>{{this.explorer.keybaseType}}</td>
+                          <td>{{this.explorer.keybaseUser}}</td>
+                          <td>{{this.explorer.keybaseHex}}</td>
                         </tr>
-                      {{/each}}
-                    {{else if isTokenTransfer}}
-                      {{#each explorer.outputs}}
+                      </tbody>
+                    </table>
+                {{else}}
+                  <h3>To</h3>
+                  <table class="ui stackable table">
+                    <thead>
+                      <th>Address</th>
+                      <th>Amount</th>
+                    </thead>
+                    <tbody>
+                      {{#if isTransfer}}
+                        {{#each explorer.outputs}}
+                          <tr>
+                            <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
+                            <td>{{this.amount}}</td>
+                          </tr>
+                        {{/each}}
+                      {{else if isTokenTransfer}}
+                        {{#each explorer.outputs}}
+                          <tr>
+                            <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
+                            <td>{{this.amount}}</td>
+                          </tr>
+                        {{/each}}
+                      {{else}}
                         <tr>
-                          <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
-                          <td>{{this.amount}}</td>
+                          <td><a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}">{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}</a>  </td>
+                          <td>{{tx.tx.amount}}</td>
                         </tr>
-                      {{/each}}
-                    {{else}}
-                      <tr>
-                        <td><a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}">{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}</a></td>
-                        <td>{{tx.tx.amount}}</td>
-                      </tr>
-                    {{/if}}
-                  </tbody>
-                </table>
+                      {{/if}}
+                    </tbody>
+                  </table>
+                {{/if}}
               {{/if}}
             {{/if}}
           {{/if}}

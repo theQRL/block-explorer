@@ -43,11 +43,11 @@ Template.lastblocks.helpers({
     let ret = ''
     MINING_POOLS.forEach((value) => {
       if (value.address === rawAddressToHexAddress(x)) {
-        ret = `Mined by <a href='${value.link}' target="_blank">${value.name}</a>`
+        ret = `<a href='${value.link}' target="_blank">${value.name}</a>`
       }
     })
     if (ret === '') {
-      return `Mined by ${hexOrB32(x)}`
+      return `${hexOrB32(x)}`
     }
     return ret
   },
@@ -84,8 +84,8 @@ Template.lastblocks.events({
     $('.message').hide()
   },
   'click .lastBlocks': (event) => {
-    const route = event.currentTarget.childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[1].childNodes[3].childNodes[0].getAttribute('href')
-    FlowRouter.go(route)
+    const route = event.currentTarget.getAttribute('data-dest')
+    FlowRouter.go(`/block/${route}`)
   },
 
 })

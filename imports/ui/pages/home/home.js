@@ -21,6 +21,11 @@ function renderChart() {
       type: 'line',
       data: chartLineData,
       options: {
+        legend: {
+          labels: {
+            fontColor: '#ffffff',
+          },
+        },
         tooltips: {
           mode: 'index',
         },
@@ -30,12 +35,17 @@ function renderChart() {
         stacked: false,
         scales: {
           xAxes: [{
+            ticks: {
+              fontColor: '#ffffff',
+            },
             scaleLabel: {
               display: true,
               labelString: 'Block Number',
+              fontColor: '#ffffff',
             },
           }],
           yAxes: [{
+            fontColor: '#ffffff',
             type: 'linear',
             display: true,
             position: 'left',
@@ -43,22 +53,29 @@ function renderChart() {
             ticks: {
               beginAtZero: true,
               max: 150,
+              fontColor: '#20E7C9',
             },
             scaleLabel: {
               display: true,
               labelString: 'Seconds',
+              fontColor: '#ffffff',
             },
           }, {
             type: 'linear',
+            fontColor: '#ffffff',
             display: true,
             position: 'right',
             id: 'y-axis-2',
             gridLines: {
               drawOnChartArea: false,
             },
+            ticks: {
+              fontColor: '#DC255D',
+            },
             scaleLabel: {
               display: true,
               labelString: 'Hashes Per Second',
+              fontColor: '#ffffff',
             },
           }],
         },
