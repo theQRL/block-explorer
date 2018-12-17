@@ -51,6 +51,7 @@ td {
 .value {
   overflow: hidden;
   word-break: break-all;
+  color: #fff !important;
 }
 
 @media (max-width: 519px) {
@@ -145,6 +146,13 @@ td .unbreakable {
   /*margin-bottom: 5px !important;*/
 }
 
+div.ui.celled.horizontal.list {
+  color: #fafafa !important;
+}
+div.ui.celled.horizontal.list > .item {
+  border-left: 1px solid rgba(208,208,208,0.8) !important;
+}
+
 .main-menu-btn {
   font-weight: bold;
   color: #fff !important;
@@ -157,7 +165,13 @@ td .unbreakable {
   width: 40px !important; 
   height: 40px !important; 
 }
+.statistic .label {
+  color: #fafafa !important;
+}
 
+.label > .ui.label {
+  color: #0d0820 !important;
+}
 
 .icon.svg.red {
   fill: red !important;
@@ -230,7 +244,7 @@ td .unbreakable {
 
 /* Main content wrapper for inside a subpage */
 .pageSegment {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
   box-shadow: 0 1px 7px 0 rgba(0, 0, 0, 0.3) !important;
   border-radius: 0px !important;
   border: 0px !important;
@@ -279,15 +293,18 @@ td .unbreakable {
 
 .ui.tabular.menu .active.item {
   border-radius: 0px !important;
-  background-color: #fff !important;
-  color: #0A0724 !important;
-}
-
-.ui.tabular.menu .item {
-  background-color: #0d0820 !important;
+  background-color: #0A0724 !important;
   color: #fff !important;
 }
 
+.ui.tabular.menu .item {
+  background-color: #cacaca !important;
+  color: #0A0724 !important;
+}
+.ui.bottom.attached.tab.segment.active {
+  background-color: #0A0724 !important;
+  color: #fff !important;
+}
 
 
 /* Form Styles */
@@ -322,7 +339,9 @@ input {
   border: solid 1px #0d0820 !important;
   border-radius: 0px !important;
 }
-
+.tab h2 .content {
+  color: #fff !important;
+}
 
 /* Wallet Created Segments */
 .ui.inverted.segment, .ui.primary.inverted.segment {
@@ -633,6 +652,13 @@ margin-right: 5% !important;
 }
 .qr-code-container {
   display: inline;
+  background: #fff !important;
+}
+.qr-code-container canvas {
+  background: #fff !important;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 2px;
 }
 .ta-c {
   text-align: center;
@@ -774,7 +800,22 @@ html {
   margin-left: 0px;
   margin-right: 0px;
 }
-
+#txnPageSegment > div.ui.bottom.attached.tab.segment.active {
+background: rgba(255,255,255,0.1) !important;
+}
+table {
+  border-radius: 0px !important;
+}
+.ui.table {
+  background: rgba(255,255,255,0.6) !important;
+}
+.ui.table th {
+  color: #fafafa !important;
+  background: rgba(0,0,0,0.3) !important;
+}
+.jsonclick {
+  border-radius: 0px !important;
+}
 .ofe {
   font-family: Roboto;
   white-space: nowrap; 
@@ -789,6 +830,9 @@ html {
   color: #fff;
   font-family: Hack;
   font-size: 13px;
+}
+#loadingTransactions {
+  background: rgba(255,255,255,0.9) !important;
 }
 .t-c {
   text-align: center !important;
@@ -816,4 +860,7 @@ html {
 }
 .pr-0 {
   padding-right: 0px !important;
+}
+.f-h {
+  font-family: Hack !important;
 }

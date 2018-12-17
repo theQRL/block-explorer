@@ -9,6 +9,7 @@ export const homechart = new Mongo.Collection('homechart')
 export const quantausd = new Mongo.Collection('quantausd')
 export const status = new Mongo.Collection('status')
 export const peerstats = new Mongo.Collection('peerstats')
+export const blockData = new Mongo.Collection('blockdata')
 
 if (Meteor.isServer) {
   // This code only runs on the server
