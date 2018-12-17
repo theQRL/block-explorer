@@ -1,4 +1,4 @@
-/* eslint no-console: 0 */
+/* eslint no-console: 0, max-len: 0 */
 // server-side startup
 import grpc from 'grpc'
 import tmp from 'tmp'
@@ -6,9 +6,9 @@ import fs from 'fs'
 import helpers from '@theqrl/explorer-helpers'
 import { check } from 'meteor/check'
 import { BrowserPolicy } from 'meteor/qrl:browser-policy'
-import '/imports/api/index.js'
+import { blockData } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js'
-import { EXPLORER_VERSION, SHOR_PER_QUANTA, numberToString, decimalToBinary } from '../both/index.js'
+import { EXPLORER_VERSION, SHOR_PER_QUANTA, decimalToBinary } from '../both/index.js'
 
 // Apply BrowserPolicy
 BrowserPolicy.content.disallowInlineScripts()
@@ -97,21 +97,15 @@ const loadGrpcClient = (endpoint, callback) => {
     } else {
       // Write a new temp file for this grpc connection
       const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
-
       fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
         if (fsErr) {
           console.log(fsErr)
           throw fsErr
         }
-
         const grpcObject = grpc.load(qrlProtoFilePath)
-
         // Create the gRPC Connection
-        qrlClient[endpoint] =
-          new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
-
+        qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
         console.log(`qrlClient loaded for ${endpoint}`)
-
         callback(null, true)
       })
     }
@@ -141,9 +135,7 @@ const connectToNode = (endpoint, callback) => {
           console.log('Error fetching node state for ', endpoint)
           // If it errors, we're going to remove the object and attempt to connect again.
           delete qrlClient[endpoint]
-
           console.log('Attempting re-connection to ', endpoint)
-
           loadGrpcClient(endpoint, (loadErr, loadResponse) => {
             if (loadErr) {
               console.log(`Failed to re-connect to node ${endpoint}`)
@@ -207,12 +199,28 @@ const connectNodes = () => {
   })
 }
 
+const updateAutoIncrement = () => {
+  // update autoincrement
+  blockData.update({ _id: 'autoincrement' }, { $inc: { value: 1 } })
+  // check cache not full
+  if (blockData.findOne({ _id: 'autoincrement' }).value > 2500) {
+    // empty cache and start again
+    blockData.remove({})
+    blockData.insert({ _id: 'autoincrement', value: 1 })
+  }
+}
+
 // Server Startup
 if (Meteor.isServer) {
   Meteor.startup(() => {
     console.log(`QRL Explorer Starting - Version: ${EXPLORER_VERSION}`)
     // Attempt to create connections with all nodes
     connectNodes()
+    try {
+      blockData.insert({ _id: 'autoincrement', value: 0 })
+    } catch (err) {
+      console.log('Autoincrement active on blockData')
+    }
   })
 }
 
@@ -284,8 +292,7 @@ const getAddressState = (request, callback) => {
             newOtsBitfield[thisOtsIndex] = thisBinary[i]
 
             // Check if this is lowest unused key
-            if ((thisBinary[i] === 0) &&
-             ((thisOtsIndex < lowestUnusedOtsKey) || (lowestUnusedOtsKey === -1))) {
+            if ((thisBinary[i] === 0) && ((thisOtsIndex < lowestUnusedOtsKey) || (lowestUnusedOtsKey === -1))) {
               lowestUnusedOtsKey = thisOtsIndex
             }
 
@@ -495,10 +502,23 @@ Meteor.methods({
       const errorMessage = 'Badly formed transaction ID'
       throw new Meteor.Error(errorCode, errorMessage)
     } else {
+      // first check this is not cached
+      const queryResults = blockData.findOne({ txId })
+      if (queryResults !== undefined) {
+        // cached transaction located
+        console.log(`** INFO ** Returning cached data for txhash ${txId}`)
+        return queryResults.formattedData
+      }
+      // not cached so...
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
-      return makeTxHumanReadable(response)
+      const formattedData = makeTxHumanReadable(response)
+      // insert into cache
+      updateAutoIncrement()
+      blockData.insert({ txId, formattedData })
+      // return to client
+      return formattedData
     }
   },
 
@@ -513,6 +533,14 @@ Meteor.methods({
     } else {
       // avoid blocking other method calls from same client - *may need to remove for production*
       this.unblock()
+      // first check this is not cached
+      const queryResults = blockData.findOne({ blockId })
+      if (queryResults !== undefined) {
+        // cached transaction located
+        console.log(`** INFO ** Returning cached data for block ${blockId}`)
+        return queryResults.formattedData
+      }
+
       // asynchronous call to API
       const req = {
         query: Buffer.from(blockId.toString()),
@@ -537,7 +565,7 @@ Meteor.methods({
           adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
           adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
           if (adjusted.transactionType === 'coinbase') {
-            adjusted.coinbase.addr_to = adjusted.coinbase.addr_to
+            // adjusted.coinbase.addr_to = adjusted.coinbase.addr_to <--- FIXME: why was this here?
             // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
             adjusted.transfer = adjusted.coinbase
           }
@@ -549,7 +577,7 @@ Meteor.methods({
             _.each(adjusted.transfer.addrs_to, (thisAddress, index) => {
               totalOutputs += 1
               thisTotalTransferred += parseInt(adjusted.transfer.amounts[index], 10)
-              adjusted.transfer.addrs_to[index] = adjusted.transfer.addrs_to[index]
+              // adjusted.transfer.addrs_to[index] = adjusted.transfer.addrs_to[index] <-- FIXME: why was this here?
             })
             adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
             adjusted.transfer.totalOutputs = totalOutputs
@@ -569,7 +597,7 @@ Meteor.methods({
             _.each(adjusted.transfer_token.addrs_to, (thisAddress, index) => {
               totalOutputs += 1
               thisTotalTransferred += parseInt(adjusted.transfer_token.amounts[index], 10)
-              adjusted.transfer_token.addrs_to[index] = adjusted.transfer_token.addrs_to[index]
+              // adjusted.transfer_token.addrs_to[index] = adjusted.transfer_token.addrs_to[index] <-- FIXME: why was this here?
             })
             // eslint-disable-next-line
             adjusted.transfer_token.totalTransferred = thisTotalTransferred / Math.pow(10, thisDecimals)
@@ -582,6 +610,9 @@ Meteor.methods({
 
         response.block.transactions = transactions
       }
+      // insert into cache
+      updateAutoIncrement()
+      blockData.insert({ blockId, formattedData: response })
       return response
     }
   },
@@ -591,7 +622,6 @@ Meteor.methods({
     console.log(`addressTransactions method called for ${request.tx.length} transactions`)
     const targets = request.tx
     const result = []
-    
     targets.forEach((arr) => {
       const req = { query: Buffer.from(arr.txhash, 'hex') }
       try {
@@ -728,13 +758,7 @@ Meteor.methods({
       } catch (err) {
         console.log(`Error fetching transaction hash in addressTransactions '${arr.txhash}' - ${err}`)
       }
-
-
-
-
-
     })
-    
     return result
   },
 
