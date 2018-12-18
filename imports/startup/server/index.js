@@ -744,6 +744,20 @@ Meteor.methods({
             timestamp: output.transaction.header.timestamp_seconds,
           }
           result.push(thisTxn)
+        } else if (output.transaction.explorer.type === 'KEYBASE') {
+          thisTxn = {
+            type: output.transaction.explorer.type,
+            txhash: arr.txhash,
+            amount: 0,
+            from_hex: output.transaction.explorer.from_hex,
+            from_b32: output.transaction.explorer.from_b32,
+            to: '',
+            ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
+            fee: output.transaction.tx.fee,
+            block: output.transaction.header.block_number,
+            timestamp: output.transaction.header.timestamp_seconds,
+          }
+          result.push(thisTxn)
         } else if (output.transaction.explorer.type === 'DOCUMENT_NOTARISATION') {
           thisTxn = {
             type: output.transaction.explorer.type,
