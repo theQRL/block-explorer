@@ -88,6 +88,7 @@ routepolicy@1.1.0
 semantic:ui@2.3.1
 semantic:ui-data@2.3.1
 session@1.2.0
+simple:json-routes@2.1.0
 socket-stream-client@0.2.2
 spacebars@1.0.15
 spacebars-compiler@1.1.3

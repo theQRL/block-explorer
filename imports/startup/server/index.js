@@ -4,11 +4,15 @@ import grpc from 'grpc'
 import tmp from 'tmp'
 import fs from 'fs'
 import helpers from '@theqrl/explorer-helpers'
+import { JsonRoutes } from 'meteor/simple:json-routes'
 import { check } from 'meteor/check'
 import { BrowserPolicy } from 'meteor/qrl:browser-policy'
 import { blockData } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js'
-import { EXPLORER_VERSION, SHOR_PER_QUANTA, decimalToBinary } from '../both/index.js'
+import {
+  EXPLORER_VERSION, SHOR_PER_QUANTA, decimalToBinary, anyAddressToRaw,
+} from '../both/index.js'
+
 
 // Apply BrowserPolicy
 BrowserPolicy.content.disallowInlineScripts()
@@ -806,4 +810,66 @@ Meteor.methods({
     const res = { colour: 'green' }
     return res
   },
+})
+
+JsonRoutes.add('get', '/api/a/:id', (req, res) => {
+  const aId = req.params.id
+  check(aId, String)
+  let response = {}
+  if (aId.length === 79 && aId.charAt(0).toLowerCase() === 'q') {
+    const request = {
+      address: anyAddressToRaw(aId),
+    }
+    try {
+      response = Meteor.wrapAsync(getAddressState)(request)
+    } catch (e) {
+      response = e
+    }
+  } else {
+    response = { found: false, message: 'Invalid QRL address', code: 3000 }
+  }
+  console.log(response)
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/tx/:id', (req, res) => {
+  const txId = req.params.id
+  check(txId, String)
+  let response = {}
+  if (txId.length === 64) {
+    const request = { query: Buffer.from(txId, 'hex') }
+    try {
+      response = Meteor.wrapAsync(getObject)(request)
+    } catch (e) {
+      response = e
+    }
+  } else {
+    response = { found: false, message: 'Invalid Txhash', code: 3001 }
+  }
+  console.log(response)
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/block/:id', (req, res) => {
+  const txId = req.params.id
+  check(txId, String)
+  let response = {}
+  if (parseInt(txId, 10).toString() === txId) {
+    const request = { query: Buffer.from(txId) }
+    try {
+      response = Meteor.wrapAsync(getObject)(request)
+    } catch (e) {
+      response = e
+    }
+  } else {
+    response = { found: false, message: 'Invalid Block', code: 3002 }
+  }
+  console.log(response)
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
 })
