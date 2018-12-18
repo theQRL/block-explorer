@@ -842,7 +842,6 @@ JsonRoutes.add('get', '/api/a/:id', (req, res) => {
   } else {
     response = { found: false, message: 'Invalid QRL address', code: 3000 }
   }
-  console.log(response)
   JsonRoutes.sendResult(res, {
     data: response,
   })
@@ -853,16 +852,23 @@ JsonRoutes.add('get', '/api/tx/:id', (req, res) => {
   check(txId, String)
   let response = {}
   if (txId.length === 64) {
-    const request = { query: Buffer.from(txId, 'hex') }
-    try {
-      response = Meteor.wrapAsync(getObject)(request)
-    } catch (e) {
-      response = e
+    // first check this is not cached
+    const queryResults = blockData.findOne({ txId })
+    if (queryResults !== undefined) {
+      // cached transaction located
+      response = queryResults.formattedData
+    } else {
+      // cache empty, query grpc
+      const request = { query: Buffer.from(txId, 'hex') }
+      try {
+        response = Meteor.wrapAsync(getObject)(request)
+      } catch (e) {
+        response = e
+      }
     }
   } else {
     response = { found: false, message: 'Invalid Txhash', code: 3001 }
   }
-  console.log(response)
   JsonRoutes.sendResult(res, {
     data: response,
   })
@@ -873,16 +879,23 @@ JsonRoutes.add('get', '/api/block/:id', (req, res) => {
   check(txId, String)
   let response = {}
   if (parseInt(txId, 10).toString() === txId) {
-    const request = { query: Buffer.from(txId) }
-    try {
-      response = Meteor.wrapAsync(getObject)(request)
-    } catch (e) {
-      response = e
+    // first check this is not cached
+    const queryResults = blockData.findOne({ txId })
+    if (queryResults !== undefined) {
+      // cached transaction located
+      response = queryResults.formattedData
+    } else {
+      // cache empty, query grpc
+      const request = { query: Buffer.from(txId) }
+      try {
+        response = Meteor.wrapAsync(getObject)(request)
+      } catch (e) {
+        response = e
+      }
     }
   } else {
     response = { found: false, message: 'Invalid Block', code: 3002 }
   }
-  console.log(response)
   JsonRoutes.sendResult(res, {
     data: response,
   })

@@ -1,5 +1,6 @@
 /* eslint max-len: 0 */
 import { HTTP } from 'meteor/http'
+import { JsonRoutes } from 'meteor/simple:json-routes'
 import sha512 from 'sha512'
 // import helpers from '@theqrl/explorer-helpers'
 /* eslint import/no-cycle: 0 */
@@ -11,7 +12,7 @@ import {
   Blocks, lasttx, homechart, quantausd, status, peerstats,
 } from '/imports/api/index.js'
 
-// import { SHOR_PER_QUANTA, numberToString } from '../both/index.js'
+import { SHOR_PER_QUANTA } from '../both/index.js'
 
 const refreshBlocks = () => {
   const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 10 }
@@ -289,3 +290,18 @@ Meteor.setTimeout(() => {
   refreshQuantaUsd()
   refreshPeerStats()
 }, 5000)
+
+JsonRoutes.add('get', '/api/emission', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const emission = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
+    response = { found: true, emission }
+  } else {
+    response = { found: false, message: 'API error', code: 5001 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
