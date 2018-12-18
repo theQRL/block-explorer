@@ -1,9 +1,8 @@
 import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import '../../stylesheets/overrides.css'
-import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
-import { formatBytes } from '../../../startup/client/index.js'
 import CryptoJS from 'crypto-js'
+import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
@@ -183,6 +182,12 @@ Template.tx.helpers({
     }
     return false
   },
+  isKeybase() {
+    if (this.explorer.type !== 'KEYBASE') {
+      return false
+    }
+    return true
+  },
   isMessage() {
     if (this.explorer.type === 'MESSAGE') {
       return true
@@ -196,7 +201,7 @@ Template.tx.helpers({
     return false
   },
   isNotMessage() {
-    if ((this.explorer.type !== 'MESSAGE') && (this.explorer.type !== 'DOCUMENT_NOTARISATION')) {
+    if ((this.explorer.type !== 'MESSAGE') && (this.explorer.type !== 'DOCUMENT_NOTARISATION') && (this.tx.transactionType !== 'message')) {
       return true
     }
     return false

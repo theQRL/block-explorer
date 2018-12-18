@@ -1,8 +1,8 @@
 <template name="address">
 
 <h3 class="ui pageHeader header">
-  <i class="tiny plus icon"></i>
-  <div class="content wordBreak">
+  <i class="tiny icon"></i>
+  <div class="content wordBreak f-h">
     {{address.state.address}}
   </div>
 </h3>
@@ -32,9 +32,9 @@
           <canvas id="identicon" width="100" height="100"></canvas>
           <div class="qr-code-container"></div>
         </div>
-        <div class="row">
-          <button class="ui button blue" id="clickHelp" data-html="<p>This is an identicon and a QR code.  The identicon is a visual representation of the address: you will be able to recognise this address from the identicon across the QRL network.</p><p>The QR code contains the QRL address for scanning with our mobile wallet app.</p><p>Click the help icon to visit our documentation site to learn more.</p>" data-position="bottom center"><i class="help icon" style="margin-right: 0px"></i> </button>
-        </div>
+        <!-- <div class="row"> -->
+          <!-- <button class="ui button blue" id="clickHelp" data-html="<p>This is an identicon and a QR code.  The identicon is a visual representation of the address: you will be able to recognise this address from the identicon across the QRL network.</p><p>The QR code contains the QRL address for scanning with our mobile wallet app.</p><p>Click the help icon to visit our documentation site to learn more.</p>" data-position="bottom center"><i class="help icon" style="margin-right: 0px"></i> </button> -->
+        <!-- </div> -->
         <div class="row"></div>
       </div>
     </div>
@@ -216,6 +216,23 @@
             <div class="content">
               <div class="header">
                 Message | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress">
+                {{this.txhash}}
+              </p>
+            </div>
+            <div class="floatright">
+              <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
+          {{#if isKeybaseTxn this.type}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                Keybase | {{this.timestamp}}
               </div>
               <p class="transactionAddress">
                 {{this.txhash}}

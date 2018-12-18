@@ -9,6 +9,7 @@ Template.lasttx.onCreated(() => {
 Template.lasttx.helpers({
   lasttx() {
     const res = lasttx.findOne()
+    console.log(res)
     return res
   },
   amount() {
@@ -75,7 +76,7 @@ Template.lasttx.helpers({
     return false
   },
   isMessageTxn(txType) {
-    if (txType === 'MESSAGE') {
+    if (txType.toLowerCase() === 'message') {
       return true
     }
     return false

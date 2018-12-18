@@ -1,14 +1,21 @@
 /* eslint max-len: 0 */
 import { HTTP } from 'meteor/http'
+import { JsonRoutes } from 'meteor/simple:json-routes'
 import sha512 from 'sha512'
-import { getLatestData, getObject, getStats, getPeersStat, apiCall, makeTxHumanReadable, makeTxListHumanReadable } from '/imports/startup/server/index.js'
-import { Blocks, lasttx, homechart, quantausd, status, peerstats } from '/imports/api/index.js'
-import { SHOR_PER_QUANTA, numberToString } from '../both/index.js'
-import helpers from '@theqrl/explorer-helpers'
+// import helpers from '@theqrl/explorer-helpers'
+/* eslint import/no-cycle: 0 */
+import {
+  getLatestData, getObject, getStats, getPeersStat, apiCall, makeTxListHumanReadable,
+} from '/imports/startup/server/index.js'
 
+import {
+  Blocks, lasttx, homechart, quantausd, status, peerstats,
+} from '/imports/api/index.js'
+
+import { SHOR_PER_QUANTA } from '../both/index.js'
 
 const refreshBlocks = () => {
-  const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 14 }
+  const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 10 }
   const response = Meteor.wrapAsync(getLatestData)(request)
 
   // identify miner and calculate total transacted in block
@@ -19,15 +26,15 @@ const refreshBlocks = () => {
     const res = Meteor.wrapAsync(getObject)(req)
     let totalTransacted = 0
     res.block_extended.extended_transactions.forEach((val) => {
-      totalTransacted += parseInt(val.tx.fee)
+      totalTransacted += parseInt(val.tx.fee, 10)
 
       if (val.tx.transactionType === 'coinbase') {
         response.blockheaders[key].minedBy = val.tx.coinbase.addr_to
-        totalTransacted += parseInt(val.tx.coinbase.amount)
+        totalTransacted += parseInt(val.tx.coinbase.amount, 10)
       }
-      if(val.tx.transactionType === 'transfer') {
+      if (val.tx.transactionType === 'transfer') {
         val.tx.transfer.amounts.forEach((xferAmount) => {
-          totalTransacted += parseInt(xferAmount)
+          totalTransacted += parseInt(xferAmount, 10)
         })
       }
     })
@@ -118,7 +125,7 @@ function refreshLasttx() {
       let thisFound = false
       _.each(current.transactions, (currentTxn) => {
         // Find a matching pair of transactions by transaction hash
-        if (currentTxn.tx.transaction_hash == newTxn.tx.transaction_hash) {
+        if (currentTxn.tx.transaction_hash === newTxn.tx.transaction_hash) {
           try {
             // If they both have null header (unconfirmed) there is no change
             if ((currentTxn.header === null) && (newTxn.header === null)) {
@@ -183,8 +190,8 @@ function refreshStats() {
   }
   const movingAverage = {
     label: 'Block Time Average (s)',
-    borderColor: '#0A0724',
-    backgroundColor: '#0A0724',
+    borderColor: '#20E7C9',
+    backgroundColor: '#20E7C9',
     fill: false,
     data: [],
     yAxisID: 'y-axis-1',
@@ -193,8 +200,8 @@ function refreshStats() {
   }
   const blockTime = {
     label: 'Block Time (s)',
-    borderColor: '#1EE9CB',
-    backgroundColor: '#1EE9CB',
+    borderColor: '#AAAAAA',
+    backgroundColor: '#AAAAAA',
     fill: false,
     showLine: false,
     data: [],
@@ -240,12 +247,9 @@ const refreshPeerStats = () => {
 
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
-    response.peers_stat[index].peer_ip =
-      sha512(Buffer.from(peer.peer_ip).toString()).toString('hex').slice(0, 10)
-    response.peers_stat[index].node_chain_state.header_hash =
-      Buffer.from(peer.node_chain_state.header_hash).toString('hex')
-    response.peers_stat[index].node_chain_state.cumulative_difficulty =
-      parseInt(Buffer.from(peer.node_chain_state.cumulative_difficulty).toString('hex'), 16)
+    response.peers_stat[index].peer_ip = sha512(Buffer.from(peer.peer_ip).toString()).toString('hex').slice(0, 10)
+    response.peers_stat[index].node_chain_state.header_hash = Buffer.from(peer.node_chain_state.header_hash).toString('hex')
+    response.peers_stat[index].node_chain_state.cumulative_difficulty = parseInt(Buffer.from(peer.node_chain_state.cumulative_difficulty).toString('hex'), 16)
   })
 
   // Update mongo collection
@@ -286,3 +290,18 @@ Meteor.setTimeout(() => {
   refreshQuantaUsd()
   refreshPeerStats()
 }, 5000)
+
+JsonRoutes.add('get', '/api/emission', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const emission = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
+    response = { found: true, emission }
+  } else {
+    response = { found: false, message: 'API error', code: 5001 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
