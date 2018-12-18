@@ -34,3 +34,4 @@ qrl:browser-policy
 oaf:moment-duration-format
 underscore@1.0.10
 semantic:ui
+simple:json-routes

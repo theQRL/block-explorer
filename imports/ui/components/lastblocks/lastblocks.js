@@ -1,8 +1,7 @@
 import { Blocks } from '/imports/api/index.js'
 import './lastblocks.html'
 import { rawAddressToHexAddress } from '@theqrl/explorer-helpers'
-import { hexOrB32 } from '../../../startup/client/index.js'
-import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+import { SHOR_PER_QUANTA, hexOrB32 } from '../../../startup/both/index.js'
 import { MINING_POOLS } from '../../../startup/client/mining-pools.js'
 
 const addHex = (b) => {

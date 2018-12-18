@@ -389,7 +389,9 @@ input {
 .transactionAddress {
   font-size: 9px;
 }
-
+.transactionRecord:hover .transactionAddress {
+  color: #0f0f0f !important;
+}
 
 .wordBreak {
   word-wrap: break-word;

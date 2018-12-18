@@ -1,7 +1,8 @@
 import JSONFormatter from 'json-formatter-js'
 import './block.html'
-import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
-import { formatBytes, hexOrB32 } from '../../../startup/client/index.js'
+import {
+  numberToString, SHOR_PER_QUANTA, formatBytes, hexOrB32,
+} from '../../../startup/both/index.js'
 
 const calculateEpoch = (blockNumber) => {
   const blocksPerEpoch = 100
