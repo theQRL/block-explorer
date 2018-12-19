@@ -305,3 +305,18 @@ JsonRoutes.add('get', '/api/emission', (req, res) => {
     data: response,
   })
 })
+
+JsonRoutes.add('get', '/api/emission/text', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const emission = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
+    response = emission
+  } else {
+    response = 'Error'
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
