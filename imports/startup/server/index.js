@@ -220,6 +220,9 @@ if (Meteor.isServer) {
     console.log(`QRL Explorer Starting - Version: ${EXPLORER_VERSION}`)
     // Attempt to create connections with all nodes
     connectNodes()
+    // remove cached data whilst cache featureset being iterated
+    // (may want this to persist on restart in time)
+    blockData.remove({})
     try {
       blockData.insert({ _id: 'autoincrement', value: 0 })
     } catch (err) {
@@ -510,17 +513,21 @@ Meteor.methods({
       const queryResults = blockData.findOne({ txId })
       if (queryResults !== undefined) {
         // cached transaction located
-        console.log(`** INFO ** Returning cached data for txhash ${txId}`)
-        return queryResults.formattedData
+        // check if it's an unconfirmed Tx
+        if (queryResults.formattedData.header.block_number !== null) {
+          console.log(`** INFO ** Returning cached data for txhash ${txId}`)
+          return queryResults.formattedData
       }
-      // not cached so...
+      // not cached (or was unconfirmed) so...
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
       const formattedData = makeTxHumanReadable(response)
-      // insert into cache
-      updateAutoIncrement()
-      blockData.insert({ txId, formattedData })
+      if (queryResults.formattedData.header.block_number !== null) {
+        // not unconfirmed so insert into cache
+        updateAutoIncrement()
+        blockData.insert({ txId, formattedData })
+      }
       // return to client
       return formattedData
     }
