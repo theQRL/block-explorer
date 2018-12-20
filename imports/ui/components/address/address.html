@@ -94,7 +94,7 @@
                 {{/if}}
                  | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{#if isThisAddress this.from_b32}}
                   {{#each this.outputs}}
                     {{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}} - {{this.amount}}<br />
@@ -104,7 +104,7 @@
                 {{/if}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
               <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from_b32}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} Quanta &gt;</a>
             </div>
           </div>
@@ -117,11 +117,11 @@
               <div class="header">
                 Token Creation - {{this.name}} ({{this.symbol}}) | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{this.txhash}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
                <a href="/tx/{{this.txhash}}">{{this.symbol}} &gt;</a>
             </div>
           </div>
@@ -143,7 +143,7 @@
                 {{/if}}
                  | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{#if isThisAddress this.from_b32}}
                   {{#each this.outputs}}
                     {{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}} - {{this.amount}}<br />
@@ -153,7 +153,7 @@
                 {{/if}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
               <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from_b32}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} {{this.symbol}} &gt;</a>
             </div>
           </div>
@@ -166,11 +166,11 @@
               <div class="header">
                 Coinbase Received | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{# if bech32}}{{this.from_b32}}{{else}}{{this.from_hex}}{{/if}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
               <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
             </div>
           </div>
@@ -183,11 +183,11 @@
               <div class="header">
                 Slave Transaction | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{this.txhash}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
               <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
             </div>
           </div>
@@ -200,11 +200,11 @@
               <div class="header">
                 Lattice Public Key | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{this.txhash}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
               <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
             </div>
           </div>
@@ -217,11 +217,11 @@
               <div class="header">
                 Message | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{this.txhash}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
               <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
             </div>
           </div>
@@ -234,11 +234,11 @@
               <div class="header">
                 Keybase | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{this.txhash}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
               <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
             </div>
           </div>
@@ -251,11 +251,11 @@
               <div class="header">
                 Document Notarisation | {{this.timestamp}}
               </div>
-              <p class="transactionAddress">
+              <p class="transactionAddress value">
                 {{this.txhash}}
               </p>
             </div>
-            <div class="floatright">
+            <div class="floatright ta-c">
               <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
             </div>
           </div>
