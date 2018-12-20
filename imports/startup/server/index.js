@@ -515,10 +515,12 @@ Meteor.methods({
         // cached transaction located
         // check if it's an unconfirmed Tx
         if (queryResults.formattedData.header.block_number !== null) {
+          // not unconfirmed, return cached data
           console.log(`** INFO ** Returning cached data for txhash ${txId}`)
           return queryResults.formattedData
+        }
       }
-      // not cached (or was unconfirmed) so...
+      // not cached or was unconfirmed so...
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
