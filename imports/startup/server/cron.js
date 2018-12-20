@@ -200,8 +200,8 @@ function refreshStats() {
   }
   const blockTime = {
     label: 'Block Time (s)',
-    borderColor: '#AAAAAA',
-    backgroundColor: '#AAAAAA',
+    borderColor: '#444444',
+    backgroundColor: '#888888',
     fill: false,
     showLine: false,
     data: [],

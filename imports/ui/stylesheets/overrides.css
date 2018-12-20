@@ -416,7 +416,7 @@ input {
   border-radius: 0px !important;
   box-shadow: unset !important;
   border: unset !important;
-  background-image: linear-gradient(193deg, #16437a, #0d0820) !important;
+  background: rgba(255,255,255,0.1) !important;
   background-attachment: fixed !important;
 }
 #myChart {
@@ -766,7 +766,7 @@ margin-right: 5% !important;
   padding: 0px;
 }
 html {
-  background-image: linear-gradient(193deg, #16437a, #0d0820) !important;
+  background-image: linear-gradient(3deg, #16437a, #0d0820) !important;
   background-attachment: fixed !important;
 }
 .ui.message {
