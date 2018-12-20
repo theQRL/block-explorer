@@ -146,6 +146,10 @@ td .unbreakable {
   /*margin-bottom: 5px !important;*/
 }
 
+.tc-w {
+  color: #fff !important;
+}
+
 div.ui.celled.horizontal.list {
   color: #fafafa !important;
 }
