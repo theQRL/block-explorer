@@ -135,6 +135,7 @@ const renderAddressBlock = () => {
   let tPage = FlowRouter.getParam('tPage')
   tPage = parseInt(tPage, 10)
   if (!tPage) { tPage = 1 }
+  // TODO: validate aId before constructing Method call
   if (aId) {
     const req = {
       address: anyAddressToRaw(aId),
@@ -190,8 +191,14 @@ Template.address.helpers({
   },
   address() {
     const address = Session.get('address')
-    address.state.address = hexOrB32(address.state.address)
-    return address
+    if (address !== undefined) {
+      if (address.state !== undefined) {
+        address.state.address = hexOrB32(address.state.address)
+        return address
+      }
+    }
+    // error handling needed here
+    return false
   },
   pages() {
     let ret = []
@@ -474,7 +481,11 @@ Template.address.events({
     window.open('https://docs.theqrl.org', '_blank')
   },
   'click .transactionRecord': (event) => {
-    const route = event.currentTarget.childNodes[5].childNodes[1].getAttribute('href')
+    let route = ''
+    route = event.currentTarget.attributes[0].ownerElement.childNodes[5].children[0].attributes[0].nodeValue
+    if (route.length !== 68) {
+      route = event.currentTarget.lastElementChild.children[0].attributes[0].nodeValue
+    }
     FlowRouter.go(route)
   },
 })
