@@ -14,6 +14,7 @@ body {
 
 .ui.menu {
   margin-bottom: 0;
+  border-radius: 0px !important;
 }
 
 .ui.menu .item {
@@ -37,9 +38,23 @@ body.pushable {
 }
 
 td a {
+  font-family: 'Hack';
   font-weight: normal;
   overflow: auto;
   word-break: break-all;
+  color: #20E7C9;
+}
+td a:hover {
+  color: #dc255d;
+}
+
+.item:not(.menu) a {
+  font-family: 'Hack';
+  color: #20E7C9;
+}
+
+.item a:hover {
+  color: #dc255d;
 }
 
 td {
@@ -656,6 +671,18 @@ margin-right: 5% !important;
 .mobile-explorer > div.footer strong {
   color: #f0f0f0 !important;
 }
+.mobile-explorer .pagination.menu a:not(.icon) {
+  display: none;
+}
+.mobile-explorer .pageSegment > div.ui.bottom.attached.tab.segment.active > table > tfoot > tr > th {
+  background: unset !important;
+}
+.mobile-explorer .pageSegment > div.ui.bottom.attached.tab.segment.active > table > tfoot > tr {
+  box-shadow: unset !important;
+}
+.mobile-explorer .pageSegment > div.ui.bottom.attached.tab.segment.active > table {
+  background: none !important
+}
 .qr-code-container {
   display: inline;
   background: #fff !important;
@@ -813,7 +840,10 @@ table {
   border-radius: 0px !important;
 }
 .ui.table {
-  background: rgba(255,255,255,0.6) !important;
+  background: rgba(255,255,255,0.2) !important;
+}
+.ui.table td {
+  color: #fafafa;
 }
 .ui.table th {
   color: #fafafa !important;

@@ -186,20 +186,20 @@
                         {{#each explorer.outputs}}
                           <tr>
                             <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
-                            <td>{{this.amount}}</td>
+                            <td class="tc-w">{{this.amount}}</td>
                           </tr>
                         {{/each}}
                       {{else if isTokenTransfer}}
                         {{#each explorer.outputs}}
                           <tr>
                             <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
-                            <td>{{this.amount}}</td>
+                            <td class="tc-w">{{this.amount}}</td>
                           </tr>
                         {{/each}}
                       {{else}}
                         <tr>
                           <td><a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}">{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}</a>  </td>
-                          <td>{{tx.tx.amount}}</td>
+                          <td class="tc-w">{{tx.tx.amount}}</td>
                         </tr>
                       {{/if}}
                     </tbody>
