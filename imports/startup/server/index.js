@@ -8,7 +8,7 @@ import { JsonRoutes } from 'meteor/simple:json-routes'
 import { check } from 'meteor/check'
 import { BrowserPolicy } from 'meteor/qrl:browser-policy'
 import { blockData } from '/imports/api/index.js'
-import '/imports/startup/server/cron.js'
+import '/imports/startup/server/cron.js' /* eslint-disable-line */
 import {
   EXPLORER_VERSION, SHOR_PER_QUANTA, decimalToBinary, anyAddressToRaw,
 } from '../both/index.js'
