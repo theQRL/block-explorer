@@ -320,3 +320,107 @@ JsonRoutes.add('get', '/api/emission/text', (req, res) => {
     data: response,
   })
 })
+
+JsonRoutes.add('get', '/api/reward', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const reward = parseFloat(queryResults.block_last_reward) / SHOR_PER_QUANTA
+    response = { found: true, reward }
+  } else {
+    response = { found: false, message: 'API error', code: 5002 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/reward/text', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const reward = parseFloat(queryResults.block_last_reward) / SHOR_PER_QUANTA
+    response = reward
+  } else {
+    response = 'Error'
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/rewardshor', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const reward = parseFloat(queryResults.block_last_reward)
+    response = { found: true, reward }
+  } else {
+    response = { found: false, message: 'API error', code: 5002 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/rewardshor/text', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const reward = parseFloat(queryResults.block_last_reward)
+    response = reward
+  } else {
+    response = 'Error'
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/blockheight', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const blockheight = parseInt(queryResults.node_info.block_height, 10)
+    response = { found: true, blockheight }
+  } else {
+    response = { found: false, message: 'API error', code: 5002 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/blockheight/text', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    const blockheight = parseInt(queryResults.node_info.block_height, 10)
+    response = blockheight
+  } else {
+    response = 'Error'
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/status', (req, res) => {
+  let response = {}
+  const queryResults = status.findOne()
+  if (queryResults !== undefined) {
+    // cached transaction located
+    response = queryResults
+  } else {
+    response = { found: false, message: 'API error', code: 5003 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
