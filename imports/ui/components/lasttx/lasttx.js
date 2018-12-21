@@ -9,7 +9,6 @@ Template.lasttx.onCreated(() => {
 Template.lasttx.helpers({
   lasttx() {
     const res = lasttx.findOne()
-    console.log(res)
     return res
   },
   amount() {
