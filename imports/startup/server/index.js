@@ -514,7 +514,7 @@ Meteor.methods({
       if (queryResults !== undefined) {
         // cached transaction located
         // check if it's an unconfirmed Tx
-        if (queryResults.formattedData.transaction.header.block_number !== null) {
+        if (queryResults.formattedData.transaction.header !== null) {
           // not unconfirmed, return cached data
           console.log(`** INFO ** Returning cached data for txhash ${txId}`)
           return queryResults.formattedData
@@ -525,7 +525,7 @@ Meteor.methods({
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
       const formattedData = makeTxHumanReadable(response)
-      if (formattedData.transaction.header.block_number !== null) {
+      if (formattedData.transaction.header !== null) {
         // not unconfirmed so insert into cache
         updateAutoIncrement()
         blockData.insert({ txId, formattedData })
