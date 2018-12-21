@@ -28,6 +28,7 @@ rules:
   semi: [2, 'never']
   no-unexpected-multiline: 2
   no-throw-literal: 0
+  max-len: 0
   import/no-extraneous-dependencies: 0
   import/no-absolute-path: 0
   # import/no-unresolved: 0

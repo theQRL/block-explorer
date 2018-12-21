@@ -54,4 +54,3 @@ if (Meteor.isCordova) {
   document.addEventListener('resume', () => { Meteor.reconnect() })
   document.addEventListener('pause', () => { createDisconnectTimeout() })
 }
-
