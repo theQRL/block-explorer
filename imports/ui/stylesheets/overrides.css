@@ -35,6 +35,7 @@ body.pushable {
 .ui.label {
   overflow: auto;
   word-break: break-all;
+  border-radius: 0px;
 }
 
 td a {
