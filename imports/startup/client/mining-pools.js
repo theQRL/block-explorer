@@ -1,4 +1,4 @@
-export const MINING_POOLS = [
+const MINING_POOLS = [
   {
     address: 'Q010900411c50a98e65d289b51d9d4dc0f61833c26f2c6c4f3ce4df8e9968d1fcae6f6341392bea',
     email: 'support@qrlpool.org',
@@ -53,4 +53,12 @@ export const MINING_POOLS = [
     link: 'https://fairpool.xyz',
     name: 'FairPool',
   },
+  {
+    address: 'Q01060030d2d22f7c1bc91d056a476ed6d6a02042655d7636c31efbaadfcff40b4a636e719b5b22',
+    email: 'eradev87@gmail.com',
+    link: 'https://supportqrl.com',
+    name: 'supportQRL.com',
+  },
 ]
+
+export { MINING_POOLS as default }
