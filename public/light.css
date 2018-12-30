@@ -180,8 +180,8 @@ div.ui.celled.horizontal.list > .item {
 }
 .main-menu-btn .icon {
   font-weight: bold;
-  color: #000 !important;
-  fill: #000 !important;
+  color: #AFAFAF !important;
+  fill: #AFAFAF !important;
   width: 40px !important; 
   height: 40px !important; 
 }
@@ -250,7 +250,7 @@ div.ui.celled.horizontal.list > .item {
   min-height: 100%;
   padding: 20px;
 
-  background-image: url(/img/dots.png) !important;
+  background-image: url(/img/dots-dark.png) !important;
   background-position: left top !important;
   background-repeat: no-repeat !important;
 }
@@ -374,8 +374,8 @@ input {
 
 /* Transactions */
 .transactionRecord {
-  color: #fafafa !important;
-  background-color: #eee !important;
+  background: #fff !important;
+  color: #0f0f0f !important;
   border-radius: 0px !important;
   padding-left: 1em !important;
   transition: background 0.3s linear;
@@ -383,15 +383,15 @@ input {
   -moz-transition: background 0.3s linear;
 }
 .transactionRecord a {
-  color: #20E7C9 !important;
+  color: #A50B5E !important;
   font-family: Hack !important;
 }
 .transactionRecord:hover a {
   color: #dc255d !important;
 }
 .transactionRecord:hover {
-  background: #fff !important;
-  color: #0f0f0f !important;
+  color: #000 !important;
+  background-color: #fff !important;
 }
 .transactionRecordInternal {
   background-color: #fff !important;
@@ -640,6 +640,7 @@ Ellipsis Animation
 }
 #mainSearch {
   width:400px !important;
+  color: #0F0F0F !important;
 }
 .mobile-explorer > div.ui.selection.floatright > div.ui.icon.fluid.input > input#mainSearch {
     width: 90% !important;
@@ -701,10 +702,8 @@ margin-right: 5% !important;
   text-align: right;
 }
 .lastBlocks {
-/*  padding-top: 0px !important;
-  padding-bottom: 0px !important;
-  padding-left: 10px !important;*/
-  background: #eee !important;
+color: #0f0f0f !important;
+background-color: #fff !important;
   transition: all 0.3s linear;
   -webkit-transition: all 0.3s linear;
   -moz-transition: all 0.3s linear;
@@ -712,8 +711,8 @@ margin-right: 5% !important;
   border-radius: 0px !important;
 }
 .lastBlocks:hover {
-  background: #fafafa !important;
-  color: #0f0f0f !important;
+  color: #000 !important;
+  background-color: #fff !important;
 }
 .lastBlocks:hover .plain {
   color: #0f0f0f !important;
@@ -783,7 +782,7 @@ margin-right: 5% !important;
 }
 .statusBoard {
   /*background: #eee !important;*/
-  color: #fff !important;
+  color: #0f0f0f !important;
 }
 .ui.segment {
   background: #eee;
@@ -798,7 +797,7 @@ margin-right: 5% !important;
   padding: 0px;
 }
 html {
-  background-image: linear-gradient(3deg, #16437a, #0d0820) !important;
+  background-image: linear-gradient(3deg, #F3F3F3, #D5D5D5) !important;
   background-attachment: fixed !important;
 }
 .ui.message {
@@ -810,10 +809,10 @@ html {
 }
 .statusBoard .content strong {
   font-family: Quicksand !important;
-  color: #20E7C9 !important;
+  color: #A50B5E !important;
 }
 .footer a {
-  color: #fafafa !important;
+  color: #0F0F0F !important;
 }
 .ui.negative.message {
   background: #FFFFFF !important;
@@ -861,10 +860,10 @@ table {
   font-size: 14px;
 }
 .cyan {
-  color: #1FE6C8;
+  color: #A50B5E;
 }
 .plain {
-  color: #fff;
+  color: #0f0f0f;
   font-family: Hack;
   font-size: 13px;
 }
@@ -900,4 +899,10 @@ table {
 }
 .f-h {
   font-family: Hack !important;
+}
+.ui.message .header {
+  font-family: 'Roboto' !important;
+}
+.ui {
+    font-family: 'Roboto' !important;
 }

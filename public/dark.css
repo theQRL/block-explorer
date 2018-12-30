@@ -250,7 +250,7 @@ div.ui.celled.horizontal.list > .item {
   min-height: 100%;
   padding: 20px;
 
-  background-image: url(/img/dots.png) !important;
+  background-image: url(/img/dots-light.png) !important;
   background-position: left top !important;
   background-repeat: no-repeat !important;
 }
@@ -900,4 +900,10 @@ table {
 }
 .f-h {
   font-family: Hack !important;
+}
+.ui.message .header {
+  font-family: 'Roboto' !important;
+}
+.ui {
+    font-family: 'Roboto' !important;
 }
