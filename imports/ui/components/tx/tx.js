@@ -1,6 +1,5 @@
 import JSONFormatter from 'json-formatter-js'
 import './tx.html'
-import '../../stylesheets/overrides.css'
 import CryptoJS from 'crypto-js'
 import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
 

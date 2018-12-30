@@ -1,6 +1,7 @@
 import './body.html'
 import './sidebar.html'
 import { EXPLORER_VERSION } from '../../../startup/both/index.js'
+/* global LocalStore */
 
 BlazeLayout.setRoot('body')
 Template.appBody.onRendered(() => {
@@ -43,9 +44,25 @@ Template.appBody.events({
     $('.rv-vanilla-modal-fi').removeClass('rv-vanilla-modal-is-open')
     $('#target-modal').hide()
   },
+  'click #toggleTheme': () => {
+    const x = LocalStore.get('theme')
+    if (x === 'dark') {
+      LocalStore.set('theme', 'light')
+    } else {
+      LocalStore.set('theme', 'dark')
+    }
+    document.location.reload()
+  },
 })
 
 Template.appBody.helpers({
+  logo() {
+    const x = LocalStore.get('theme')
+    if (x === 'light') {
+      return '/img/qrl-logo-dark.png'
+    }
+    return '/img/qrl-logo-white.png'
+  },
   /* Active Menu Item Helpers */
   menuBlocksActive() {
     if (
