@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Quicksand');
-
 body {
   background: unset !important;
 }
@@ -148,7 +146,7 @@ td .unbreakable {
 .logoArea {
   background-color: #dc255d !important;
   color: #000 !important;
-  font-family: 'Quicksand', sans-serif !important;
+  font-family: 'Roboto', sans-serif !important;
   font-weight: bold;
   text-align: center;
   font-size: 24px;
@@ -176,7 +174,7 @@ div.ui.celled.horizontal.list > .item {
 .main-menu-btn {
   font-weight: bold;
   color: #000 !important;
-  font-family: 'Quicksand', sans-serif !important;
+  font-family: 'Roboto', sans-serif !important;
 }
 .main-menu-btn .icon {
   font-weight: bold;
@@ -209,7 +207,7 @@ div.ui.celled.horizontal.list > .item {
   font-weight: bold;
   background-color: #fff !important;
   color: #000 !important;
-  font-family: 'Quicksand', sans-serif !important;
+  font-family: 'Roboto', sans-serif !important;
 }
 .main-menu-btn.active {
   background-color: #6f6f6f !important;
@@ -288,7 +286,7 @@ div.ui.celled.horizontal.list > .item {
   background-color: #0d0820;
   color: #fff;
   margin: 0px !important;
-  font-family: 'Quicksand', sans-serif !important;
+  font-family: 'Roboto', sans-serif !important;
   font-weight: bold !important;
   padding: 10px;
 }
@@ -298,7 +296,7 @@ div.ui.celled.horizontal.list > .item {
 }
 .ui .pageHeader  .content .sub.header {
   color: #fff !important;
-  font-family: 'Quicksand', sans-serif !important;
+  font-family: 'Roboto', sans-serif !important;
 }
 
 
@@ -351,7 +349,7 @@ input {
   box-shadow: 0 1px 7px 0 rgba(0, 0, 0, 0.3) !important;
   color: #fff !important;
   border-radius: 0px !important;
-  font-family: Quicksand !important;
+  font-family: Roboto !important;
   font-size: 14px;
 }
 .ui.button.plain  {
@@ -360,7 +358,7 @@ input {
   border: solid 1px #0d0820 !important;
   color: #0A0724 !important;
   border-radius: 0px !important;
-  font-family: Quicksand !important;
+  font-family: Roboto !important;
   font-size: 14px;
 }
 
@@ -585,7 +583,7 @@ Ellipsis Animation
 }
 
 .rv-vanilla-modal-title {
-  font-family: 'Quicksand';
+  font-family: 'Roboto';
   color: #fff;
   margin: 0;
   font-size: 18px;
@@ -629,7 +627,7 @@ Ellipsis Animation
 }
 
 .mobile-explorer > h4.ui.header, h3.ui.header {
- font-family: Quicksand;
+ font-family: Roboto;
  font-size: 1.5em;
  text-align: center;
  font-weight: 300;
@@ -754,7 +752,7 @@ background-color: #fafafa !important;
       overflow: hidden;
 }
 .bl-num {
-  font-family: Quicksand;
+  font-family: Roboto;
     font-size: 14px;
     font-weight: 500;
     font-style: normal;
@@ -816,7 +814,7 @@ html {
   border-radius: 0px !important;
 }
 .statusBoard .content strong {
-  font-family: Quicksand !important;
+  font-family: Roboto !important;
   color: #A50B5E !important;
 }
 .footer a {
@@ -851,7 +849,7 @@ table {
   background: rgba(255,255,255,0.2) !important;
 }
 .ui.table td {
-  color: #fafafa;
+  color: #0f0f0f;
 }
 .ui.table th {
   color: #fafafa !important;
