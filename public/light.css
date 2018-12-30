@@ -211,6 +211,10 @@ div.ui.celled.horizontal.list > .item {
   color: #000 !important;
   font-family: 'Quicksand', sans-serif !important;
 }
+.main-menu-btn.active {
+  background-color: #6f6f6f !important;
+  color: #000 !important;
+}
 .ui.inverted.menu .active.item:hover {
   color: #000 !important;
 }
@@ -219,6 +223,14 @@ div.ui.celled.horizontal.list > .item {
   background-attachment: fixed !important;
 }
 .main-menu-btn:hover .icon {
+  color: #dc255d !important;
+  fill: #dc255d !important;
+}
+.main-menu-btn.active .icon {
+  color: #fff !important;
+  fill: #fff !important;
+}
+.main-menu-btn.active:hover .icon {
   color: #dc255d !important;
   fill: #dc255d !important;
 }
@@ -276,8 +288,8 @@ div.ui.celled.horizontal.list > .item {
   background-color: #0d0820;
   color: #fff;
   margin: 0px !important;
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 400 !important;
+  font-family: 'Quicksand', sans-serif !important;
+  font-weight: bold !important;
   padding: 10px;
 }
 .ui .pageHeader .icon {
@@ -374,7 +386,7 @@ input {
 
 /* Transactions */
 .transactionRecord {
-  background: #fff !important;
+  background: #fafafa !important;
   color: #0f0f0f !important;
   border-radius: 0px !important;
   padding-left: 1em !important;
@@ -703,7 +715,7 @@ margin-right: 5% !important;
 }
 .lastBlocks {
 color: #0f0f0f !important;
-background-color: #fff !important;
+background-color: #fafafa !important;
   transition: all 0.3s linear;
   -webkit-transition: all 0.3s linear;
   -moz-transition: all 0.3s linear;
@@ -803,10 +815,6 @@ html {
 .ui.message {
   border-radius: 0px !important;
 }
-/*dark theme*/
-.message {
-  background: rgba(255,255,255,0.1) !important;
-}
 .statusBoard .content strong {
   font-family: Quicksand !important;
   color: #A50B5E !important;
@@ -834,7 +842,7 @@ html {
   margin-right: 0px;
 }
 #txnPageSegment > div.ui.bottom.attached.tab.segment.active {
-background: rgba(255,255,255,0.1) !important;
+background: rgba(100,100,100,0.1) !important;
 }
 table {
   border-radius: 0px !important;
