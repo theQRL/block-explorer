@@ -41,7 +41,7 @@ td a {
   font-weight: normal;
   overflow: auto;
   word-break: break-all;
-  color: #20E7C9;
+  color: #A50B5E;
 }
 td a:hover {
   color: #dc255d;
@@ -49,7 +49,7 @@ td a:hover {
 
 .item:not(.menu) a {
   font-family: 'Hack';
-  color: #20E7C9;
+  color: #A50B5E;
 }
 
 .item a:hover {
@@ -165,7 +165,7 @@ td .unbreakable {
 }
 
 div.ui.celled.horizontal.list {
-  color: #fafafa !important;
+  color: #0f0f0f !important;
 }
 div.ui.celled.horizontal.list > .item {
   border-left: 1px solid rgba(208,208,208,0.8) !important;
@@ -184,7 +184,7 @@ div.ui.celled.horizontal.list > .item {
   height: 40px !important; 
 }
 .statistic .label {
-  color: #fafafa !important;
+  color: #0f0f0f !important;
 }
 
 .label > .ui.label {
@@ -287,7 +287,6 @@ div.ui.celled.horizontal.list > .item {
   color: #fff;
   margin: 0px !important;
   font-family: 'Roboto', sans-serif !important;
-  font-weight: bold !important;
   padding: 10px;
 }
 .ui .pageHeader .icon {
@@ -295,7 +294,7 @@ div.ui.celled.horizontal.list > .item {
   padding-top: 0px !important;
 }
 .ui .pageHeader  .content .sub.header {
-  color: #fff !important;
+  color: #0f0f0f !important;
   font-family: 'Roboto', sans-serif !important;
 }
 
@@ -332,8 +331,8 @@ div.ui.celled.horizontal.list > .item {
   color: #0A0724 !important;
 }
 .ui.bottom.attached.tab.segment.active {
-  background-color: #0A0724 !important;
-  color: #fff !important;
+  background-color: #fafafa !important;
+  color: #0f0f0f !important;
 }
 
 
@@ -370,7 +369,7 @@ input {
   border-radius: 0px !important;
 }
 .tab h2 .content {
-  color: #fff !important;
+  color: #0f0f0f !important;
 }
 
 /* Wallet Created Segments */
@@ -762,7 +761,7 @@ background-color: #fafafa !important;
     text-align: center;
 }
 .text-lipstick {
-  color: #20E7C9 !important;
+  color: #dc255d !important;
 }
 .bl-data {
   font-family: Roboto;
