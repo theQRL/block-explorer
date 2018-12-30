@@ -16,12 +16,15 @@ import {
 
 // Apply BrowserPolicy
 BrowserPolicy.content.disallowInlineScripts()
+BrowserPolicy.content.allowStyleOrigin('cdnjs.cloudflare.com')
 BrowserPolicy.content.allowStyleOrigin('fonts.googleapis.com')
 BrowserPolicy.content.allowStyleOrigin('cdn.jsdelivr.net')
 BrowserPolicy.content.allowFontOrigin('fonts.gstatic.com')
+BrowserPolicy.content.allowFontOrigin('cdnjs.cloudflare.com')
 BrowserPolicy.content.allowFontOrigin('cdn.jsdelivr.net')
 BrowserPolicy.content.allowScriptOrigin('cdn.jsdelivr.net')
-BrowserPolicy.content.allowFontDataUrl()
+BrowserPolicy.content.allowScriptOrigin('cdnjs.cloudflare.com')
+BrowserPolicy.content.allowFontDataUrl('cdnjs.cloudflare.com')
 
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file

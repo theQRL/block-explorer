@@ -5,7 +5,6 @@ import JSONFormatter from 'json-formatter-js'
 import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import './address.html'
-import '../../stylesheets/overrides.css'
 import {
   bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA,
 } from '../../../startup/both/index.js'
