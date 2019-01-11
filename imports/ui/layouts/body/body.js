@@ -1,6 +1,8 @@
 import './body.html'
 import './sidebar.html'
 import { EXPLORER_VERSION } from '../../../startup/both/index.js'
+import { renderChart } from '../../pages/home/home.js'
+
 /* global LocalStore */
 
 const updateStyleSheet = (filename) => {
@@ -60,7 +62,7 @@ Template.appBody.events({
     $('.rv-vanilla-modal-fi').removeClass('rv-vanilla-modal-is-open')
     $('#target-modal').hide()
   },
-  'click #toggleTheme': () => {
+  'click .themeToggle': () => {
     try {
       const x = LocalStore.get('theme')
       if (x === 'dark') {
@@ -79,6 +81,17 @@ Template.appBody.events({
         updateStyleSheet('light')
       }
     }
+    // re-render chart
+    const h = $('#statusSegment').height()
+    const canvas = $('canvas')
+    const newWidth = canvas.parent().width()
+    const newHeight = canvas.parent().height() // eslint-disable-line
+    canvas.prop({
+      width: newWidth,
+      height: h,
+    })
+    $('#chart').parent().height(h)
+    renderChart()
   },
 })
 
