@@ -3,7 +3,12 @@
 body {
   background: unset !important;
 }
-
+h3, button {
+  font-family: 'Roboto' !important;
+}
+pre {
+  font-family: 'Hack' !important;
+}
 .pushable {
   background: #f3f3f3 !important;
 }
@@ -828,7 +833,7 @@ html {
   max-width: 1288px;
     min-width: 100px;
   background: #2E3C5A;
-  color: #fff;
+  color: #fff !important;
   margin-top: 10px;
   margin-bottom: 10px;
   margin-left: 0px;
@@ -868,6 +873,12 @@ table {
   font-family: Hack;
   font-size: 13px;
 }
+.plain-r {
+  color: #fff !important;
+}
+.lastBlocks:hover .plain-r {
+  color: #000 !important;
+}
 #loadingTransactions {
   background: rgba(255,255,255,0.9) !important;
 }
@@ -906,4 +917,7 @@ table {
 }
 .ui:not(.icon) {
     font-family: 'Roboto' !important;
+}
+.ui.small.basic.grey.icon.button.themeToggle {
+  color: #fafafa !important;
 }
