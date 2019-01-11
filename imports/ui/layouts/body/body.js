@@ -60,7 +60,7 @@ Template.appBody.events({
     $('.rv-vanilla-modal-fi').removeClass('rv-vanilla-modal-is-open')
     $('#target-modal').hide()
   },
-  'click #toggleTheme': () => {
+  'click .themeToggle': () => {
     try {
       const x = LocalStore.get('theme')
       if (x === 'dark') {
