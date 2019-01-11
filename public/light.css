@@ -944,3 +944,9 @@ table {
 .ui.small.basic.grey.icon.button.themeToggle {
   color: #0f0f0f !important;
 }
+.plain a {
+  color: #4183c4 !important;
+}
+.lastBlocks:hover .plain a{
+  color: #0E5091 !important;
+}
