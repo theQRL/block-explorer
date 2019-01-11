@@ -1,7 +1,25 @@
 import './body.html'
 import './sidebar.html'
 import { EXPLORER_VERSION } from '../../../startup/both/index.js'
+import { renderChart } from '../../pages/home/home.js'
+
 /* global LocalStore */
+
+const updateStyleSheet = (filename) => {
+  const newstylesheet = `${filename}.css`
+  if ($('#dynamic_css').length === 0) {
+    $('head').append('<link>')
+    const css = $('head').children(':last')
+    css.attr({
+      id: 'dynamic_css',
+      rel: 'stylesheet',
+      type: 'text/css',
+      href: newstylesheet,
+    })
+  } else {
+    $('#dynamic_css').attr('href', newstylesheet)
+  }
+}
 
 BlazeLayout.setRoot('body')
 Template.appBody.onRendered(() => {
@@ -44,14 +62,36 @@ Template.appBody.events({
     $('.rv-vanilla-modal-fi').removeClass('rv-vanilla-modal-is-open')
     $('#target-modal').hide()
   },
-  'click #toggleTheme': () => {
-    const x = LocalStore.get('theme')
-    if (x === 'dark') {
-      LocalStore.set('theme', 'light')
-    } else {
-      LocalStore.set('theme', 'dark')
+  'click .themeToggle': () => {
+    try {
+      const x = LocalStore.get('theme')
+      if (x === 'dark') {
+        LocalStore.set('theme', 'light')
+        updateStyleSheet('light')
+      } else {
+        LocalStore.set('theme', 'dark')
+        updateStyleSheet('dark')
+      }
+    } catch (e) {
+      // localstore not supported so work out what theme is in use and switch accordingly
+      if ($('.main-content').css('background-image').indexOf('dark') > 0) {
+        // light theme in use
+        updateStyleSheet('dark')
+      } else {
+        updateStyleSheet('light')
+      }
     }
-    document.location.reload()
+    // re-render chart
+    const h = $('#statusSegment').height()
+    const canvas = $('canvas')
+    const newWidth = canvas.parent().width()
+    const newHeight = canvas.parent().height() // eslint-disable-line
+    canvas.prop({
+      width: newWidth,
+      height: h,
+    })
+    $('#chart').parent().height(h)
+    renderChart()
   },
 })
 
