@@ -932,3 +932,6 @@ table {
 .ui:not(.icon) {
     font-family: 'Roboto' !important;
 }
+.snapshot__loading-info {
+  color: #0f0f0f !important;
+}

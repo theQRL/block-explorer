@@ -2,6 +2,7 @@ import { homechart } from '/imports/api/index.js'
 
 import './home.html'
 import '../../components/status/status.js'
+/* global LocalStore */
 
 let chartIntervalHandle
 
@@ -14,6 +15,13 @@ function renderChart() {
     // Hide loading svg
     $('#chartLoading').hide()
 
+    // determine colour to use for labels
+    let graphLabels = '#FFFFFF'
+    const x = LocalStore.get('theme')
+    if (x === 'light') {
+      graphLabels = '#000000'
+    }
+
     // Draw chart
     const ctx = document.getElementById('myChart').getContext('2d')
     // eslint-disable-next-line
@@ -23,7 +31,7 @@ function renderChart() {
       options: {
         legend: {
           labels: {
-            fontColor: '#ffffff',
+            fontColor: graphLabels,
           },
         },
         tooltips: {
@@ -36,16 +44,16 @@ function renderChart() {
         scales: {
           xAxes: [{
             ticks: {
-              fontColor: '#ffffff',
+              fontColor: graphLabels,
             },
             scaleLabel: {
               display: true,
               labelString: 'Block Number',
-              fontColor: '#ffffff',
+              fontColor: graphLabels,
             },
           }],
           yAxes: [{
-            fontColor: '#ffffff',
+            fontColor: graphLabels,
             type: 'linear',
             display: true,
             position: 'left',
@@ -58,11 +66,11 @@ function renderChart() {
             scaleLabel: {
               display: true,
               labelString: 'Seconds',
-              fontColor: '#ffffff',
+              fontColor: graphLabels,
             },
           }, {
             type: 'linear',
-            fontColor: '#ffffff',
+            fontColor: graphLabels,
             display: true,
             position: 'right',
             id: 'y-axis-2',
@@ -75,7 +83,7 @@ function renderChart() {
             scaleLabel: {
               display: true,
               labelString: 'Hashes Per Second',
-              fontColor: '#ffffff',
+              fontColor: graphLabels,
             },
           }],
         },
@@ -85,6 +93,7 @@ function renderChart() {
     // Clear Interval
     Meteor.clearInterval(chartIntervalHandle)
   }
+  return true
 }
 
 Template.appHome.onCreated(() => {
