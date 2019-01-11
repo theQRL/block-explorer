@@ -2,7 +2,12 @@
 body {
   background: unset !important;
 }
-
+h3 {
+  font-family: Roboto;
+}
+pre {
+  font-family: Hack;
+}
 .pushable {
   background: #3f3f3f !important;
 }
@@ -204,25 +209,6 @@ div.ui.celled.horizontal.list > .item {
 
 
 /* Hover style for menu items */
-.mobile-explorer .menu .item {
-  color: #000 !important;
-}
-.mobile-explorer .menu .item.active {
-  background-color: #6f6f6f !important;
-  color: #000 !important;
-}
-.mobile-explorer .menu .item:hover .icon {
-  color: #dc255d !important;
-  fill: #dc255d !important;
-}
-.mobile-explorer .menu .item:hover .icon {
-  color: #fff !important;
-  fill: #fff !important;
-}
-.mobile-explorer .menu .item:hover .icon {
-  color: #dc255d !important;
-  fill: #dc255d !important;
-}
 .main-menu-btn:hover {
   font-weight: bold;
   background-color: #fff !important;
@@ -362,6 +348,10 @@ input {
   background-color: #E3E1E3 !important;
   color: #0A0724 !important;
   border-radius: 0px !important;
+}
+.ui.label.red {
+  background-color: #dc255d !important;
+  color: #fff !important;
 }
 
 .ui.button.red {
@@ -715,6 +705,17 @@ margin-right: 5% !important;
 .mobile-explorer .pageSegment > div.ui.bottom.attached.tab.segment.active > table {
   background: none !important
 }
+.mobile-explorer .menu .item {
+  color: #000 !important;
+}
+.mobile-explorer .menu .item.active {
+  background-color: #6f6f6f !important;
+  color: #000 !important;
+}
+.mobile-explorer .ui.menu.four.item .item:hover .icon {
+  color: #dc255d !important;
+  fill: #dc255d !important;
+}
 .qr-code-container {
   display: inline;
   background: #fff !important;
@@ -853,7 +854,7 @@ html {
   max-width: 1288px;
     min-width: 100px;
   background: #2E3C5A;
-  color: #fff;
+  color: #000 !important;
   margin-top: 10px;
   margin-bottom: 10px;
   margin-left: 0px;
@@ -877,6 +878,8 @@ table {
 }
 .jsonclick {
   border-radius: 0px !important;
+  background-color: #DC255D !important;
+  color: #fff !important;
 }
 .ofe {
   font-family: Roboto;
@@ -892,6 +895,9 @@ table {
   color: #0f0f0f;
   font-family: Hack;
   font-size: 13px;
+}
+.plain-r {
+  color: #0f0f0f !important;
 }
 #loadingTransactions {
   background: rgba(255,255,255,0.9) !important;
@@ -933,5 +939,8 @@ table {
     font-family: 'Roboto' !important;
 }
 .snapshot__loading-info {
+  color: #0f0f0f !important;
+}
+.ui.small.basic.grey.icon.button.themeToggle {
   color: #0f0f0f !important;
 }

@@ -1,19 +1,19 @@
 <template name="mobile">
   <div class="mobile-explorer">
 <div class="ui labeled icon bottom fixed four item inverted menu">
-  <a class="item {{menuStatusActive}}" href="/status">
+  <a class="main-menu-btn item {{menuStatusActive}}" href="/status">
     <i class="share alternate icon"></i>
     Status
   </a>
-  <a class="item {{menuTransactionsActive}}" href="/lasttx">
+  <a class="main-menu-btn item {{menuTransactionsActive}}" href="/lasttx">
     <i class="send mail icon"></i>
     Transactions
   </a>
-  <a class="item {{menuBlocksActive}}" href="/lastblocks">
+  <a class="main-menu-btn item {{menuBlocksActive}}" href="/lastblocks">
     <i class="cube icon"></i>
     Blocks
   </a>
-  <a class="item {{menuSearchActive}}" href="/search">
+  <a class="main-menu-btn item {{menuSearchActive}}" href="/search">
     <i class="search icon"></i>
     Search
   </a>
@@ -27,7 +27,7 @@
                 </a>
                 <br />           
                 <button class="ui small basic grey icon button themeToggle">
-                  <i class="ui moon icon"></i> Toggle theme
+                  <i class="ui {{theme}} icon"></i> Toggle theme
                 </button>
                 <br />
                 <div class="ui horizontal small divided link list">
