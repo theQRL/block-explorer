@@ -6,7 +6,7 @@ import '../../components/status/status.js'
 
 let chartIntervalHandle
 
-function renderChart() {
+export function renderChart() {
   // Get Chart data from Mongo
   const chartLineData = homechart.findOne()
 
