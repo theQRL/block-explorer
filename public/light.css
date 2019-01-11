@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
 body {
   background: unset !important;
 }
@@ -287,6 +288,7 @@ div.ui.celled.horizontal.list > .item {
   color: #fff;
   margin: 0px !important;
   font-family: 'Roboto', sans-serif !important;
+  font-weight: 300 !important;
   padding: 10px;
 }
 .ui .pageHeader .icon {
@@ -908,6 +910,6 @@ table {
 .ui.message .header {
   font-family: 'Roboto' !important;
 }
-.ui {
+.ui:not(.icon) {
     font-family: 'Roboto' !important;
 }
