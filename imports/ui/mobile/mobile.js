@@ -74,7 +74,7 @@ Template.mobile.helpers({
     return ''
   },
   menuStatusActive() {
-    if (FlowRouter.getRouteName() === 'Status.home') {
+    if ((FlowRouter.getRouteName() === 'Status.home') || (FlowRouter.getRouteName() === 'App.home')) {
       return 'active'
     }
     return ''
