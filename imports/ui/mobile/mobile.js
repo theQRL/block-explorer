@@ -3,7 +3,7 @@ import { EXPLORER_VERSION } from '../../startup/both/index.js'
 /* global LocalStore */
 
 const updateStyleSheet = (filename) => {
-  const newstylesheet = `${filename}.css`
+  const newstylesheet = `/${filename}.css`
   if ($('#dynamic_css').length === 0) {
     $('head').append('<link>')
     const css = $('head').children(':last')

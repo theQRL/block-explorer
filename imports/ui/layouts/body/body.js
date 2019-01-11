@@ -6,7 +6,7 @@ import { renderChart } from '../../pages/home/home.js'
 /* global LocalStore */
 
 const updateStyleSheet = (filename) => {
-  const newstylesheet = `${filename}.css`
+  const newstylesheet = `/${filename}.css`
   if ($('#dynamic_css').length === 0) {
     $('head').append('<link>')
     const css = $('head').children(':last')
