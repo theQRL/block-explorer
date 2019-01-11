@@ -204,25 +204,6 @@ div.ui.celled.horizontal.list > .item {
 
 
 /* Hover style for menu items */
-.mobile-explorer .menu .item {
-  color: #000 !important;
-}
-.mobile-explorer .menu .item.active {
-  background-color: #6f6f6f !important;
-  color: #000 !important;
-}
-.mobile-explorer .menu .item:hover .icon {
-  color: #dc255d !important;
-  fill: #dc255d !important;
-}
-.mobile-explorer .menu .item:hover .icon {
-  color: #fff !important;
-  fill: #fff !important;
-}
-.mobile-explorer .menu .item:hover .icon {
-  color: #dc255d !important;
-  fill: #dc255d !important;
-}
 .main-menu-btn:hover {
   font-weight: bold;
   background-color: #fff !important;
@@ -714,6 +695,17 @@ margin-right: 5% !important;
 }
 .mobile-explorer .pageSegment > div.ui.bottom.attached.tab.segment.active > table {
   background: none !important
+}
+.mobile-explorer .menu .item {
+  color: #000 !important;
+}
+.mobile-explorer .menu .item.active {
+  background-color: #6f6f6f !important;
+  color: #000 !important;
+}
+.mobile-explorer .ui.menu.four.item .item:hover .icon {
+  color: #dc255d !important;
+  fill: #dc255d !important;
 }
 .qr-code-container {
   display: inline;
