@@ -1,12 +1,10 @@
 <template name="lastblocks">
-  <div class="center aligned ui responsive container grid">
-  <div class="sixteen wide column pb-5 pl-0 pr-0"><h4 class="ui t-l pageHeader header">
-      <div class="t-l content">
-        Latest Blocks
-      </div>
-    </h4>
+<h4 class="ui pageHeader header">
+  <div class="content">
+    Latest Blocks
   </div>
-</div>
+</h4>
+
 
 
   {{#with lastblocks}} {{#if error}}
@@ -18,9 +16,9 @@
     <p>{{error.error}} : {{error.reason}}</p>
   </div>
   {{else}}
-    <div class="center aligned ui grid container">
+    
   {{#each lastblocks.blockheaders}}
-  <div class="row pt-0 pb-0">
+ 
     <div class="ui message lastBlocks" id="lastBlocks" data-dest="{{this.header.block_number}}">
       <div class="ui responsive computer only grid container">
         <div class="two column row pt-0">
@@ -71,8 +69,8 @@
         </div>
       </div>
     </div>
-</div>
+
   {{/each}}
-    </div>
+ 
   {{/if}} {{/with}}
 </template>
