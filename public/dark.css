@@ -922,8 +922,8 @@ table {
   color: #fafafa !important;
 }
 .plain a {
-  color: #f4bfcf;
+  color: #f4bfcf !important;
 }
 .lastBlocks:hover .plain a{
-  color: #4183c4;
+  color: #4183c4 !important;
 }
