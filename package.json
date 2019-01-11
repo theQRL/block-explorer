@@ -1,6 +1,6 @@
 {
   "name": "block-explorer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "QRL block explorer",
   "main": "index.js",
   "dependencies": {
@@ -32,7 +32,7 @@
     "QRL",
     "blockchain"
   ],
-  "author": "JP Lomas",
+  "author": "QRL contributors",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/theQRL/block-explorer/issues"
