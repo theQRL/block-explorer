@@ -2,6 +2,8 @@
 import './routes.js'
 import { EXPLORER_VERSION } from '../both/index.js'
 
+global.Buffer = global.Buffer || require('buffer').Buffer // eslint-disable-line
+
 // Developer note console messages
 /* eslint-disable no-console */
 console.log('block-explorer - ', EXPLORER_VERSION)

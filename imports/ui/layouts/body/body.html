@@ -24,6 +24,12 @@
         <i class="send outline icon"></i>
         Wallet
       </a>
+      <!-- 
+      Possibly too large to have here
+      <a class="item main-menu-btn themeToggle">
+        <i class="moon icon"></i>
+        Toggle theme
+      </a> -->
       <a class="item main-menu-btn sidebarConnectionStatus">
         <i class="{{connectionStatus.colour}} signal icon"></i>
       </a>
@@ -51,12 +57,15 @@
             <div class="footer">
               <div class="ui center aligned container">
                 <a href="/">
-                  <img class="footerLogo" src="/img/qrl-logo-white.png">
+                  <img class="footerLogo" src="{{logo}}">
                 </a>
                 <br />
+                <button class="ui small basic grey icon button themeToggle">
+                  <i class="ui {{theme}} icon"></i> Toggle theme
+                </button>
+                <br />
                 <div class="ui horizontal small divided link list">
-                  <a class="item" target="_blank" href="https://www.theqrl.org/">theQRL.org</a>
-                  <a class="item" target="_blank" href="https://www.theqrl.org/whitepaper/QRL_whitepaper.pdf">White Paper</a>
+                  <a class="item" target="_blank" href="https://theqrl.org/">theQRL.org</a>
                   <a class="item" target="_blank" href="https://github.com/theQRL">Github</a>
                   <a class="item" target="_blank" href="https://github.com/theQRL/block-explorer/issues">Found a Problem?</a>
                   <a class="item" target="_blank" href="https://github.com/theQRL/block-explorer">qrl-explorer v{{qrlExplorerVersion}}</a>
