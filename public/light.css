@@ -204,6 +204,25 @@ div.ui.celled.horizontal.list > .item {
 
 
 /* Hover style for menu items */
+.mobile-explorer .menu .item {
+  color: #000 !important;
+}
+.mobile-explorer .menu .item.active {
+  background-color: #6f6f6f !important;
+  color: #000 !important;
+}
+.mobile-explorer .menu .item:hover .icon {
+  color: #dc255d !important;
+  fill: #dc255d !important;
+}
+.mobile-explorer .menu .item:hover .icon {
+  color: #fff !important;
+  fill: #fff !important;
+}
+.mobile-explorer .menu .item:hover .icon {
+  color: #dc255d !important;
+  fill: #dc255d !important;
+}
 .main-menu-btn:hover {
   font-weight: bold;
   background-color: #fff !important;
@@ -682,7 +701,7 @@ margin-right: 5% !important;
   color: #a0a0a0 !important;
 }
 .mobile-explorer > div.footer strong {
-  color: #f0f0f0 !important;
+  color: #0f0f0f !important;
 }
 .mobile-explorer .pagination.menu a:not(.icon) {
   display: none;
