@@ -46,12 +46,27 @@ Template.address.helpers({
   },
 })
 
+Template.address.events({
+  'click .meta': () => {
+    if ($('.meta').hasClass('dropdown-toggle')) {
+      $('.meta').removeClass('dropdown-toggle')
+      $('.toggle').show()
+    } else {
+      $('.meta').addClass('dropdown-toggle')
+      $('.toggle').hide()
+    }
+  },
+})
+
 Template.address.onRendered(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('address', {})
     Session.set('loading', true)
-    $('#blockjson').html('')
+    $('#addressjson').html('')
+    $('.data').addClass('loaded')
+    $('.meta').addClass('dropdown-toggle')
+    $('.toggle').hide()
     // Session.set('qrl', 0)
     // Session.set('status', {})
     renderAddress()

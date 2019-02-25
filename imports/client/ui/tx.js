@@ -46,12 +46,27 @@ Template.tx.helpers({
   },
 })
 
+Template.tx.events({
+  'click .meta': () => {
+    if ($('.meta').hasClass('dropdown-toggle')) {
+      $('.meta').removeClass('dropdown-toggle')
+      $('.toggle').show()
+    } else {
+      $('.meta').addClass('dropdown-toggle')
+      $('.toggle').hide()
+    }
+  },
+})
+
 Template.tx.onRendered(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('tx', {})
     Session.set('loading', true)
     $('#blockjson').html('')
+    $('.data').addClass('loaded')
+    $('.meta').addClass('dropdown-toggle')
+    $('.toggle').hide()
     // Session.set('qrl', 0)
     // Session.set('status', {})
     renderTx()
