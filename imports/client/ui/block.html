@@ -1,0 +1,14 @@
+<template name="block">
+  <h2><a class="btn btn-light {{prev_available}}" href="{{prev}}">&lt;</a> Block {{id}} <a class="btn btn-light" href="{{next}}">&gt;</a></h2>
+  {{#if loading}}
+    {{>progress}}
+  {{/if}}
+  <div class="data loaded">
+    <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
+    <div class="container toggle">
+      <div class="mx-auto container border shadow p-2">
+        <div id="blockjson" style="word-break: break-all;"></div>
+      </div>
+    </div>
+  </div>
+</template>

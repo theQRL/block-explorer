@@ -1,9 +1,7 @@
 node_modules/
-.eslintrc.js
 .deploy/
 .DS_Store
-/public/img/offline.png
-
 \.idea/
 /production.json
 /localhost.json
+/run.sh
