@@ -1,14 +1,29 @@
 <template name="block">
-  <h2><a class="btn btn-light {{prev_available}}" href="{{prev}}">&lt;</a> Block {{id}} <a class="btn btn-light" href="{{next}}">&gt;</a></h2>
-  {{#if loading}}
-    {{>progress}}
-  {{/if}}
-  <div class="data loaded">
-    <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
-    <div class="container toggle">
-      <div class="mx-auto container border shadow p-2">
-        <div id="blockjson" style="word-break: break-all;"></div>
-      </div>
+    <div class="container-fluid">
+        <div class="row justify-content-between bg-dark text-white align-items-center p-2">
+            <div class="col-auto pl-0">
+                <a class="btn btn-light {{prev_available}}" href="{{prev}}">&lt;</a>
+            </div>
+            <div class="col-6">
+                <h4 class="text-center mb-0">Block {{id}}</h4>
+            </div>
+            <div class="col-auto pr-0">
+                <a class="btn btn-light" href="{{next}}">&gt;</a>
+            </div>
+        </div>
     </div>
-  </div>
+    <div class="spacer p-1"></div>
+    {{#if loading}}
+        {{>progress}}
+    {{/if}}
+    <div class="data loaded">
+        <div class="container p-2">
+            <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
+            <div class="container toggle">
+                <div class="mx-auto container border shadow p-2">
+                    <div id="blockjson" style="word-break: break-all;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
