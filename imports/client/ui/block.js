@@ -1,4 +1,5 @@
 import JSONFormatter from 'json-formatter-js'
+import { SHOR_PER_QUANTA, numberToString } from '../../functions.js'
 
 const renderBlock = () => {
   const blockId = FlowRouter.getParam('blockId')
@@ -61,6 +62,106 @@ Template.block.helpers({
   next() {
     const current = parseInt(FlowRouter.getParam('blockId'), 10)
     return `/block/${current + 1}`
+  },
+  ts() {
+    try {
+      const thisHeader = Session.get('block').timestamp
+      const x = moment.unix(thisHeader)
+      return moment(x).format('HH:mm D MMM YYYY')
+    } catch (e) {
+      return ' '
+    }
+  },
+  mining() {
+    if (!(Session.get('loading'))) {
+      const amount = Session.get('block').block_reward
+      if (amount > 0) {
+        return numberToString(amount / SHOR_PER_QUANTA)
+      }
+      return 0
+    }
+    return false
+  },
+  fees() {
+    if (!(Session.get('loading'))) {
+      const amount = Session.get('block').fee_reward
+      if (amount > 0) {
+        return numberToString(amount / SHOR_PER_QUANTA)
+      }
+      return 0
+    }
+    return false
+  },
+  reward() {
+    if (!(Session.get('loading'))) {
+      const amountMining = Session.get('block').block_reward
+      const amountFees = Session.get('block').fee_reward
+      const total = amountFees + amountMining
+      if (total > 0) {
+        return numberToString(total / SHOR_PER_QUANTA)
+      }
+      return 0
+    }
+    return false
+  },
+  blockTx() {
+    if (!(Session.get('loading'))) {
+      const tx = Session.get('block').transactions
+      return tx
+    }
+    return false
+  },
+  rowColour() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') { return 'table-info' }
+      if (this.type === 'TRANSFER') { return 'table-warning' }
+      if (this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') { return 'table-danger' }
+      if (this.type === 'DOCUMENT_NOTARISATION' || this.type === 'KEYBASE' || this.type === 'MESSAGE') { return 'table-success' }
+      return ''
+    }
+    return false
+  },
+  to() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') { return `Q${this.address_to}` }
+      if (this.type === 'TRANSFER' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
+        if (this.addresses_to.length) { return `Q${this.addresses_to[0]}` }
+        return `${this.addresses_to.length} addresses`
+      }
+      if (this.type === 'KEYBASE') { return `${this.keybaseType} ${this.keybaseUser}` }
+      return ''
+    }
+    return false
+  },
+  from() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') { return '' }
+      if (this.type === 'TRANSFER' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER' || this.type === 'DOCUMENT_NOTARISATION' || this.type === 'SLAVE' || this.type === 'KEYBASE' || this.type === 'MESSAGE') { return `Q${this.address_from}` }
+      return ''
+    }
+    return false
+  },
+  amount() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') { return `${(this.amount / SHOR_PER_QUANTA).toString()} <small>Quanta</small>` }
+      if (this.type === 'TRANSFER') {
+        const sum = this.amounts.reduce((partialSum, a) => partialSum + a)
+        return `${numberToString(sum / SHOR_PER_QUANTA)} <small>Quanta</small>`
+      }
+      if (this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
+        const sum = this.amounts.reduce((partialSum, a) => partialSum + a)
+        // TODO: bug here - this should be token decimals which needs returning in token object
+        return `${numberToString(sum / SHOR_PER_QUANTA)} <small>${this.symbol}</small>`
+      }
+      return ''
+    }
+    return false
+  },
+  quantity() {
+    if (!(Session.get('loading'))) {
+      return Session.get('block').transactions.length
+    }
+    return false
   },
 })
 

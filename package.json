@@ -8,6 +8,7 @@
     "@babel/runtime": "^7.1.5",
     "json-formatter-js": "^2.2.1",
     "long": "^4.0.0",
+    "mathjs": "^5.5.0",
     "meteor-node-stubs": "^0.4.1"
   }
 }

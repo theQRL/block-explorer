@@ -12,7 +12,7 @@ import {
 
 // *** TODO: MUST BE false IN PRODUCTION
 // add a delay in returning data to client to test loading progress UI
-const ADD_DATA_RETURN_DELAY = true
+const ADD_DATA_RETURN_DELAY = false
 // ^^^
 
 const verifyDBConnection = () => !(process.env.MONGO_URL.substr(process.env.MONGO_URL.length - 7) === '/meteor')
@@ -113,6 +113,8 @@ const processTx = (input) => {
       result.amounts = additionalResult.amounts
       result.token_txn_hash = additionalResult.token_txn_hash
       result.type = 'TOKEN_TRANSFER'
+      const symbol = tokenTxs.findOne({ transaction_hash: fromHexString(result.token_txn_hash) })
+      result.symbol = toTextString(symbol.symbol)
     }
   }
 
@@ -179,6 +181,10 @@ const processTx = (input) => {
       }
       result = { ...result, ...additionalResult }
     }
+  }
+
+  if (result.transaction_type === 5) {
+    result.type = 'SLAVE'
   }
 
   if (result.transaction_hash) {

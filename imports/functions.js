@@ -1,4 +1,5 @@
 import Long from 'long'
+import mathjs from 'mathjs'
 
 export const toHexString = byteArray => Buffer.from(byteArray).toString('hex')
 
@@ -23,4 +24,11 @@ export const toLongString = (lowBits, highBits) => {
 export const toLongStringFromUInt32 = (int) => {
   const longVal = toLongString(int, 0)
   return longVal
+}
+
+// Define amount of SHOR contained per QUANTA (10^9)
+export const SHOR_PER_QUANTA = 1000000000
+
+export function numberToString(num) {
+  return mathjs.format(num, { notation: 'fixed', lowerExp: 1e-100, upperExp: Infinity })
 }

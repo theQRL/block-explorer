@@ -16,6 +16,7 @@
     .json-formatter-constructor-name,
     .json-formatter-null {
       font-family: Hack;
+      font-size: 0.7em;
     }
     .loaded {
       display: none;
@@ -23,6 +24,22 @@
     .toggle {
       display: none;
     }
+.table .text {
+  position: relative;
+}
+
+.table .text span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  position: absolute;
+  width: 100%;
+}
+
+.text:before {
+  content: '';
+  display: inline-block;
+}
 /*    .json-formatter-constructor-name {
       display: none;
     }
