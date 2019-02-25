@@ -104,6 +104,65 @@ Template.block.helpers({
     }
     return false
   },
+  blockTx() {
+    if (!(Session.get('loading'))) {
+      const tx = Session.get('block').transactions
+      return tx
+    }
+    return false
+  },
+  rowColour() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') { return 'table-info' }
+      if (this.type === 'TRANSFER') { return 'table-warning' }
+      if (this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') { return 'table-danger' }
+      if (this.type === 'DOCUMENT_NOTARISATION' || this.type === 'KEYBASE' || this.type === 'MESSAGE') { return 'table-success' }
+      return ''
+    }
+    return false
+  },
+  to() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') { return `Q${this.address_to}` }
+      if (this.type === 'TRANSFER' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
+        if (this.addresses_to.length) { return `Q${this.addresses_to[0]}` }
+        return `${this.addresses_to.length} addresses`
+      }
+      if (this.type === 'KEYBASE') { return `${this.keybaseType} ${this.keybaseUser}` }
+      return ''
+    }
+    return false
+  },
+  from() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') { return '' }
+      if (this.type === 'TRANSFER' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER' || this.type === 'DOCUMENT_NOTARISATION' || this.type === 'SLAVE' || this.type === 'KEYBASE' || this.type === 'MESSAGE') { return `Q${this.address_from}` }
+      return ''
+    }
+    return false
+  },
+  amount() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') { return `${(this.amount / SHOR_PER_QUANTA).toString()} <small>Quanta</small>` }
+      if (this.type === 'TRANSFER') {
+        const sum = this.amounts.reduce((partialSum, a) => partialSum + a)
+        return `${numberToString(sum / SHOR_PER_QUANTA)} <small>Quanta</small>`
+      }
+      if (this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
+        const sum = this.amounts.reduce((partialSum, a) => partialSum + a)
+        // TODO: bug here - this should be token decimals which needs returning in token object
+        return `${numberToString(sum / SHOR_PER_QUANTA)} <small>${this.symbol}</small>`
+      }
+      return ''
+    }
+    return false
+  },
+  quantity() {
+    if (!(Session.get('loading'))) {
+      return Session.get('block').transactions.length
+    }
+    return false
+  },
 })
 
 Template.block.events({

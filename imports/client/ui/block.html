@@ -33,8 +33,33 @@
                     <strong>{{reward}}</strong><br><small>QUANTA</small>
                   </div>
                   <div class="col">
-                    Content
+                    This top area needs refactoring
                   </div>
+                </div>
+                <div class="row mt-3">
+                  <h5>{{quantity}} block transactions</h5>
+                  <div class="table-responsive">
+                  <table class="table table-bordered table-hover table-sm">
+                    <thead>
+                      <tr>
+                        <th class="text" width="120px">Type</th>
+                        <th class="text" width="50%">From</th>
+                        <th class="text" width="50%">To</th>
+                        <th class="text" width="170px" style="min-width: 170px;">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{#each blockTx}}
+                      <tr class="{{rowColour}}">
+                        <td>{{this.type}}</td>
+                        <td class="text"><span>{{from}}</span></td>
+                        <td class="text"><span>{{to}}</span></td>
+                        <td class="text"><span>{{{amount}}}</span></td>
+                      </tr>
+                      {{/each}}
+                    </tbody>
+                  </table>
+                </div>
                 </div>
               </div>
             </div>
