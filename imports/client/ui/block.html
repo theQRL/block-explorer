@@ -18,6 +18,27 @@
     {{/if}}
     <div class="data loaded">
         <div class="container p-2">
+          <div class="card m-3">
+            <div class="card-header">
+              {{ts}}
+            </div>
+            <div class="card-body">
+              <div class="container">
+                <div class="row">
+                  <div class="col">
+                    <strong>Reward</strong><br>
+                    <p class="text-muted mb-0"><small>{{mining}} (mining)<br>
+                      {{fees}} (tx fees)
+                    </small></p>
+                    <strong>{{reward}}</strong><br><small>QUANTA</small>
+                  </div>
+                  <div class="col">
+                    Content
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
             <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
             <div class="container toggle">
                 <div class="mx-auto container border shadow p-2">

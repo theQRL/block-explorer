@@ -1,4 +1,5 @@
 import JSONFormatter from 'json-formatter-js'
+import { SHOR_PER_QUANTA, numberToString } from '../../functions.js'
 
 const renderBlock = () => {
   const blockId = FlowRouter.getParam('blockId')
@@ -61,6 +62,47 @@ Template.block.helpers({
   next() {
     const current = parseInt(FlowRouter.getParam('blockId'), 10)
     return `/block/${current + 1}`
+  },
+  ts() {
+    try {
+      const thisHeader = Session.get('block').timestamp
+      const x = moment.unix(thisHeader)
+      return moment(x).format('HH:mm D MMM YYYY')
+    } catch (e) {
+      return ' '
+    }
+  },
+  mining() {
+    if (!(Session.get('loading'))) {
+      const amount = Session.get('block').block_reward
+      if (amount > 0) {
+        return numberToString(amount / SHOR_PER_QUANTA)
+      }
+      return 0
+    }
+    return false
+  },
+  fees() {
+    if (!(Session.get('loading'))) {
+      const amount = Session.get('block').fee_reward
+      if (amount > 0) {
+        return numberToString(amount / SHOR_PER_QUANTA)
+      }
+      return 0
+    }
+    return false
+  },
+  reward() {
+    if (!(Session.get('loading'))) {
+      const amountMining = Session.get('block').block_reward
+      const amountFees = Session.get('block').fee_reward
+      const total = amountFees + amountMining
+      if (total > 0) {
+        return numberToString(total / SHOR_PER_QUANTA)
+      }
+      return 0
+    }
+    return false
   },
 })
 
