@@ -179,6 +179,7 @@ const processTx = (input) => {
         additionalResult.type = 'MESSAGE'
         additionalResult.message = hexToString(additionalResult.message_hash)
       }
+      delete additionalResult.transaction_hash
       result = { ...result, ...additionalResult }
     }
   }
