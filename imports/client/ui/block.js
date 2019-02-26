@@ -1,12 +1,19 @@
 import JSONFormatter from 'json-formatter-js'
-import { SHOR_PER_QUANTA, numberToString } from '../../functions.js'
+import {
+  SHOR_PER_QUANTA,
+  numberToString,
+} from '../../functions.js'
 
 const renderBlock = () => {
   const blockId = FlowRouter.getParam('blockId')
   if (blockId) {
     Meteor.call('block', blockId, (err, res) => {
       if (err) {
-        Session.set('block', { error: err, id: blockId, found: false })
+        Session.set('block', {
+          error: err,
+          id: blockId,
+          found: false,
+        })
         return false
       }
       Session.set('block', res)
@@ -16,20 +23,20 @@ const renderBlock = () => {
       Session.set('loading', false)
       return true
     })
-  //   Meteor.call('QRLvalue', (err, res) => {
-  //     if (err) {
-  //       Session.set('qrl', 'Error getting value from API')
-  //     } else {
-  //       Session.set('qrl', res)
-  //     }
-  //   })
-  //   Meteor.call('status', (err, res) => {
-  //     if (err) {
-  //       Session.set('status', { error: err })
-  //     } else {
-  //       Session.set('status', res)
-  //     }
-  //   })
+    //   Meteor.call('QRLvalue', (err, res) => {
+    //     if (err) {
+    //       Session.set('qrl', 'Error getting value from API')
+    //     } else {
+    //       Session.set('qrl', res)
+    //     }
+    //   })
+    //   Meteor.call('status', (err, res) => {
+    //     if (err) {
+    //       Session.set('status', { error: err })
+    //     } else {
+    //       Session.set('status', res)
+    //     }
+    //   })
   }
 }
 
@@ -67,83 +74,119 @@ Template.block.helpers({
     try {
       const thisHeader = Session.get('block').timestamp
       const x = moment.unix(thisHeader)
-      return moment(x).format('HH:mm D MMM YYYY')
+      return moment(x).format('HH:mm dddd D MMMM YYYY')
     } catch (e) {
       return ' '
     }
   },
   mining() {
     if (!(Session.get('loading'))) {
-      const amount = Session.get('block').block_reward
-      if (amount > 0) {
-        return numberToString(amount / SHOR_PER_QUANTA)
+      try {
+        const amount = Session.get('block').block_reward
+        if (amount > 0) {
+          return numberToString(amount / SHOR_PER_QUANTA)
+        }
+        return 0
+      } catch (e) {
+        return false
       }
-      return 0
     }
     return false
   },
   fees() {
     if (!(Session.get('loading'))) {
-      const amount = Session.get('block').fee_reward
-      if (amount > 0) {
-        return numberToString(amount / SHOR_PER_QUANTA)
+      try {
+        const amount = Session.get('block').fee_reward
+        if (amount > 0) {
+          return numberToString(amount / SHOR_PER_QUANTA)
+        }
+        return 0
+      } catch (e) {
+        return false
       }
-      return 0
     }
     return false
   },
   reward() {
     if (!(Session.get('loading'))) {
-      const amountMining = Session.get('block').block_reward
-      const amountFees = Session.get('block').fee_reward
-      const total = amountFees + amountMining
-      if (total > 0) {
-        return numberToString(total / SHOR_PER_QUANTA)
+      try {
+        const amountMining = Session.get('block').block_reward
+        const amountFees = Session.get('block').fee_reward
+        const total = amountFees + amountMining
+        if (total > 0) {
+          return numberToString(total / SHOR_PER_QUANTA)
+        }
+        return 0
+      } catch (e) {
+        return false
       }
-      return 0
     }
     return false
   },
   blockTx() {
     if (!(Session.get('loading'))) {
-      const tx = Session.get('block').transactions
-      return tx
+      try {
+        const tx = Session.get('block').transactions
+        return tx
+      } catch (e) {
+        return false
+      }
     }
     return false
   },
   rowColour() {
     if (!(Session.get('loading'))) {
-      if (this.type === 'COINBASE') { return 'table-info' }
-      if (this.type === 'TRANSFER') { return 'table-warning' }
-      if (this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') { return 'table-danger' }
-      if (this.type === 'DOCUMENT_NOTARISATION' || this.type === 'KEYBASE' || this.type === 'MESSAGE') { return 'table-success' }
+      if (this.type === 'COINBASE') {
+        return 'table-info'
+      }
+      if (this.type === 'TRANSFER') {
+        return 'table-warning'
+      }
+      if (this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
+        return 'table-danger'
+      }
+      if (this.type === 'DOCUMENT_NOTARISATION' || this.type === 'KEYBASE' || this.type === 'MESSAGE') {
+        return 'table-success'
+      }
       return ''
     }
     return false
   },
   to() {
     if (!(Session.get('loading'))) {
-      if (this.type === 'COINBASE') { return `Q${this.address_to}` }
+      if (this.type === 'COINBASE') {
+        return `Q${this.address_to}`
+      }
       if (this.type === 'TRANSFER' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
-        if (this.addresses_to.length) { return `Q${this.addresses_to[0]}` }
+        if (this.addresses_to.length) {
+          return `Q${this.addresses_to[0]}`
+        }
         return `${this.addresses_to.length} addresses`
       }
-      if (this.type === 'KEYBASE') { return `${this.keybaseType} ${this.keybaseUser}` }
+      if (this.type === 'KEYBASE') {
+        return `${this.keybaseType} ${this.keybaseUser}`
+      }
       return ''
     }
     return false
   },
   from() {
     if (!(Session.get('loading'))) {
-      if (this.type === 'COINBASE') { return '' }
-      if (this.type === 'TRANSFER' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER' || this.type === 'DOCUMENT_NOTARISATION' || this.type === 'SLAVE' || this.type === 'KEYBASE' || this.type === 'MESSAGE') { return `Q${this.address_from}` }
+      if (this.type === 'COINBASE') {
+        return ''
+      }
+      if (this.type === 'TRANSFER' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER' || this.type === 'DOCUMENT_NOTARISATION' || this.type === 'SLAVE' || this.type === 'KEYBASE' || this.type === 'MESSAGE') {
+        return `Q${this.address_from}`
+      }
       return ''
     }
     return false
   },
   amount() {
     if (!(Session.get('loading'))) {
-      if (this.type === 'COINBASE') { return `${(this.amount / SHOR_PER_QUANTA).toString()} <small>Quanta</small>` }
+      if (this.type === 'COINBASE') {
+        return `${(this.amount / SHOR_PER_QUANTA).toString()} <small>Quanta</small>`
+      }
       if (this.type === 'TRANSFER') {
         const sum = this.amounts.reduce((partialSum, a) => partialSum + a)
         return `${numberToString(sum / SHOR_PER_QUANTA)} <small>Quanta</small>`
@@ -159,9 +202,32 @@ Template.block.helpers({
   },
   quantity() {
     if (!(Session.get('loading'))) {
-      return Session.get('block').transactions.length
+      try {
+        const q = Session.get('block').transactions.length
+        return q
+      } catch (e) {
+        return false
+      }
     }
     return false
+  },
+  isTooltipFrom() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') {
+        return ''
+      }
+      return 'tooltip'
+    }
+    return ''
+  },
+  isTooltipTo() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'SLAVE') {
+        return ''
+      }
+      return 'tooltip'
+    }
+    return ''
   },
 })
 
@@ -174,6 +240,17 @@ Template.block.events({
       $('.meta').addClass('dropdown-toggle')
       $('.toggle').hide()
     }
+  },
+  'mouseover [data-toggle="tooltip"]': (event) => {
+    $(event.currentTarget).tooltip({
+      boundary: 'window',
+    }).tooltip('show')
+  },
+  'mouseleave [data-toggle="tooltip"]': (event) => {
+    $(event.currentTarget).tooltip('hide')
+  },
+  'click tr': (event) => {
+    FlowRouter.go(`/tx/${$(event.currentTarget).attr('data-txhash')}`)
   },
 })
 

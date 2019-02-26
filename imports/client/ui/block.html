@@ -1,5 +1,5 @@
 <template name="block">
-    <div class="container-fluid">
+    <div class="container-fluid shadow">
         <div class="row justify-content-between bg-dark text-white align-items-center p-2">
             <div class="col-auto pl-0">
                 <a class="btn btn-light {{prev_available}}" href="{{prev}}">&lt;</a>
@@ -18,9 +18,9 @@
     {{/if}}
     <div class="data loaded">
         <div class="container p-2">
-          <div class="card m-3">
+          <div class="card m-3 shadow">
             <div class="card-header">
-              {{ts}}
+              <i class="fas fa-clock"></i> {{ts}}
             </div>
             <div class="card-body">
               <div class="container">
@@ -33,12 +33,16 @@
                     <strong>{{reward}}</strong><br><small>QUANTA</small>
                   </div>
                   <div class="col">
-                    This top area needs refactoring
+                    <a href="/block/15">token create</a><br>
+                    <a href="/block/868">token transfer</a><br>
+                    <a href="/block/23719">message</a><br>
+                    <a href="/block/94">slave</a><br>
+                    <a href="/block/237518">kb</a><br>
                   </div>
                 </div>
                 <div class="row mt-3">
                   <h5>{{quantity}} block transactions</h5>
-                  <div class="table-responsive">
+                  <div class="table-responsive" style="overflow-x: hidden;">
                   <table class="table table-bordered table-hover table-sm">
                     <thead>
                       <tr>
@@ -50,11 +54,11 @@
                     </thead>
                     <tbody>
                       {{#each blockTx}}
-                      <tr class="{{rowColour}}">
-                        <td>{{this.type}}</td>
-                        <td class="text"><span>{{from}}</span></td>
-                        <td class="text"><span>{{to}}</span></td>
-                        <td class="text"><span>{{{amount}}}</span></td>
+                      <tr class="{{rowColour}}" data-txhash="{{this.transaction_hash}}">
+                        <td data-toggle="tooltip" data-placement="top" data-container="tr" data-html="true" title="<u>txhash:</u> {{this.transaction_hash}}">{{this.type}}</td>
+                        <td data-toggle="{{isTooltipFrom}}" data-placement="top" data-container="tr" data-html="true" title="{{from}}" class="text"><span>{{from}}</span></td>
+                        <td data-toggle="{{isTooltipTo}}" data-placement="top" data-container="tr" data-html="true" title="{{to}}" class="text"><span>{{to}}</span></td>
+                        <td data-toggle="tooltip" data-placement="top" data-container="tr" data-html="true" title="{{amount}}" class="text"><span>{{{amount}}}</span></td>
                       </tr>
                       {{/each}}
                     </tbody>
@@ -64,7 +68,7 @@
               </div>
             </div>
           </div>
-            <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
+            <button class="btn btn-primary dropdown-toggle ml-3 meta shadow">Meta <i class="pl-1 toggle">&times;</i></button>
             <div class="container toggle">
                 <div class="mx-auto container border shadow p-2">
                     <div id="blockjson" style="word-break: break-all;"></div>
