@@ -20,6 +20,12 @@ const identifySearch = (str) => {
     type.route = `/block/${str}`
     type.method = 'block'
   }
+  // otherwise, if 3 chars or more, assume search token data
+  if (str.length > 2) {
+    type.type = 'Token'
+    type.route = `/tokens/${str}`
+    type.method = 'tokenBySymbol'
+  }
   return type
 }
 

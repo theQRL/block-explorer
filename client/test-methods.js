@@ -1,7 +1,9 @@
-/* eslint no-console: 0, import/no-cycle: 0 */
-import { EXPLORER_DEBUG } from './index.js'
+/* eslint no-console: 0 */
 
-if (EXPLORER_DEBUG) {
+const EXPLORER_DEBUG = false
+
+if (EXPLORER_DEBUG === true) {
+  console.log('TESTING\n^^^^^^^')
   // coinbase Tx (transaction_type = 0)
   Meteor.call('tx', 'd53bee9ec7a7d26569cb4b89675ae2055f659bf97fed1a2a7e1fd29110c97ed3', (error, result) => {
     if (!error) {
@@ -140,6 +142,26 @@ if (EXPLORER_DEBUG) {
 
   // message Tx [MESSAGE] (transaction_type = 4)
   Meteor.call('messageTx', '6dd93529bab3eb8bef9b849aa0bbc0b050ed1f4d0a825f73bf3c5c9c479703a9', (error, result) => {
+    if (!error) {
+      console.log(result)
+    } else {
+      // error handling
+      console.log(error)
+    }
+  })
+
+  // test fetch token by symbol
+  Meteor.call('tokenBySymbol', 'Fr1t2', (error, result) => {
+    if (!error) {
+      console.log(result)
+    } else {
+      // error handling
+      console.log(error)
+    }
+  })
+
+  // test fetch token by name
+  Meteor.call('tokenByName', 'Basic Whining Token', (error, result) => {
     if (!error) {
       console.log(result)
     } else {

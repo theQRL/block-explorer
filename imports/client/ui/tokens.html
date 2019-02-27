@@ -1,0 +1,14 @@
+<template name="tokens">
+  <h2>Tokens</h2>
+  {{#if loading}}
+    {{>progress}}
+  {{/if}}
+    <div class="data loaded">
+    <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
+    <div class="container toggle">
+      <div class="mx-auto container border shadow p-2">
+        <div id="tokensjson" style="word-break: break-all;"></div>
+      </div>
+    </div>
+  </div>
+</template>

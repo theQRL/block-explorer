@@ -459,4 +459,48 @@ Meteor.methods({
     return { found: false, error: 'Not found' }
   },
 
+  tokenBySymbol(name) {
+    check(name, String)
+    if (!verifyDBConnection()) {
+      return { found: false, error: 'No database connection' }
+    }
+    const result = tokenTxs.find({ symbol: Buffer.from(name) }).fetch()
+    if (result) {
+      const returned = []
+      result.forEach((e) => {
+        returned.push({
+          name: toTextString(e.name),
+          owner: toHexString(e.owner),
+          transaction_hash: toHexString(e.transaction_hash),
+          symbol: toTextString(e.symbol),
+        })
+      })
+      if (returned.length === 0) { return { found: false, search_string: name, error: 'Not found' } }
+      return returned
+    }
+    return { found: false, error: 'Not found' }
+  },
+
+  tokenByName(name) {
+    check(name, String)
+    if (!verifyDBConnection()) {
+      return { found: false, error: 'No database connection' }
+    }
+    const result = tokenTxs.find({ name: Buffer.from(name) }).fetch()
+    if (result) {
+      const returned = []
+      result.forEach((e) => {
+        returned.push({
+          name: toTextString(e.name),
+          owner: toHexString(e.owner),
+          transaction_hash: toHexString(e.transaction_hash),
+          symbol: toTextString(e.symbol),
+        })
+      })
+      if (returned.length === 0) { return { found: false, search_string: name, error: 'Not found' } }
+      return returned
+    }
+    return { found: false, error: 'Not found' }
+  },
+
 })

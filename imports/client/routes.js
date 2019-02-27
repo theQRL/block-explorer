@@ -25,6 +25,12 @@ FlowRouter.route('/a/:aId/:tPage?', {
     BlazeLayout.render('body', { main: 'address' })
   },
 })
+FlowRouter.route('/tokens/:tokenText', {
+  name: 'Tokens.home',
+  action() {
+    BlazeLayout.render('body', { main: 'tokens' })
+  },
+})
 // FlowRouter.route('/lastblocks', {
 //   name: 'Lastblocks.home',
 //   action() {
