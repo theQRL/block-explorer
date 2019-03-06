@@ -1,14 +1,57 @@
 <template name="tokens">
-  <h2>Tokens</h2>
-  {{#if loading}}
-    {{>progress}}
-  {{/if}}
-    <div class="data loaded">
-    <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
-    <div class="container toggle">
-      <div class="mx-auto container border shadow p-2">
-        <div id="tokensjson" style="word-break: break-all;"></div>
+  <div class="container-fluid shadow">
+      <div class="row justify-content-between bg-primary text-white align-items-center p-2">
+          <div class="col-12">
+              <h4 class="text-center mb-0">Token search</h4>
+          </div>
       </div>
-    </div>
   </div>
+  <div class="spacer p-1"></div>
+    {{#if loading}}
+        {{>progress}}
+    {{/if}}
+    <div class="data loaded">
+        <div class="container p-2">
+            <div class="card m-3 shadow">
+                <div class="card-header">
+                    <i class="fas fa-clock"></i> Searching for `{{id}}`
+                </div>
+                <div class="card-body">
+                    <div class="container">
+                        <div class="row mt-3">
+                            <h5>{{quantity}} token(s) found</h5>
+                            <div class="table-responsive" style="overflow-x: hidden;">
+                                <table class="table table-bordered table-hover table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="text" width="120px">Symbol</th>
+                                            <th class="text" width="30%">Name</th>
+                                            <th class="text" width="40%">Owner</th>
+                                            <th class="text" width="30%">Txhash</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{#each results}}
+                                            <tr class="" data-txhash="{{this.transaction_hash}}">
+                                                <td>{{this.symbol}}</td>
+                                                <td class="text"><span>{{this.name}}</span></td>
+                                                <td class="text"><span>{{this.owner}}</span></td>
+                                                <td class="text"><span>{{{this.transaction_hash}}}</span></td>
+                                            </tr>
+                                        {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
+            <div class="container toggle">
+                <div class="mx-auto container border shadow p-2">
+                    <div id="tokensjson" style="word-break: break-all;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>

@@ -64,14 +64,8 @@ const processTx = (input) => {
       if (additionalResult.transaction_hash) {
         additionalResult.transaction_hash = toHexString(additionalResult.transaction_hash)
       }
-      if (additionalResult.name) {
-        additionalResult.name = toTextString(additionalResult.name)
-      }
       if (additionalResult.owner) {
         additionalResult.owner = toHexString(additionalResult.owner)
-      }
-      if (additionalResult.symbol) {
-        additionalResult.symbol = toTextString(additionalResult.symbol)
       }
       if (additionalResult.addresses_to) {
         for (let i = 0; i < additionalResult.addresses_to.length; i += 1) {
@@ -87,8 +81,8 @@ const processTx = (input) => {
       }
       result.addresses_to = additionalResult.addresses_to
       result.amounts = additionalResult.amounts
-      result.name = additionalResult.name
-      result.symbol = additionalResult.symbol
+      result.name = additionalResult.name_str
+      result.symbol = additionalResult.symbol_str
       result.owner = additionalResult.owner
       result.type = 'TOKEN_CREATE'
     }
@@ -235,7 +229,12 @@ Meteor.methods({
     if (ADD_DATA_RETURN_DELAY === true) { sleepFor(2000) }
     if (result) {
       if (result.address) {
-        result.address = `Q${toHexString(result.address)}`
+        result.address = `${toHexString(result.address)}`
+      }
+      if (result.balance.low_) {
+        result.balance = toLongString(result.balance.low_, result.balance.high_)
+      } else {
+        result.balance = result.balance.toString()
       }
       delete result._id
       return result
@@ -336,13 +335,13 @@ Meteor.methods({
         result.transaction_hash = toHexString(result.transaction_hash)
       }
       if (result.name) {
-        result.name = toTextString(result.name)
+        result.name = result.name_str
       }
       if (result.owner) {
         result.owner = toHexString(result.owner)
       }
       if (result.symbol) {
-        result.symbol = toTextString(result.symbol)
+        result.symbol = result.symbol_str
       }
       if (result.addresses_to) {
         for (let i = 0; i < result.addresses_to.length; i += 1) {
@@ -357,6 +356,8 @@ Meteor.methods({
         }
       }
       result.type = 'TOKEN_CREATE'
+      delete result.name_str
+      delete result.symbol_str
       delete result._id
       return result
     }
@@ -464,7 +465,7 @@ Meteor.methods({
     if (!verifyDBConnection()) {
       return { found: false, error: 'No database connection' }
     }
-    const result = tokenTxs.find({ symbol: Buffer.from(name) }).fetch()
+    const result = tokenTxs.find({ symbol_str: { $regex: new RegExp(name.toLowerCase(), 'i') } }).fetch()
     if (result) {
       const returned = []
       result.forEach((e) => {
@@ -486,7 +487,7 @@ Meteor.methods({
     if (!verifyDBConnection()) {
       return { found: false, error: 'No database connection' }
     }
-    const result = tokenTxs.find({ name: Buffer.from(name) }).fetch()
+    const result = tokenTxs.find({ name_str: { $regex: new RegExp(name.toLowerCase(), 'i') } }).fetch()
     if (result) {
       const returned = []
       result.forEach((e) => {
@@ -501,6 +502,67 @@ Meteor.methods({
       return returned
     }
     return { found: false, error: 'Not found' }
+  },
+
+  tokenByText(name) {
+    check(name, String)
+    if (!verifyDBConnection()) {
+      return { found: false, error: 'No database connection' }
+    }
+    const result = tokenTxs.find({ $or: [{ name_str: { $regex: new RegExp(name.toLowerCase(), 'i') } }, { symbol_str: { $regex: new RegExp(name.toLowerCase(), 'i') } }] }).fetch()
+    if (result) {
+      const returned = []
+      result.forEach((e) => {
+        returned.push({
+          name: toTextString(e.name),
+          owner: toHexString(e.owner),
+          transaction_hash: toHexString(e.transaction_hash),
+          symbol: toTextString(e.symbol),
+        })
+      })
+      if (returned.length === 0) { return { found: false, search_string: name, error: 'Not found' } }
+      return returned
+    }
+    return { found: false, error: 'Not found' }
+  },
+
+  richlist(num) {
+    check(num, Number)
+    let limit = num
+    if (limit > 100) { limit = 100 }
+    if (limit < 5) { limit = 5 }
+    // need to remove unmined coins (000000...00000 address)
+    limit += 1
+    if (!verifyDBConnection()) {
+      return { found: false, error: 'No database connection' }
+    }
+    const result = accounts.find({}, { sort: { balance: -1 }, limit, fields: { balance: 1, _id: 0, address: 1 } }).fetch()
+    if (ADD_DATA_RETURN_DELAY === true) { sleepFor(2000) }
+    if (result) {
+      const returned = []
+      for (let i = 0; i < result.length; i += 1) {
+        result[i].address = toHexString(result[i].address)
+        if (result[i].balance.low_) {
+          result[i].balance = toLongString(result[i].balance.low_, result[i].balance.high_)
+        } else {
+          result[i].balance = result[i].balance.toString()
+        }
+        if (result[i].address !== '0000000000000000000000000000000000000000000000000000000000000000') {
+          returned.push(result[i])
+        }
+      }
+      return returned
+    }
+    return { found: false, error: 'Not found' }
+  },
+
+  totalAddresses() {
+    if (!verifyDBConnection()) {
+      return { found: false, error: 'No database connection' }
+    }
+    const addresses = accounts.find({}).count()
+    // need to subtract one to account for the virtual address for unmined coins
+    return { found: true, count: addresses - 1 }
   },
 
 })
