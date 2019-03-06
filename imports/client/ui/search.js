@@ -24,7 +24,7 @@ const identifySearch = (str) => {
   if (str.length > 2) {
     type.type = 'Token'
     type.route = `/tokens/${str}`
-    type.method = 'tokenBySymbol'
+    type.method = 'tokenByText'
   }
   return type
 }

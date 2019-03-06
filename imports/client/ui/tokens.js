@@ -3,7 +3,7 @@ import JSONFormatter from 'json-formatter-js'
 const renderTokens = () => {
   const tokenText = FlowRouter.getParam('tokenText')
   if (tokenText) {
-    Meteor.call('tokenBySymbol', tokenText, (err, res) => {
+    Meteor.call('tokenByText', tokenText, (err, res) => {
       if (err) {
         Session.set('tokens', { error: err, param: tokenText, found: false })
         return false
@@ -44,6 +44,28 @@ Template.tokens.helpers({
       return false
     }
   },
+  results() {
+    if (!(Session.get('loading'))) {
+      try {
+        const results = Session.get('tokens')
+        return results
+      } catch (e) {
+        return false
+      }
+    }
+    return false
+  },
+  quantity() {
+    if (!(Session.get('loading'))) {
+      try {
+        const results = Session.get('tokens').length
+        return results
+      } catch (e) {
+        return false
+      }
+    }
+    return false
+  },
 })
 
 Template.tokens.events({
@@ -55,6 +77,9 @@ Template.tokens.events({
       $('.meta').addClass('dropdown-toggle')
       $('.toggle').hide()
     }
+  },
+  'click tr': (event) => {
+    FlowRouter.go(`/tx/${$(event.currentTarget).attr('data-txhash')}`)
   },
 })
 

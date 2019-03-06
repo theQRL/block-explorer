@@ -4,6 +4,17 @@ const EXPLORER_DEBUG = false
 
 if (EXPLORER_DEBUG === true) {
   console.log('TESTING\n^^^^^^^')
+
+  // richlist
+  Meteor.call('richlist', 10, (error, result) => {
+    if (!error) {
+      console.log(result)
+    } else {
+      // error handling
+      console.log(error)
+    }
+  })
+
   // coinbase Tx (transaction_type = 0)
   Meteor.call('tx', 'd53bee9ec7a7d26569cb4b89675ae2055f659bf97fed1a2a7e1fd29110c97ed3', (error, result) => {
     if (!error) {
@@ -73,7 +84,7 @@ if (EXPLORER_DEBUG === true) {
     }
   })
 
-  Meteor.call('block', 200, (error, result) => {
+  Meteor.call('block', '200', (error, result) => {
     if (!error) {
       console.log(result)
     } else {
@@ -161,7 +172,17 @@ if (EXPLORER_DEBUG === true) {
   })
 
   // test fetch token by name
-  Meteor.call('tokenByName', 'Basic Whining Token', (error, result) => {
+  Meteor.call('tokenByName', 'Whining', (error, result) => {
+    if (!error) {
+      console.log(result)
+    } else {
+      // error handling
+      console.log(error)
+    }
+  })
+
+  // test fetch token by name
+  Meteor.call('totalAddresses', (error, result) => {
     if (!error) {
       console.log(result)
     } else {
