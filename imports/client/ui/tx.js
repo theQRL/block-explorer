@@ -58,7 +58,7 @@ Template.tx.events({
   },
 })
 
-Template.tx.onRendered(() => {
+Template.tx.onCreated(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('tx', {})

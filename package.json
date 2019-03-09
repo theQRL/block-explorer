@@ -11,7 +11,5 @@
     "mathjs": "^5.5.0",
     "meteor-node-stubs": "^0.4.1"
   },
-  "devDependencies": {
-    "eslint-config-prettier": "^4.1.0"
-  }
+  "devDependencies": {}
 }

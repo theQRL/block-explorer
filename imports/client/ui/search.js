@@ -30,9 +30,9 @@ const identifySearch = (str) => {
 }
 
 Template.search.events({
-  'submit form, click #button-search': (event) => {
+  'submit form, click #button-search': (event, templateInstance) => {
     event.preventDefault()
-    const searchString = $('#searchBox').val()
+    const searchString = templateInstance.find('#searchBox').value
     const action = identifySearch(searchString)
     if (action.type !== 'Undetermined') {
       FlowRouter.go(action.route)
