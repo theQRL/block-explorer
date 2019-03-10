@@ -254,7 +254,7 @@ Template.block.events({
   },
 })
 
-Template.block.onRendered(() => {
+Template.block.onCreated(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('block', {})

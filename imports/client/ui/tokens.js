@@ -83,7 +83,7 @@ Template.tokens.events({
   },
 })
 
-Template.tokens.onRendered(() => {
+Template.tokens.onCreated(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('tokens', {})

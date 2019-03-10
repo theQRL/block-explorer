@@ -1,0 +1,19 @@
+<template name="nav">
+<nav class="navbar navbar-expand-md navbar-light bg-light" id="navbar" data-toggle="affix">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#qrlNavbar" aria-controls="qrlNavbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <a class="navbar-brand" href="/" id="logo"><img src="/logo.svg" height="28px" class="pr-3">QRL Explorer</a>
+  <div class="collapse navbar-collapse" id="qrlNavbar">
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <li class="nav-item active">
+        <a class="nav-link" href="/">Stats</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Tokens</a>
+      </li>
+    </ul>
+    {{ > search }}
+  </div>
+</nav>
+</template>

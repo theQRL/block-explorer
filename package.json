@@ -6,12 +6,11 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.1.5",
+    "@theqrl/validate-qrl-address": "^1.1.0",
     "json-formatter-js": "^2.2.1",
     "long": "^4.0.0",
     "mathjs": "^5.5.0",
     "meteor-node-stubs": "^0.4.1"
   },
-  "devDependencies": {
-    "eslint-config-prettier": "^4.1.0"
-  }
+  "devDependencies": {}
 }
