@@ -32,3 +32,17 @@ export const SHOR_PER_QUANTA = 1000000000
 export function numberToString(num) {
   return mathjs.format(num, { notation: 'fixed', lowerExp: 1e-100, upperExp: Infinity })
 }
+
+// Convert decimal value to binary
+export function decimalToBinary(decimalNumber) {
+  const binaryArray = []
+  while (decimalNumber >= 1) {
+    binaryArray.unshift(decimalNumber % 2)
+    decimalNumber = Math.floor(decimalNumber / 2) // eslint-disable-line
+  }
+  // Pad start of array with 0s if not a full byte
+  while (binaryArray.length < 8) {
+    binaryArray.unshift(0)
+  }
+  return binaryArray
+}

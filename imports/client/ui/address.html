@@ -1,14 +1,110 @@
 <template name="address">
-  <h2>Address</h2>
+  <div class="container-fluid shadow">
+      <div class="row justify-content-between bg-primary text-white align-items-center p-2">
+          <div class="col-12">
+              <h4 class="text-center mb-0"><small class="hack weight-100 ofe">{{id}}</small></h4>
+          </div>
+      </div>
+  </div>
+  <div class="spacer p-1"></div>
   {{#if loading}}
     {{>progress}}
   {{/if}}
   <div class="data loaded">
-    <button class="btn btn-primary dropdown-toggle ml-3 meta">Meta <i class="pl-1 toggle">&times;</i></button>
-    <div class="container toggle">
-      <div class="mx-auto container border shadow p-2">
-        <div id="addressjson" style="word-break: break-all;"></div>
+      <div class="container p-2">
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="quanta-tab" data-toggle="tab" href="#quanta" role="tab" aria-controls="quanta" aria-selected="true">Quanta</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="tokens-tab" data-toggle="tab" href="#tokens" role="tab" aria-controls="tokens" aria-selected="false">Tokens</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="info-tab" data-toggle="tab" href="#info" role="tab" aria-controls="info" aria-selected="false">Info</a>
+          </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="quanta" role="tabpanel" aria-labelledby="quanta-tab">
+                    <div class="card m-3 shadow">
+                      <div class="card-header">
+                        <span class="hack">{{balance}}</span> Quanta
+                      </div>
+                      <div class="card-body">
+                        <div class="container">
+                          <div class="row">
+
+                          </div>
+                          <div class="row mt-3">
+                            <h5>000 address transactions</h5>
+                            <div class="table-responsive" style="overflow-x: hidden;">
+                            <table class="table table-bordered table-hover table-sm">
+                              <thead>
+                                <tr>
+                                  <th class="text" width="120px">Type</th>
+                                  <th class="text" width="50%">From</th>
+                                  <th class="text" width="50%">To</th>
+                                  <th class="text" width="170px" style="min-width: 170px;">Amount</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+            <!--                     {{#each blockTx}}
+                                <tr class="{{rowColour}}" data-txhash="{{this.transaction_hash}}">
+                                  <td data-toggle="tooltip" data-placement="top" data-container="tr" data-html="true" title="<u>txhash:</u> {{this.transaction_hash}}">{{this.type}}</td>
+                                  <td data-toggle="{{isTooltipFrom}}" data-placement="top" data-container="tr" data-html="true" title="{{from}}" class="text"><span>{{from}}</span></td>
+                                  <td data-toggle="{{isTooltipTo}}" data-placement="top" data-container="tr" data-html="true" title="{{to}}" class="text"><span>{{to}}</span></td>
+                                  <td data-toggle="tooltip" data-placement="top" data-container="tr" data-html="true" title="{{amount}}" class="text"><span>{{{amount}}}</span></td>
+                                </tr>
+                                {{/each}} -->
+                              </tbody>
+                            </table>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+          </div>
+          <div class="tab-pane fade" id="tokens" role="tabpanel" aria-labelledby="tokens-tab">...</div>
+          <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
+                        {{#with validAddress}}
+            <div class="card m-3 shadow">
+              <div class="card-header">
+                {{#if this.valid}}<i class="fas fa-check text-success"></i> Valid QRL address{{else}}<i class="fas fa-times text-danger"></i> Invalid QRL address{{/if}}
+              </div>
+              <div class="card-body">
+                <div class="container">
+                  <div class="row">
+                    <h5 class="hack break-all">{{id}}</h5>
+            <div class="col">
+              {{#if this.valid}}
+                <span class="badge badge-secondary">{{this.signatureScheme}}</span> <span class="badge badge-info">{{this.hashFunction}}</span><br>
+                <span class="text-muted"><span class="hack">{{this.totalSignatures}}</span> total signatures</span><br>
+                <span class="hack">{{this.keysRemaining}}</span> signatures remaining
+                {{else}}
+                <i class="fas {{this.validator.sig.class}}"></i> Signature scheme <span class="badge badge-secondary">{{this.validator.sig.type}}</span> <small class="text-muted">{{this.validator.sig.message}}</small>
+                <br /><i class="fas {{this.validator.hash.class}}"></i> Hash function <span class="badge badge-info">{{this.validator.hash.function}}</span> <small class="text-muted">{{this.validator.hash.message}}</small>
+                <br /><i class="fas {{this.validator.len.class}}"></i> Length <small class="text-muted">address {{this.validator.len.message}}</small>
+                <br /><i class="fas {{this.validator.checksum.class}}"></i> Checksum <small class="text-muted">{{this.validator.checksum.message}}</small>
+                {{/if}}
+              </div>
+<!--             <div class="col">
+               Placeholder
+            </div> -->
+          </div>
+        </div>
       </div>
     </div>
+                {{/with}}
+  </div>
+</div>
+
+          <button class="btn btn-secondary dropdown-toggle ml-3 meta shadow">Meta <i class="pl-1 toggle">&times;</i></button>
+          <div class="container toggle">
+              <div class="mx-auto container border shadow p-2">
+                  <div id="addressjson" style="word-break: break-all;"></div>
+              </div>
+          </div>
+      </div>
   </div>
 </template>
