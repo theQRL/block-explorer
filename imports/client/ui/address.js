@@ -14,7 +14,7 @@ const renderAddress = () => {
         Session.set('address', {
           error: err,
           id: aId,
-          found: false
+          found: false,
         })
         return false
       }

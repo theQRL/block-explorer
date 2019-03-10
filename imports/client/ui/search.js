@@ -8,7 +8,7 @@ const identifySearch = (str) => {
   }
   if (str.length === 79 && str.charAt(0).toLowerCase() === 'q') {
     type.type = 'Address'
-    type.route = `/a/Q${str.slice(1,79)}`
+    type.route = `/a/Q${str.slice(1, 79)}`
     type.method = 'address'
   }
   if (str.length === 78 && str.charAt(0).toLowerCase() !== 'q') {
