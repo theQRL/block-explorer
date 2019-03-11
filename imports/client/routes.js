@@ -31,6 +31,12 @@ FlowRouter.route('/tokens/:tokenText', {
     BlazeLayout.render('body', { main: 'tokens' })
   },
 })
+FlowRouter.route('/stats', {
+  name: 'Stats.home',
+  action() {
+    BlazeLayout.render('body', { main: 'stats' })
+  },
+})
 // FlowRouter.route('/lastblocks', {
 //   name: 'Lastblocks.home',
 //   action() {

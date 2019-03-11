@@ -1,0 +1,73 @@
+<template name="stats">
+  <div class="container-fluid shadow">
+      <div class="row justify-content-between bg-primary text-white align-items-center p-2">
+          <div class="col-12">
+              <h4 class="text-center mb-0">Statistics</h4>
+          </div>
+      </div>
+  </div>
+  <div class="spacer p-1"></div>
+  {{#if loading}}
+    {{>progress}}
+  {{/if}}
+  <div class="data loaded">
+    {{#if loading}}
+    {{else}}
+      <div class="container p-2">
+        <div class="row">
+        <div class="col-4 align-items-center p-2 mb-3"><p><span style="font-size: 3em;">{{totalAddresses}}</span><br><small>TOTAL ADDRESSES</small></p></div>
+        <div class="col-4 align-items-center p-2 mb-3"><p><span style="font-size: 3em;">TO DO</span><br><small>to do</small></p></div>
+        <div class="col-4 align-items-center p-2 mb-3"><p><span style="font-size: 3em;">TO DO</span><br><small>to do</small></p></div>
+        </div>
+        <ul class="nav nav-tabs mb-3" id="statsTab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="richlist-tab" data-toggle="tab" href="#richlist" role="tab" aria-controls="richlist" aria-selected="true">Richlist</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="transactions-tab" data-toggle="tab" href="#transactions" role="tab" aria-controls="transactions" aria-selected="false">Transactions</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="nodes-tab" data-toggle="tab" href="#nodes" role="tab" aria-controls="nodes" aria-selected="false">Nodes</a>
+          </li>
+        </ul>
+        <div class="tab-content" id="addressTabContent">
+
+          <div class="tab-pane fade show active" id="richlist" role="tabpanel" aria-labelledby="richlist-tab">
+          <div class="card m-3 shadow">
+            <div class="card-header">
+              Top 15 balances
+            </div>
+            <div class="card-body">
+              <div class="container">  
+      <div class="table-responsive" style="overflow-x: hidden;">
+      <table class="table table-bordered table-hover table-sm">
+        <thead>
+          <tr>
+            <th class="text" width="120px">Position</th>
+            <th class="text" width="70%">Address</th>
+            <th class="text" width="30%">Balance <small>Quanta</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each richlist}}
+          <tr style="background-color: {{this.css}}" data-txhash="{{this.transaction_hash}}">
+            <td data-toggle="tooltip" data-placement="top" data-container="tr" data-html="true" title="<u>txhash:</u> {{this.transaction_hash}}" style="text-align: right;">{{this.position}}</td>
+            <td data-toggle="{{isTooltipFrom}}" data-placement="top" data-container="tr" data-html="true" title="{{from}}" class="hack text"><span>{{this.address}}</span></td>
+            <td data-toggle="{{isTooltipTo}}" data-placement="top" data-container="tr" data-html="true" title="{{to}}" class="text"><span class="hack">{{this.balance}}</span></td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+  <div class="tab-pane fade show" id="transactions" role="tabpanel" aria-labelledby="transactions-tab">...</div>
+  <div class="tab-pane fade show" id="nodes" role="tabpanel" aria-labelledby="nodes-tab">...</div>
+
+</div>
+</div>
+    {{/if}}
+  </div>
+</template>
