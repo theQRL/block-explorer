@@ -13,6 +13,8 @@ import '../imports/client/ui/block.js'
 import '../imports/client/ui/address.html'
 import '../imports/client/ui/address.js'
 import '../imports/client/ui/progress.html'
+import '../imports/client/ui/stats.html'
+import '../imports/client/ui/stats.js'
 import '../imports/client/routes.js'
 import './test-methods.js'
 
