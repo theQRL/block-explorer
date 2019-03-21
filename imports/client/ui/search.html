@@ -10,10 +10,18 @@
     </form>
 </template>
 <template name="searchpage">
+  {{#if loading}}
+      {{>progress}}
+  {{else}}
+  {{#if noConnection}}
+
+  {{else}}
   <div class="container mt-5">
 <!-- {{ > search }} -->
   <a href="/tx/46b0bc75307c15f08fcdb5c74e87b0cb44c1c8286d3d9ac6faa268de4a5ca3dd">e.g. Tx</a><br>
   <a href="/block/7">e.g. Block</a><br>
   <a href="/a/Q0106001d34628da087339ddd650a843e131fa4a3f3b107e9b6222d609f6dad3860b4798cc5b361">e.g. Address</a>
   </div>
+  {{/if}}
+  {{/if}}
 </template>

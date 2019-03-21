@@ -15,6 +15,8 @@ import {
 const ADD_DATA_RETURN_DELAY = false
 // ^^^
 
+const STATS_CACHE = {}
+
 const verifyDBConnection = () => !(process.env.MONGO_URL.substr(process.env.MONGO_URL.length - 7) === '/meteor')
 
 const sleepFor = (sleepDuration) => {
@@ -200,6 +202,47 @@ const processTx = (input) => {
   delete result._id
   return result
 }
+
+const refreshStats = () => {
+  // richlist
+  const limit = 101
+  if (!verifyDBConnection()) {
+    return false
+  }
+  const result = accounts.find({}, { sort: { balance: -1 }, limit, fields: { balance: 1, _id: 0, address: 1 } }).fetch()
+  if (ADD_DATA_RETURN_DELAY === true) { sleepFor(2000) }
+  if (!result) {
+    return false
+  }
+  const returned = []
+  for (let i = 0; i < result.length; i += 1) {
+    result[i].address = toHexString(result[i].address)
+    if (result[i].balance.low_) {
+      result[i].balance = toLongString(result[i].balance.low_, result[i].balance.high_)
+    } else {
+      result[i].balance = result[i].balance.toString()
+    }
+    if (result[i].address !== '0000000000000000000000000000000000000000000000000000000000000000') {
+      returned.push(result[i])
+    }
+  }
+  STATS_CACHE.richlist = returned
+
+  // total addresses
+  const addresses = accounts.find({}).count()
+  if (addresses === 0) {
+    return false
+  }
+  // need to subtract one to account for the virtual address for unmined coins
+  STATS_CACHE.addresses = addresses - 1
+  return true
+}
+
+refreshStats()
+
+Meteor.setInterval(() => {
+  refreshStats()
+}, 200000)
 
 Meteor.methods({
   tx(txId) {
@@ -533,36 +576,28 @@ Meteor.methods({
     if (limit < 5) { limit = 5 }
     // need to remove unmined coins (000000...00000 address)
     limit += 1
-    if (!verifyDBConnection()) {
-      return { found: false, error: 'No database connection' }
-    }
-    const result = accounts.find({}, { sort: { balance: -1 }, limit, fields: { balance: 1, _id: 0, address: 1 } }).fetch()
-    if (ADD_DATA_RETURN_DELAY === true) { sleepFor(2000) }
-    if (result) {
-      const returned = []
-      for (let i = 0; i < result.length; i += 1) {
-        result[i].address = toHexString(result[i].address)
-        if (result[i].balance.low_) {
-          result[i].balance = toLongString(result[i].balance.low_, result[i].balance.high_)
-        } else {
-          result[i].balance = result[i].balance.toString()
-        }
-        if (result[i].address !== '0000000000000000000000000000000000000000000000000000000000000000') {
-          returned.push(result[i])
-        }
-      }
-      return returned
+    try {
+      if (STATS_CACHE.richlist.length > 0) { return STATS_CACHE.richlist }
+    } catch (e) {
+      return { found: false, error: 'Not found' }
     }
     return { found: false, error: 'Not found' }
   },
 
   totalAddresses() {
-    if (!verifyDBConnection()) {
-      return { found: false, error: 'No database connection' }
+    try {
+      if (STATS_CACHE.addresses > 0) {
+        return { found: true, count: STATS_CACHE.addresses }
+      }
+    } catch (e) {
+      return { found: false, error: 'Not found' }
     }
-    const addresses = accounts.find({}).count()
-    // need to subtract one to account for the virtual address for unmined coins
-    return { found: true, count: addresses - 1 }
+    return { found: false, error: 'Not found' }
+  },
+
+  networkConnection() {
+    if (ADD_DATA_RETURN_DELAY === true) { sleepFor(5000) }
+    return verifyDBConnection()
   },
 
 })
