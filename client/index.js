@@ -1,7 +1,7 @@
 /* eslint no-console: 0 */
 import '../imports/client/ui/home.html'
 import '../imports/client/ui/nav.html'
-// import '../imports/client/ui/home.js'
+import '../imports/client/ui/nav.js'
 import '../imports/client/ui/search.html'
 import '../imports/client/ui/search.js'
 import '../imports/client/ui/tx.html'

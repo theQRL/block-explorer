@@ -40,3 +40,8 @@ Template.search.events({
     }
   },
 })
+
+Template.searchpage.helpers({
+  noConnection: () => Session.get('noConnection'),
+  loading: () => Session.get('loading')
+})

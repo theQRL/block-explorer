@@ -1,4 +1,15 @@
 <template name="nav">
+  {{#if noConnection }}
+  <div class="container">
+    <div class="alert alert-danger" role="alert">
+      <img src="/logo.svg" height="54px" class="mb-3">
+      <h4 class="alert-heading">Connection error</h4>
+      <p>There has been a problem with the QRL Explorer connecting to the QRL network.</p>
+      <hr>
+      <p class="mb-0">Try reconnecting in a few minutes, and if the problem persists contact our <a href="mailto:support@theqrl.org">support team</a></p>
+    </div>
+  </div>
+  {{else}}
 <nav class="navbar navbar-expand-md navbar-light bg-light" id="navbar" data-toggle="affix">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#qrlNavbar" aria-controls="qrlNavbar" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -16,4 +27,5 @@
     {{ > search }}
   </div>
 </nav>
+{{/if}}
 </template>
