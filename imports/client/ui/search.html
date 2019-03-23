@@ -14,7 +14,15 @@
       {{>progress}}
   {{else}}
   {{#if noConnection}}
-
+    <div class="container">
+      <div class="alert alert-danger" role="alert">
+        <img src="/logo.svg" height="54px" class="mb-3">
+        <h4 class="alert-heading">Connection error</h4>
+        <p>There has been a problem with the QRL Explorer connecting to the QRL network.</p>
+        <hr>
+        <p class="mb-0">Try reconnecting in a few minutes, and if the problem persists contact our <a href="mailto:support@theqrl.org">support team</a></p>
+      </div>
+    </div>
   {{else}}
   <div class="container mt-5">
 <!-- {{ > search }} -->

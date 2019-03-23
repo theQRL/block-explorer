@@ -42,6 +42,26 @@ Template.search.events({
 })
 
 Template.searchpage.helpers({
-  noConnection: () => Session.get('noConnection'),
   loading: () => Session.get('loading'),
+  noConnection: () => {
+    // $('div.alert-danger').hide()
+    const c = Session.get('noConnection')
+    const l = true
+    if (c && l) { return true }
+    return false
+  },
+})
+
+Template.searchpage.onCreated(() => {
+  Session.set('loading', true)
+  Meteor.call('networkConnection', (error, result) => {
+    if (error) {
+      Session.set('noConnection', true)
+      Session.set('loading', false)
+      return false
+    }
+    Session.set('noConnection', !result)
+    Session.set('loading', false)
+    return true
+  })
 })

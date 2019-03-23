@@ -24,6 +24,8 @@ const sleepFor = (sleepDuration) => {
   while (new Date().getTime() < now + sleepDuration) { } // eslint-disable-line
 }
 
+
+
 const processTx = (input) => {
   let result = input
   // get additional data depending on transaction type
