@@ -23,20 +23,6 @@ const renderBlock = () => {
       Session.set('loading', false)
       return true
     })
-    //   Meteor.call('QRLvalue', (err, res) => {
-    //     if (err) {
-    //       Session.set('qrl', 'Error getting value from API')
-    //     } else {
-    //       Session.set('qrl', res)
-    //     }
-    //   })
-    //   Meteor.call('status', (err, res) => {
-    //     if (err) {
-    //       Session.set('status', { error: err })
-    //     } else {
-    //       Session.set('status', res)
-    //     }
-    //   })
   }
 }
 
