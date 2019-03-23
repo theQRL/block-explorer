@@ -164,6 +164,126 @@ Template.address.helpers({
     }
     return result
   },
+  addressTx() {
+    if (!(Session.get('loading'))) {
+      try {
+        const tx = Session.get('address').transactions
+        return tx
+      } catch (e) {
+        return false
+      }
+    }
+    return false
+  },
+  rowColour() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') {
+        return 'table-info'
+      }
+      if (this.type === 'TRANSFER_IN' || this.type === 'TRANSFER_OUT') {
+        return 'table-warning'
+      }
+      if (this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
+        return 'table-danger'
+      }
+      if (this.type === 'DOCUMENT_NOTARISATION' || this.type === 'KEYBASE' || this.type === 'MESSAGE') {
+        return 'table-success'
+      }
+      return ''
+    }
+    return false
+  },
+  to() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') {
+        return `Q${this.address_to}`
+      }
+      if (this.type === 'TRANSFER_OUT' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
+        if (this.addresses_to.length === 1) {
+          return `Q${this.addresses_to[0]}`
+        }
+        return `${this.addresses_to.length} addresses`
+      }
+      if (this.type === 'TRANSFER_IN') {
+        return `Q${FlowRouter.getParam('aId').slice(1, 79)}`
+      }
+      if (this.type === 'KEYBASE') {
+        return `${this.keybaseType} ${this.keybaseUser}`
+      }
+      return ''
+    }
+    return false
+  },
+  from() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') {
+        return ''
+      }
+      if (this.type === 'TRANSFER_IN' || this.type === 'TRANSFER_OUT' || this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER' || this.type === 'DOCUMENT_NOTARISATION' || this.type === 'SLAVE' || this.type === 'KEYBASE' || this.type === 'MESSAGE') {
+        return `Q${this.address_from}`
+      }
+      return ''
+    }
+    return false
+  },
+  amount() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') {
+        return `${(this.amount / SHOR_PER_QUANTA).toString()} <small>Quanta</small>`
+      }
+      if (this.type === 'TRANSFER_IN' || this.type === 'TRANSFER_OUT') {
+        if (this.addresses_to.length === 1) {
+          const sum = this.amounts.reduce((partialSum, a) => partialSum + a)
+          return `${numberToString(sum / SHOR_PER_QUANTA)} <small>Quanta</small>`
+        }
+        let thisIndex = 0
+        const addressTo = `${FlowRouter.getParam('aId').slice(1, 79)}`
+        this.addresses_to.forEach((e, i) => {
+          if (e === addressTo) {
+            thisIndex = i
+          }
+        })
+        return `${numberToString(this.amounts[thisIndex] / SHOR_PER_QUANTA)} <small>Quanta</small>`
+      }
+      // get from array
+      if (this.type === 'TOKEN_CREATE' || this.type === 'TOKEN_TRANSFER') {
+        const sum = this.amounts.reduce((partialSum, a) => partialSum + a)
+        // TODO: bug here - this should be token decimals which needs returning in token object
+        return `${numberToString(sum / SHOR_PER_QUANTA)} <small>${this.symbol}</small>`
+      }
+      return ''
+    }
+    return false
+  },
+  quantity() {
+    if (!(Session.get('loading'))) {
+      try {
+        const q = Session.get('address').transactions.length
+        return q
+      } catch (e) {
+        return false
+      }
+    }
+    return false
+  },
+  isTooltipFrom() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'COINBASE') {
+        return ''
+      }
+      return 'tooltip'
+    }
+    return ''
+  },
+  isTooltipTo() {
+    if (!(Session.get('loading'))) {
+      if (this.type === 'SLAVE') {
+        return ''
+      }
+      return 'tooltip'
+    }
+    return ''
+  },
 })
 
 Template.address.events({

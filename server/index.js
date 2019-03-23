@@ -279,6 +279,25 @@ Meteor.methods({
       } else {
         result.balance = result.balance.toString()
       }
+      // next get transactions by type
+      const addressTransactions = []
+      let additionalResult
+      // first TRANSFER_IN
+      additionalResult = transferTxs.find({ addresses_to: fromHexString(noQaddress) }).fetch()
+      additionalResult.forEach((e) => {
+        const processed = processTx(txs.findOne({ transaction_hash: e.transaction_hash }))
+        processed.type = 'TRANSFER_IN'
+        addressTransactions.push(processed)
+      })
+      // next TRANSFER_OUT
+      additionalResult = transferTxs.find({ address_from: fromHexString(noQaddress) }).fetch() // FIXME
+      additionalResult.forEach((e) => {
+        const processed = processTx(e)
+        processed.type = 'TRANSFER_OUT'
+        addressTransactions.push(processed)
+      })
+      result.transactions = addressTransactions
+      // console.log(addressTransactions)
       delete result._id
       return result
     }
