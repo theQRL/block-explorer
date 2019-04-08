@@ -24,7 +24,12 @@ const sleepFor = (sleepDuration) => {
   while (new Date().getTime() < now + sleepDuration) { } // eslint-disable-line
 }
 
-
+let ARGH = transferTxs.find({ addresses_to: { $all: [fromHexString('0105006fa629c7a63f01fe06b1f54cea65231cdbbadd5f782e5b43e54fe2397fa862dd3649cb9b')] } }).fetch()
+// ARGH = transferTxs.findOne()
+// ARGH.addresses_to.forEach((e) => {
+//   console.log(toHexString(e))
+// })
+console.log(ARGH.length)
 
 const processTx = (input) => {
   let result = input
@@ -281,25 +286,33 @@ Meteor.methods({
       } else {
         result.balance = result.balance.toString()
       }
-      // next get transactions by type
-      const addressTransactions = []
-      let additionalResult
-      // first TRANSFER_IN
-      additionalResult = transferTxs.find({ addresses_to: fromHexString(noQaddress) }).fetch()
-      additionalResult.forEach((e) => {
-        const processed = processTx(txs.findOne({ transaction_hash: e.transaction_hash }))
-        processed.type = 'TRANSFER_IN'
-        addressTransactions.push(processed)
-      })
-      // next TRANSFER_OUT
-      additionalResult = transferTxs.find({ address_from: fromHexString(noQaddress) }).fetch() // FIXME
-      additionalResult.forEach((e) => {
-        const processed = processTx(e)
-        processed.type = 'TRANSFER_OUT'
-        addressTransactions.push(processed)
-      })
-      result.transactions = addressTransactions
-      // console.log(addressTransactions)
+      // // // // next get transactions by type
+      // // // const addressTransactions = []
+      let additionalResult = 0
+      // // // // first TRANSFER_IN
+      additionalResult += transferTxs.find({ addresses_to: { $all: [fromHexString(noQaddress)] } }).count()
+      // // // additionalResult.forEach((e) => {
+      // // //   const processed = processTx(txs.findOne({ transaction_hash: e.transaction_hash }))
+      // // //   processed.type = 'TRANSFER_IN'
+      // // //   addressTransactions.push(processed)
+      // // // })
+      // // // // next TRANSFER_OUT
+      additionalResult += txs.find({ address_from: fromHexString(noQaddress) }).count()
+      // // // additionalResult.forEach((e) => {
+      // // //   const processed = processTx(e)
+      // // //   if (processed.type === 'TRANSFER') { processed.type = 'TRANSFER_OUT' }
+      // // //   addressTransactions.push(processed)
+      // // // })
+      additionalResult += txs.find({ master_address: fromHexString(noQaddress) }).count()
+      additionalResult += coinBaseTxs.find({ address_to: fromHexString(noQaddress) }).count()
+      // // // additionalResult.forEach((e) => {
+      // // //   const processed = processTx(e)
+      // // //   if (processed.type === 'TRANSFER') { processed.type = 'TRANSFER_OUT' }
+      // // //   addressTransactions.push(processed)
+      // // // })
+      // // // result.transactions = addressTransactions
+      // // // // console.log(addressTransactions)
+      result.totalTransactions = additionalResult
       delete result._id
       return result
     }
