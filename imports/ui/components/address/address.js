@@ -461,19 +461,6 @@ Template.address.helpers({
 })
 
 Template.address.events({
-  'click #OTS-close, click #OTSclose': () => {
-    Meteor.reconnect()
-    $('.rv-vanilla-modal-overlay-se').removeClass('is-shown')
-    $('.rv-vanilla-modal-overlay-se').hide()
-    $('.rv-vanilla-modal-se').removeClass('rv-vanilla-modal-is-open')
-    $('#OTS-modal').hide()
-  },
-  'click #OTStracker': (event) => {
-    $('.rv-vanilla-modal-overlay-se').addClass('is-shown')
-    $('.rv-vanilla-modal-se').addClass('rv-vanilla-modal-is-open')
-    $('.rv-vanilla-modal-overlay-se').show('fast')
-    $('#OTS-modal').show('fast')
-  },
   'keypress #paginator': (event) => {
     if (event.keyCode === 13) {
       const x = $('#paginator').val()
@@ -567,7 +554,7 @@ Template.address.onRendered(() => {
       jdenticon.update('#identicon', addressToRender)
       // Re-render QR Code
       $('.qr-code-container').empty()
-      $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
+      // $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
     }
   })
 
