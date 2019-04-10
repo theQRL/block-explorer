@@ -38,6 +38,7 @@
         <div class="row"></div>
       </div>
     </div>
+    <div class="ui grid">
     <div class="ui celled horizontal list">
       <div class="item"><strong>Transactions</strong> {{address.state.txcount}}</div>
       <div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>
@@ -46,7 +47,10 @@
       <div class="item"><strong>Total Signatures</strong> {{addressValidation.totalSignatures}}</div>
       <div class="item"><strong>Signatures Remaining</strong> {{addressValidation.keysRemaining}}</div>
       <div class="item"><strong>Hash Function</strong> {{addressValidation.hashFunction}}</div>
+      <div class="item" id="OTStracker"><i class="expand arrows alternate icon"></i>OTS tracker</div>
     </div>
+  </div>
+
   </div>
 
 
@@ -342,6 +346,26 @@
     <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
     <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
     
+</div>
+
+<div class="rv-vanilla-modal-overlay-se">
+<div id="OTS-modal" class="rv-vanilla-modal-se">
+
+  <div class="rv-vanilla-modal-header group">
+    <button class="rv-vanilla-modal-close" id="OTS-close"><span class="text">×</span></button>
+    <h2 class="rv-vanilla-modal-title">OTS tracker</h2>
+  </div>
+  <div class="rv-vanilla-modal-body">
+    <h4>Warning</h4>
+    <p>The OTS tracker uses the blockchain to determine OTS key use.  It will not account for transactions that have not been broadcast to nodes.</p>
+    <p>More about OTS key use in contained in the <a href="https://docs.theqrl.org">documentation</a></p>
+    <div class="ui equal width celled grid">
+    {{{OTStracker}}}
+  </div>
+    <p align="center"><button class="ui red button" id="OTSclose">Close</button></p>
+    <div style="height: 200px;"></div>
+  </div>
+</div>
 </div>
 
 </template>

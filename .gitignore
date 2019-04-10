@@ -7,3 +7,4 @@ node_modules/
 \.idea/
 /production.json
 /localhost.json
+/run.sh
