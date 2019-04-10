@@ -608,46 +608,11 @@ Ellipsis Animation
   transition: 0.4s opacity linear;
 }
 
-.rv-vanilla-modal-se {
-  position: absolute;
-  top: -100%;
-  left: 50%;
-  width: 45%;
-  min-height: 300px;
-  margin: -300px 0 0 -22.5%;
-  background: #fff;
-  z-index: 1000;
-  -webkit-transition: 0.3s all ease-out;
-  transition: 0.3s all ease-out;
-  border-radius: 4px;
-  -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
-  box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.3);
-}
-
 .rv-vanilla-modal-is-open {
   top: 50%;
 }
 
-.rv-vanilla-modal-overlay-se {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  display: none;
-  -webkit-transition: .4s opacity linear;
-  transition: 0.4s opacity linear;
-}
-
 .rv-vanilla-modal-overlay-fi.is-shown {
-  opacity: 1;
-  display: block;
-  position: fixed;
-}
-
-.rv-vanilla-modal-overlay-se.is-shown {
   opacity: 1;
   display: block;
   position: fixed;
@@ -1106,11 +1071,11 @@ table {
   background-color: #d20202;
   color: #fff;
   text-decoration: line-through;
+  padding: 2px !important;
+  font-size: 10px !important;
 }
 .unused {
   background-color: #02d202;
-}
-#OTS-modal {
-  max-height: 80% !important;
-  overflow-y: auto !important;
+  padding: 2px !important;
+  font-size: 10px !important;
 }
