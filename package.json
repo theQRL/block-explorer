@@ -1,6 +1,6 @@
 {
   "name": "block-explorer",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "QRL block explorer",
   "main": "index.js",
   "dependencies": {

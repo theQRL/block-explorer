@@ -49,6 +49,40 @@ const addressResultsRefactor = (res) => {
   return output
 }
 
+async function parseOTS(obj) {
+  const k = Object.keys(obj)
+  let c = 0
+  let ret = ''
+  k.forEach((val) => {
+    let o = '<div class="column '
+    if (obj[val] === 1) {
+      o = `${o}used`
+    } else {
+      o = `${o}unused`
+    }
+    o = `${o}">${val}</div>`
+    c += 1
+    if (c > 10) {
+      ret = `${ret}</div><div class="row">`
+      c -= 10
+    }
+    ret = `${ret}${o}`
+  })
+  console.log(c)
+  if (c < 10) {
+    // add some empty columns
+    for (let i = c; i < 10; i += 1) {
+      ret = `${ret}<div class="column"></div>`
+    }
+  }
+  return ret
+}
+
+async function OTS(obj) {
+  const x = await parseOTS(obj)
+  Session.set('OTStracker', `<div class="row">${x}</div>`)
+}
+
 function loadAddressTransactions(txArray) {
   const request = {
     tx: txArray,
@@ -78,6 +112,8 @@ const getTokenBalances = (getAddress, callback) => {
     if (err) {
       // TODO - Error handling
     } else {
+      // first generate OTS tracker HTML
+      OTS(res.ots.keys)
       // Now for each res.state.token we find, go discover token name and symbol
       // eslint-disable-next-line
       if (res.state.address !== '') {
@@ -419,6 +455,9 @@ Template.address.helpers({
     }
     return false
   },
+  OTStracker() {
+    return Session.get('OTStracker')
+  },
 })
 
 Template.address.events({
@@ -515,7 +554,7 @@ Template.address.onRendered(() => {
       jdenticon.update('#identicon', addressToRender)
       // Re-render QR Code
       $('.qr-code-container').empty()
-      $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
+      // $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
     }
   })
 
