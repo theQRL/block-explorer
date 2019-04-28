@@ -1068,14 +1068,14 @@ table {
   color: #0E5091 !important;
 }
 .used {
-  background-color: #d20202;
+  background-color: rgba(165,37,37,0.85);
   color: #fff;
   text-decoration: line-through;
   padding: 2px !important;
   font-size: 10px !important;
 }
 .unused {
-  background-color: #02d202;
+  background-color: rgba(37,165,37,0.6);
   padding: 2px !important;
   font-size: 10px !important;
 }
