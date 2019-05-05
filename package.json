@@ -21,7 +21,8 @@
     "meteor-node-stubs": "^0.3.3",
     "path": "^0.12.7",
     "sha512": "0.0.1",
-    "tmp": "0.0.33"
+    "tmp": "0.0.33",
+    "snyk": "^1.161.1"
   },
   "private": true,
   "repository": {
@@ -49,5 +50,10 @@
         ]
       }
     }
-  }
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
+  },
+  "snyk": true
 }
