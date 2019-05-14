@@ -6,7 +6,7 @@ import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import './address.html'
 import {
-  bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA,
+  bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst
 } from '../../../startup/both/index.js'
 
 
@@ -166,7 +166,7 @@ const getTokenBalances = (getAddress, callback) => {
 
 
 const renderAddressBlock = () => {
-  const aId = FlowRouter.getParam('aId')
+  const aId = upperCaseFirst(FlowRouter.getParam('aId'))
   let tPage = FlowRouter.getParam('tPage')
   tPage = parseInt(tPage, 10)
   if (!tPage) { tPage = 1 }
@@ -314,7 +314,7 @@ Template.address.helpers({
     }
   },
   QRtext() {
-    return FlowRouter.getParam('aId')
+    return upperCaseFirst(FlowRouter.getParam('aId'))
   },
   qrl() {
     const address = Session.get('address')
@@ -466,7 +466,7 @@ Template.address.events({
       const x = $('#paginator').val()
       const max = Session.get('pages').length
       if ((x < (max + 1)) && (x > 0)) {
-        FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${x}`)
+        FlowRouter.go(`/a/${upperCaseFirst(FlowRouter.getParam('aId'))}/${x}`)
       }
     }
   },
@@ -562,12 +562,12 @@ Template.address.onRendered(() => {
   Session.set('tokensHeld', [])
 
   // Get Tokens and Balances
-  getTokenBalances(FlowRouter.getParam('aId'), () => {
+  getTokenBalances(upperCaseFirst(FlowRouter.getParam('aId')), () => {
     $('#tokenBalancesLoading').hide()
   })
 
   // Render identicon (needs to be here for initial load).
   // Also Session.get('address') is blank at this point
-  $('.qr-code-container').qrcode({ width: 100, height: 100, text: FlowRouter.getParam('aId') })
-  jdenticon.update('#identicon', FlowRouter.getParam('aId')) /* eslint no-undef:0 */
+  $('.qr-code-container').qrcode({ width: 100, height: 100, text: upperCaseFirst(FlowRouter.getParam('aId')) })
+  jdenticon.update('#identicon', upperCaseFirst(FlowRouter.getParam('aId'))) /* eslint no-undef:0 */
 })
