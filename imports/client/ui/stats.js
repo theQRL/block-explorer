@@ -1,3 +1,5 @@
+import validateQrlAddress from '@theqrl/validate-qrl-address'
+
 import {
   SHOR_PER_QUANTA,
   numberWithCommas,
@@ -23,6 +25,7 @@ const renderStats = () => {
       })
     })
     Session.set('stats', { richlist })
+
     Meteor.call('totalAddresses', (errTA, resTA) => {
       if (err) {
         console.log(err)
@@ -35,6 +38,33 @@ const renderStats = () => {
       Session.set('loading', false)
       return true
     })
+
+    Meteor.call('totalTransactions', (errTA, resTA) => {
+      if (err) {
+        console.log(err)
+        return false
+      }
+      const soFar = Session.get('stats')
+      soFar.transactions = resTA
+      Session.set('stats', soFar)
+      $('.data').removeClass('loaded')
+      Session.set('loading', false)
+      return true
+    })
+
+    Meteor.call('networkStart', (errTA, resTA) => {
+      if (err) {
+        console.log(err)
+        return false
+      }
+      const soFar = Session.get('stats')
+      soFar.start = resTA
+      Session.set('stats', soFar)
+      $('.data').removeClass('loaded')
+      Session.set('loading', false)
+      return true
+    })
+
     return true
   })
 }
@@ -62,6 +92,34 @@ Template.stats.helpers({
       return ta
     } catch (e) {
       return false
+    }
+  },
+  totalTransactions() {
+    try {
+      const ta = Session.get('stats').transactions.count // eslint-disable-line
+      return ta
+    } catch (e) {
+      return false
+    }
+  },
+  uptime() {
+    try {
+      const ta = Session.get('stats').start.count // eslint-disable-line
+      const x = moment.unix(ta)
+      const today = moment().startOf('day')
+      return Math.round(moment.duration(today - x).asDays())
+    } catch (e) {
+      return false
+    }
+  },
+})
+
+Template.stats.events({
+  'click tr': (event) => {
+    if (event.target.innerHTML.length === 79) {
+      if (validateQrlAddress.hexString(event.target.innerHTML).result) {
+        FlowRouter.go(`/a/${event.target.innerHTML}`)
+      }
     }
   },
 })

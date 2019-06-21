@@ -242,6 +242,14 @@ const refreshStats = () => {
   }
   // need to subtract one to account for the virtual address for unmined coins
   STATS_CACHE.addresses = addresses - 1
+
+  // total transactions
+  const transactions = txs.find({}).count()
+  STATS_CACHE.transactions = transactions
+
+  // uptime
+  STATS_CACHE.start = blocks.findOne({ block_number: 0 }).timestamp
+
   return true
 }
 
@@ -622,6 +630,28 @@ Meteor.methods({
     try {
       if (STATS_CACHE.addresses > 0) {
         return { found: true, count: STATS_CACHE.addresses }
+      }
+    } catch (e) {
+      return { found: false, error: 'Not found' }
+    }
+    return { found: false, error: 'Not found' }
+  },
+
+  networkStart() {
+    try {
+      if (STATS_CACHE.start > 0) {
+        return { found: true, count: STATS_CACHE.start }
+      }
+    } catch (e) {
+      return { found: false, error: 'Not found' }
+    }
+    return { found: false, error: 'Not found' }
+  },
+
+  totalTransactions() {
+    try {
+      if (STATS_CACHE.transactions > 0) {
+        return { found: true, count: STATS_CACHE.transactions }
       }
     } catch (e) {
       return { found: false, error: 'Not found' }
