@@ -12,5 +12,7 @@
     "mathjs": "^5.5.0",
     "meteor-node-stubs": "^0.4.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "cypress": "^3.3.1"
+  }
 }
