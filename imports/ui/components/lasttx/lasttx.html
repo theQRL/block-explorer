@@ -125,7 +125,7 @@
       </div>
       {{/if}}
 
-      {{#if isMessageTxn this.tx.transactionType}}
+      {{#if isMessageTxn this.explorer.type}}
       <div class="ui icon message transactionRecord">
         <img class="transactionTypeImage" src="/img/icons/send.png" />
         <div class="content">
@@ -151,6 +151,24 @@
             {{ts}}
           </div>
           Document Notarisation | Block <a href="/block/{{block}}">{{block}}</a>
+          <p class="transactionAddress value">
+            {{this.tx.transaction_hash}}
+          </p>
+        </div>
+        <div class="floatright ta-c">
+          <a href="/tx/{{this.tx.transaction_hash}}"><small>View<br>Transaction</small></a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isKeybaseTxn this.explorer.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            {{ts}}
+          </div>
+          Keybase | Block <a href="/block/{{block}}">{{block}}</a>
           <p class="transactionAddress value">
             {{this.tx.transaction_hash}}
           </p>
@@ -272,6 +290,23 @@
         <div class="content">
           <div class="header">
             Document Notarisation | Unconfirmed | First Seen: {{ts}}
+          </div>
+          <p class="transactionAddress value">
+            {{this.tx.transaction_hash}}
+          </p>
+        </div>
+        <div class="floatright ta-c">
+          <a href="/tx/{{this.tx.transaction_hash}}"><small>View<br>Transaction</small></a>
+        </div>
+      </div>
+      {{/if}}
+
+      {{#if isKeybaseTxn this.explorer.type}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <div class="content">
+          <div class="header">
+            Keybase | Unconfirmed | First Seen: {{ts}}
           </div>
           <p class="transactionAddress value">
             {{this.tx.transaction_hash}}

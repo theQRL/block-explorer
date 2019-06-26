@@ -91,6 +91,12 @@ Template.lastunconfirmedtx.helpers({
     }
     return false
   },
+  isKeybaseTxn(txType) {
+    if (txType === 'KEYBASE') {
+      return true
+    }
+    return false
+  },
 })
 
 Template.lastunconfirmedtx.events({
