@@ -116,6 +116,23 @@
     </div>
     {{/if}}
 
+    {{#if isKeybaseTxn this.explorer.type}}
+    <div class="ui icon message transactionRecord">
+      <img class="transactionTypeImage" src="/img/icons/receive.png" />
+      <div class="content">
+        <div class="header">
+          Keybase | Unconfirmed | First Seen: {{ts}}
+        </div>
+        <p class="transactionAddress">
+          {{this.tx.transaction_hash}}
+        </p>
+      </div>
+      <div class="floatright">
+        <a href="/tx/{{this.tx.transaction_hash}}">View Transaction &gt;</a>
+      </div>
+    </div>
+    {{/if}}
+
   {{/each}}
 {{/if}} {{/with}}
 

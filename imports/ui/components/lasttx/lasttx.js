@@ -75,13 +75,19 @@ Template.lasttx.helpers({
     return false
   },
   isMessageTxn(txType) {
-    if (txType.toLowerCase() === 'message') {
+    if (txType === 'MESSAGE') {
       return true
     }
     return false
   },
   isDocumentNotarisation(txType) {
     if (txType === 'DOCUMENT_NOTARISATION') {
+      return true
+    }
+    return false
+  },
+  isKeybaseTxn(txType) {
+    if (txType === 'KEYBASE') {
       return true
     }
     return false
