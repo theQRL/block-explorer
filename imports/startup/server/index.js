@@ -25,6 +25,7 @@ BrowserPolicy.content.allowFontOrigin('cdn.jsdelivr.net')
 BrowserPolicy.content.allowScriptOrigin('cdn.jsdelivr.net')
 BrowserPolicy.content.allowScriptOrigin('cdnjs.cloudflare.com')
 BrowserPolicy.content.allowFontDataUrl('cdnjs.cloudflare.com')
+BrowserPolicy.content.allowConnectOrigin('wss://*.theqrl.org:*')
 
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
