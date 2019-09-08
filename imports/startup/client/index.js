@@ -1,5 +1,6 @@
 // Import client startup through a single index entry point
 import './routes.js'
+import './grpc-console-tests.js'
 import { EXPLORER_VERSION } from '../both/index.js'
 
 global.Buffer = global.Buffer || require('buffer').Buffer // eslint-disable-line

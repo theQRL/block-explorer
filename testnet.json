@@ -1,0 +1,10 @@
+{
+  "glip": {
+    "webhook": "INSERT GLIP WEBHOOK HTTPS:// ADDRESS HERE"
+  },
+  "api": {
+    "primaryNode": "140.82.57.210:19009",
+    "secondaryNode": "140.82.57.210:19009",
+    "tertiaryNode": "140.82.57.210:19009"
+  }
+}

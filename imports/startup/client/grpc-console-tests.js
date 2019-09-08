@@ -1,6 +1,12 @@
 /* eslint no-console: 0 */
 // const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
 
+import {
+  bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst
+} from '../both/index.js'
+
+global.Buffer = global.Buffer || require('buffer').Buffer // eslint-disable-line
+
 const addHex = (b) => {
   const result = b
   result.header.hash_header_hex = Buffer.from(result.header.hash_header).toString('hex')
@@ -11,78 +17,24 @@ Meteor.call('getStats', (err, res) => {
   if (err) {
     console.log(err.message)
   } else {
-    console.log(res)
+    console.log('getStats', res)
   }
 })
 
-let req = {
-  query: Buffer.from(('63e4fc9803fb0c44d98dbff04f54ca2592e4faa9964bac2ed4f5715fc753c54a').toString()),
-}
-Meteor.call('getObject', req, (err, res) => {
+let req = '1aa57ca12f6f18fd319fa864822f05e945a9b0f089d3be5983c9c29b6b9f77eb'
+Meteor.call('txhash', req, (err, res) => {
   if (err) {
     console.log(err.message)
   } else {
-    console.log(res)
+    console.log('txhash', res)
   }
 })
 
-req = {
-  query: Buffer.from(('150').toString()),
-}
-Meteor.call('getObject', req, (err, res) => {
-  if (err) {
-    console.log('GET BLOCK 0: - **ERROR**')
-    console.log(err.message)
-  } else {
-    console.log('GET BLOCK 0:')
-    console.log(res)
-  }
-})
-
-
-req = { filter: 'BLOCKHEADERS', offset: 0, quantity: 5 }
-Meteor.call('getLatestData', req, (err, res) => {
-  if (err) {
-    console.log('LATEST BLOCKHEADERS: - **ERROR**')
-    console.log(err.message)
-  } else {
-    console.log('LATEST BLOCKHEADERS:')
-    res.blockheaders = res.blockheaders.reverse()
-    const editedBlockheaders = []
-    res.blockheaders.forEach((bh) => {
-      editedBlockheaders.push(addHex(bh))
-    })
-    res.blockheaders = editedBlockheaders
-    console.log(res)
-  }
-})
-
-
-req = { filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 }
-Meteor.call('getLatestData', req, (err, res) => {
-  if (err) {
-    console.log('LATEST TRANSACTIONS_UNCONFIRMED: - **ERROR**')
-    console.log(err.message)
-  } else {
-    console.log('LATEST TRANSACTIONS_UNCONFIRMED:')
-    console.log(res)
-  }
-})
-
-req = { filter: 'TRANSACTIONS', offset: 0, quantity: 5 }
-Meteor.call('getLatestData', req, (err, res) => {
-  if (err) {
-    console.log('LATEST TRANSACTIONS: - **ERROR**')
-    console.log(err.message)
-  } else {
-    console.log('LATEST TRANSACTIONS:')
-    console.log(res)
-  }
-})
-
-const address = Buffer.from('Q010600647bdcb1548622afa0a92ec1ba7b5d0fc212a3f2ae69fd830ac6ce01de5d94f1a66a7699'.substring(1), 'hex')
+const address = Buffer.from('Q0105000bb5422d57e569331055dcee3a1bc0334a439d299105d2a149ac75beba95cebd05d2478f'.substring(1), 'hex')
 req = {
   address,
+  exclude_ots_bitfield: false,
+  exclude_transaction_hashes: false,
 }
 Meteor.call('getAddressState', req, (err, res) => {
   if (err) {
@@ -90,10 +42,33 @@ Meteor.call('getAddressState', req, (err, res) => {
     console.log(err.message)
   } else {
     console.log('ADDRESS STATE:')
-    console.log(res)
+    console.log('getAddressState', res)
   }
 })
 
+/*
+message GetTransactionsByAddressReq {
+    bytes address = 1;
+    uint64 item_per_page = 2;
+    uint64 page_number = 3;
+}
+ */
+
+ const addresstx = anyAddressToRaw('Q0105000bb5422d57e569331055dcee3a1bc0334a439d299105d2a149ac75beba95cebd05d2478f')
+ req = {
+   address: addresstx,
+   item_per_page: 10,
+   page_number: 1,
+ }
+ Meteor.call('getTransactionsByAddress', req, (err, res) => {
+   if (err) {
+     console.log('ADDRESS STATE: - **ERROR**')
+     console.log(err.message)
+   } else {
+     console.log('TX FOR ADDRESS:')
+     console.log('getTransactionsByAddress', res)
+   }
+ })
 
 // req = { filter: 'CURRENT', offset: 0, quantity: 5 }
 // Meteor.call('stakers', req, (err, res) => {

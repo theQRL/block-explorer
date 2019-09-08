@@ -113,7 +113,7 @@ const loadGrpcClient = (endpoint, callback) => {
         const grpcObject = grpc.load(qrlProtoFilePath)
         // Create the gRPC Connection
         qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
-        console.log(`qrlClient loaded for ${endpoint}`)
+        console.log(`qrlClient loaded for ${endpoint} from ${qrlProtoFilePath}`)
         callback(null, true)
       })
     }
@@ -278,6 +278,46 @@ const qrlApi = (api, request, callback) => {
   }
 }
 
+const helpersaddressTransactions = (response) => {
+  const output = []
+  console.log(response)
+  _.each(response.transactions_detail, (tx) => {
+    const txEdited = tx
+    console.log('tx.transfer', tx.transfer)
+    if (tx.tx.transfer) {
+      const hexlified = []
+      _.each(tx.tx.transfer.addrs_to, (txOutput) => {
+        console.log('formatting: ', txOutput)
+        hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
+      })
+      txEdited.tx.transfer.addrs_to = hexlified
+    }
+    if (tx.tx.coinbase) {
+      if (tx.tx.coinbase.addr_to) {
+        txEdited.tx.coinbase.addr_to = `Q${Buffer.from(txEdited.tx.coinbase.addr_to).toString('hex')}`
+      }
+    }
+    if (tx.tx.transaction_hash) {
+      txEdited.tx.transaction_hash = Buffer.from(txEdited.tx.transaction_hash).toString('hex')
+    }
+    if (tx.tx.master_addr) {
+      txEdited.tx.master_addr = Buffer.from(txEdited.tx.master_addr).toString('hex')
+    }
+    if (tx.tx.public_key) {
+      txEdited.tx.public_key = Buffer.from(txEdited.tx.public_key).toString('hex')
+    }
+    if (tx.tx.signature) {
+      txEdited.tx.signature = Buffer.from(txEdited.tx.signature).toString('hex')
+    }
+    if (tx.block_header_hash) {
+      txEdited.block_header_hash = Buffer.from(txEdited.block_header_hash).toString('hex')
+    }
+    txEdited.addr_from = `Q${Buffer.from(txEdited.addr_from).toString('hex')}`
+    output.push(txEdited)
+  })
+  return response
+}
+
 const getAddressState = (request, callback) => {
   try {
     qrlApi('GetAddressState', request, (error, response) => {
@@ -289,8 +329,9 @@ const getAddressState = (request, callback) => {
         const newOtsBitfield = {}
         let lowestUnusedOtsKey = -1
         let otsBitfieldLength = 0
-
-        const thisOtsBitfield = response.state.ots_bitfield
+        let thisOtsBitfield = []
+        // console.log('response.state.ots_bitfield=', response.state.ots_bitfield)
+        if (response.state.ots_bitfield !== undefined) { thisOtsBitfield = response.state.ots_bitfield }
         thisOtsBitfield.forEach((item, index) => {
           const thisDecimal = new Uint8Array(item)[0]
           const thisBinary = decimalToBinary(thisDecimal).reverse()
@@ -340,6 +381,10 @@ const getAddressState = (request, callback) => {
         response.ots.keys = newOtsBitfield
         response.ots.nextKey = lowestUnusedOtsKey
         response.ots.keysConsumed = totalKeysConsumed
+
+        if (response.state.address) {
+          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+        }
 
         callback(null, response)
       }
@@ -411,6 +456,23 @@ export const getObject = (request, callback) => {
     })
   } catch (error) {
     const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/GetObject**')
+    callback(myError, null)
+  }
+}
+
+export const getTransactionsByAddress = (request, callback) => {
+  try {
+    qrlApi('GetTransactionsByAddress', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetTransactionsByAddress', '**ERROR/GetTransactionsByAddress**')
+        callback(myError, null)
+      } else {
+        // console.log(response)
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetTransactionsByAddress', '**ERROR/GetTransactionsByAddress**')
     callback(myError, null)
   }
 }
@@ -819,6 +881,14 @@ Meteor.methods({
     this.unblock()
     const response = Meteor.wrapAsync(getAddressState)(request)
     return response
+  },
+
+  getTransactionsByAddress(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getTransactionsByAddress)(request)
+    console.table(response)
+    return helpersaddressTransactions(response)
   },
 
   connectionStatus() {
