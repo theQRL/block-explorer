@@ -204,7 +204,7 @@ const renderAddressBlock = () => {
         }
         Session.set('address', addressResultsRefactor(res))
         Session.set('fetchedTx', false)
-        const numPages = Math.ceil(res.state.transaction_hash_count / 10) - 1
+        const numPages = Math.ceil(res.state.transaction_hash_count / 10)
         const pages = []
         while (pages.length !== numPages) {
           pages.push({
@@ -318,18 +318,38 @@ Template.address.helpers({
       return false
     }
   },
-  ReceivedAmount(tx) {
-    console.log('tx', tx)
+  receivedAmount(tx) {
     const a = Session.get('address').state.address
     const outputs = tx.transfer
     if (outputs) {
       let amount = 0
       _.each(outputs.addrs_to, (element, key) => {
         if (element === a) {
-          amount += outputs.amounts[key]
+          amount += (outputs.amounts[key] / SHOR_PER_QUANTA)
         }
       })
-      return amount / SHOR_PER_QUANTA
+      return amount
+    }
+    return ''
+  },
+  sendingOutputs(outputs) {
+    console.log('outputs', outputs)
+    const result = []
+    _.each(outputs.transfer.addrs_to, (element, key) => {
+      console.log('made it here')
+      result.push({ to: element, amount: (outputs.transfer.amounts[key] / SHOR_PER_QUANTA) })
+    })
+    console.log('return in sendingOutputs', result)
+    return result
+  },
+  totalTransferred(tx) {
+    const outputs = tx.transfer
+    if (outputs) {
+      let amount = 0
+      _.each(outputs.amounts, (element) => {
+        amount += element / SHOR_PER_QUANTA
+      })
+      return amount
     }
     return ''
   },
@@ -346,7 +366,7 @@ Template.address.helpers({
   isThisAddress(address) {
     try {
       console.log(address)
-      if (address === rawAddressToB32Address(anyAddressToRaw(Session.get('address').state.address))) {
+      if (address === Session.get('address').state.address) {
         console.log('isThisAddress ping true on ', address)
         return true
       }
@@ -508,7 +528,7 @@ Template.address.helpers({
 Template.address.events({
   'keypress #paginator': (event) => {
     if (event.keyCode === 13) {
-      const x = $('#paginator').val()
+      const x = parseInt($('#paginator').val(), 10)
       const max = Session.get('pages').length
       if ((x < (max + 1)) && (x > 0)) {
         FlowRouter.go(`/a/${upperCaseFirst(FlowRouter.getParam('aId'))}/${x}`)

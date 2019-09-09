@@ -101,8 +101,8 @@
               </div>
               <p class="transactionAddress value">
                 {{#if isThisAddress this.addr_from}}
-                  {{#each this.tx.transfer.addrs_to}}
-                    {{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}} - {{getAmount @index}}<br />
+                  {{#each sendingOutputs this}}
+                    {{this.amount}} &raquo; {{this.to}}<br />
                   {{/each}}
                 {{else}}
                   {{# if bech32}}{{this.addr_from}}{{else}}{{this.addr_from}}{{/if}}
@@ -110,7 +110,7 @@
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{#if isThisAddress this.addr_from}} {{this.totalTransferred}} {{else}} {{ReceivedAmount this}} {{/if}} Quanta &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">{{#if isThisAddress this.addr_from}} {{totalTransferred this}} {{else}} {{receivedAmount this}} {{/if}} Quanta &gt;</a>
             </div>
           </div>
           {{/if}}
