@@ -477,19 +477,19 @@ Template.address.helpers({
     return false
   },
   isMessageTxn(txType) {
-    if (txType === 'MESSAGE') {
+    if (txType === 'message') {
       return true
     }
     return false
   },
   isKeybaseTxn(txType) {
-    if (txType === 'KEYBASE') {
+    if (txType === 'keybase') {
       return true
     }
     return false
   },
   isDocumentNotarisation(txType) {
-    if (txType === 'DOCUMENT_NOTARISATION') {
+    if (txType === 'document_notarisation') {
       return true
     }
     return false
