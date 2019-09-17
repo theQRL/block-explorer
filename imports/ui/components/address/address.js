@@ -635,6 +635,6 @@ Template.address.onRendered(() => {
 
   // Render identicon (needs to be here for initial load).
   // Also Session.get('address') is blank at this point
-  $('.qr-code-container').qrcode({ width: 100, height: 100, text: upperCaseFirst(FlowRouter.getParam('aId')) })
-  jdenticon.update('#identicon', upperCaseFirst(FlowRouter.getParam('aId'))) /* eslint no-undef:0 */
+  //$('.qr-code-container').qrcode({ width: 100, height: 100, text: upperCaseFirst(FlowRouter.getParam('aId')) })
+  //jdenticon.update('#identicon', upperCaseFirst(FlowRouter.getParam('aId'))) /* eslint no-undef:0 */
 })
