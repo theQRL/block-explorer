@@ -280,14 +280,13 @@ const qrlApi = (api, request, callback) => {
 
 const helpersaddressTransactions = (response) => {
   const output = []
-  console.log(response)
+  // console.log(response)
   _.each(response.transactions_detail, (tx) => {
     const txEdited = tx
-    console.log('tx.transfer', tx.transfer)
     if (tx.tx.transfer) {
       const hexlified = []
       _.each(tx.tx.transfer.addrs_to, (txOutput) => {
-        console.log('formatting: ', txOutput)
+        // console.log('formatting: ', txOutput)
         hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
       })
       txEdited.tx.transfer.addrs_to = hexlified
@@ -318,6 +317,23 @@ const helpersaddressTransactions = (response) => {
   return response
 }
 
+const getOTS = (request, callback) => {
+  try {
+    qrlApi('GetOTS', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetOTS', '**ERROR/getOTS** ')
+        callback(myError, null)
+      } else {
+        // console.log(response)
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetOTS', '**ERROR/GetOTS**')
+    callback(myError, null)
+  }
+}
+
 const getAddressState = (request, callback) => {
   try {
     qrlApi('GetAddressState', request, (error, response) => {
@@ -325,6 +341,7 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
         callback(myError, null)
       } else {
+        // console.log(response)
         // Parse OTS Bitfield, and grab the lowest unused key
         const newOtsBitfield = {}
         let lowestUnusedOtsKey = -1
@@ -489,20 +506,23 @@ export const apiCall = (apiUrl, callback) => {
 }
 
 export const makeTxHumanReadable = (item) => {
-  let output
-  if (item.transaction.tx.transactionType === 'transfer_token') {
-    try {
-      // Request Token Decimals / Symbol
-      const symbolRequest = { query: item.transaction.tx.transfer_token.token_txhash }
-      const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-      output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
-    } catch (e) {
-      console.log('ERROR in makeTxHumanReadable', e)
+  if (item.found !== false) {
+    let output
+    if (item.transaction.tx.transactionType === 'transfer_token') {
+      try {
+        // Request Token Decimals / Symbol
+        const symbolRequest = { query: item.transaction.tx.transfer_token.token_txhash }
+        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+        output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
+      } catch (e) {
+        console.log('ERROR in makeTxHumanReadable', e)
+      }
+    } else {
+      output = helpers.txhash(item)
     }
-  } else {
-    output = helpers.txhash(item)
+    return output
   }
-  return output
+  return item
 }
 
 export const makeTxListHumanReadable = (txList, confirmed) => {
@@ -591,10 +611,14 @@ Meteor.methods({
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
       const formattedData = makeTxHumanReadable(response)
-      if (formattedData.transaction.header !== null) {
-        // not unconfirmed so insert into cache
-        updateAutoIncrement()
-        blockData.insert({ txId, formattedData })
+      try {
+        if (formattedData.transaction.header !== null) {
+          // not unconfirmed so insert into cache
+          updateAutoIncrement()
+          blockData.insert({ txId, formattedData })
+        }
+      } catch (e) {
+        console.log('Null Tx ignored')
       }
       // return to client
       return formattedData
@@ -880,6 +904,13 @@ Meteor.methods({
     check(request, Object)
     this.unblock()
     const response = Meteor.wrapAsync(getAddressState)(request)
+    return response
+  },
+
+  getOTS(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getOTS)(request)
     return response
   },
 
