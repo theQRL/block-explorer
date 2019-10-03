@@ -7,7 +7,8 @@ import {
   hexOrB32,
   numberToString,
   SHOR_PER_QUANTA,
-  upperCaseFirst
+  upperCaseFirst,
+  decimalToBinary,
 } from '../both/index.js'
 
 global.Buffer = global.Buffer || require('buffer').Buffer // eslint-disable-line
@@ -37,7 +38,7 @@ Meteor.call('txhash', req, (err, res) => {
   }
 })
 
-const address = Buffer.from('Q0105000bb5422d57e569331055dcee3a1bc0334a439d299105d2a149ac75beba95cebd05d2478f'.substring(1), 'hex')
+const address = Buffer.from('Q0105005a4749998aa0eb1b7125e5100bcbc8048b583eb582853db7451d005ed850f2d0fd52cd7c'.substring(1), 'hex')
 req = {
   address,
   exclude_ots_bitfield: false,
@@ -70,6 +71,44 @@ Meteor.call('getTransactionsByAddress', req, (err, res) => {
   }
 })
 
+const otsParse = (response) => {
+  // Parse OTS Bitfield, and grab the lowest unused key
+  const newOtsBitfield = {}
+  let lowestUnusedOtsKey = -1
+  // let otsBitfieldLength = 0
+  let thisOtsBitfield = []
+  // console.log('response.ots_bitfield_by_page.ots_bitfield=', response.ots_bitfield_by_page.ots_bitfield)
+  if (response.ots_bitfield_by_page[0].ots_bitfield !== undefined) {
+    thisOtsBitfield = response.ots_bitfield_by_page[0].ots_bitfield
+  }
+  thisOtsBitfield.forEach((item, index) => {
+    const thisDecimal = new Uint8Array(item)[0]
+    const thisBinary = decimalToBinary(thisDecimal).reverse()
+    const startIndex = index * 8
+
+    for (let i = 0; i < 8; i += 1) {
+      const thisOtsIndex = startIndex + i
+
+      // Add to parsed array
+      newOtsBitfield[thisOtsIndex] = thisBinary[i]
+
+      // Check if this is lowest unused key
+      if ((thisBinary[i] === 0) && ((thisOtsIndex < lowestUnusedOtsKey) || (lowestUnusedOtsKey === -1))) {
+        lowestUnusedOtsKey = thisOtsIndex
+      }
+
+      // Increment otsBitfieldLength
+      // otsBitfieldLength += 1
+    }
+  })
+
+  // Add in OTS fields to response
+  const ots = {}
+  ots.keys = newOtsBitfield
+  ots.nextKey = lowestUnusedOtsKey
+  return ots
+}
+
 req = {
   address: addresstx,
   page_from: 1,
@@ -83,5 +122,6 @@ Meteor.call('getOTS', req, (err, res) => {
   } else {
     console.log('TX FOR ADDRESS:')
     console.log('getOTS', res)
+    console.log(otsParse(res))
   }
 })

@@ -6,7 +6,7 @@ import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import './address.html'
 import {
-  bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst
+  bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst, decimalToBinary,
 } from '../../../startup/both/index.js'
 
 
@@ -55,28 +55,27 @@ async function parseOTS(obj) {
   const k = Object.keys(obj)
   let c = 0
   let ret = ''
-  // k.forEach((val) => {
-  //   let o = '<div class="column '
-  //   if (obj[val] === 1) {
-  //     o = `${o}used`
-  //   } else {
-  //     o = `${o}unused`
-  //   }
-  //   o = `${o}">${val}</div>`
-  //   c += 1
-  //   if (c > 10) {
-  //     ret = `${ret}</div><div class="row">`
-  //     c -= 10
-  //   }
-  //   ret = `${ret}${o}`
-  // })
-  // console.log(c)
-  // if (c < 10) {
-  //   // add some empty columns
-  //   for (let i = c; i < 10; i += 1) {
-  //     ret = `${ret}<div class="column"></div>`
-  //   }
-  // }
+  k.forEach((val) => {
+    let o = '<div class="column '
+    if (obj[val] === 1) {
+      o = `${o}used`
+    } else {
+      o = `${o}unused`
+    }
+    o = `${o}">${val}</div>`
+    c += 1
+    if (c > 10) {
+      ret = `${ret}</div><div class="row">`
+      c -= 10
+    }
+    ret = `${ret}${o}`
+  })
+  if (c < 10) {
+    // add some empty columns
+    for (let i = c; i < 10; i += 1) {
+      ret = `${ret}<div class="column"></div>`
+    }
+  }
   return ret
 }
 
@@ -88,9 +87,9 @@ async function OTS(obj) {
 function loadAddressTransactions(aId, page) {
   Session.set('addressTransactions', [])
   $('#loadingTransactions').show()
-  console.log('Getting transactions for page ', page)
+  // console.log('Getting transactions for page ', page)
   const addresstx = anyAddressToRaw(aId)
-  request = {
+  const request = {
     address: addresstx,
     item_per_page: 10,
     page_number: page,
@@ -176,6 +175,37 @@ const getTokenBalances = (getAddress, callback) => {
   */
 }
 
+const otsParse = (response, totalSignatures) => {
+  // Parse OTS Bitfield, and grab the lowest unused key
+  let newOtsBitfield = {}
+  let thisOtsBitfield = []
+  if (response.ots_bitfield_by_page[0].ots_bitfield !== undefined) {
+    thisOtsBitfield = response.ots_bitfield_by_page[0].ots_bitfield
+  }
+  thisOtsBitfield.forEach((item, index) => {
+    const thisDecimal = new Uint8Array(item)[0]
+    const thisBinary = decimalToBinary(thisDecimal).reverse()
+    const startIndex = index * 8
+    for (let i = 0; i < 8; i += 1) {
+      const thisOtsIndex = startIndex + i
+      // Add to parsed array unless we have reached the end of the signatures
+      if (thisOtsIndex < totalSignatures) {
+        newOtsBitfield[thisOtsIndex] = thisBinary[i]
+      }
+    }
+  })
+  // console.log('otslen', newOtsBitfield)
+  if (newOtsBitfield.length > totalSignatures) {
+    newOtsBitfield = newOtsBitfield.slice(0, totalSignatures + 1)
+  }
+
+  // Add in OTS fields to response
+  const ots = {}
+  ots.keys = newOtsBitfield
+  ots.nextKey = response.next_unused_ots_index
+  // console.log('ots:', ots)
+  return ots
+}
 
 const renderAddressBlock = () => {
   const aId = upperCaseFirst(FlowRouter.getParam('aId'))
@@ -202,24 +232,42 @@ const renderAddressBlock = () => {
             res.state.empty_warning = false
           }
         }
-        Session.set('address', addressResultsRefactor(res))
-        Session.set('fetchedTx', false)
-        const numPages = Math.ceil(res.state.transaction_hash_count / 10)
-        const pages = []
-        while (pages.length !== numPages) {
-          pages.push({
-            number: pages.length + 1,
-            from: ((pages.length + 1) * 10) + 1,
-            to: ((pages.length + 1) * 10) + 10,
-          })
-        }
-        // let txArray = null
-        Session.set('pages', pages)
-        Session.set('active', tPage)
-        const startIndex = (tPage - 1) * 10
-        // txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
-        Session.set('fetchedTx', false)
-        loadAddressTransactions(aId, tPage)
+
+        req.page_from = 1
+        req.page_count = 1
+        req.unused_ots_index_from = 0
+
+        Meteor.call('getOTS', req, (error, result) => {
+          if (err) {
+            Session.set('address', { error, id: aId })
+          } else {
+            const ots = otsParse(result, qrlAddressValdidator.hexString(res.state.address).sig.number)
+            res.ots = ots
+            res.ots.keysConsumed = res.state.used_ots_key_count
+
+            // generate OTS tracker HTML
+            OTS(res.ots.keys)
+
+            Session.set('address', addressResultsRefactor(res))
+            Session.set('fetchedTx', false)
+            const numPages = Math.ceil(res.state.transaction_hash_count / 10)
+            const pages = []
+            while (pages.length !== numPages) {
+              pages.push({
+                number: pages.length + 1,
+                from: ((pages.length + 1) * 10) + 1,
+                to: ((pages.length + 1) * 10) + 10,
+              })
+            }
+            // let txArray = null
+            Session.set('pages', pages)
+            Session.set('active', tPage)
+            // const startIndex = (tPage - 1) * 10
+            // txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
+            Session.set('fetchedTx', false)
+            loadAddressTransactions(aId, tPage)
+          }
+        })
       }
     })
   }
@@ -312,7 +360,7 @@ Template.address.helpers({
 
         transactions.push(y)
       })
-      console.log('transactions', transactions)
+      // console.log('transactions', transactions)
       return transactions
     } catch (e) {
       return false
@@ -333,13 +381,12 @@ Template.address.helpers({
     return ''
   },
   sendingOutputs(outputs) {
-    console.log('outputs', outputs)
+    // console.log('outputs', outputs)
     const result = []
     _.each(outputs.transfer.addrs_to, (element, key) => {
-      console.log('made it here')
       result.push({ to: element, amount: (outputs.transfer.amounts[key] / SHOR_PER_QUANTA) })
     })
-    console.log('return in sendingOutputs', result)
+    // console.log('return in sendingOutputs', result)
     return result
   },
   totalTransferred(tx) {
@@ -365,9 +412,9 @@ Template.address.helpers({
   },
   isThisAddress(address) {
     try {
-      console.log(address)
+      // console.log(address)
       if (address === Session.get('address').state.address) {
-        console.log('isThisAddress ping true on ', address)
+        // console.log('isThisAddress ping true on ', address)
         return true
       }
       return false
