@@ -6,7 +6,7 @@ import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import './address.html'
 import {
-  bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst
+  bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst, decimalToBinary,
 } from '../../../startup/both/index.js'
 
 
@@ -17,6 +17,7 @@ let tokensHeld = []
 const addressResultsRefactor = (res) => {
   // rewrite all arrays as strings (Q-addresses) or hex (hashes)
   const output = res
+  /*
   if (res.state) {
     // output.state.address = ab2str(output.state.address)
     output.state.txcount = output.state.transaction_hashes.length
@@ -46,6 +47,7 @@ const addressResultsRefactor = (res) => {
     })
     output.state.transaction_hashes = transactionHashes
   }
+  */
   return output
 }
 
@@ -68,7 +70,6 @@ async function parseOTS(obj) {
     }
     ret = `${ret}${o}`
   })
-  console.log(c)
   if (c < 10) {
     // add some empty columns
     for (let i = c; i < 10; i += 1) {
@@ -83,20 +84,28 @@ async function OTS(obj) {
   Session.set('OTStracker', `<div class="row">${x}</div>`)
 }
 
-function loadAddressTransactions(txArray) {
-  const request = {
-    tx: txArray,
-  }
-
+function loadAddressTransactions(aId, page) {
   Session.set('addressTransactions', [])
   $('#loadingTransactions').show()
-  Meteor.call('addressTransactions', request, (err, res) => {
+  // console.log('Getting transactions for page ', page)
+  const addresstx = anyAddressToRaw(aId)
+  const request = {
+    address: addresstx,
+    item_per_page: 10,
+    page_number: page,
+  }
+
+  Meteor.call('getTransactionsByAddress', request, (err, res) => {
     if (err) {
       Session.set('addressTransactions', { error: err })
     } else {
-      Session.set('addressTransactions', res)
+      Session.set('addressTransactions', res.transactions_detail)
+      const a = Session.get('address')
+      a.transactions = res.transactions_detail
+      Session.set('address', a)
       Session.set('fetchedTx', true)
     }
+
     $('#loadingTransactions').hide()
     $('#noTransactionsFound').show()
   })
@@ -108,6 +117,7 @@ const getTokenBalances = (getAddress, callback) => {
     address: anyAddressToRaw(getAddress),
   }
 
+  /*
   Meteor.call('getAddressState', request, (err, res) => {
     if (err) {
       // TODO - Error handling
@@ -162,8 +172,40 @@ const getTokenBalances = (getAddress, callback) => {
       }
     }
   })
+  */
 }
 
+const otsParse = (response, totalSignatures) => {
+  // Parse OTS Bitfield, and grab the lowest unused key
+  let newOtsBitfield = {}
+  let thisOtsBitfield = []
+  if (response.ots_bitfield_by_page[0].ots_bitfield !== undefined) {
+    thisOtsBitfield = response.ots_bitfield_by_page[0].ots_bitfield
+  }
+  thisOtsBitfield.forEach((item, index) => {
+    const thisDecimal = new Uint8Array(item)[0]
+    const thisBinary = decimalToBinary(thisDecimal).reverse()
+    const startIndex = index * 8
+    for (let i = 0; i < 8; i += 1) {
+      const thisOtsIndex = startIndex + i
+      // Add to parsed array unless we have reached the end of the signatures
+      if (thisOtsIndex < totalSignatures) {
+        newOtsBitfield[thisOtsIndex] = thisBinary[i]
+      }
+    }
+  })
+  // console.log('otslen', newOtsBitfield)
+  if (newOtsBitfield.length > totalSignatures) {
+    newOtsBitfield = newOtsBitfield.slice(0, totalSignatures + 1)
+  }
+
+  // Add in OTS fields to response
+  const ots = {}
+  ots.keys = newOtsBitfield
+  ots.nextKey = response.next_unused_ots_index
+  // console.log('ots:', ots)
+  return ots
+}
 
 const renderAddressBlock = () => {
   const aId = upperCaseFirst(FlowRouter.getParam('aId'))
@@ -190,24 +232,42 @@ const renderAddressBlock = () => {
             res.state.empty_warning = false
           }
         }
-        Session.set('address', addressResultsRefactor(res))
-        Session.set('fetchedTx', false)
-        const numPages = Math.ceil(res.state.transactions.length / 10)
-        const pages = []
-        while (pages.length !== numPages) {
-          pages.push({
-            number: pages.length + 1,
-            from: ((pages.length + 1) * 10) + 1,
-            to: ((pages.length + 1) * 10) + 10,
-          })
-        }
-        let txArray = null
-        Session.set('pages', pages)
-        Session.set('active', tPage)
-        const startIndex = (tPage - 1) * 10
-        txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
-        Session.set('fetchedTx', false)
-        loadAddressTransactions(txArray)
+
+        req.page_from = 1
+        req.page_count = 1
+        req.unused_ots_index_from = 0
+
+        Meteor.call('getOTS', req, (error, result) => {
+          if (err) {
+            Session.set('address', { error, id: aId })
+          } else {
+            const ots = otsParse(result, qrlAddressValdidator.hexString(res.state.address).sig.number)
+            res.ots = ots
+            res.ots.keysConsumed = res.state.used_ots_key_count
+
+            // generate OTS tracker HTML
+            OTS(res.ots.keys)
+
+            Session.set('address', addressResultsRefactor(res))
+            Session.set('fetchedTx', false)
+            const numPages = Math.ceil(res.state.transaction_hash_count / 10)
+            const pages = []
+            while (pages.length !== numPages) {
+              pages.push({
+                number: pages.length + 1,
+                from: ((pages.length + 1) * 10) + 1,
+                to: ((pages.length + 1) * 10) + 10,
+              })
+            }
+            // let txArray = null
+            Session.set('pages', pages)
+            Session.set('active', tPage)
+            // const startIndex = (tPage - 1) * 10
+            // txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
+            Session.set('fetchedTx', false)
+            loadAddressTransactions(aId, tPage)
+          }
+        })
       }
     })
   }
@@ -228,7 +288,7 @@ Template.address.helpers({
     const address = Session.get('address')
     if (address !== undefined) {
       if (address.state !== undefined) {
-        address.state.address = hexOrB32(address.state.address)
+        address.state.address = hexOrB32(anyAddressToRaw(address.state.address))
         return address
       }
     }
@@ -253,6 +313,16 @@ Template.address.helpers({
     }
     return ret
   },
+  coinbaseValue() {
+    return this.coinbase.amount / SHOR_PER_QUANTA
+  },
+  // timestampToDateTime(ts) {
+  //   console.log('ts', ts)
+  //   if (moment.unix(ts.timestamp).isValid()) {
+  //     return moment.unix(ts.timestamp).format('HH:mm D MMM YYYY')
+  //   }
+  //   return 'Unconfirmed Tx'
+  // },
   addressTx() {
     let ret = []
     if (Session.get('addressTransactions').length > 0) {
@@ -266,7 +336,7 @@ Template.address.helpers({
       const thisAddress = rawAddressToB32Address(Session.get('address').state.address)
       _.each(Session.get('addressTransactions'), (transaction) => {
         // Store modified transaction
-        const y = transaction
+        const y = transaction.tx
 
         // Update timestamp from unix epoch to human readable time/date.
         if (moment.unix(transaction.timestamp).isValid()) {
@@ -274,6 +344,8 @@ Template.address.helpers({
         } else {
           y.timestamp = 'Unconfirmed Tx'
         }
+
+        y.addr_from = transaction.addr_from
 
         // Set total received amount if sent to this address
         let thisReceivedAmount = 0
@@ -288,10 +360,45 @@ Template.address.helpers({
 
         transactions.push(y)
       })
+      // console.log('transactions', transactions)
       return transactions
     } catch (e) {
       return false
     }
+  },
+  receivedAmount(tx) {
+    const a = Session.get('address').state.address
+    const outputs = tx.transfer
+    if (outputs) {
+      let amount = 0
+      _.each(outputs.addrs_to, (element, key) => {
+        if (element === a) {
+          amount += (outputs.amounts[key] / SHOR_PER_QUANTA)
+        }
+      })
+      return amount
+    }
+    return ''
+  },
+  sendingOutputs(outputs) {
+    // console.log('outputs', outputs)
+    const result = []
+    _.each(outputs.transfer.addrs_to, (element, key) => {
+      result.push({ to: element, amount: (outputs.transfer.amounts[key] / SHOR_PER_QUANTA) })
+    })
+    // console.log('return in sendingOutputs', result)
+    return result
+  },
+  totalTransferred(tx) {
+    const outputs = tx.transfer
+    if (outputs) {
+      let amount = 0
+      _.each(outputs.amounts, (element) => {
+        amount += element / SHOR_PER_QUANTA
+      })
+      return amount
+    }
+    return ''
   },
   addressHasTransactions() {
     try {
@@ -305,13 +412,18 @@ Template.address.helpers({
   },
   isThisAddress(address) {
     try {
-      if (address === rawAddressToB32Address(Session.get('address').state.address)) {
+      // console.log(address)
+      if (address === Session.get('address').state.address) {
+        // console.log('isThisAddress ping true on ', address)
         return true
       }
       return false
     } catch (e) {
       return false
     }
+  },
+  getAmount(index) {
+    return this.amounts[index]
   },
   QRtext() {
     return upperCaseFirst(FlowRouter.getParam('aId'))
@@ -412,19 +524,19 @@ Template.address.helpers({
     return false
   },
   isMessageTxn(txType) {
-    if (txType === 'MESSAGE') {
+    if (txType === 'message') {
       return true
     }
     return false
   },
   isKeybaseTxn(txType) {
-    if (txType === 'KEYBASE') {
+    if (txType === 'keybase') {
       return true
     }
     return false
   },
   isDocumentNotarisation(txType) {
-    if (txType === 'DOCUMENT_NOTARISATION') {
+    if (txType === 'document_notarisation') {
       return true
     }
     return false
@@ -434,7 +546,7 @@ Template.address.helpers({
   },
   addressValidation() {
     try {
-      const thisAddress = rawAddressToHexAddress(Session.get('address').state.address)
+      const thisAddress = rawAddressToHexAddress(anyAddressToRaw(Session.get('address').state.address))
       // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
       const { keysConsumed } = Session.get('address').ots
       const validationResult = qrlAddressValdidator.hexString(thisAddress)
@@ -463,7 +575,7 @@ Template.address.helpers({
 Template.address.events({
   'keypress #paginator': (event) => {
     if (event.keyCode === 13) {
-      const x = $('#paginator').val()
+      const x = parseInt($('#paginator').val(), 10)
       const max = Session.get('pages').length
       if ((x < (max + 1)) && (x > 0)) {
         FlowRouter.go(`/a/${upperCaseFirst(FlowRouter.getParam('aId'))}/${x}`)
@@ -543,7 +655,9 @@ Template.address.onRendered(() => {
     Session.set('pages', [])
     Session.set('active', 1)
     Session.set('fetchedTx', false)
-    renderAddressBlock()
+    if (FlowRouter.getParam('aId')) {
+      renderAddressBlock()
+    }
   })
 
   Tracker.autorun(() => {
@@ -568,6 +682,6 @@ Template.address.onRendered(() => {
 
   // Render identicon (needs to be here for initial load).
   // Also Session.get('address') is blank at this point
-  $('.qr-code-container').qrcode({ width: 100, height: 100, text: upperCaseFirst(FlowRouter.getParam('aId')) })
-  jdenticon.update('#identicon', upperCaseFirst(FlowRouter.getParam('aId'))) /* eslint no-undef:0 */
+  //$('.qr-code-container').qrcode({ width: 100, height: 100, text: upperCaseFirst(FlowRouter.getParam('aId')) })
+  //jdenticon.update('#identicon', upperCaseFirst(FlowRouter.getParam('aId'))) /* eslint no-undef:0 */
 })
