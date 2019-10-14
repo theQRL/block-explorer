@@ -258,7 +258,7 @@ Template.address.helpers({
   quantity() {
     if (!(Session.get('loading'))) {
       try {
-        const q = Session.get('address').transactions.length
+        const q = Session.get('address').totalTransactions
         return q
       } catch (e) {
         return false
@@ -295,6 +295,17 @@ Template.address.events({
       $('.meta').addClass('dropdown-toggle')
       $('.toggle').hide()
     }
+  },
+  'mouseover [data-toggle="tooltip"]': (event) => {
+    $(event.currentTarget).tooltip({
+      boundary: 'window',
+    }).tooltip('show')
+  },
+  'mouseleave [data-toggle="tooltip"]': (event) => {
+    $(event.currentTarget).tooltip('hide')
+  },
+  'click tr': (event) => {
+    FlowRouter.go(`/tx/${$(event.currentTarget).attr('data-txhash')}`)
   },
 })
 
