@@ -193,6 +193,12 @@ Template.tx.helpers({
     }
     return false
   },
+  isMultiSigCreate() {
+    if (this.explorer.type === 'MULTISIG_CREATE') {
+      return true
+    }
+    return false
+  },
   isDocumentNotarisation() {
     if (this.explorer.type === 'DOCUMENT_NOTARISATION') {
       return true
@@ -205,6 +211,12 @@ Template.tx.helpers({
     }
     return false
   },
+  isNotMultiSig() {
+    if ((this.explorer.type !== 'MULTISIG_CREATE')) {
+      return true
+    }
+    return false
+  },
   documentNotarisationVerificationMessage() {
     const message = Session.get('documentNotarisationVerificationMessage')
     return message
@@ -213,6 +225,16 @@ Template.tx.helpers({
     const message = Session.get('documentNotarisationError')
     return message
   },
+  multiSigSignatories(ms) {
+    const output = []
+    if (ms) {
+      _.each(ms.signatories, (item, index) => {
+        output.push({address_hex: `Q${item}`, weight: ms.weights[index]})
+      })
+      return output
+    }
+    return false
+  }
 })
 
 Template.tx.events({

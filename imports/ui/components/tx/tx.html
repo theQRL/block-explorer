@@ -59,7 +59,7 @@
                   <div class="label">
                     <div class="ui {{color}} label">{{explorer.type}}{{#if isTokenTransfer}}: {{explorer.symbol}} {{/if}}</div>
                   </div>
-
+                  {{#if isNotMultiSig}}
                   {{#if isNotMessage}}
                     {{#if isToken}}
                       <strong>{{explorer.name}} ({{explorer.symbol}})</strong><br />
@@ -81,6 +81,7 @@
                         </div>
                       {{/if}}
                     {{/if}}
+                  {{/if}}
                   {{/if}}
                 </div>
               </div>
@@ -175,6 +176,28 @@
                       </tbody>
                     </table>
                 {{else}}
+                {{#if isMultiSigCreate}}
+                  <h4>Signatories</h4>
+                  <table class="ui table">
+                    <thead><th>Address</th><th>Weight</th></thead>
+                    <tbody>
+                      {{#each multiSigSignatories this.tx.multi_sig_create}}
+                      <tr>
+                      <td>
+                        <!-- {{# if bech32}}{{ this.address_b32 }}{{else}} -->
+                        {{ this.address_hex}}
+                        <!-- {{/if}} -->
+                      </td>
+                      <td>{{ this.weight }}</td>
+                      </tr>
+                      {{/each}}
+                    </tbody>
+                    <tfoot>
+                      <th>Threshold for spend</th>
+                      <th>{{ this.tx.multi_sig_create.threshold }}</th>
+                    </tfoot>
+                  </table>
+                {{else}}
                   <h3>To</h3>
                   <table class="ui stackable table">
                     <thead>
@@ -204,6 +227,7 @@
                       {{/if}}
                     </tbody>
                   </table>
+                  {{/if}}
                 {{/if}}
               {{/if}}
             {{/if}}
