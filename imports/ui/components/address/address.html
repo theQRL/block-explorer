@@ -198,6 +198,23 @@
           </div>
           {{/if}}
 
+          {{#if isMultiSigCreateTxn this.transactionType}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                MultiSig CREATE | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress value">
+                {{this.transaction_hash}}
+              </p>
+            </div>
+            <div class="floatright ta-c">
+              <a href="/tx/{{this.transaction_hash}}">{{signatories this}} &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
           {{#if isLatticePKTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/send.png" />

@@ -80,6 +80,12 @@ Template.lasttx.helpers({
     }
     return false
   },
+  isMultiSigCreateTxn(txType) {
+    if (txType === 'multi_sig_create') {
+      return true
+    }
+    return false
+  },
   isDocumentNotarisation(txType) {
     if (txType === 'DOCUMENT_NOTARISATION') {
       return true

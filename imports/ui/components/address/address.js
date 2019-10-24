@@ -529,6 +529,12 @@ Template.address.helpers({
     }
     return false
   },
+  isMultiSigCreateTxn(txType) {
+    if (txType === 'multi_sig_create') {
+      return true
+    }
+    return false
+  },
   isKeybaseTxn(txType) {
     if (txType === 'keybase') {
       return true
@@ -570,6 +576,13 @@ Template.address.helpers({
   OTStracker() {
     return Session.get('OTStracker')
   },
+  signatories(i) {
+    let output = ''
+    console.log(i)
+    if (i) {
+      return `${i.multi_sig_create.weights.length} signatories`
+    }
+  }
 })
 
 Template.address.events({
