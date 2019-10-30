@@ -2,6 +2,7 @@ import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import CryptoJS from 'crypto-js'
 import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
+import sha256 from 'sha256'
 
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
@@ -34,6 +35,51 @@ const renderTxBlock = () => {
       }
     })
   }
+}
+
+function toHexString(byteArray) {
+  return Array.from(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('')
+}
+
+function hexToBytes(hex) {
+  for (var bytes = [], c = 0; c < hex.length; c += 2)
+    bytes.push(parseInt(hex.substr(c, 2), 16));
+  return bytes;
+}
+function bytesToHex(bytes) {
+  for (var hex = [], i = 0; i < bytes.length; i++) {
+    hex.push((bytes[i] >>> 4).toString(16));
+    hex.push((bytes[i] & 0xf).toString(16));
+  }
+  return hex.join("");
+}
+function byte2bits(a) {
+  var tmp = "";
+  for (var i = 128; i >= 1; i /= 2) tmp += a & i ? "1" : "0";
+  return tmp;
+}
+function split2Bits(a, n) {
+  var buff = "";
+  var b = [];
+  for (var i = 0; i < a.length; i++) {
+    buff += byte2bits(a[i]);
+    while (buff.length >= n) {
+      b.push(buff.substr(0, n));
+      buff = buff.substr(n);
+    }
+  }
+  return [b, buff];
+}
+
+function toByteArray(hexString) {
+  var result = [];
+  while (hexString.length >= 2) {
+    result.push(parseInt(hexString.substring(0, 2), 16));
+    hexString = hexString.substring(2, hexString.length);
+  }
+  return result;
 }
 
 Template.tx.helpers({
@@ -234,7 +280,18 @@ Template.tx.helpers({
       return output
     }
     return false
-  }
+  },
+  multiSigAddress() {
+    var desc = hexToBytes('110000');
+    var txhash = hexToBytes(Session.get('txhash').transaction.tx.transaction_hash);
+    var arr = desc.concat(txhash);
+    var prev_hash = hexToBytes(sha256(arr));
+    var newArr = desc.concat(prev_hash)
+    var new_hash = hexToBytes(sha256(newArr).slice(56, 64));
+    var q1 = desc.concat(prev_hash);
+    var q = q1.concat(new_hash);
+    return `Q${toHexString(q)}`
+  },
 })
 
 Template.tx.events({
