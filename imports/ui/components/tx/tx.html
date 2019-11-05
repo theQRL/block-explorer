@@ -61,6 +61,7 @@
                   </div>
                   {{#if isNotMultiSig}}
                   {{#if isNotMessage}}
+                  {{#if isNotLattice}}
                     {{#if isToken}}
                       <strong>{{explorer.name}} ({{explorer.symbol}})</strong><br />
                       owned by:<br />
@@ -79,6 +80,7 @@
                         <div class="label">
                           Quanta<br><small>USD ${{qrl}}</small>
                         </div>
+                      {{/if}}
                       {{/if}}
                     {{/if}}
                   {{/if}}
@@ -200,6 +202,30 @@
                     </tfoot>
                   </table>
                 {{else}}
+                  {{#if isLattice}}
+                  <table class="ui stackable celled table">
+                    <tr>
+                      <td style="text-align: right;" width="30%"><strong>PK1</strong></td><td>{{bf this.tx.latticePK.pk1}}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: right;" width="30%"><strong>PK2</strong></td><td>{{bf this.tx.latticePK.pk2}}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: right;" width="30%"><strong>PK3</strong></td><td>{{bf this.tx.latticePK.pk3}}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: right;" width="30%"><strong>PK4</strong></td><td>{{bf this.tx.latticePK.pk4}}</td>
+                    </tr>
+                </table>
+                <table class="ui stackable celled table">
+                  <tr>
+                    <td style="text-align: right;" width="30%"><strong>public_key</strong></td><td>{{bf this.tx.public_key}}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: right;" width="30%"><strong>signature</strong></td><td>{{bf this.tx.signature}}</td>
+                  </tr>
+              </table>
+                  {{else}}
                   <h3>To</h3>
                   <table class="ui stackable table">
                     <thead>
@@ -229,6 +255,7 @@
                       {{/if}}
                     </tbody>
                   </table>
+                  {{/if}}
                   {{/if}}
                 {{/if}}
               {{/if}}
