@@ -245,6 +245,12 @@ Template.tx.helpers({
     }
     return false
   },
+  isLattice() {
+    if (this.explorer.type === 'LATTICE PK') {
+      return true
+    }
+    return false
+  },
   isDocumentNotarisation() {
     if (this.explorer.type === 'DOCUMENT_NOTARISATION') {
       return true
@@ -259,6 +265,12 @@ Template.tx.helpers({
   },
   isNotMultiSig() {
     if ((this.explorer.type !== 'MULTISIG_CREATE')) {
+      return true
+    }
+    return false
+  },
+  isNotLattice() {
+    if ((this.explorer.type !== 'LATTICE PK')) {
       return true
     }
     return false
@@ -291,6 +303,9 @@ Template.tx.helpers({
     var q1 = desc.concat(prev_hash);
     var q = q1.concat(new_hash);
     return `Q${toHexString(q)}`
+  },
+  bf(b) {
+    return Buffer.from(b).toString('hex')
   },
 })
 
