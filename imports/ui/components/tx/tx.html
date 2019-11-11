@@ -114,7 +114,9 @@
                 <tbody>
                   <tr>
                     <td class="single line">
-                      <div class="ui red label"><i class="sign out icon"></i>from</div>
+                      <div class="ui red label"><i class="sign out icon"></i>
+                        {{#if isMultiSigSpend }}initiated by{{else}}from{{/if}}
+                      </div>
                     </td>
                     <td><a href="/a/{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}">{{# if bech32 }}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</a></td>
                   </tr>
@@ -247,6 +249,13 @@
                             <td class="tc-w">{{this.amount}}</td>
                           </tr>
                         {{/each}}
+                      {{else if isMultiSigSpend }}
+                      {{#each mso this.tx.multi_sig_spend}}
+                      <tr>
+                        <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
+                        <td class="tc-w">{{this.amount}}</td>
+                      </tr>
+                    {{/each}}
                       {{else}}
                         <tr>
                           <td><a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}">{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}</a>  </td>

@@ -245,6 +245,12 @@ Template.tx.helpers({
     }
     return false
   },
+  isMultiSigSpend() {
+    if (this.explorer.type === 'MULTISIG_SPEND') {
+      return true
+    }
+    return false
+  },
   isLattice() {
     if (this.explorer.type === 'LATTICE PK') {
       return true
@@ -264,7 +270,7 @@ Template.tx.helpers({
     return false
   },
   isNotMultiSig() {
-    if ((this.explorer.type !== 'MULTISIG_CREATE')) {
+    if ((this.explorer.type !== 'MULTISIG_CREATE') && (this.explorer.type !== 'MULTISIG_SPEND')) {
       return true
     }
     return false
@@ -287,7 +293,17 @@ Template.tx.helpers({
     const output = []
     if (ms) {
       _.each(ms.signatories, (item, index) => {
-        output.push({address_hex: `Q${item}`, weight: ms.weights[index]})
+        output.push({ address_hex: `Q${item}`, weight: ms.weights[index] })
+      })
+      return output
+    }
+    return false
+  },
+  mso(ms) {
+    const output = []
+    if (ms) {
+      _.each(ms.addrs_to, (item, index) => {
+        output.push({ address: `Q${item}`, amount: (ms.amounts[index] / SHOR_PER_QUANTA) })
       })
       return output
     }

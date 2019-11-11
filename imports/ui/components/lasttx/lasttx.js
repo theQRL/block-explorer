@@ -86,6 +86,12 @@ Template.lasttx.helpers({
     }
     return false
   },
+  isMultiSigSpendTxn(txType) {
+    if (txType === 'multi_sig_spend') {
+      return true
+    }
+    return false
+  },
   isDocumentNotarisation(txType) {
     if (txType === 'DOCUMENT_NOTARISATION') {
       return true
