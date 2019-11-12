@@ -85,7 +85,11 @@
                     {{/if}}
                   {{/if}}
                   {{else}}
-                  <div class="ui large horizontal list"><div class="item"><a href="/a/{{multiSigAddress}}">{{multiSigAddress}}</a></div></div>
+                  {{#if isMultiSigSpend }}
+                    <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigSpendAddress}}">{{multiSigSpendAddress}}</a></div></div>
+                  {{else}}
+                    <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigAddress}}">{{multiSigAddress}}</a></div></div>
+                  {{/if}}
                   {{/if}}
                 </div>
               </div>
@@ -253,13 +257,13 @@
                       {{#each mso this.tx.multi_sig_spend}}
                       <tr>
                         <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
-                        <td class="tc-w">{{this.amount}}</td>
+                        <td class="tc-w" style="word-break: keep-all">{{this.amount}} Quanta</td>
                       </tr>
                     {{/each}}
                       {{else}}
                         <tr>
                           <td><a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}">{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}</a>  </td>
-                          <td class="tc-w">{{tx.tx.amount}}</td>
+                          <td class="tc-w" style="word-break: keep-all">{{tx.tx.amount}}</td>
                         </tr>
                       {{/if}}
                     </tbody>

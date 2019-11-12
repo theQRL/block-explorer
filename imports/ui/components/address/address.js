@@ -3,6 +3,7 @@
  */
 import JSONFormatter from 'json-formatter-js'
 import qrlAddressValdidator from '@theqrl/validate-qrl-address'
+import { BigNumber } from 'bignumber.js'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import './address.html'
 import {
@@ -214,62 +215,79 @@ const renderAddressBlock = () => {
   if (!tPage) { tPage = 1 }
   // TODO: validate aId before constructing Method call
   if (aId) {
+    const validate = qrlAddressValdidator.hexString(aId)
+    if (validate.result === false) { return }
     const req = {
       address: anyAddressToRaw(aId),
     }
-    Meteor.call('getAddressState', req, (err, res) => {
-      if (err) {
-        Session.set('address', { error: err, id: aId })
-      } else {
-        if (res) {
-          res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(9)
+    if (validate.sig.type === 'MULTISIG') {
+      Meteor.call('getMultiSigAddressState', req, (err, res) => {
+        if (err) {
+          Session.set('address', { error: err, id: aId })
+        } else {
+          console.log(res)
           if (!(res.state.address)) {
             res.state.address = aId
           }
-          if (parseInt(res.state.txcount, 10) === 0 && parseInt(res.state.nonce, 10) === 0) {
-            res.state.empty_warning = true
-          } else {
-            res.state.empty_warning = false
-          }
+          res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(8)
+          Session.set('address', addressResultsRefactor(res))
         }
-
-        req.page_from = 1
-        req.page_count = 1
-        req.unused_ots_index_from = 0
-
-        Meteor.call('getOTS', req, (error, result) => {
-          if (err) {
-            Session.set('address', { error, id: aId })
-          } else {
-            const ots = otsParse(result, qrlAddressValdidator.hexString(res.state.address).sig.number)
-            res.ots = ots
-            res.ots.keysConsumed = res.state.used_ots_key_count
-
-            // generate OTS tracker HTML
-            OTS(res.ots.keys)
-
-            Session.set('address', addressResultsRefactor(res))
-            Session.set('fetchedTx', false)
-            const numPages = Math.ceil(res.state.transaction_hash_count / 10)
-            const pages = []
-            while (pages.length !== numPages) {
-              pages.push({
-                number: pages.length + 1,
-                from: ((pages.length + 1) * 10) + 1,
-                to: ((pages.length + 1) * 10) + 10,
-              })
+      })
+    } else {
+      Meteor.call('getAddressState', req, (err, res) => {
+        if (err) {
+          Session.set('address', { error: err, id: aId })
+        } else {
+          if (res) {
+            res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(8)
+            if (!(res.state.address)) {
+              res.state.address = aId
             }
-            // let txArray = null
-            Session.set('pages', pages)
-            Session.set('active', tPage)
-            // const startIndex = (tPage - 1) * 10
-            // txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
-            Session.set('fetchedTx', false)
-            loadAddressTransactions(aId, tPage)
+            if (parseInt(res.state.txcount, 10) === 0 && parseInt(res.state.nonce, 10) === 0) {
+              res.state.empty_warning = true
+            } else {
+              res.state.empty_warning = false
+            }
           }
-        })
-      }
-    })
+
+          req.page_from = 1
+          req.page_count = 1
+          req.unused_ots_index_from = 0
+
+          Meteor.call('getOTS', req, (error, result) => {
+            if (err) {
+              Session.set('address', { error, id: aId })
+            } else {
+              const ots = otsParse(result, qrlAddressValdidator.hexString(res.state.address).sig.number)
+              res.ots = ots
+              res.ots.keysConsumed = res.state.used_ots_key_count
+
+              // generate OTS tracker HTML
+              OTS(res.ots.keys)
+
+              Session.set('address', addressResultsRefactor(res))
+              Session.set('fetchedTx', false)
+              const numPages = Math.ceil(res.state.transaction_hash_count / 10)
+              const pages = []
+              while (pages.length !== numPages) {
+                pages.push({
+                  number: pages.length + 1,
+                  from: ((pages.length + 1) * 10) + 1,
+                  to: ((pages.length + 1) * 10) + 10,
+                })
+              }
+              // let txArray = null
+              Session.set('pages', pages)
+              Session.set('active', tPage)
+              // const startIndex = (tPage - 1) * 10
+              // txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
+              Session.set('fetchedTx', false)
+              loadAddressTransactions(aId, tPage)
+            }
+          })
+        }
+      })
+    }
   }
   Meteor.call('QRLvalue', (err, res) => {
     if (err) {
@@ -294,6 +312,16 @@ Template.address.helpers({
     }
     // error handling needed here
     return false
+  },
+  isMultiSig() {
+    try {
+      if (qrlAddressValdidator.hexString(upperCaseFirst(FlowRouter.getParam('aId'))).sig.type === 'MULTISIG') {
+        return true
+      }
+      return false
+    } catch (error) {
+      return false
+    }
   },
   pages() {
     let ret = []
@@ -535,6 +563,12 @@ Template.address.helpers({
     }
     return false
   },
+  isMultiSigSpendTxn(txType) {
+    if (txType === 'multi_sig_spend') {
+      return true
+    }
+    return false
+  },
   isKeybaseTxn(txType) {
     if (txType === 'keybase') {
       return true
@@ -552,17 +586,24 @@ Template.address.helpers({
   },
   addressValidation() {
     try {
-      const thisAddress = rawAddressToHexAddress(anyAddressToRaw(Session.get('address').state.address))
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
-      const { keysConsumed } = Session.get('address').ots
-      const validationResult = qrlAddressValdidator.hexString(thisAddress)
-      const result = {}
-      result.height = validationResult.sig.height
-      result.totalSignatures = validationResult.sig.number
-      result.keysRemaining = result.totalSignatures - keysConsumed
-      result.signatureScheme = validationResult.sig.type
-      result.hashFunction = validationResult.hash.function
-      return result
+      if (Session.get('address').state) {
+        const thisAddress = rawAddressToHexAddress(anyAddressToRaw(Session.get('address').state.address))
+        // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
+        const result = {}
+        if (Session.get('address').ots) {
+          const { keysConsumed } = Session.get('address').ots
+          result.keysRemaining = result.totalSignatures - keysConsumed
+        }
+        const validationResult = qrlAddressValdidator.hexString(thisAddress)
+
+        result.height = validationResult.sig.height
+        result.totalSignatures = validationResult.sig.number
+
+        result.signatureScheme = validationResult.sig.type
+        result.hashFunction = validationResult.hash.function
+        return result
+      }
+      return false
     } catch (e) {
       return false
     }
@@ -577,12 +618,41 @@ Template.address.helpers({
     return Session.get('OTStracker')
   },
   signatories(i) {
-    let output = ''
-    console.log(i)
-    if (i) {
-      return `${i.multi_sig_create.weights.length} signatories`
+    try {
+      if (i) {
+        if (i === 'MULTISIG') {
+          const addressState = Session.get('address').state
+          const r = []
+          _.each(addressState.signatories, (item, index) => {
+            r.push({ address_hex: item, weight: addressState.weights[index] })
+          })
+          return r
+        }
+        return `${i.multi_sig_create.weights.length} signatories`
+      }
+      return null
+    } catch (error) {
+      return null
     }
-  }
+  },
+  msSpendAmount(i) {
+    try {
+      let sum = new BigNumber(0)
+      _.each(i.multi_sig_spend.amounts, (a) => {
+        sum = sum.plus(a)
+      })
+      return `${sum.dividedBy(SHOR_PER_QUANTA).toNumber()} Quanta`
+    } catch (error) {
+      return null
+    }
+  },
+  threshold() {
+    try {
+      return Session.get('address').state.threshold
+    } catch (error) {
+      return null
+    }
+  },
 })
 
 Template.address.events({

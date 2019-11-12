@@ -16,7 +16,13 @@
         <div class="ui basic center aligned segment">
           <div class="ui statistic">
             <div class="label">
-              <div class="ui label">Balance</div>
+              <div class="ui label">
+                {{#if isMultiSig}}
+                MultiSig Balance
+                {{else}}
+                Balance
+                {{/if}}
+              </div>
             </div>
             <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
               {{address.state.balance}}
@@ -41,11 +47,11 @@
     <div class="ui grid">
     <div class="ui celled horizontal list">
       <div class="item"><strong>Transactions</strong> {{address.state.transaction_hash_count}}</div>
-      <div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>
+      {{#if isMultiSig}}{{else}}<div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>{{/if}}
       <div class="item"><strong>Signature Scheme</strong> {{addressValidation.signatureScheme}}</div>
-      <div class="item"><strong>Tree Height</strong> {{addressValidation.height}}</div>
-      <div class="item"><strong>Total Signatures</strong> {{addressValidation.totalSignatures}}</div>
-      <div class="item"><strong>Signatures Remaining</strong> {{addressValidation.keysRemaining}}</div>
+      {{#if isMultiSig}}{{else}}<div class="item"><strong>Tree Height</strong> {{addressValidation.height}}</div>{{/if}}
+      {{#if isMultiSig}}{{else}}<div class="item"><strong>Total Signatures</strong> {{addressValidation.totalSignatures}}</div>{{/if}}
+      {{#if isMultiSig}}{{else}}<div class="item"><strong>Signatures Remaining</strong> {{addressValidation.keysRemaining}}</div>{{/if}}
       <div class="item"><strong>Hash Function</strong> {{addressValidation.hashFunction}}</div>
       <!-- <div class="item" id="OTStracker"><button class="ui small button secondary"><i class="expand arrows alternate icon"></i>OTS tracker</button></div> -->
     </div>
@@ -53,7 +59,28 @@
 
   </div>
 
-
+  {{#if isMultiSig}}
+  <h3 class="value">Signatories</h3>
+  <table class="ui table">
+    <thead><th>Address</th><th>Weight</th></thead>
+    <tbody>
+      {{#each signatories 'MULTISIG'}}
+      <tr>
+      <td class="hack">
+        <!-- {{# if bech32}}{{ this.address_b32 }}{{else}} -->
+        <a href="/a/{{ this.address_hex}}">{{ this.address_hex}}</a>
+        <!-- {{/if}} -->
+      </td>
+      <td>{{ this.weight }}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+    <tfoot>
+      <th>Threshold for spend</th>
+      <th>{{ threshold }}</th>
+    </tfoot>
+  </table>
+  {{else}}
   <!-- Send/Receive Section -->
   <div id="addressTabs" class="ui top attached tabular menu">
     <a class="item active" data-tab="transactions">Quanta</a>
@@ -215,6 +242,23 @@
           </div>
           {{/if}}
 
+          {{#if isMultiSigSpendTxn this.transactionType}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                MultiSig SPEND | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress value">
+                {{this.transaction_hash}}
+              </p>
+            </div>
+            <div class="floatright ta-c">
+              <a href="/tx/{{this.transaction_hash}}">{{msSpendAmount this}} &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
           {{#if isLatticePKTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/send.png" />
@@ -369,7 +413,9 @@
         {{{OTStracker}}}
       </div>
     </div>
-
+    
+    {{/if}}
+    
     <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
     <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
     

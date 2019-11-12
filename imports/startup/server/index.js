@@ -354,6 +354,35 @@ const getAddressState = (request, callback) => {
   }
 }
 
+const getMultiSigAddressState = (request, callback) => {
+  try {
+    qrlApi('GetMultiSigAddressState', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetMultiSigAddressState', '**ERROR/getMultiSigAddressState** ')
+        callback(myError, null)
+      } else {
+        if (response.state.address) {
+          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+        }
+        if (response.state.creation_tx_hash) {
+          response.state.creation_tx_hash = Buffer.from(response.state.creation_tx_hash).toString('hex')
+        }
+        if (response.state.signatories) {
+          const formatted = []
+          _.each(response.state.signatories, (i) => {
+            formatted.push(`Q${Buffer.from(i).toString('hex')}`)
+          })
+          response.state.signatories = formatted
+        }
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetMultiSigAddressState', '**ERROR/GetMultiSigAddressState**')
+    callback(myError, null)
+  }
+}
+
 export const getLatestData = (request, callback) => {
   try {
     qrlApi('GetLatestData', request, (error, response) => {
@@ -846,6 +875,13 @@ Meteor.methods({
     check(request, Object)
     this.unblock()
     const response = Meteor.wrapAsync(getAddressState)(request)
+    return response
+  },
+
+  getMultiSigAddressState(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getMultiSigAddressState)(request)
     return response
   },
 
