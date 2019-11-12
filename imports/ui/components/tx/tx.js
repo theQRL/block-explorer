@@ -1,8 +1,9 @@
+/* eslint no-console: 0 */
 import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import CryptoJS from 'crypto-js'
-import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
 import sha256 from 'sha256'
+import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
@@ -37,6 +38,7 @@ const renderTxBlock = () => {
   }
 }
 
+/* eslint-disable */
 function toHexString(byteArray) {
   return Array.from(byteArray, function(byte) {
     return ('0' + (byte & 0xFF).toString(16)).slice(-2);
@@ -81,6 +83,7 @@ function toByteArray(hexString) {
   }
   return result;
 }
+/* eslint-enable */
 
 Template.tx.helpers({
   bech32() {
@@ -310,15 +313,22 @@ Template.tx.helpers({
     return false
   },
   multiSigAddress() {
-    var desc = hexToBytes('110000');
-    var txhash = hexToBytes(Session.get('txhash').transaction.tx.transaction_hash);
-    var arr = desc.concat(txhash);
-    var prev_hash = hexToBytes(sha256(arr));
-    var newArr = desc.concat(prev_hash)
-    var new_hash = hexToBytes(sha256(newArr).slice(56, 64));
-    var q1 = desc.concat(prev_hash);
-    var q = q1.concat(new_hash);
+    const desc = hexToBytes('110000')
+    const txhash = hexToBytes(Session.get('txhash').transaction.tx.transaction_hash)
+    const arr = desc.concat(txhash)
+    const prevHash = hexToBytes(sha256(arr))
+    const newArr = desc.concat(prevHash)
+    const newHash = hexToBytes(sha256(newArr).slice(56, 64))
+    const q1 = desc.concat(prevHash)
+    const q = q1.concat(newHash)
     return `Q${toHexString(q)}`
+  },
+  multiSigSpendAddress() {
+    try {
+      return `Q${this.tx.multi_sig_spend.multi_sig_address}`
+    } catch (error) {
+      return null
+    }
   },
   bf(b) {
     return Buffer.from(b).toString('hex')
@@ -344,7 +354,7 @@ Template.tx.events({
     $('#documentVerified').hide()
     $('#documentVerifcationFailed').hide()
 
-    let notaryDocuments = $('#notaryDocument').prop('files')
+    const notaryDocuments = $('#notaryDocument').prop('files')
     const notaryDocument = notaryDocuments[0]
 
     // Get notary details from txn
@@ -369,25 +379,25 @@ Template.tx.events({
 
     // Verify user supplied file against txn hash
     const reader = new FileReader()
-    reader.onloadend = function() {
+    reader.onloadend = function onloadend() {
       try {
         let fileHash
 
         // Convert FileReader ArrayBuffer to WordArray first
-        var resultWordArray = CryptoJS.lib.WordArray.create(reader.result);
+        const resultWordArray = CryptoJS.lib.WordArray.create(reader.result)
 
-        if(txnHashFunction == "SHA1") {
-          fileHash = CryptoJS.SHA1(resultWordArray).toString(CryptoJS.enc.Hex);
-        } else if(txnHashFunction == "SHA256") {
-          fileHash = CryptoJS.SHA256(resultWordArray).toString(CryptoJS.enc.Hex);
-        } else if(txnHashFunction == "MD5") {
-          fileHash = CryptoJS.MD5(resultWordArray).toString(CryptoJS.enc.Hex);
+        if (txnHashFunction === 'SHA1') {
+          fileHash = CryptoJS.SHA1(resultWordArray).toString(CryptoJS.enc.Hex)
+        } else if (txnHashFunction === 'SHA256') {
+          fileHash = CryptoJS.SHA256(resultWordArray).toString(CryptoJS.enc.Hex)
+        } else if (txnHashFunction === 'MD5') {
+          fileHash = CryptoJS.MD5(resultWordArray).toString(CryptoJS.enc.Hex)
         }
 
         // Verify the txnFileHash is the same as provided file
-        if(txnFileHash == fileHash) {
+        if (txnFileHash === fileHash) {
           // Valid document notarisation
-          let successMessage = String.raw`The file '${notaryDocument.name}' has been verifiably
+          const successMessage = String.raw`The file '${notaryDocument.name}' has been verifiably
           notarised by '${txnNotary}' on ${txnNotaryDate} using the hash function '${txnHashFunction}'
           resulting in the hash '${txnFileHash}'.`
 
