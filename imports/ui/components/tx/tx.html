@@ -1,7 +1,18 @@
 <template name="tx">
-
+  {{#if notFound}}
+    <h3 class="ui pageHeader header">
+      <i class="tiny plus icon"></i>
+      <div class="content wordBreak">
+        Transaction {{tx.parameter}}
+      </div>
+    </h3>
+    <div class="ui negative message">
+      <i class="close icon"></i>
+      Transaction <span class="hack">{{id}}</span> not found
+    </div>
+  {{/if}}
 {{#with tx}}
-  {{#if error}}
+    {{#if error}}
     <h3 class="ui pageHeader header">
       <i class="tiny plus icon"></i>
       <div class="content wordBreak">
@@ -15,18 +26,6 @@
       </div>
       <p>{{tx.error}}</p>
     </div>
-  {{else}}
-    {{#if notFound}}
-      <h3 class="ui pageHeader header">
-        <i class="tiny plus icon"></i>
-        <div class="content wordBreak">
-          Transaction {{tx.parameter}}
-        </div>
-      </h3>
-      <div class="ui negative message">
-        <i class="close icon"></i>
-        Transaction <span class="hack">{{id}}</span> not found
-      </div>
     {{else}}
       <h3 class="ui pageHeader header">
         <i class="tiny plus icon"></i>
@@ -280,7 +279,6 @@
       </div>
 
     {{/if}}
-  {{/if}}
 {{/with}}
 
 </template>
