@@ -254,6 +254,12 @@ Template.tx.helpers({
     }
     return false
   },
+  isMultiSigVote() {
+    if (this.explorer.type === 'MULTISIG_VOTE') {
+      return true
+    }
+    return false
+  },
   isLattice() {
     if (this.explorer.type === 'LATTICE PK') {
       return true
@@ -273,7 +279,7 @@ Template.tx.helpers({
     return false
   },
   isNotMultiSig() {
-    if ((this.explorer.type !== 'MULTISIG_CREATE') && (this.explorer.type !== 'MULTISIG_SPEND')) {
+    if ((this.explorer.type !== 'MULTISIG_CREATE') && (this.explorer.type !== 'MULTISIG_SPEND') && (this.explorer.type !== 'MULTISIG_VOTE')) {
       return true
     }
     return false
