@@ -254,7 +254,24 @@
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{msSpendAmount this}} &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">{{msSpendAmount this}} Quanta &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
+          {{#if isMultiSigVoteTxn this.transactionType}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                MultiSig VOTE | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress value">
+                {{this.transaction_hash}}
+              </p>
+            </div>
+            <div class="floatright ta-c">
+              <a href="/tx/{{this.transaction_hash}}">{{msVoteStatus this}} &gt;</a>
             </div>
           </div>
           {{/if}}
