@@ -596,10 +596,6 @@ Template.address.helpers({
         const thisAddress = rawAddressToHexAddress(anyAddressToRaw(Session.get('address').state.address))
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
         const result = {}
-        if (Session.get('address').ots) {
-          const { keysConsumed } = Session.get('address').ots
-          result.keysRemaining = result.totalSignatures - keysConsumed
-        }
         const validationResult = qrlAddressValdidator.hexString(thisAddress)
 
         result.height = validationResult.sig.height
@@ -607,6 +603,10 @@ Template.address.helpers({
 
         result.signatureScheme = validationResult.sig.type
         result.hashFunction = validationResult.hash.function
+        if (Session.get('address').ots) {
+          const { keysConsumed } = Session.get('address').ots
+          result.keysRemaining = parseInt(result.totalSignatures, 10) - parseInt(keysConsumed, 10)
+        }
         return result
       }
       return false
