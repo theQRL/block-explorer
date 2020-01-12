@@ -569,6 +569,12 @@ Template.address.helpers({
     }
     return false
   },
+  isMultiSigVoteTxn(txType) {
+    if (txType === 'multi_sig_vote') {
+      return true
+    }
+    return false
+  },
   isKeybaseTxn(txType) {
     if (txType === 'keybase') {
       return true
@@ -641,7 +647,17 @@ Template.address.helpers({
       _.each(i.multi_sig_spend.amounts, (a) => {
         sum = sum.plus(a)
       })
-      return `${sum.dividedBy(SHOR_PER_QUANTA).toNumber()} Quanta`
+      return sum.dividedBy(SHOR_PER_QUANTA).toNumber()
+    } catch (error) {
+      return null
+    }
+  },
+  msVoteStatus(i) {
+    try {
+      if (i.multi_sig_vote.unvote === true) {
+        return 'Approval revoked'
+      }
+      return 'Approved'
     } catch (error) {
       return null
     }
