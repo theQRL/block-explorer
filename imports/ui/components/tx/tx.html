@@ -215,7 +215,7 @@
                   </tr>
                   <tr>
                       <td><strong>Vote status</strong></td>
-                      <td>{{ #if this.tx.multi_sig_vote.unvote }}Approval revoked{{else}}Transaction approved{{/if}}</td>
+                      <td>{{ #if this.tx.multi_sig_vote.unvote }}Vote REJECT spend{{else}}Vote APPROVE spend{{/if}}</td>
                   </tr>
                 </table>
                 {{else}}
