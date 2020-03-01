@@ -1046,3 +1046,6 @@ table {
   padding: 0px !important;
   font-size: 10px !important;
 }
+span.json-formatter-string {
+  white-space: pre-wrap !important;
+}

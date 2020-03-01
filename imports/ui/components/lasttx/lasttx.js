@@ -1,3 +1,4 @@
+import { BigNumber } from 'bignumber.js'
 import { lasttx } from '/imports/api/index.js'
 import './lasttx.html'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
@@ -80,6 +81,24 @@ Template.lasttx.helpers({
     }
     return false
   },
+  isMultiSigCreateTxn(txType) {
+    if (txType === 'multi_sig_create') {
+      return true
+    }
+    return false
+  },
+  isMultiSigSpendTxn(txType) {
+    if (txType === 'multi_sig_spend') {
+      return true
+    }
+    return false
+  },
+  isMultiSigVoteTxn(txType) {
+    if (txType === 'multi_sig_vote') {
+      return true
+    }
+    return false
+  },
   isDocumentNotarisation(txType) {
     if (txType === 'DOCUMENT_NOTARISATION') {
       return true
@@ -97,6 +116,27 @@ Template.lasttx.helpers({
       return true
     }
     return false
+  },
+  msVoteStatus(i) {
+    try {
+      if (i.tx.multi_sig_vote.unvote === true) {
+        return 'Approval revoked'
+      }
+      return 'Approved'
+    } catch (error) {
+      return null
+    }
+  },
+  msSpendAmount(i) {
+    try {
+      let sum = new BigNumber(0)
+      _.each(i.tx.multi_sig_spend.amounts, (a) => {
+        sum = sum.plus(a)
+      })
+      return sum.dividedBy(SHOR_PER_QUANTA).toNumber()
+    } catch (error) {
+      return null
+    }
   },
 })
 

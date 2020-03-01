@@ -113,7 +113,7 @@ const loadGrpcClient = (endpoint, callback) => {
         const grpcObject = grpc.load(qrlProtoFilePath)
         // Create the gRPC Connection
         qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
-        console.log(`qrlClient loaded for ${endpoint}`)
+        console.log(`qrlClient loaded for ${endpoint} from ${qrlProtoFilePath}`)
         callback(null, true)
       })
     }
@@ -278,74 +278,107 @@ const qrlApi = (api, request, callback) => {
   }
 }
 
-const getAddressState = (request, callback) => {
+const helpersaddressTransactions = (response) => {
+  const output = []
+  // console.log(response)
+  _.each(response.transactions_detail, (tx) => {
+    const txEdited = tx
+    if (tx.tx.transfer) {
+      const hexlified = []
+      _.each(tx.tx.transfer.addrs_to, (txOutput) => {
+        // console.log('formatting: ', txOutput)
+        hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
+      })
+      txEdited.tx.transfer.addrs_to = hexlified
+    }
+    if (tx.tx.coinbase) {
+      if (tx.tx.coinbase.addr_to) {
+        txEdited.tx.coinbase.addr_to = `Q${Buffer.from(txEdited.tx.coinbase.addr_to).toString('hex')}`
+      }
+    }
+    if (tx.tx.transaction_hash) {
+      txEdited.tx.transaction_hash = Buffer.from(txEdited.tx.transaction_hash).toString('hex')
+    }
+    if (tx.tx.master_addr) {
+      txEdited.tx.master_addr = Buffer.from(txEdited.tx.master_addr).toString('hex')
+    }
+    if (tx.tx.public_key) {
+      txEdited.tx.public_key = Buffer.from(txEdited.tx.public_key).toString('hex')
+    }
+    if (tx.tx.signature) {
+      txEdited.tx.signature = Buffer.from(txEdited.tx.signature).toString('hex')
+    }
+    if (tx.block_header_hash) {
+      txEdited.block_header_hash = Buffer.from(txEdited.block_header_hash).toString('hex')
+    }
+    txEdited.addr_from = `Q${Buffer.from(txEdited.addr_from).toString('hex')}`
+    output.push(txEdited)
+  })
+  return response
+}
+
+const getOTS = (request, callback) => {
   try {
-    qrlApi('GetAddressState', request, (error, response) => {
+    qrlApi('GetOTS', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/getAddressState** ')
+        const myError = errorCallback(error, 'Cannot access API/GetOTS', '**ERROR/getOTS** ')
         callback(myError, null)
       } else {
-        // Parse OTS Bitfield, and grab the lowest unused key
-        const newOtsBitfield = {}
-        let lowestUnusedOtsKey = -1
-        let otsBitfieldLength = 0
+        // console.log(response)
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetOTS', '**ERROR/GetOTS**')
+    callback(myError, null)
+  }
+}
 
-        const thisOtsBitfield = response.state.ots_bitfield
-        thisOtsBitfield.forEach((item, index) => {
-          const thisDecimal = new Uint8Array(item)[0]
-          const thisBinary = decimalToBinary(thisDecimal).reverse()
-          const startIndex = index * 8
-
-          for (let i = 0; i < 8; i += 1) {
-            const thisOtsIndex = startIndex + i
-
-            // Add to parsed array
-            newOtsBitfield[thisOtsIndex] = thisBinary[i]
-
-            // Check if this is lowest unused key
-            if ((thisBinary[i] === 0) && ((thisOtsIndex < lowestUnusedOtsKey) || (lowestUnusedOtsKey === -1))) {
-              lowestUnusedOtsKey = thisOtsIndex
-            }
-
-            // Increment otsBitfieldLength
-            otsBitfieldLength += 1
-          }
-        })
-
-        // If all keys in bitfield are used, lowest key will be what is shown in ots_counter + 1
-        if (lowestUnusedOtsKey === -1) {
-          if (response.state.ots_counter === '0') {
-            lowestUnusedOtsKey = otsBitfieldLength
-          } else {
-            lowestUnusedOtsKey = parseInt(response.state.ots_counter, 10) + 1
-          }
+const getAddressState = (request, callback) => {
+  try {
+    qrlApi('GetOptimizedAddressState', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetOptimizedAddressState', '**ERROR/getAddressState** ')
+        callback(myError, null)
+      } else {
+        if (response.state.address) {
+          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
         }
-
-        // Calculate number of keys that are consumed
-        let totalKeysConsumed = 0
-        // First add all tracked keys from bitfield
-        for (let i = 0; i < otsBitfieldLength; i += 1) {
-          if (newOtsBitfield[i] === 1) {
-            totalKeysConsumed += 1
-          }
-        }
-
-        // Then add any extra from `otsBitfieldLength` to `ots_counter`
-        if (response.state.ots_counter !== '0') {
-          totalKeysConsumed += parseInt(response.state.ots_counter, 10) - (otsBitfieldLength - 1)
-        }
-
-        // Add in OTS fields to response
-        response.ots = {}
-        response.ots.keys = newOtsBitfield
-        response.ots.nextKey = lowestUnusedOtsKey
-        response.ots.keysConsumed = totalKeysConsumed
 
         callback(null, response)
       }
     })
   } catch (error) {
     const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/GetAddressState**')
+    callback(myError, null)
+  }
+}
+
+const getMultiSigAddressState = (request, callback) => {
+  try {
+    qrlApi('GetMultiSigAddressState', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetMultiSigAddressState', '**ERROR/getMultiSigAddressState** ')
+        callback(myError, null)
+      } else {
+        if (response.state.address) {
+          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+        }
+        if (response.state.creation_tx_hash) {
+          response.state.creation_tx_hash = Buffer.from(response.state.creation_tx_hash).toString('hex')
+        }
+        if (response.state.signatories) {
+          const formatted = []
+          _.each(response.state.signatories, (i) => {
+            formatted.push(`Q${Buffer.from(i).toString('hex')}`)
+          })
+          response.state.signatories = formatted
+        }
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetMultiSigAddressState', '**ERROR/GetMultiSigAddressState**')
     callback(myError, null)
   }
 }
@@ -415,6 +448,23 @@ export const getObject = (request, callback) => {
   }
 }
 
+export const getTransactionsByAddress = (request, callback) => {
+  try {
+    qrlApi('GetTransactionsByAddress', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetTransactionsByAddress', '**ERROR/GetTransactionsByAddress**')
+        callback(myError, null)
+      } else {
+        // console.log(response)
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetTransactionsByAddress', '**ERROR/GetTransactionsByAddress**')
+    callback(myError, null)
+  }
+}
+
 export const apiCall = (apiUrl, callback) => {
   try {
     const response = HTTP.get(apiUrl).data
@@ -427,20 +477,23 @@ export const apiCall = (apiUrl, callback) => {
 }
 
 export const makeTxHumanReadable = (item) => {
-  let output
-  if (item.transaction.tx.transactionType === 'transfer_token') {
-    try {
-      // Request Token Decimals / Symbol
-      const symbolRequest = { query: item.transaction.tx.transfer_token.token_txhash }
-      const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-      output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
-    } catch (e) {
-      console.log('ERROR in makeTxHumanReadable', e)
+  if (item.found !== false) {
+    let output
+    if (item.transaction.tx.transactionType === 'transfer_token') {
+      try {
+        // Request Token Decimals / Symbol
+        const symbolRequest = { query: item.transaction.tx.transfer_token.token_txhash }
+        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+        output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
+      } catch (e) {
+        console.log('ERROR in makeTxHumanReadable', e)
+      }
+    } else {
+      output = helpers.txhash(item)
     }
-  } else {
-    output = helpers.txhash(item)
+    return output
   }
-  return output
+  return item
 }
 
 export const makeTxListHumanReadable = (txList, confirmed) => {
@@ -529,10 +582,14 @@ Meteor.methods({
       const req = { query: Buffer.from(txId, 'hex') }
       const response = Meteor.wrapAsync(getObject)(req)
       const formattedData = makeTxHumanReadable(response)
-      if (formattedData.transaction.header !== null) {
-        // not unconfirmed so insert into cache
-        updateAutoIncrement()
-        blockData.insert({ txId, formattedData })
+      try {
+        if (formattedData.transaction.header !== null) {
+          // not unconfirmed so insert into cache
+          updateAutoIncrement()
+          blockData.insert({ txId, formattedData })
+        }
+      } catch (e) {
+        console.log('Null Tx ignored')
       }
       // return to client
       return formattedData
@@ -819,6 +876,28 @@ Meteor.methods({
     this.unblock()
     const response = Meteor.wrapAsync(getAddressState)(request)
     return response
+  },
+
+  getMultiSigAddressState(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getMultiSigAddressState)(request)
+    return response
+  },
+
+  getOTS(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getOTS)(request)
+    return response
+  },
+
+  getTransactionsByAddress(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getTransactionsByAddress)(request)
+    console.table(response)
+    return helpersaddressTransactions(response)
   },
 
   connectionStatus() {

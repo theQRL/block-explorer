@@ -16,7 +16,13 @@
         <div class="ui basic center aligned segment">
           <div class="ui statistic">
             <div class="label">
-              <div class="ui label">Balance</div>
+              <div class="ui label">
+                {{#if isMultiSig}}
+                MultiSig Balance
+                {{else}}
+                Balance
+                {{/if}}
+              </div>
             </div>
             <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
               {{address.state.balance}}
@@ -40,12 +46,12 @@
     </div>
     <div class="ui grid">
     <div class="ui celled horizontal list">
-      <div class="item"><strong>Transactions</strong> {{address.state.txcount}}</div>
-      <div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>
+      <div class="item"><strong>Transactions</strong> {{address.state.transaction_hash_count}}</div>
+      {{#if isMultiSig}}{{else}}<div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>{{/if}}
       <div class="item"><strong>Signature Scheme</strong> {{addressValidation.signatureScheme}}</div>
-      <div class="item"><strong>Tree Height</strong> {{addressValidation.height}}</div>
-      <div class="item"><strong>Total Signatures</strong> {{addressValidation.totalSignatures}}</div>
-      <div class="item"><strong>Signatures Remaining</strong> {{addressValidation.keysRemaining}}</div>
+      {{#if isMultiSig}}{{else}}<div class="item"><strong>Tree Height</strong> {{addressValidation.height}}</div>{{/if}}
+      {{#if isMultiSig}}{{else}}<div class="item"><strong>Total Signatures</strong> {{addressValidation.totalSignatures}}</div>{{/if}}
+      {{#if isMultiSig}}{{else}}<div class="item"><strong>Signatures Remaining</strong> {{addressValidation.keysRemaining}}</div>{{/if}}
       <div class="item"><strong>Hash Function</strong> {{addressValidation.hashFunction}}</div>
       <!-- <div class="item" id="OTStracker"><button class="ui small button secondary"><i class="expand arrows alternate icon"></i>OTS tracker</button></div> -->
     </div>
@@ -53,7 +59,28 @@
 
   </div>
 
-
+  {{#if isMultiSig}}
+  <h3 class="value">Signatories</h3>
+  <table class="ui table">
+    <thead><th>Address</th><th>Weight</th></thead>
+    <tbody>
+      {{#each signatories 'MULTISIG'}}
+      <tr>
+      <td class="hack">
+        <!-- {{# if bech32}}{{ this.address_b32 }}{{else}} -->
+        <a href="/a/{{ this.address_hex}}">{{ this.address_hex}}</a>
+        <!-- {{/if}} -->
+      </td>
+      <td>{{ this.weight }}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+    <tfoot>
+      <th>Threshold for spend</th>
+      <th>{{ threshold }}</th>
+    </tfoot>
+  </table>
+  {{else}}
   <!-- Send/Receive Section -->
   <div id="addressTabs" class="ui top attached tabular menu">
     <a class="item active" data-tab="transactions">Quanta</a>
@@ -83,16 +110,16 @@
       {{#each addressTransactions}}
 
 
-          {{#if isTransfer this.type}}
+          {{#if isTransfer this.transactionType}}
           <div class="ui icon message transactionRecord">
-            {{#if isThisAddress this.from_b32}}
+            {{#if isThisAddress this.addr_from}}
             <img class="transactionTypeImage" src="/img/icons/send.png" />
             {{else}}
             <img class="transactionTypeImage" src="/img/icons/receive.png" />
             {{/if}}
             <div class="content">
               <div class="header">
-                {{#if isThisAddress this.from_b32}}
+                {{#if isThisAddress this.addr_from}}
                 Sent
                 {{else}}
                 Received
@@ -100,22 +127,22 @@
                  | {{this.timestamp}}
               </div>
               <p class="transactionAddress value">
-                {{#if isThisAddress this.from_b32}}
-                  {{#each this.outputs}}
-                    {{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}} - {{this.amount}}<br />
+                {{#if isThisAddress this.addr_from}}
+                  {{#each sendingOutputs this}}
+                    {{this.amount}} &raquo; {{this.to}}<br />
                   {{/each}}
                 {{else}}
-                  {{# if bech32}}{{this.from_b32}}{{else}}{{this.from_hex}}{{/if}}
+                  {{# if bech32}}{{this.addr_from}}{{else}}{{this.addr_from}}{{/if}}
                 {{/if}}
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from_b32}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} Quanta &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">{{#if isThisAddress this.addr_from}} {{totalTransferred this}} {{else}} {{receivedAmount this}} {{/if}} Quanta &gt;</a>
             </div>
           </div>
           {{/if}}
 
-          {{#if isTokenCreation this.type}}
+          {{#if isTokenCreation this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/send.png" />
             <div class="content">
@@ -123,16 +150,16 @@
                 Token Creation - {{this.name}} ({{this.symbol}}) | {{this.timestamp}}
               </div>
               <p class="transactionAddress value">
-                {{this.txhash}}
+                {{this.transaction_hash}}
               </p>
             </div>
             <div class="floatright ta-c">
-               <a href="/tx/{{this.txhash}}">{{this.symbol}} &gt;</a>
+               <a href="/tx/{{this.transaction_hash}}">{{this.symbol}} &gt;</a>
             </div>
           </div>
           {{/if}}
 
-          {{#if isTokenTransfer this.type}}
+          {{#if isTokenTransfer this.transactionType}}
           <div class="ui icon message transactionRecord">
             {{#if isThisAddress this.from_b32}}
             <img class="transactionTypeImage" src="/img/icons/send.png" />
@@ -159,12 +186,12 @@
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.txhash}}">{{#if isThisAddress this.from_b32}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} {{this.symbol}} &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">{{#if isThisAddress this.from_b32}} {{this.totalTransferred}} {{else}} {{this.thisReceivedAmount}} {{/if}} {{this.symbol}} &gt;</a>
             </div>
           </div>
           {{/if}}
 
-          {{#if isCoinbaseTxn this.type}}
+          {{#if isCoinbaseTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/receive.png" />
             <div class="content">
@@ -176,12 +203,12 @@
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">{{coinbaseValue}} Quanta &gt;</a>
             </div>
           </div>
           {{/if}}
 
-          {{#if isSlaveTxn this.type}}
+          {{#if isSlaveTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/send.png" />
             <div class="content">
@@ -189,16 +216,67 @@
                 Slave Transaction | {{this.timestamp}}
               </div>
               <p class="transactionAddress value">
-                {{this.txhash}}
+                {{this.transaction_hash}}
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.txhash}}">{{this.amount}} Quanta &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">{{this.amount}} Quanta &gt;</a>
             </div>
           </div>
           {{/if}}
 
-          {{#if isLatticePKTxn this.type}}
+          {{#if isMultiSigCreateTxn this.transactionType}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                MultiSig CREATE | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress value">
+                {{this.transaction_hash}}
+              </p>
+            </div>
+            <div class="floatright ta-c">
+              <a href="/tx/{{this.transaction_hash}}">{{signatories this}} &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
+          {{#if isMultiSigSpendTxn this.transactionType}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                MultiSig SPEND | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress value">
+                {{this.transaction_hash}}
+              </p>
+            </div>
+            <div class="floatright ta-c">
+              <a href="/tx/{{this.transaction_hash}}">{{msSpendAmount this}} Quanta &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
+          {{#if isMultiSigVoteTxn this.transactionType}}
+          <div class="ui icon message transactionRecord">
+            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <div class="content">
+              <div class="header">
+                MultiSig VOTE | {{this.timestamp}}
+              </div>
+              <p class="transactionAddress value">
+                {{this.transaction_hash}}
+              </p>
+            </div>
+            <div class="floatright ta-c">
+              <a href="/tx/{{this.transaction_hash}}">{{msVoteStatus this}} &gt;</a>
+            </div>
+          </div>
+          {{/if}}
+
+          {{#if isLatticePKTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/send.png" />
             <div class="content">
@@ -206,16 +284,16 @@
                 Lattice Public Key | {{this.timestamp}}
               </div>
               <p class="transactionAddress value">
-                {{this.txhash}}
+                {{this.transaction_hash}}
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">View Transaction &gt;</a>
             </div>
           </div>
           {{/if}}
 
-          {{#if isMessageTxn this.type}}
+          {{#if isMessageTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/send.png" />
             <div class="content">
@@ -223,16 +301,16 @@
                 Message | {{this.timestamp}}
               </div>
               <p class="transactionAddress value">
-                {{this.txhash}}
+                {{this.transaction_hash}}
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">View Transaction &gt;</a>
             </div>
           </div>
           {{/if}}
 
-          {{#if isKeybaseTxn this.type}}
+          {{#if isKeybaseTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/send.png" />
             <div class="content">
@@ -240,16 +318,16 @@
                 Keybase | {{this.timestamp}}
               </div>
               <p class="transactionAddress value">
-                {{this.txhash}}
+                {{this.transaction_hash}}
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">View Transaction &gt;</a>
             </div>
           </div>
           {{/if}}
 
-          {{#if isDocumentNotarisation this.type}}
+          {{#if isDocumentNotarisation this.transactionType}}
           <div class="ui icon message transactionRecord">
             <img class="transactionTypeImage" src="/img/icons/send.png" />
             <div class="content">
@@ -257,11 +335,11 @@
                 Document Notarisation | {{this.timestamp}}
               </div>
               <p class="transactionAddress value">
-                {{this.txhash}}
+                {{this.transaction_hash}}
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.txhash}}">View Transaction &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">View Transaction &gt;</a>
             </div>
           </div>
           {{/if}}
@@ -352,7 +430,9 @@
         {{{OTStracker}}}
       </div>
     </div>
-
+    
+    {{/if}}
+    
     <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
     <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
     
