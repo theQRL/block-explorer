@@ -118,13 +118,10 @@ const getTokenBalances = (getAddress, callback) => {
     address: anyAddressToRaw(getAddress),
   }
 
-  /*
-  Meteor.call('getAddressState', request, (err, res) => {
+  Meteor.call('getFullAddressState', request, (err, res) => {
     if (err) {
       // TODO - Error handling
     } else {
-      // first generate OTS tracker HTML
-      OTS(res.ots.keys)
       // Now for each res.state.token we find, go discover token name and symbol
       // eslint-disable-next-line
       if (res.state.address !== '') {
@@ -145,7 +142,7 @@ const getTokenBalances = (getAddress, callback) => {
             } else {
               // Check if this is a token hash.
               // eslint-disable-next-line
-              if (objRes.transaction.tx.transactionType !== "token") {
+              if (objRes.transaction.tx.transactionType !== 'token') {
                 // TODO - Error handling here
               } else {
                 const tokenDetails = objRes.transaction.tx.token
@@ -173,7 +170,6 @@ const getTokenBalances = (getAddress, callback) => {
       }
     }
   })
-  */
 }
 
 const otsParse = (response, totalSignatures) => {
