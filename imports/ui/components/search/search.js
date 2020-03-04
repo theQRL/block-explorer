@@ -1,18 +1,24 @@
 import './search.html'
 
 const identifySearch = (str) => {
-  const type = { parameter: str, type: 'Undetermined' }
-  if (str.length === 79 && str.charAt(0) === 'Q') {
+  let adjstr = str.trim()
+  if (adjstr.charAt(0) === 'q') {
+    adjstr = `Q${adjstr.substr(1, adjstr.length - 1)}`
+    $('#mainSearch').val(adjstr)
+  }
+  console.log(adjstr)
+  const type = { parameter: adjstr, type: 'Undetermined' }
+  if (adjstr.length === 79 && adjstr.charAt(0) === 'Q') {
     type.type = 'Address'
-    type.route = `/a/${str}`
+    type.route = `/a/${adjstr}`
   }
-  if ((str.length === 64) && (parseInt(str, 10) !== str)) {
+  if ((adjstr.length === 64) && (parseInt(adjstr, 10) !== adjstr)) {
     type.type = 'Txhash'
-    type.route = `/tx/${str}`
+    type.route = `/tx/${adjstr}`
   }
-  if ((parseInt(str, 10).toString()) === str) {
+  if ((parseInt(adjstr, 10).toString()) === adjstr) {
     type.type = 'Block'
-    type.route = `/block/${str}`
+    type.route = `/block/${adjstr}`
   }
   return type
 }
@@ -40,4 +46,10 @@ Template.search.events({
     }
     return true
   },
+})
+Template.search.onRendered(() => {
+  if ($('.sidebar').hasClass('visible')) {
+    // sidebar is visible so this is not mobile layout
+    this.$('.floatright').first().hide()
+  }
 })
