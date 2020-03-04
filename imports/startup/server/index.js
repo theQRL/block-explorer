@@ -386,6 +386,26 @@ const getOTS = (request, callback) => {
   }
 }
 
+const getFullAddressState = (request, callback) => {
+  try {
+    qrlApi('GetAddressState', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetOptimizedAddressState', '**ERROR/getAddressState** ')
+        callback(myError, null)
+      } else {
+        if (response.state.address) {
+          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+        }
+
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/GetAddressState**')
+    callback(myError, null)
+  }
+}
+
 const getAddressState = (request, callback) => {
   try {
     qrlApi('GetOptimizedAddressState', request, (error, response) => {
@@ -927,6 +947,13 @@ Meteor.methods({
     check(request, Object)
     this.unblock()
     const response = Meteor.wrapAsync(getAddressState)(request)
+    return response
+  },
+
+  getFullAddressState(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getFullAddressState)(request)
     return response
   },
 
