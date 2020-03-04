@@ -12,6 +12,7 @@ import '/imports/startup/server/cron.js' /* eslint-disable-line */
 import {
   EXPLORER_VERSION, SHOR_PER_QUANTA, decimalToBinary, anyAddressToRaw,
 } from '../both/index.js'
+import BigNumber from 'bignumber.js'
 
 
 // Apply BrowserPolicy
@@ -278,6 +279,31 @@ const qrlApi = (api, request, callback) => {
   }
 }
 
+function addTokenDetail(transaction) {
+  const tokenDetail = {}
+  const req = { query: Buffer.from(transaction.tx.transfer_token.token_txhash, 'hex') }
+  const response = Meteor.wrapAsync(getObject)(req) // eslint-disable-line no-use-before-define
+  const formattedData = makeTxHumanReadable(response) // eslint-disable-line no-use-before-define
+  tokenDetail.name = formattedData.transaction.tx.token.name
+  tokenDetail.symbol = formattedData.transaction.tx.token.symbol
+  tokenDetail.decimals = formattedData.transaction.tx.token.decimals
+  tokenDetail.owner = `Q${Buffer.from(formattedData.transaction.tx.token.owner).toString('hex')}`
+  return tokenDetail
+}
+
+const formatTokenAmount = (quantity, decimals) => {
+  const num = new BigNumber(parseInt(quantity, 10))
+  return num.dividedBy(10 ** parseInt(decimals, 10))
+}
+
+const sumTokenTotal = (arr, decimals) => {
+  let total = new BigNumber(0)
+  _.each(arr, (item) => {
+    total = total.plus(parseInt(item, 10))
+  })
+  return total.dividedBy(10 ** parseInt(decimals, 10)).toNumber()
+}
+
 const helpersaddressTransactions = (response) => {
   const output = []
   // console.log(response)
@@ -295,6 +321,32 @@ const helpersaddressTransactions = (response) => {
       if (tx.tx.coinbase.addr_to) {
         txEdited.tx.coinbase.addr_to = `Q${Buffer.from(txEdited.tx.coinbase.addr_to).toString('hex')}`
       }
+    }
+    if (tx.tx.transactionType === 'token') {
+      if (tx.tx.token.symbol) {
+        txEdited.tx.token.symbol = Buffer.from(txEdited.tx.token.symbol).toString()
+      }
+      if (tx.tx.token.name) {
+        txEdited.tx.token.name = Buffer.from(txEdited.tx.token.name).toString()
+      }
+    }
+    if (tx.tx.transactionType === 'transfer_token') {
+      if (tx.tx.transfer_token.token_txhash) {
+        txEdited.tx.transfer_token.token_txhash = Buffer.from(txEdited.tx.transfer_token.token_txhash).toString('hex')
+      }
+      txEdited.tx.token = addTokenDetail(tx)
+      const hexlified = []
+      const outputs = []
+      _.each(tx.tx.transfer_token.addrs_to, (txOutput, index) => {
+        hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
+        outputs.push({
+          address_hex: `Q${Buffer.from(txOutput).toString('hex')}`,
+          amount: `${formatTokenAmount(tx.tx.transfer_token.amounts[index], txEdited.tx.token.decimals)} ${txEdited.tx.token.symbol}`,
+        })
+      })
+      txEdited.tx.outputs = outputs
+      txEdited.tx.totalTransferred = `${sumTokenTotal(tx.tx.transfer_token.amounts, txEdited.tx.token.decimals)} ${txEdited.tx.token.symbol}`
+      txEdited.tx.transfer_token.addrs_to = hexlified
     }
     if (tx.tx.transaction_hash) {
       txEdited.tx.transaction_hash = Buffer.from(txEdited.tx.transaction_hash).toString('hex')
@@ -330,6 +382,26 @@ const getOTS = (request, callback) => {
     })
   } catch (error) {
     const myError = errorCallback(error, 'Cannot access API/GetOTS', '**ERROR/GetOTS**')
+    callback(myError, null)
+  }
+}
+
+const getFullAddressState = (request, callback) => {
+  try {
+    qrlApi('GetAddressState', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetOptimizedAddressState', '**ERROR/getAddressState** ')
+        callback(myError, null)
+      } else {
+        if (response.state.address) {
+          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+        }
+
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/GetAddressState**')
     callback(myError, null)
   }
 }
@@ -875,6 +947,13 @@ Meteor.methods({
     check(request, Object)
     this.unblock()
     const response = Meteor.wrapAsync(getAddressState)(request)
+    return response
+  },
+
+  getFullAddressState(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getFullAddressState)(request)
     return response
   },
 
