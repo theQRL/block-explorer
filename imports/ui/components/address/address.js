@@ -10,7 +10,7 @@ import {
   bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst, decimalToBinary,
 } from '../../../startup/both/index.js'
 
-
+BigNumber.config({ EXPONENTIAL_AT: 1e+9 })
 let tokensHeld = []
 
 // const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
@@ -412,7 +412,11 @@ Template.address.helpers({
     // console.log('outputs', outputs)
     const result = []
     _.each(outputs.transfer.addrs_to, (element, key) => {
-      result.push({ to: element, amount: (outputs.transfer.amounts[key] / SHOR_PER_QUANTA) })
+      const a = new BigNumber(outputs.transfer.amounts[key])
+      result.push({
+        to: element,
+        amount: a.dividedBy(SHOR_PER_QUANTA).toString(),
+      })
     })
     // console.log('return in sendingOutputs', result)
     return result
@@ -420,11 +424,11 @@ Template.address.helpers({
   totalTransferred(tx) {
     const outputs = tx.transfer
     if (outputs) {
-      let amount = 0
+      let amount = new BigNumber(0)
       _.each(outputs.amounts, (element) => {
-        amount += element / SHOR_PER_QUANTA
+        amount = amount.plus(element)
       })
-      return amount
+      return amount.dividedBy(SHOR_PER_QUANTA).toString()
     }
     return ''
   },
