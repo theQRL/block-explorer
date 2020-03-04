@@ -47,3 +47,9 @@ Template.search.events({
     return true
   },
 })
+Template.search.onRendered(() => {
+  if ($('.sidebar').hasClass('visible')) {
+    // sidebar is visible so this is not mobile layout
+    this.$('.floatright').first().hide()
+  }
+})
