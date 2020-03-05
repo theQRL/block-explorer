@@ -107,6 +107,14 @@ function loadAddressTransactions(aId, page) {
       Session.set('fetchedTx', true)
     }
 
+    Meteor.call('getSlavesByAddress', request, (errSlaves, resSlaves) => {
+      if (errSlaves) {
+        // error handling
+      } else {
+        Session.set('slaves', resSlaves)
+      }
+    })
+
     $('#loadingTransactions').hide()
     $('#noTransactionsFound').show()
   })
@@ -669,6 +677,20 @@ Template.address.helpers({
       return null
     }
   },
+  hasSlaves() {
+    try {
+      const x = Session.get('slaves')
+      if (x.length === 0) {
+        return false
+      }
+      return true
+    } catch (e) {
+      return false
+    }
+  },
+  slaves() {
+    return Session.get('slaves')
+  },
 })
 
 Template.address.events({
@@ -754,6 +776,7 @@ Template.address.onRendered(() => {
     Session.set('pages', [])
     Session.set('active', 1)
     Session.set('fetchedTx', false)
+    Session.set('slaves', [])
     if (FlowRouter.getParam('aId')) {
       renderAddressBlock()
     }
