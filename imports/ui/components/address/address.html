@@ -86,6 +86,7 @@
     <a class="item active" data-tab="transactions">Quanta</a>
     <a class="item" data-tab="tokenBalances">Tokens</a>
     <a class="item" data-tab="otsTrackerTab">OTS Tracker</a>
+    <a class="item" data-tab="slavesTab">Slaves</a>
   </div>
   <div class="ui bottom attached tab segment active" data-tab="transactions">
 
@@ -431,6 +432,17 @@
       </div>
     </div>
     
+    <div class="ui bottom attached tab segment" data-tab="slavesTab">
+      <h4>Slave addresses</h4>
+      {{#if hasSlaves}}
+      <div class="ui bulleted list">
+        {{#each slaves}}<div class="ui item"><a href="/a/{{this.slave_address}}">{{this.slave_address}}</a></div>{{/each}}
+        </div>
+        {{else}}
+        <p>None found for this address</p>
+      {{/if}}
+  </div>
+
     {{/if}}
     
     <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>

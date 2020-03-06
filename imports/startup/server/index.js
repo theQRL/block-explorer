@@ -3,6 +3,7 @@
 import grpc from 'grpc'
 import tmp from 'tmp'
 import fs from 'fs'
+import BigNumber from 'bignumber.js'
 import helpers from '@theqrl/explorer-helpers'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { check } from 'meteor/check'
@@ -10,10 +11,8 @@ import { BrowserPolicy } from 'meteor/qrl:browser-policy'
 import { blockData } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
 import {
-  EXPLORER_VERSION, SHOR_PER_QUANTA, decimalToBinary, anyAddressToRaw,
+  EXPLORER_VERSION, SHOR_PER_QUANTA, anyAddressToRaw,
 } from '../both/index.js'
-import BigNumber from 'bignumber.js'
-
 
 // Apply BrowserPolicy
 BrowserPolicy.content.disallowInlineScripts()
@@ -537,6 +536,23 @@ export const getTransactionsByAddress = (request, callback) => {
   }
 }
 
+export const getSlavesByAddress = (request, callback) => {
+  try {
+    qrlApi('GetSlavesByAddress', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(error, 'Cannot access API/GetSlavesByAddress', '**ERROR/GetSlavesByAddress**')
+        callback(myError, null)
+      } else {
+        // console.log(response)
+        callback(null, response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(error, 'Cannot access API/GetSlavesByAddress', '**ERROR/GetSlavesByAddress**')
+    callback(myError, null)
+  }
+}
+
 export const apiCall = (apiUrl, callback) => {
   try {
     const response = HTTP.get(apiUrl).data
@@ -977,6 +993,20 @@ Meteor.methods({
     const response = Meteor.wrapAsync(getTransactionsByAddress)(request)
     console.table(response)
     return helpersaddressTransactions(response)
+  },
+
+  getSlavesByAddress(request) {
+    check(request, Object)
+    this.unblock()
+    const response = Meteor.wrapAsync(getSlavesByAddress)(request)
+    console.log('response', response)
+    const res = []
+    _.forEach(response.slaves_detail, (item) => {
+      const i = item
+      i.slave_address = `Q${Buffer.from(item.slave_address).toString('hex')}`
+      res.push(i)
+    })
+    return res
   },
 
   connectionStatus() {
