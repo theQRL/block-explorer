@@ -48,8 +48,13 @@ Template.search.events({
   },
 })
 Template.search.onRendered(() => {
-  if ($('.sidebar').hasClass('visible')) {
-    // sidebar is visible so this is not mobile layout
+  if ($('.sidebar').hasClass('visible') && FlowRouter.getRouteName() === 'Search.home') {
+    // sidebar is visible and on /find route
     this.$('.floatright').first().hide()
   }
+})
+Tracker.autorun(() => {
+  FlowRouter.watchPathChange()
+  // const context = FlowRouter.current()
+  this.$('.floatright').show()
 })
