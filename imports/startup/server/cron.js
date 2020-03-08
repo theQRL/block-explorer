@@ -424,3 +424,21 @@ JsonRoutes.add('get', '/api/status', (req, res) => {
     data: response,
   })
 })
+
+JsonRoutes.add('get', '/api/miningstats', (req, res) => {
+  let response = {}
+  const queryResults = homechart.findOne()
+  if (queryResults !== undefined) {
+    response = {
+      block: queryResults.labels[queryResults.labels.length - 1],
+      hashrate: queryResults.datasets[0].data[queryResults.labels.length - 1],
+      difficulty: queryResults.datasets[1].data[queryResults.labels.length - 1],
+      blocktime: queryResults.datasets[2].data[queryResults.labels.length - 1],
+    }
+  } else {
+    response = { found: false, message: 'API error', code: 5003 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
