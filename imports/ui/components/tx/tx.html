@@ -1,7 +1,18 @@
 <template name="tx">
-
+  {{#if notFound}}
+    <h3 class="ui pageHeader header">
+      <i class="tiny plus icon"></i>
+      <div class="content wordBreak">
+        Transaction {{tx.parameter}}
+      </div>
+    </h3>
+    <div class="ui negative message">
+      <i class="close icon"></i>
+      Transaction <span class="hack">{{id}}</span> not found
+    </div>
+  {{/if}}
 {{#with tx}}
-  {{#if error}}
+    {{#if error}}
     <h3 class="ui pageHeader header">
       <i class="tiny plus icon"></i>
       <div class="content wordBreak">
@@ -15,18 +26,6 @@
       </div>
       <p>{{tx.error}}</p>
     </div>
-  {{else}}
-    {{#if notFound}}
-      <h3 class="ui pageHeader header">
-        <i class="tiny plus icon"></i>
-        <div class="content wordBreak">
-          Transaction {{tx.parameter}}
-        </div>
-      </h3>
-      <div class="ui negative message">
-        <i class="close icon"></i>
-        Transaction <span class="hack">{{id}}</span> not found
-      </div>
     {{else}}
       <h3 class="ui pageHeader header">
         <i class="tiny plus icon"></i>
@@ -59,8 +58,9 @@
                   <div class="label">
                     <div class="ui {{color}} label">{{explorer.type}}{{#if isTokenTransfer}}: {{explorer.symbol}} {{/if}}</div>
                   </div>
-
+                  {{#if isNotMultiSig}}
                   {{#if isNotMessage}}
+                  {{#if isNotLattice}}
                     {{#if isToken}}
                       <strong>{{explorer.name}} ({{explorer.symbol}})</strong><br />
                       owned by:<br />
@@ -80,7 +80,15 @@
                           Quanta<br><small>USD ${{qrl}}</small>
                         </div>
                       {{/if}}
+                      {{/if}}
                     {{/if}}
+                  {{/if}}
+                  {{else}}
+                  {{#if isMultiSigSpend }}
+                    <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigSpendAddress}}">{{multiSigSpendAddress}}</a></div></div>
+                  {{else}}
+                    <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigAddress}}">{{multiSigAddress}}</a></div></div>
+                  {{/if}}
                   {{/if}}
                 </div>
               </div>
@@ -109,7 +117,9 @@
                 <tbody>
                   <tr>
                     <td class="single line">
-                      <div class="ui red label"><i class="sign out icon"></i>from</div>
+                      <div class="ui red label"><i class="sign out icon"></i>
+                        {{#if isMultiSigSpend }}initiated by{{else}}from{{/if}}
+                      </div>
                     </td>
                     <td><a href="/a/{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}">{{# if bech32 }}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</a></td>
                   </tr>
@@ -175,6 +185,61 @@
                       </tbody>
                     </table>
                 {{else}}
+                {{#if isMultiSigCreate}}
+                  <h4>Signatories</h4>
+                  <table class="ui table">
+                    <thead><th>Address</th><th>Weight</th></thead>
+                    <tbody>
+                      {{#each multiSigSignatories this.tx.multi_sig_create}}
+                      <tr>
+                      <td>
+                        <!-- {{# if bech32}}{{ this.address_b32 }}{{else}} -->
+                        {{ this.address_hex}}
+                        <!-- {{/if}} -->
+                      </td>
+                      <td>{{ this.weight }}</td>
+                      </tr>
+                      {{/each}}
+                    </tbody>
+                    <tfoot>
+                      <th>Threshold for spend</th>
+                      <th>{{ this.tx.multi_sig_create.threshold }}</th>
+                    </tfoot>
+                  </table>
+                {{else}}
+                {{#if isMultiSigVote}}
+                <table class="ui table">
+                  <tr>
+                    <td><strong>Spend transaction</strong></td>
+                    <td style="font-family: Hack;"><a href="/tx/{{ this.tx.multi_sig_vote.shared_key }}">{{ this.tx.multi_sig_vote.shared_key }}</a></td>
+                  </tr>
+                  <tr>
+                      <td><strong>Vote status</strong></td>
+                      <td>{{ #if this.tx.multi_sig_vote.unvote }}Vote REJECT spend{{else}}Vote APPROVE spend{{/if}}</td>
+                  </tr>
+                </table>
+                {{else}}
+                  {{#if isLattice}}
+                  <table class="ui stackable celled table">
+                    <tr>
+                      <td style="text-align: right;" width="30%"><strong>PK1</strong></td><td>{{bf this.tx.latticePK.pk1}}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: right;" width="30%"><strong>PK2</strong></td><td>{{bf this.tx.latticePK.pk2}}</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align: right;" width="30%"><strong>PK3</strong></td><td>{{bf this.tx.latticePK.pk3}}</td>
+                    </tr>
+                </table>
+                <table class="ui stackable celled table">
+                  <tr>
+                    <td style="text-align: right;" width="30%"><strong>public_key</strong></td><td>{{bf this.tx.public_key}}</td>
+                  </tr>
+                  <tr>
+                    <td style="text-align: right;" width="30%"><strong>signature</strong></td><td>{{bf this.tx.signature}}</td>
+                  </tr>
+              </table>
+                  {{else}}
                   <h3>To</h3>
                   <table class="ui stackable table">
                     <thead>
@@ -196,14 +261,24 @@
                             <td class="tc-w">{{this.amount}}</td>
                           </tr>
                         {{/each}}
+                      {{else if isMultiSigSpend }}
+                      {{#each mso this.tx.multi_sig_spend}}
+                      <tr>
+                        <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
+                        <td class="tc-w" style="word-break: keep-all">{{this.amount}} Quanta</td>
+                      </tr>
+                    {{/each}}
                       {{else}}
                         <tr>
                           <td><a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}">{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}</a>  </td>
-                          <td class="tc-w">{{tx.tx.amount}}</td>
+                          <td class="tc-w" style="word-break: keep-all">{{tx.tx.amount}}</td>
                         </tr>
                       {{/if}}
                     </tbody>
                   </table>
+                  {{/if}}
+                  {{/if}}
+                  {{/if}}
                 {{/if}}
               {{/if}}
             {{/if}}
@@ -214,7 +289,6 @@
       </div>
 
     {{/if}}
-  {{/if}}
 {{/with}}
 
 </template>

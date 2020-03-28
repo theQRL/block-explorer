@@ -1,6 +1,8 @@
+/* eslint no-console: 0 */
 import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import CryptoJS from 'crypto-js'
+import sha256 from 'sha256'
 import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
@@ -35,6 +37,53 @@ const renderTxBlock = () => {
     })
   }
 }
+
+/* eslint-disable */
+function toHexString(byteArray) {
+  return Array.from(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('')
+}
+
+function hexToBytes(hex) {
+  for (var bytes = [], c = 0; c < hex.length; c += 2)
+    bytes.push(parseInt(hex.substr(c, 2), 16));
+  return bytes;
+}
+function bytesToHex(bytes) {
+  for (var hex = [], i = 0; i < bytes.length; i++) {
+    hex.push((bytes[i] >>> 4).toString(16));
+    hex.push((bytes[i] & 0xf).toString(16));
+  }
+  return hex.join("");
+}
+function byte2bits(a) {
+  var tmp = "";
+  for (var i = 128; i >= 1; i /= 2) tmp += a & i ? "1" : "0";
+  return tmp;
+}
+function split2Bits(a, n) {
+  var buff = "";
+  var b = [];
+  for (var i = 0; i < a.length; i++) {
+    buff += byte2bits(a[i]);
+    while (buff.length >= n) {
+      b.push(buff.substr(0, n));
+      buff = buff.substr(n);
+    }
+  }
+  return [b, buff];
+}
+
+function toByteArray(hexString) {
+  var result = [];
+  while (hexString.length >= 2) {
+    result.push(parseInt(hexString.substring(0, 2), 16));
+    hexString = hexString.substring(2, hexString.length);
+  }
+  return result;
+}
+/* eslint-enable */
 
 Template.tx.helpers({
   bech32() {
@@ -193,6 +242,30 @@ Template.tx.helpers({
     }
     return false
   },
+  isMultiSigCreate() {
+    if (this.explorer.type === 'MULTISIG_CREATE') {
+      return true
+    }
+    return false
+  },
+  isMultiSigSpend() {
+    if (this.explorer.type === 'MULTISIG_SPEND') {
+      return true
+    }
+    return false
+  },
+  isMultiSigVote() {
+    if (this.explorer.type === 'MULTISIG_VOTE') {
+      return true
+    }
+    return false
+  },
+  isLattice() {
+    if (this.explorer.type === 'LATTICE PK') {
+      return true
+    }
+    return false
+  },
   isDocumentNotarisation() {
     if (this.explorer.type === 'DOCUMENT_NOTARISATION') {
       return true
@@ -205,6 +278,18 @@ Template.tx.helpers({
     }
     return false
   },
+  isNotMultiSig() {
+    if ((this.explorer.type !== 'MULTISIG_CREATE') && (this.explorer.type !== 'MULTISIG_SPEND') && (this.explorer.type !== 'MULTISIG_VOTE')) {
+      return true
+    }
+    return false
+  },
+  isNotLattice() {
+    if ((this.explorer.type !== 'LATTICE PK')) {
+      return true
+    }
+    return false
+  },
   documentNotarisationVerificationMessage() {
     const message = Session.get('documentNotarisationVerificationMessage')
     return message
@@ -212,6 +297,47 @@ Template.tx.helpers({
   documentNotarisationError() {
     const message = Session.get('documentNotarisationError')
     return message
+  },
+  multiSigSignatories(ms) {
+    const output = []
+    if (ms) {
+      _.each(ms.signatories, (item, index) => {
+        output.push({ address_hex: `Q${item}`, weight: ms.weights[index] })
+      })
+      return output
+    }
+    return false
+  },
+  mso(ms) {
+    const output = []
+    if (ms) {
+      _.each(ms.addrs_to, (item, index) => {
+        output.push({ address: `Q${item}`, amount: (ms.amounts[index] / SHOR_PER_QUANTA) })
+      })
+      return output
+    }
+    return false
+  },
+  multiSigAddress() {
+    const desc = hexToBytes('110000')
+    const txhash = hexToBytes(Session.get('txhash').transaction.tx.transaction_hash)
+    const arr = desc.concat(txhash)
+    const prevHash = hexToBytes(sha256(arr))
+    const newArr = desc.concat(prevHash)
+    const newHash = hexToBytes(sha256(newArr).slice(56, 64))
+    const q1 = desc.concat(prevHash)
+    const q = q1.concat(newHash)
+    return `Q${toHexString(q)}`
+  },
+  multiSigSpendAddress() {
+    try {
+      return `Q${this.tx.multi_sig_spend.multi_sig_address}`
+    } catch (error) {
+      return null
+    }
+  },
+  bf(b) {
+    return Buffer.from(b).toString('hex')
   },
 })
 
@@ -234,7 +360,7 @@ Template.tx.events({
     $('#documentVerified').hide()
     $('#documentVerifcationFailed').hide()
 
-    let notaryDocuments = $('#notaryDocument').prop('files')
+    const notaryDocuments = $('#notaryDocument').prop('files')
     const notaryDocument = notaryDocuments[0]
 
     // Get notary details from txn
@@ -259,25 +385,25 @@ Template.tx.events({
 
     // Verify user supplied file against txn hash
     const reader = new FileReader()
-    reader.onloadend = function() {
+    reader.onloadend = function onloadend() {
       try {
         let fileHash
 
         // Convert FileReader ArrayBuffer to WordArray first
-        var resultWordArray = CryptoJS.lib.WordArray.create(reader.result);
+        const resultWordArray = CryptoJS.lib.WordArray.create(reader.result)
 
-        if(txnHashFunction == "SHA1") {
-          fileHash = CryptoJS.SHA1(resultWordArray).toString(CryptoJS.enc.Hex);
-        } else if(txnHashFunction == "SHA256") {
-          fileHash = CryptoJS.SHA256(resultWordArray).toString(CryptoJS.enc.Hex);
-        } else if(txnHashFunction == "MD5") {
-          fileHash = CryptoJS.MD5(resultWordArray).toString(CryptoJS.enc.Hex);
+        if (txnHashFunction === 'SHA1') {
+          fileHash = CryptoJS.SHA1(resultWordArray).toString(CryptoJS.enc.Hex)
+        } else if (txnHashFunction === 'SHA256') {
+          fileHash = CryptoJS.SHA256(resultWordArray).toString(CryptoJS.enc.Hex)
+        } else if (txnHashFunction === 'MD5') {
+          fileHash = CryptoJS.MD5(resultWordArray).toString(CryptoJS.enc.Hex)
         }
 
         // Verify the txnFileHash is the same as provided file
-        if(txnFileHash == fileHash) {
+        if (txnFileHash === fileHash) {
           // Valid document notarisation
-          let successMessage = String.raw`The file '${notaryDocument.name}' has been verifiably
+          const successMessage = String.raw`The file '${notaryDocument.name}' has been verifiably
           notarised by '${txnNotary}' on ${txnNotaryDate} using the hash function '${txnHashFunction}'
           resulting in the hash '${txnFileHash}'.`
 

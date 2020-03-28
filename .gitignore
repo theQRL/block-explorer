@@ -8,3 +8,4 @@ node_modules/
 /production.json
 /localhost.json
 /run.sh
+/testnet.json
