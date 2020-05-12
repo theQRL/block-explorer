@@ -43,9 +43,9 @@ export const MINING_POOLS = [
   },
   {
     address: 'Q010800d1f8900a72abeb583737b8bcd1185e07a54760551173cd15ffe2408048a2df150556cad9',
-    email: 'support@mineqrl.net',
-    link: 'https://mineqrl.net',
-    name: 'mineQRL.net',
+    email: 'support@miningocean.org',
+    link: 'https://qrl.miningocean.org',
+    name: 'qrl.miningocean.org',
   },
   {
     address: 'Q01060048522a06d47bdb71728ef9a2ad2dd965de9d5836eee83a230a8981de16d1ad2181d84883',
@@ -60,7 +60,7 @@ export const MINING_POOLS = [
     name: 'supportQRL.com',
   },
   {
-    address: 'Q0106008479a80a2ca30a8ba19eddc176e296558795d499555841e9ea83413203cddd1a19862060',
+    address: 'Q0106003b59b48dbe83b91b77961d4001407a3973d613d12f06913e52e0e8c7916be4662dc2a33b',
     email: 'admin@herominers.com',
     link: 'https://qrl.herominers.com',
     name: 'qrl.herominers.com',
