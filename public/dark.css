@@ -3,6 +3,10 @@
 
 body {
   background: #0B181E !important;
+    -webkit-font-feature-settings: "liga" 0;
+    -moz-font-feature-settings: "liga" 0;
+    -ms-font-feature-settings: "liga" 0;
+    font-feature-settings: "liga" 0;
 }
 
 h3,
