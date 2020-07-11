@@ -7,11 +7,11 @@ body {
 
 h3,
 button {
-  font-family: 'DinPro' !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 pre {
-  font-family: 'DinPro' !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .pushable {
@@ -49,7 +49,7 @@ body.pushable {
 }
 
 td a {
-  font-family: 'DinPro';
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-weight: normal;
   overflow: auto;
   word-break: break-all;
@@ -61,7 +61,7 @@ td a:hover {
 }
 
 .item:not(.menu) a {
-  font-family: 'DinPro';
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   color: #4aafff;
 }
 
@@ -124,11 +124,11 @@ td .unbreakable {
 }
 
 .sidebar a {
-  font-family: DinPro !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .sidebar a:hover {
-  font-family: DinPro !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .ui.labeled.icon.menu .item>.icon:not(.dropdown) {
@@ -165,7 +165,7 @@ td .unbreakable {
 .logoArea {
   background-color: #FFA729 !important;
   color: #EAEFF5 !important;
-  font-family: 'DinPro', sans-serif !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-weight: bold;
   text-align: center;
   font-size: 24px;
@@ -195,7 +195,7 @@ div.ui.celled.horizontal.list>.item {
 .main-menu-btn {
   font-weight: bold;
   color: #EAEFF5 !important;
-  font-family: 'DinPro', sans-serif !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .main-menu-btn .icon {
@@ -232,7 +232,7 @@ div.ui.celled.horizontal.list>.item {
   font-weight: bold;
   background-color: #6D7478 !important;
   /* color: #000 !important; */
-  font-family: 'DinPro', sans-serif !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .ui.inverted.menu .active.item:hover {
@@ -303,7 +303,7 @@ div.ui.celled.horizontal.list>.item {
   background-color: #4AAFFF;
   color: #EAEFF5;
   margin: 0px !important;
-  font-family: 'DinProBold', sans-serif;
+  font-family: 'DinProBold', Tahoma, Geneva, sans-serif !important;
   /* font-weight: 300 !important; */
   padding: 10px;
 }
@@ -315,7 +315,7 @@ div.ui.celled.horizontal.list>.item {
 
 .ui .pageHeader .content .sub.header {
   color: #EAEFF5 !important;
-  font-family: 'DinPro', sans-serif !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 
@@ -370,7 +370,7 @@ input {
   box-shadow: 0 1px 7px 0 rgba(0, 0, 0, 0.3) !important;
   color: #FFF !important;
   border-radius: 0px !important;
-  font-family: DinPro !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-size: 14px;
   -webkit-transition: all .2s linear;
   transition: all .2s linear;
@@ -385,7 +385,7 @@ input {
   border: solid 1px #0b181e !important;
   color: #0A0724 !important;
   border-radius: 0px !important;
-  font-family: DinPro !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-size: 14px;
 }
 
@@ -424,7 +424,7 @@ input {
 
 .transactionRecord a {
   color: #4aafff !important;
-  font-family: DinPro !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .transactionRecord:hover a {
@@ -522,7 +522,7 @@ SVG styling
 */
 .snapshot__loading {
   position: relative;
-  font-family: "DinPro", sans-serif;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   height: 150px;
   padding-top: 20px;
   text-align: center;
@@ -613,7 +613,7 @@ Ellipsis Animation
   padding: 25px 20px 20px;
   overflow: auto;
   color: #0b181e;
-  font-family: 'DinPro';
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .rv-vanilla-modal-body p {
@@ -622,7 +622,7 @@ Ellipsis Animation
 }
 
 .rv-vanilla-modal-title {
-  font-family: 'DinPro';
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   color: #EAEFF5;
   margin: 0;
   font-size: 18px;
@@ -631,7 +631,7 @@ Ellipsis Animation
 
 .rv-vanilla-modal-close {
   color: #FFA729;
-  font-family: 'DinPro';
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-size: 20px;
   float: right;
   display: inline-block;
@@ -667,7 +667,7 @@ Ellipsis Animation
 
 .mobile-explorer>h4.ui.header,
 h3.ui.header {
-  font-family: DinPro;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-size: 1.5em;
   text-align: center;
   font-weight: 300;
@@ -801,7 +801,7 @@ h3.ui.header {
 }
 
 .bl-head {
-  font-family: DinPro;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-size: 12px;
   font-weight: normal;
   font-style: normal;
@@ -818,7 +818,7 @@ h3.ui.header {
 }
 
 .bl-num {
-  font-family: DinPro;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-size: 14px;
   font-weight: 500;
   font-style: normal;
@@ -833,7 +833,7 @@ h3.ui.header {
 }
 
 .bl-data {
-  font-family: DinPro;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-size: 12px;
   font-weight: normal;
   font-style: normal;
@@ -906,7 +906,7 @@ html {
   color: #0B181E !important;
 }
 .statusBoard .content strong {
-  font-family: DinPro !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   color: #4aafff !important;
 }
 
@@ -965,7 +965,7 @@ table {
 }
 
 .ofe {
-  font-family: DinPro;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -978,7 +978,7 @@ table {
 
 .plain {
   color: #EAEFF5;
-  font-family: DinPro;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
   font-size: 13px;
 }
 
@@ -1031,15 +1031,15 @@ table {
 }
 
 .f-h {
-  font-family: DinPro !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .ui.message .header {
-  font-family: 'DinPro' !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .ui:not(.icon) {
-  font-family: 'DinPro' !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 
 .ui.small.basic.grey.icon.button.themeToggle {
@@ -1094,10 +1094,10 @@ span.json-formatter-string {
   background-color: #FFA729 !important;
 }
 div.value {
-  font-family: 'DinPro' !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 div.label {
-  font-family: 'DinPro' !important;
+  font-family: DinPro, Tahoma, Geneva, sans-serif !important;
 }
 .list a.item:hover {
   color: #FFA729 !important;
