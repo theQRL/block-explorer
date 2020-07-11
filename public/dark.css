@@ -414,7 +414,7 @@ input {
 /* Transactions */
 .transactionRecord {
   color: #fafafa !important;
-  background-color: #eee !important;
+  background: #eee !important;
   border-radius: 0px !important;
   padding-left: 1em !important;
   transition: background 0.3s linear;
