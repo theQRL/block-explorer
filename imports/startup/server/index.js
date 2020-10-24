@@ -5,6 +5,7 @@ import tmp from 'tmp'
 import fs from 'fs'
 import BigNumber from 'bignumber.js'
 import helpers from '@theqrl/explorer-helpers'
+import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { check } from 'meteor/check'
 import { BrowserPolicy } from 'meteor/qrl:browser-policy'
@@ -1032,13 +1033,20 @@ Meteor.methods({
 JsonRoutes.add('get', '/api/a/:id', (req, res) => {
   const aId = req.params.id
   check(aId, String)
+  const validate = qrlAddressValdidator.hexString(aId)
   let response = {}
-  if (aId.length === 79 && aId.charAt(0).toLowerCase() === 'q') {
+  if (validate.result === true) {
     const request = {
       address: anyAddressToRaw(aId),
     }
     try {
-      response = Meteor.wrapAsync(getAddressState)(request)
+      if (validate.sig.type !== 'MULTISIG') {
+        response = Meteor.wrapAsync(getAddressState)(request)
+        response.isMultisig = false
+      } else {
+        response = Meteor.wrapAsync(getMultiSigAddressState)(request)
+        response.isMultisig = true
+      }
     } catch (e) {
       response = e
     }
