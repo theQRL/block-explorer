@@ -9,3 +9,4 @@ node_modules/
 /localhost.json
 /run.sh
 /testnet.json
+/mainnet.json
