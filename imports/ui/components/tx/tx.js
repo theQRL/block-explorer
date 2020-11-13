@@ -86,6 +86,19 @@ function toByteArray(hexString) {
 /* eslint-enable */
 
 Template.tx.helpers({
+  hasMessage() {
+    try {
+      if (this.tx.transfer.message_data.length > 0) {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
+  tfMessage() {
+    return this.tx.transfer.message_data
+  },
   bech32() {
     return Session.equals('addressFormat', 'bech32')
   },
