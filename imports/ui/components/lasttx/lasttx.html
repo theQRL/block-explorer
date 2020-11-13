@@ -19,7 +19,7 @@
       <!-- Confirmed Txn -->
       {{#if isTransfer this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
              {{ts}}
@@ -37,7 +37,7 @@
 
       {{#if isTokenCreation this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -55,7 +55,7 @@
 
       {{#if isTokenTransfer this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -73,7 +73,7 @@
 
       {{#if isCoinbaseTxn this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/receive.png" />
+        <img class="transactionTypeImage" src="/img/icons/receive.svg" />
         <div class="content">
           <div class="header">
              {{ts}}
@@ -91,7 +91,7 @@
 
       {{#if isSlaveTxn this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -109,7 +109,7 @@
 
       {{#if isMultiSigCreateTxn this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -127,7 +127,7 @@
 
       {{#if isMultiSigSpendTxn this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -145,7 +145,7 @@
 
       {{#if isMultiSigVoteTxn this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -163,7 +163,7 @@
 
       {{#if isLatticePKTxn this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -181,7 +181,7 @@
 
       {{#if isMessageTxn this.explorer.type}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -199,7 +199,7 @@
 
       {{#if isDocumentNotarisation this.explorer.type}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -217,7 +217,7 @@
 
       {{#if isKeybaseTxn this.explorer.type}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             {{ts}}
@@ -238,7 +238,7 @@
 
       {{#if isTransfer this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             Transfer | Unconfirmed | First Seen: {{ts}}
@@ -255,7 +255,7 @@
 
       {{#if isTokenCreation this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             Token Creation - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
@@ -272,7 +272,7 @@
 
       {{#if isTokenTransfer this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             Token Transfer - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
@@ -289,7 +289,7 @@
 
       {{#if isSlaveTxn this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/receive.png" />
+        <img class="transactionTypeImage" src="/img/icons/receive.svg" />
         <div class="content">
           <div class="header">
             Slave Transaction | Unconfirmed | First Seen: {{ts}}
@@ -306,7 +306,7 @@
 
       {{#if isLatticePKTxn this.tx.transactionType}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             Lattice Public Key | Unconfirmed | First Seen: {{ts}}
@@ -323,7 +323,7 @@
 
       {{#if isMessageTxn this.explorer.type}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             Message | Unconfirmed | First Seen: {{ts}}
@@ -340,7 +340,7 @@
 
       {{#if isDocumentNotarisation this.explorer.type}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             Document Notarisation | Unconfirmed | First Seen: {{ts}}
@@ -357,7 +357,7 @@
 
       {{#if isKeybaseTxn this.explorer.type}}
       <div class="ui icon message transactionRecord">
-        <img class="transactionTypeImage" src="/img/icons/send.png" />
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
             Keybase | Unconfirmed | First Seen: {{ts}}
