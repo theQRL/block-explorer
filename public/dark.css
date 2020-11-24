@@ -1,20 +1,44 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto');
+@font-face {
+  font-family: 'Alte DIN 1451 Mittelschrift';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/AlteDIN1451Mittelschrift/din1451alt.eot'); /* IE9 Compat Modes */
+  src: local('Alte DIN 1451 Mittelschrift'), local('AlteDIN1451Mittelschrift'),
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt.woff2') format('woff2'), /* Super Modern Browsers */
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt.woff') format('woff'), /* Modern Browsers */
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt.svg#AlteDIN1451Mittelschrift') format('svg'); /* Legacy iOS */
+}
+
+@font-face {
+  font-family: 'Alte DIN 1451 Mittelschrift';
+  font-style: bold;
+  font-weight: 600;
+  src: url('/fonts/AlteDIN1451Mittelschrift/din1451alt_bold.eot'); /* IE9 Compat Modes */
+  src: local('Alte DIN 1451 Mittelschrift'), local('AlteDIN1451Mittelschrift'),
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt_bold.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt_bold.woff2') format('woff2'), /* Super Modern Browsers */
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt_bold.woff') format('woff'), /* Modern Browsers */
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt_bold.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('/fonts/AlteDIN1451Mittelschrift/din1451alt_bold.svg#AlteDIN1451Mittelschrift') format('svg'); /* Legacy iOS */
+}
 
 body {
-  background: unset !important;
+  background: #0B181E !important;
 }
 
 h3,
 button {
-  font-family: 'Roboto' !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
 }
 
 pre {
-  font-family: 'Hack' !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
 }
 
 .pushable {
-  background: #f3f3f3 !important;
+  /* background: #f3f3f3 !important; */
 }
 
 .ui .label {
@@ -32,7 +56,7 @@ pre {
 }
 
 body.pushable {
-  background: #f3f3f3 !important;
+  /* background: #f3f3f3 !important; */
 }
 
 @media (max-width: 519px) {
@@ -48,24 +72,24 @@ body.pushable {
 }
 
 td a {
-  font-family: 'Hack';
+  font-family: 'Alte DIN 1451 Mittelschrift';
   font-weight: normal;
   overflow: auto;
   word-break: break-all;
-  color: #20E7C9;
+  color: #4aafff;
 }
 
 td a:hover {
-  color: #dc255d;
+  color: #6EBFFF;
 }
 
 .item:not(.menu) a {
-  font-family: 'Hack';
-  color: #20E7C9;
+  font-family: 'Alte DIN 1451 Mittelschrift';
+  color: #4aafff;
 }
 
 .item a:hover {
-  color: #dc255d;
+  color: #6EBFFF;
 }
 
 td {
@@ -77,7 +101,7 @@ td {
 .value {
   overflow: hidden;
   word-break: break-all;
-  color: #fff !important;
+  color: #EAEFF5 !important;
 }
 
 @media (max-width: 519px) {
@@ -106,7 +130,7 @@ td .unbreakable {
 
 .ui.inverted.segment,
 .ui.primary.inverted.segment {
-  background: #0d0820;
+  background: #0b181e;
 }
 
 .footbanner {
@@ -119,15 +143,15 @@ td .unbreakable {
 
 
 .sidebar {
-  background-color: #0d0820 !important;
+  background-color: #3C464B !important;
 }
 
 .sidebar a {
-  font-family: Roboto !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
 }
 
 .sidebar a:hover {
-  font-family: Roboto !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
 }
 
 .ui.labeled.icon.menu .item>.icon:not(.dropdown) {
@@ -151,24 +175,25 @@ td .unbreakable {
 }
 
 .main-menu-logo {
-  margin-top: 10px;
+  margin-top: 5px;
   margin-bottom: 0px;
   padding-bottom: 5px;
   max-width: 70px;
   margin-left: auto !important;
   margin-right: auto !important;
-  width: 50px !important;
+  width: 70px !important;
 
 }
 
 .logoArea {
-  background-color: #dc255d !important;
-  color: #fff !important;
-  font-family: 'Roboto', sans-serif !important;
+  background-color: #FFA729 !important;
+  color: #EAEFF5 !important;
+  font-family: 'Alte DIN 1451 Mittelschrift', sans-serif !important;
   font-weight: bold;
   text-align: center;
   font-size: 24px;
   min-width: 1em !important;
+  padding: 10px !important;
 }
 
 .logoArea img {
@@ -179,7 +204,7 @@ td .unbreakable {
 }
 
 .tc-w {
-  color: #fff !important;
+  color: #EAEFF5 !important;
 }
 
 div.ui.celled.horizontal.list {
@@ -192,14 +217,14 @@ div.ui.celled.horizontal.list>.item {
 
 .main-menu-btn {
   font-weight: bold;
-  color: #fff !important;
-  font-family: 'Roboto', sans-serif !important;
+  color: #EAEFF5 !important;
+  font-family: 'Alte DIN 1451 Mittelschrift', sans-serif !important;
 }
 
 .main-menu-btn .icon {
   font-weight: bold;
-  color: #fff !important;
-  fill: #fff !important;
+  color: #EAEFF5 !important;
+  fill: #EAEFF5 !important;
   width: 40px !important;
   height: 40px !important;
 }
@@ -209,7 +234,7 @@ div.ui.celled.horizontal.list>.item {
 }
 
 .label>.ui.label {
-  color: #0d0820 !important;
+  color: #0b181e !important;
 }
 
 .icon.svg.red {
@@ -228,28 +253,28 @@ div.ui.celled.horizontal.list>.item {
 /* Hover style for menu items */
 .main-menu-btn:hover {
   font-weight: bold;
-  background-color: #fff !important;
-  color: #000 !important;
-  font-family: 'Roboto', sans-serif !important;
+  background-color: #6D7478 !important;
+  /* color: #000 !important; */
+  font-family: 'Alte DIN 1451 Mittelschrift', sans-serif !important;
 }
 
 .ui.inverted.menu .active.item:hover {
-  color: #000 !important;
+  /* color: #000 !important; */
 }
 
 .ui.inverted.menu {
-  background-image: linear-gradient(193deg, #16437a, #0d0820) !important;
+  background: #0b181e !important;
   background-attachment: fixed !important;
 }
 
 .main-menu-btn:hover .icon {
-  color: #dc255d !important;
-  fill: #dc255d !important;
+  color: #ffa729 !important;
+  fill: #ffa729 !important;
 }
 
 /* Exclude Logo Area :hover */
 .logoArea:hover {
-  background-color: #dc255d !important;
+  background-color: #ffa729 !important;
 }
 
 
@@ -265,7 +290,7 @@ div.ui.celled.horizontal.list>.item {
 .main-content-wrapper .main-content-warning.ui.fixed.secondary.menu {
   padding-left: 110px;
   /*border-bottom: 1px solid rgba(34,36,38,.15);*/
-  /*background: #fff;*/
+  /*background: #EAEFF5;*/
   box-shadow: 0 3px 5px 0 rgba(34, 36, 38, .15);
 }
 
@@ -275,21 +300,21 @@ div.ui.celled.horizontal.list>.item {
   min-height: 100%;
   padding: 20px;
 
-  background-image: url(/img/dots-light.png) !important;
+  /* background-image: url(/img/dots-light.png) !important; */
   background-position: left top !important;
   background-repeat: no-repeat !important;
 }
 
 /* Sub page wrapper in body */
 .subPageContent {
-  padding-top: 60px;
+  padding-top: 20px;
 }
 
 
 
 /* Main content wrapper for inside a subpage */
 .pageSegment {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  /* background-color: rgba(255, 255, 255, 0.1) !important; */
   box-shadow: 0 1px 7px 0 rgba(0, 0, 0, 0.3) !important;
   border-radius: 0px !important;
   border: 0px !important;
@@ -298,11 +323,11 @@ div.ui.celled.horizontal.list>.item {
 
 /* Header for a Sub Page */
 .ui .pageHeader {
-  background-color: #0d0820;
-  color: #fff;
+  background-color: #4AAFFF;
+  color: #EAEFF5;
   margin: 0px !important;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 300 !important;
+  font-family: 'Alte DIN 1451 Mittelschrift', sans-serif;
+  font-weight: 600 !important;
   padding: 10px;
 }
 
@@ -312,8 +337,8 @@ div.ui.celled.horizontal.list>.item {
 }
 
 .ui .pageHeader .content .sub.header {
-  color: #fff !important;
-  font-family: 'Roboto', sans-serif !important;
+  color: #EAEFF5 !important;
+  font-family: 'Alte DIN 1451 Mittelschrift', sans-serif !important;
 }
 
 
@@ -325,12 +350,12 @@ div.ui.celled.horizontal.list>.item {
   bottom: 0px;
   transform: translate(-50%, -50%);
   margin: 0 auto;
-  margin-top: 70px;
-  z-index: -99;
+  margin-top: 120px !important;
+  z-index: 99;
 }
 
 .footerLogo {
-  width: 50px;
+  width: 150px;
 }
 
 
@@ -341,8 +366,8 @@ div.ui.celled.horizontal.list>.item {
 
 .ui.tabular.menu .active.item {
   border-radius: 0px !important;
-  background-color: #0A0724 !important;
-  color: #fff !important;
+  background-color: #0B181E !important;
+  color: #EAEFF5 !important;
 }
 
 .ui.tabular.menu .item {
@@ -351,34 +376,39 @@ div.ui.celled.horizontal.list>.item {
 }
 
 .ui.bottom.attached.tab.segment.active {
-  background-color: #0A0724 !important;
-  color: #fff !important;
+  background-color: #0B181E !important;
+  color: #EAEFF5 !important;
 }
 
 
 /* Form Styles */
 input {
   background-color: #E3E1E3 !important;
-  color: #0A0724 !important;
+  color: #3C464B !important;
   border-radius: 0px !important;
 }
 
 .ui.button.red {
-  background-color: #dc255d !important;
+  background-color: #FFA729 !important;
   box-shadow: 0 1px 7px 0 rgba(0, 0, 0, 0.3) !important;
-  color: #fff !important;
+  color: #FFF !important;
   border-radius: 0px !important;
-  font-family: Roboto !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
   font-size: 14px;
+  -webkit-transition: all .2s linear;
+  transition: all .2s linear;
+}
+.ui.button.red:hover {
+  background-color: #0B181E !important;
 }
 
 .ui.button.plain {
   background-color: #f3f3f3 !important;
   box-shadow: 0 1px 7px 0 rgba(0, 0, 0, 0.3) !important;
-  border: solid 1px #0d0820 !important;
+  border: solid 1px #0b181e !important;
   color: #0A0724 !important;
   border-radius: 0px !important;
-  font-family: Roboto !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
   font-size: 14px;
 }
 
@@ -386,12 +416,12 @@ input {
   background-color: #E3E1E3 !important;
   color: #0A0724 !important;
   box-shadow: 0 !important;
-  border: solid 1px #0d0820 !important;
+  border: solid 1px #0b181e !important;
   border-radius: 0px !important;
 }
 
 .tab h2 .content {
-  color: #fff !important;
+  color: #EAEFF5 !important;
 }
 
 /* Wallet Created Segments */
@@ -416,21 +446,21 @@ input {
 }
 
 .transactionRecord a {
-  color: #20E7C9 !important;
-  font-family: Hack !important;
+  color: #4aafff !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
 }
 
 .transactionRecord:hover a {
-  color: #dc255d !important;
+  /* color: #dc255d !important; */
 }
 
 .transactionRecord:hover {
-  background: #fff !important;
-  color: #0f0f0f !important;
+  background: #6D7478 !important;
+  /* color: #0f0f0f !important; */
 }
 
 .transactionRecordInternal {
-  background-color: #fff !important;
+  background-color: #6D7478 !important;
   border-radius: 0px !important;
   padding-left: 0 !important;
   border: 0 !important;
@@ -448,7 +478,7 @@ input {
 }
 
 .transactionRecord:hover .transactionAddress {
-  color: #0f0f0f !important;
+  /* color: #0f0f0f !important; */
 }
 
 .wordBreak {
@@ -474,7 +504,7 @@ input {
   border-radius: 0px !important;
   box-shadow: unset !important;
   border: unset !important;
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: #3C464B !important;
   background-attachment: fixed !important;
 }
 
@@ -494,19 +524,19 @@ SVG styling
 }
 
 .svg__loading-won {
-  fill: #DC255D;
+  fill: #FFA729;
 }
 
 .svg__loading-lost {
-  fill: #4A90E2;
+  fill: #4AAFFF;
 }
 
 .svg__loading-new {
-  fill: #ccc;
+  fill: #CBD7E6;
 }
 
 .svg__loading-open {
-  fill: #777;
+  fill: #9DA3A5;
 }
 
 
@@ -515,7 +545,7 @@ SVG styling
 */
 .snapshot__loading {
   position: relative;
-  font-family: "Roboto", sans-serif;
+  font-family: 'Alte DIN 1451 Mittelschrift', sans-serif;
   height: 150px;
   padding-top: 20px;
   text-align: center;
@@ -552,7 +582,8 @@ Ellipsis Animation
 }
 
 #paginator {
-  background-color: #fff !important;
+  background-color: #EAEFF5 !important;
+  color: #0B181E !important;
   width: 80px !important;
 }
 
@@ -563,7 +594,7 @@ Ellipsis Animation
   width: 45%;
   min-height: 300px;
   margin: -300px 0 0 -22.5%;
-  background: #fff;
+  background: #EAEFF5;
   z-index: 1000;
   -webkit-transition: 0.3s all ease-out;
   transition: 0.3s all ease-out;
@@ -597,15 +628,15 @@ Ellipsis Animation
 
 .rv-vanilla-modal-header {
   padding: 20px;
-  background: #0d0820;
+  background: #3C464B;
   border-radius: 4px 4px 0 0;
 }
 
 .rv-vanilla-modal-body {
   padding: 25px 20px 20px;
   overflow: auto;
-  color: #0d0820;
-  font-family: 'Roboto';
+  color: #0b181e;
+  font-family: 'Alte DIN 1451 Mittelschrift';
 }
 
 .rv-vanilla-modal-body p {
@@ -614,16 +645,16 @@ Ellipsis Animation
 }
 
 .rv-vanilla-modal-title {
-  font-family: 'Roboto';
-  color: #fff;
+  font-family: 'Alte DIN 1451 Mittelschrift';
+  color: #EAEFF5;
   margin: 0;
   font-size: 18px;
   font-weight: 300;
 }
 
 .rv-vanilla-modal-close {
-  color: #fff;
-  font-family: 'Roboto';
+  color: #FFA729;
+  font-family: 'Alte DIN 1451 Mittelschrift';
   font-size: 20px;
   float: right;
   display: inline-block;
@@ -634,7 +665,7 @@ Ellipsis Animation
   border-radius: 50%;
   border: 0;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.4);
+  background: #0B181E;
   -webkit-transition: all .2s linear;
   transition: all 0.2s linear;
 }
@@ -645,7 +676,7 @@ Ellipsis Animation
 }
 
 .rv-vanilla-modal-close:hover {
-  color: #a50b5e;
+  color: #EAEFF5;
   background: rgba(255, 255, 255, 0.5);
 }
 
@@ -659,15 +690,15 @@ Ellipsis Animation
 
 .mobile-explorer>h4.ui.header,
 h3.ui.header {
-  font-family: Roboto;
+  font-family: 'Alte DIN 1451 Mittelschrift';
   font-size: 1.5em;
   text-align: center;
   font-weight: 300;
   margin-top: 0px;
   padding-top: 10px;
   padding-bottom: 10px;
-  color: #fff;
-  background: #0d0820;
+  background-color: #4AAFFF;
+  color: #EAEFF5;
   display: block !important;
 }
 
@@ -743,11 +774,11 @@ h3.ui.header {
 
 .qr-code-container {
   display: inline;
-  background: #fff !important;
+  background: #EAEFF5 !important;
 }
 
 .qr-code-container canvas {
-  background: #fff !important;
+  background: #EAEFF5 !important;
   padding-left: 2px;
   padding-right: 2px;
   padding-top: 2px;
@@ -774,16 +805,16 @@ h3.ui.header {
 }
 
 .lastBlocks:hover {
-  background: #fafafa !important;
-  color: #0f0f0f !important;
+  background: #6D7478 !important;
+  /* color: #0f0f0f !important; */
 }
 
 .lastBlocks:hover .plain {
-  color: #0f0f0f !important;
+  /* color: #0f0f0f !important; */
 }
 
 .lastBlocks:hover .cyan {
-  color: #dc255d !important;
+  /* color: #dc255d !important; */
 }
 
 .miner {
@@ -793,7 +824,7 @@ h3.ui.header {
 }
 
 .bl-head {
-  font-family: Roboto;
+  font-family: 'Alte DIN 1451 Mittelschrift';
   font-size: 12px;
   font-weight: normal;
   font-style: normal;
@@ -810,7 +841,7 @@ h3.ui.header {
 }
 
 .bl-num {
-  font-family: Roboto;
+  font-family: 'Alte DIN 1451 Mittelschrift';
   font-size: 14px;
   font-weight: 500;
   font-style: normal;
@@ -821,11 +852,11 @@ h3.ui.header {
 }
 
 .text-lipstick {
-  color: #20E7C9 !important;
+  color: #4aafff !important;
 }
 
 .bl-data {
-  font-family: Roboto;
+  font-family: 'Alte DIN 1451 Mittelschrift';
   font-size: 12px;
   font-weight: normal;
   font-style: normal;
@@ -854,12 +885,12 @@ h3.ui.header {
 }
 
 .statusBoard {
-  /*background: #eee !important;*/
-  color: #fff !important;
+  background: #3C464B !important;
+  color: #EAEFF5 !important;
 }
 
 .ui.segment {
-  background: #eee;
+  background: #3C464B;
 }
 
 .break-word {
@@ -867,7 +898,7 @@ h3.ui.header {
 }
 
 .ui.attached.segment {
-  background: #fff;
+  background: #EAEFF5;
 }
 
 .p0 {
@@ -875,7 +906,7 @@ h3.ui.header {
 }
 
 html {
-  background-image: linear-gradient(3deg, #16437a, #0d0820) !important;
+  background: #0B181E !important;
   background-attachment: fixed !important;
 }
 
@@ -885,12 +916,21 @@ html {
 
 /*dark theme*/
 .message {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: #3C464B !important;
 }
 
+.message.transactionRecord {
+  background-color: #3C464B !important;
+}
+.message.transactionRecord:hover {
+  background-color: #9DA3A5 !important;
+}
+.message.transactionRecord:hover a {
+  color: #0B181E !important;
+}
 .statusBoard .content strong {
-  font-family: Roboto !important;
-  color: #20E7C9 !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
+  color: #4aafff !important;
 }
 
 .footer a {
@@ -898,23 +938,25 @@ html {
 }
 
 .ui.negative.message {
-  background: #FFFFFF !important;
+  background: #EAEFF5 !important;
+  -webkit-box-shadow: 0 0 0 1px #FFCA7E inset, 0 0 0 0 transparent;
+  box-shadow: 0 0 0 1px #FFCA7E inset, 0 0 0 0 transparent;
 }
 
 .ui.negative.message .header {
-  color: #dc255d !important;
+  color: #FFA729!important;
 }
 
 .ui.negative.message .close.icon {
-  color: #dc255d !important;
+  color: #FFA729!important;
 }
 
 #lastBlocks {
   max-width: 1288px;
   min-width: 100px;
   background: #2E3C5A;
-  color: #fff !important;
-  margin-top: 10px;
+  color: #EAEFF5 !important;
+  margin-top: 15px;
   margin-bottom: 10px;
   margin-left: 0px;
   margin-right: 0px;
@@ -946,7 +988,7 @@ table {
 }
 
 .ofe {
-  font-family: Roboto;
+  font-family: 'Alte DIN 1451 Mittelschrift';
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -954,21 +996,21 @@ table {
 }
 
 .cyan {
-  color: #1FE6C8;
+  color: #4aafff;
 }
 
 .plain {
-  color: #fff;
-  font-family: Hack;
+  color: #EAEFF5;
+  font-family: 'Alte DIN 1451 Mittelschrift';
   font-size: 13px;
 }
 
 .plain-r {
-  color: #fff !important;
+  color: #EAEFF5 !important;
 }
 
 .lastBlocks:hover .plain-r {
-  color: #000 !important;
+  /* color: #000 !important; */
 }
 
 #loadingTransactions {
@@ -1012,19 +1054,24 @@ table {
 }
 
 .f-h {
-  font-family: Hack !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
 }
 
 .ui.message .header {
-  font-family: 'Roboto' !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
 }
 
 .ui:not(.icon) {
-  font-family: 'Roboto' !important;
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
 }
 
 .ui.small.basic.grey.icon.button.themeToggle {
   color: #fafafa !important;
+}
+
+.ui.small.basic.grey.icon.button.themeToggle:hover {
+  color: #fafafa !important;
+  background: #4aafff !important;
 }
 
 .plain a {
@@ -1036,7 +1083,7 @@ table {
 }
 .used {
   background-color: rgba(165,37,37,0.7);
-  color: #fff;
+  color: #EAEFF5;
   text-decoration: line-through;
   padding: 0px !important;
   font-size: 10px !important;
@@ -1048,4 +1095,33 @@ table {
 }
 span.json-formatter-string {
   white-space: pre-wrap !important;
+}
+
+.input input {
+  background-color: #6D7478 !important;
+  color: #EAEFF5 !important;
+}
+.input.icon {
+  color: #EAEFF5 !important;
+}
+.refresh:before {
+  color: #FFA729 !important;
+}
+.ui.red.label {
+  background-color: #FFA729 !important;
+}
+.jsonbox {
+  background-color: #CBD7E6 !important;
+}
+.ui.teal.label {
+  background-color: #FFA729 !important;
+}
+div.value {
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
+}
+div.label {
+  font-family: 'Alte DIN 1451 Mittelschrift' !important;
+}
+.list a.item:hover {
+  color: #FFA729 !important;
 }

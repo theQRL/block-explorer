@@ -114,9 +114,9 @@
           {{#if isTransfer this.transactionType}}
           <div class="ui icon message transactionRecord">
             {{#if isThisAddress this.addr_from}}
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             {{else}}
-            <img class="transactionTypeImage" src="/img/icons/receive.png" />
+            <img class="transactionTypeImage" src="/img/icons/receive.svg" />
             {{/if}}
             <div class="content">
               <div class="header">
@@ -145,7 +145,7 @@
 
           {{#if isTokenCreation this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 Token Creation - {{this.token.name}} ({{this.token.symbol}}) | {{this.timestamp}}
@@ -163,9 +163,9 @@
           {{#if isTokenTransfer this.transactionType}}
           <div class="ui icon message transactionRecord">
             {{#if isThisAddress this.addr_from}}
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             {{else}}
-            <img class="transactionTypeImage" src="/img/icons/receive.png" />
+            <img class="transactionTypeImage" src="/img/icons/receive.svg" />
             {{/if}}
             <div class="content">
               <div class="header">
@@ -194,7 +194,7 @@
 
           {{#if isCoinbaseTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/receive.png" />
+            <img class="transactionTypeImage" src="/img/icons/receive.svg" />
             <div class="content">
               <div class="header">
                 Coinbase Received | {{this.timestamp}}
@@ -211,7 +211,7 @@
 
           {{#if isSlaveTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 Slave Transaction | {{this.timestamp}}
@@ -228,7 +228,7 @@
 
           {{#if isMultiSigCreateTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 MultiSig CREATE | {{this.timestamp}}
@@ -245,7 +245,7 @@
 
           {{#if isMultiSigSpendTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 MultiSig SPEND | {{this.timestamp}}
@@ -262,7 +262,7 @@
 
           {{#if isMultiSigVoteTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 MultiSig VOTE | {{this.timestamp}}
@@ -279,7 +279,7 @@
 
           {{#if isLatticePKTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 Lattice Public Key | {{this.timestamp}}
@@ -296,7 +296,7 @@
 
           {{#if isMessageTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 Message | {{this.timestamp}}
@@ -313,7 +313,7 @@
 
           {{#if isKeybaseTxn this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 Keybase | {{this.timestamp}}
@@ -330,7 +330,7 @@
 
           {{#if isDocumentNotarisation this.transactionType}}
           <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.png" />
+            <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
                 Document Notarisation | {{this.timestamp}}

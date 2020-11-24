@@ -16,7 +16,7 @@
   {{#each lastunconfirmedtx.transactions_unconfirmed}}
     {{#if isTransfer this.tx.transactionType}}
     <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <img class="transactionTypeImage" src="/img/icons/send.svg" />
       <div class="content">
         <div class="header">
           Transfer | Unconfirmed | First Seen: {{ts}}
@@ -33,7 +33,7 @@
 
     {{#if isTokenCreation this.tx.transactionType}}
     <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <img class="transactionTypeImage" src="/img/icons/send.svg" />
       <div class="content">
         <div class="header">
           Token Creation - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
@@ -50,7 +50,7 @@
 
     {{#if isTokenTransfer this.tx.transactionType}}
     <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/send.png" />
+      <img class="transactionTypeImage" src="/img/icons/send.svg" />
       <div class="content">
         <div class="header">
           Token Transfer - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
@@ -67,7 +67,7 @@
 
     {{#if isSlaveTxn this.tx.transactionType}}
     <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/receive.png" />
+      <img class="transactionTypeImage" src="/img/icons/receive.svg" />
       <div class="content">
         <div class="header">
           Slave Transaction | Unconfirmed | First Seen: {{ts}}
@@ -84,7 +84,7 @@
 
     {{#if isMessageTxn this.explorer.type}}
     <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/receive.png" />
+      <img class="transactionTypeImage" src="/img/icons/receive.svg" />
       <div class="content">
         <div class="header">
           Message | Unconfirmed | First Seen: {{ts}}
@@ -101,7 +101,7 @@
 
     {{#if isDocumentNotarisation this.explorer.type}}
     <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/receive.png" />
+      <img class="transactionTypeImage" src="/img/icons/receive.svg" />
       <div class="content">
         <div class="header">
           Document Notarisation | Unconfirmed | First Seen: {{ts}}
@@ -118,7 +118,7 @@
 
     {{#if isKeybaseTxn this.explorer.type}}
     <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/receive.png" />
+      <img class="transactionTypeImage" src="/img/icons/receive.svg" />
       <div class="content">
         <div class="header">
           Keybase | Unconfirmed | First Seen: {{ts}}
