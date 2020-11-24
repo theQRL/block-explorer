@@ -16,10 +16,10 @@ export function renderChart() {
     $('#chartLoading').hide()
 
     // determine colour to use for labels
-    let graphLabels = '#FFFFFF'
+    let graphLabels = '#EAEFF5'
     const x = LocalStore.get('theme')
     if (x === 'light') {
-      graphLabels = '#000000'
+      graphLabels = '#0B181E'
     }
 
     // Draw chart
@@ -61,7 +61,7 @@ export function renderChart() {
             ticks: {
               beginAtZero: true,
               max: 150,
-              fontColor: '#20E7C9',
+              fontColor: '#4AAFFF',
             },
             scaleLabel: {
               display: true,
@@ -78,7 +78,7 @@ export function renderChart() {
               drawOnChartArea: false,
             },
             ticks: {
-              fontColor: '#DC255D',
+              fontColor: '#FFA729',
             },
             scaleLabel: {
               display: true,

@@ -60,7 +60,7 @@ export const MINING_POOLS = [
     name: 'supportQRL.com',
   },
   {
-    address: 'Q0106003b59b48dbe83b91b77961d4001407a3973d613d12f06913e52e0e8c7916be4662dc2a33b',
+    address: 'Q0106006381264d564ca0aab29d45239774beae915f8e0cbba3eb3062239d42225a22454bb2a278',
     email: 'admin@herominers.com',
     link: 'https://qrl.herominers.com',
     name: 'qrl.herominers.com',

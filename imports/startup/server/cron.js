@@ -170,8 +170,8 @@ function refreshStats() {
   const labels = []
   const hashPower = {
     label: 'Hash Power (hps)',
-    borderColor: '#DC255D',
-    backgroundColor: '#DC255D',
+    borderColor: '#FFA729',
+    backgroundColor: '#FFA729',
     fill: false,
     data: [],
     yAxisID: 'y-axis-2',
@@ -180,8 +180,8 @@ function refreshStats() {
   }
   const difficulty = {
     label: 'Difficulty',
-    borderColor: '#4A90E2',
-    backgroundColor: '#4A90E2',
+    borderColor: '#B7DFFF',
+    backgroundColor: '#B7DFFF',
     fill: false,
     data: [],
     yAxisID: 'y-axis-2',
@@ -190,8 +190,8 @@ function refreshStats() {
   }
   const movingAverage = {
     label: 'Block Time Average (s)',
-    borderColor: '#20E7C9',
-    backgroundColor: '#20E7C9',
+    borderColor: '#4AAFFF',
+    backgroundColor: '#4AAFFF',
     fill: false,
     data: [],
     yAxisID: 'y-axis-1',
@@ -200,14 +200,14 @@ function refreshStats() {
   }
   const blockTime = {
     label: 'Block Time (s)',
-    borderColor: '#444444',
-    backgroundColor: '#888888',
+    borderColor: '#6D7478',
+    backgroundColor: '#6D7478',
     fill: false,
     showLine: false,
     data: [],
     yAxisID: 'y-axis-1',
-    pointRadius: 2,
-    borderWidth: 2,
+    pointRadius: 1,
+    borderWidth: 0,
   }
 
   // Loop all API responses and push data into axis objects
