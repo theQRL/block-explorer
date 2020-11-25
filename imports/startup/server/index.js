@@ -1,6 +1,7 @@
 /* eslint no-console: 0, max-len: 0 */
 // server-side startup
 import grpc from 'grpc'
+import protoloader from '@grpc/proto-loader'
 import tmp from 'tmp'
 import fs from 'fs'
 import BigNumber from 'bignumber.js'
@@ -14,6 +15,9 @@ import '/imports/startup/server/cron.js' /* eslint-disable-line */
 import {
   EXPLORER_VERSION, SHOR_PER_QUANTA, anyAddressToRaw,
 } from '../both/index.js'
+
+const PROTO_PATH = Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
+console.log(`Using local folder ${PROTO_PATH} for Proto files`)
 
 // Apply BrowserPolicy
 BrowserPolicy.content.disallowInlineScripts()
@@ -98,28 +102,39 @@ const qrlClient = []
 // Load the qrl.proto gRPC client into qrlClient from a remote node.
 const loadGrpcClient = (endpoint, callback) => {
   // Load qrlbase.proto and fetch current qrl.proto from node
-  const baseGrpcObject = grpc.load(Assets.absoluteFilePath('qrlbase.proto'))
-  const client = new baseGrpcObject.qrl.Base(endpoint, grpc.credentials.createInsecure())
-
-  client.getNodeInfo({}, (err, res) => {
-    if (err) {
-      console.log(`Error fetching qrl.proto from ${endpoint}`)
-      callback(err, null)
-    } else {
-      // Write a new temp file for this grpc connection
-      const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
-      fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
-        if (fsErr) {
-          console.log(fsErr)
-          throw fsErr
-        }
-        const grpcObject = grpc.load(qrlProtoFilePath)
-        // Create the gRPC Connection
-        qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
-        console.log(`qrlClient loaded for ${endpoint} from ${qrlProtoFilePath}`)
-        callback(null, true)
-      })
-    }
+  const options = {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true,
+    includeDirs: [PROTO_PATH],
+  }
+  protoloader.load(`${PROTO_PATH}qrlbase.proto`).then((packageDefinitionBase) => {
+    const baseGrpcObject = grpc.loadPackageDefinition(packageDefinitionBase)
+    const client = new baseGrpcObject.qrl.Base(endpoint, grpc.credentials.createInsecure())
+    client.getNodeInfo({}, (err, res) => {
+      if (err) {
+        console.log(`Error fetching qrl.proto from ${endpoint}`)
+        callback(err, null)
+      } else {
+        // Write a new temp file for this grpc connection
+        const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
+        fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
+          if (fsErr) {
+            console.log(fsErr)
+            throw fsErr
+          }
+          protoloader.load(qrlProtoFilePath, options).then((packageDefinition) => {
+            const grpcObject = grpc.loadPackageDefinition(packageDefinition)
+            // Create the gRPC Connection
+            qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
+            console.log(`qrlClient loaded for ${endpoint} from ${qrlProtoFilePath}`)
+            callback(null, true)
+          })
+        })
+      }
+    })
   })
 }
 
