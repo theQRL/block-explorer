@@ -6,7 +6,7 @@
   "dependencies": {
     "@babel/runtime": "^7.2.0",
     "@grpc/proto-loader": "^0.5.5",
-    "@theqrl/explorer-helpers": "^2.0.2",
+    "@theqrl/explorer-helpers": "^2.4.1",
     "@theqrl/validate-qrl-address": "^3.0.0",
     "babel-runtime": "^6.26.0",
     "bech32": "^1.1.3",
