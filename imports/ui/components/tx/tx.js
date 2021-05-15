@@ -3,6 +3,9 @@ import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import CryptoJS from 'crypto-js'
 import sha256 from 'sha256'
+import $ from 'jquery'
+import "fomantic-ui-css/semantic.js";
+import "fomantic-ui-css/semantic.css";
 import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
@@ -446,7 +449,7 @@ Template.tx.events({
 })
 
 Template.tx.onRendered(() => {
-  this.$('.value').popup()
+  $('.value').popup()
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('txhash', {})

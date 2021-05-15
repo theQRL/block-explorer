@@ -1,6 +1,6 @@
 /* eslint no-console: 0, max-len: 0 */
 // server-side startup
-import grpc from 'grpc'
+import grpc from '@grpc/grpc-js'
 import protoloader from '@grpc/proto-loader'
 import tmp from 'tmp'
 import fs from 'fs'
