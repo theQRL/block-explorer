@@ -1,5 +1,41 @@
 export const MINING_POOLS = [
   {
+    address: 'Q01060088d97b5117865b8f13e4361ced5a620024b42538ad678e9c9c64d0aaedb4c146bf5b0a86',
+    email: 'pacificpool@protonmail.com',
+    link: 'https://qrl.pacificpool.ws/',
+    name: 'qrl.pacificpool.ws',
+  },
+  {
+    address: 'Q010600b128da4e518a88eab6013ec8cf12a911324488a35dac930d810de171bdb45eada26e95b1',
+    email: 'fastpool.xyz@gmail.com',
+    link: 'https://fastpool.xyz/qrl/',
+    name: 'fastpool.xyz',
+  },
+  {
+    address: 'Q0106007a6644b5d547d1fd11a6786b231d1b59b5453c5518fd98a8a31cae57ebfa8236686cb28d',
+    email: 'support@gntl.co.uk',
+    link: 'https://qrl.pool.gntl.co.uk/',
+    name: 'gntl.co.uk',
+  },
+  {
+    address: 'Q0106004c828d4adf4674d539cafc6f7585ca249c6d23acf5c46bc8bc5821f1cb23cc59a0b6298b',
+    email: 'admin@pool-pay.com',
+    link: 'https://qrl.pool-pay.com/',
+    name: 'pool-pay.com',
+  },
+  {
+    address: 'Q010600c9333ff30d29816d9dd44c4b71e6ebe017a1f9927c42c8dfb16c68d3dd2725d2984f40e4',
+    email: 'info@clouddatatech.net',
+    link: 'https://pool2mine.com',
+    name: 'pool2mine.com',
+  },
+  {
+    address: 'Q01060045b7b0f262e09daf7366ad4740cd85932bf17e708f417d90dc4c6eb158c5813c7c3f32be',
+    email: 'pool@skypool.org',
+    link: 'https://skypool.org',
+    name: 'skypool.org',
+  },
+  {
     address: 'Q010900411c50a98e65d289b51d9d4dc0f61833c26f2c6c4f3ce4df8e9968d1fcae6f6341392bea',
     email: 'support@qrlpool.org',
     link: 'https://qrlpool.org',
