@@ -412,6 +412,20 @@ Template.address.helpers({
     }
     return ''
   },
+  receivedTokens(tx) {
+    const a = Session.get('address').state.address
+    const outputs = tx.transfer_token.addrs_to
+    let amount = 0
+    if (outputs) {
+      _.each(outputs, (element, key) => {
+        if (element === a) {
+          amount += (tx.transfer_token.amounts[key] / (Math.pow(10, parseInt(tx.token.decimals, 10))))
+        }
+      })
+      return `${amount} ${tx.token.symbol}`
+    }
+    return ''
+  },
   sendingOutputs(outputs) {
     // console.log('outputs', outputs)
     const result = []
