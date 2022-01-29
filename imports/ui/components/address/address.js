@@ -120,7 +120,6 @@ function loadAddressTransactions(aId, page) {
   })
 }
 
-
 const getTokenBalances = (getAddress, callback) => {
   const request = {
     address: anyAddressToRaw(getAddress),
@@ -307,15 +306,23 @@ Template.address.helpers({
     return Session.equals('addressFormat', 'bech32')
   },
   address() {
-    const address = Session.get('address')
-    if (address !== undefined) {
-      if (address.state !== undefined) {
-        address.state.address = hexOrB32(anyAddressToRaw(address.state.address))
-        return address
+    try {
+      const address = Session.get('address')
+      if (Session.get('address').error) {
+        return { found: false, parameter: FlowRouter.getParam('aId') }
       }
+      if (address !== undefined) {
+        if (address.state !== undefined) {
+          address.state.address = hexOrB32(
+            anyAddressToRaw(address.state.address),
+          )
+          return address
+        }
+      }
+      return false
+    } catch (e) {
+      return false
     }
-    // error handling needed here
-    return false
   },
   isMultiSig() {
     try {
@@ -412,6 +419,20 @@ Template.address.helpers({
     }
     return ''
   },
+  receivedTokens(tx) {
+    const a = Session.get('address').state.address
+    const outputs = tx.transfer_token.addrs_to
+    let amount = 0
+    if (outputs) {
+      _.each(outputs, (element, key) => {
+        if (element === a) {
+          amount += (tx.transfer_token.amounts[key] / (Math.pow(10, parseInt(tx.token.decimals, 10))))
+        }
+      })
+      return `${amount} ${tx.token.symbol}`
+    }
+    return ''
+  },
   sendingOutputs(outputs) {
     // console.log('outputs', outputs)
     const result = []
@@ -439,6 +460,16 @@ Template.address.helpers({
   addressHasTransactions() {
     try {
       if (Session.get('addressTransactions').length > 0) {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
+  notFound() {
+    try {
+      if (Session.get('address').error) {
         return true
       }
       return false
@@ -804,6 +835,6 @@ Template.address.onRendered(() => {
 
   // Render identicon (needs to be here for initial load).
   // Also Session.get('address') is blank at this point
-  //$('.qr-code-container').qrcode({ width: 100, height: 100, text: upperCaseFirst(FlowRouter.getParam('aId')) })
-  //jdenticon.update('#identicon', upperCaseFirst(FlowRouter.getParam('aId'))) /* eslint no-undef:0 */
+  // $('.qr-code-container').qrcode({ width: 100, height: 100, text: upperCaseFirst(FlowRouter.getParam('aId')) })
+  // jdenticon.update('#identicon', upperCaseFirst(FlowRouter.getParam('aId'))) /* eslint no-undef:0 */
 })

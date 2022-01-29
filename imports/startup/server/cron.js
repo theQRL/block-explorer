@@ -1,7 +1,7 @@
 /* eslint max-len: 0 */
 import { HTTP } from 'meteor/http'
 import { JsonRoutes } from 'meteor/simple:json-routes'
-import sha512 from 'sha512'
+import {SHA512} from 'jscrypto/es6'
 // import helpers from '@theqrl/explorer-helpers'
 /* eslint import/no-cycle: 0 */
 import {
@@ -247,7 +247,7 @@ const refreshPeerStats = () => {
 
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
-    response.peers_stat[index].peer_ip = sha512(Buffer.from(peer.peer_ip).toString()).toString('hex').slice(0, 10)
+    response.peers_stat[index].peer_ip = SHA512.hash(Buffer.from(peer.peer_ip).toString()).toString().toString('hex').slice(0, 10)
     response.peers_stat[index].node_chain_state.header_hash = Buffer.from(peer.node_chain_state.header_hash).toString('hex')
     response.peers_stat[index].node_chain_state.cumulative_difficulty = parseInt(Buffer.from(peer.node_chain_state.cumulative_difficulty).toString('hex'), 16)
   })
