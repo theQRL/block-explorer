@@ -1,5 +1,16 @@
 <template name="address">
-
+  {{#if notFound}}
+    <h3 class="ui pageHeader header">
+      <i class="tiny icon"></i>
+      <div class="content wordBreak">
+        {{address.parameter}}
+      </div>
+    </h3>
+    <div class="ui negative message">
+      State for <span class="hack">{{address.parameter}}</span> not found on this chain.<br>
+      Is this address from a different QRL network?
+    </div>
+  {{else}}
 <h3 class="ui pageHeader header">
   <i class="tiny icon"></i>
   <div class="content wordBreak f-h">
@@ -449,5 +460,5 @@
     <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
     
 </div>
-
+{{/if}}
 </template>
