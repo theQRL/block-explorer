@@ -426,12 +426,18 @@ const getFullAddressState = (request, callback) => {
 const getAddressState = (request, callback) => {
   try {
     qrlApi('GetOptimizedAddressState', request, (error, response) => {
-      if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetOptimizedAddressState', '**ERROR/getAddressState** ')
+      if (error || response.state === null) {
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetOptimizedAddressState',
+          '**ERROR/getAddressState** ',
+        )
         callback(myError, null)
       } else {
         if (response.state.address) {
-          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+          response.state.address = `Q${Buffer.from(
+            response.state.address,
+          ).toString('hex')}`
         }
 
         callback(null, response)
@@ -450,6 +456,15 @@ const getMultiSigAddressState = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetMultiSigAddressState', '**ERROR/getMultiSigAddressState** ')
         callback(myError, null)
       } else {
+        if (response.state === null) {
+          const myError = errorCallback(
+            error,
+            'No state returned for this address',
+            '**ERROR/getMultiSigAddressState** ',
+          )
+          callback(myError, null)
+          return
+        }
         if (response.state.address) {
           response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
         }
