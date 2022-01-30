@@ -14,7 +14,7 @@ before_script:
   - meteor npm install
  
 node_js:
- - 12
+ - 14
 
 script:
   - meteor build $HOME/build.tgz
