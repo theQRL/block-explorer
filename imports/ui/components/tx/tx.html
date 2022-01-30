@@ -87,8 +87,12 @@
                   {{#if isMultiSigSpend }}
                     <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigSpendAddress}}">{{multiSigSpendAddress}}</a></div></div>
                   {{else}}
-                    <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigAddress}}">{{multiSigAddress}}</a></div></div>
-                  {{/if}}
+                        {{#if isMultiSigVote }}
+                        <!-- nil -->
+                        {{else}}
+  <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigAddress}}">{{multiSigAddress}}</a></div></div>
+                          {{/if}}
+                      {{/if}}
                   {{/if}}
                 </div>
               </div>
