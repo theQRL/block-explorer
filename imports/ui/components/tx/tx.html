@@ -73,12 +73,16 @@
                         <div class="label">Token creation transaction: </div>
                         <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
                       {{else}}
+                        {{#if isCreateNFT}}
+                        <!-- NFT -->
+                        {{else}}
                         <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
                           {{tx.tx.amount}}
                         </div>
                         <div class="label">
                           Quanta<br><small>USD ${{qrl}}</small>
                         </div>
+                        {{/if}}
                       {{/if}}
                       {{/if}}
                     {{/if}}
@@ -244,6 +248,28 @@
                   </tr>
               </table>
                   {{else}}
+                    {{#if isCreateNFT}}
+                        {{#if knownProvider}}
+                        <i class="ui certificate icon"></i>Verified
+                        {{else}}
+                        <i class="ui warning icon"></i>Unverified
+                        {{/if}}
+                        provider: 
+                        {{#if knownProvider}}
+                        <a href="{{providerURL}}/{{tx.tx.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+                        {{else}}
+                        {{providerID}}
+                        {{/if}}
+                        <p>Hash: {{nftHash}}</p>
+                        <div>
+                          {{#if knownProvider}}
+                            <a href="{{providerURL}}/{{tx.tx.transaction_hash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>
+                          {{else}}
+                            Contact your NFT provider
+                          {{/if}}
+                        </div>
+                        <p>&nbsp;</p>
+                    {{else}}
                   <h3>To</h3>
                   <table class="ui stackable table">
                     <thead>
@@ -280,6 +306,7 @@
                       {{/if}}
                     </tbody>
                   </table>
+                  {{/if}}
                   {{/if}}
                   {{/if}}
                   {{/if}}

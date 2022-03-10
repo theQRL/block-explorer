@@ -4,8 +4,10 @@ import './tx.html'
 import CryptoJS from 'crypto-js'
 import sha256 from 'sha256'
 import $ from 'jquery'
-import "fomantic-ui-css/semantic.js";
-import "fomantic-ui-css/semantic.css";
+import _ from 'underscore'
+import qrlNft from '@theqrl/nft-providers'
+import 'fomantic-ui-css/semantic.js'
+import 'fomantic-ui-css/semantic.css'
 import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
@@ -282,6 +284,12 @@ Template.tx.helpers({
     }
     return false
   },
+  isCreateNFT() {
+    if (this.explorer.type === 'CREATE NFT') {
+      return true
+    }
+    return false
+  },
   isDocumentNotarisation() {
     if (this.explorer.type === 'DOCUMENT_NOTARISATION') {
       return true
@@ -305,6 +313,47 @@ Template.tx.helpers({
       return true
     }
     return false
+  },
+  providerID() {
+    return `0x${this.explorer.nft.id}`
+  },
+  knownProvider() {
+    const { id } = this.explorer.nft
+    const from = this.explorer.from_hex
+    let known = false
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        _.each(provider.addresses, (address) => {
+          if (address === from) {
+            known = true
+          }
+        })
+      }
+    })
+    return known
+  },
+  providerURL() {
+    const { id } = this.explorer.nft
+    let url = ''
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        url = provider.url
+      }
+    })
+    return url
+  },
+  providerName() {
+    const { id } = this.explorer.nft
+    let name = ''
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        name = provider.name
+      }
+    })
+    return name
+  },
+  nftHash() {
+    return this.explorer.nft.hash
   },
   documentNotarisationVerificationMessage() {
     const message = Session.get('documentNotarisationVerificationMessage')
