@@ -118,6 +118,17 @@ Template.block.helpers({
     }
     return ''
   },
+  isCreateNFT() {
+    console.log(this)
+    try {
+      if (this.nft.type === 'CREATE NFT') {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
   amount() {
     if (this.transactionType === 'transfer') {
       return `${numberToString(this.transfer.totalTransferred)} Quanta`

@@ -352,7 +352,7 @@ const helpersaddressTransactions = (response) => {
         txEdited.tx.token.nft = {
           type: 'CREATE NFT',
           id: Buffer.from(idBytes).toString('hex'),
-          hash: Buffer.from(cryptoHashBytes).t,
+          hash: Buffer.from(cryptoHashBytes).toString('hex'),
         }
         console.log('Found an NFT')
       }
@@ -780,7 +780,28 @@ Meteor.methods({
             // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
             adjusted.transfer = adjusted.coinbase
           }
-
+          if (adjusted.transactionType === 'token') {
+          // first check if NFT
+            let nft = {}
+            const symbol = Buffer.from(adjusted.token.symbol).toString(
+              'hex',
+            )
+            if (symbol.slice(0, 8) === '00ff00ff') {
+              const nftBytes = Buffer.concat([
+                Buffer.from(adjusted.token.symbol),
+                Buffer.from(adjusted.token.name),
+              ])
+              const idBytes = Buffer.from(nftBytes.slice(4, 8))
+              const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+              nft = {
+                type: 'CREATE NFT',
+                id: Buffer.from(idBytes).toString('hex'),
+                hash: Buffer.from(cryptoHashBytes).toString('hex'),
+              }
+              console.log('Found an NFT')
+              adjusted.nft = nft
+            }
+          }
           if (adjusted.transactionType === 'transfer') {
             // Calculate total transferred, and generate a clean structure to display outputs from
             let thisTotalTransferred = 0
@@ -857,9 +878,30 @@ Meteor.methods({
           }
           result.push(thisTxn)
         } else if (output.transaction.tx.transactionType === 'token') {
+          // first check if NFT
+          let nft = {}
+          const symbol = Buffer.from(output.transaction.tx.token.symbol).toString(
+            'hex',
+          )
+          if (symbol.slice(0, 8) === '00ff00ff') {
+            const nftBytes = Buffer.concat([
+              Buffer.from(output.transaction.tx.token.symbol),
+              Buffer.from(output.transaction.tx.token.name),
+            ])
+            const idBytes = Buffer.from(nftBytes.slice(4, 8))
+            const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+            nft = {
+              type: 'CREATE NFT',
+              id: Buffer.from(idBytes).toString('hex'),
+              hash: Buffer.from(cryptoHashBytes).toString('hex'),
+            }
+            console.log('Found an NFT')
+          }
+
           thisTxn = {
             type: output.transaction.tx.transactionType,
             txhash: arr.txhash,
+            nft,
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
             symbol: output.transaction.tx.token.symbol,

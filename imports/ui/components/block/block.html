@@ -51,7 +51,13 @@
       {{#each transactions}}
         <tr>
           <td>
-            <div class="ui label {{color}}">{{this.transactionType}}</div>
+            <div class="ui label {{color}}">
+              {{#if isCreateNFT}}
+              Create&nbsp;NFT
+              {{else}}
+              {{this.transactionType}}
+              {{/if}}
+            </div>
           </td>
           <td><div class="unbreakable">{{amount}}</div></td>
           <td><div class="unbreakable">{{fee}}</div></td>
