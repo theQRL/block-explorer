@@ -351,6 +351,18 @@ Template.address.helpers({
     })
     return known
   },
+  knownProviderNonSpecific() {
+    const from = Session.get('address').state.address
+    let known = false
+    _.each(qrlNft.providers, (provider) => {
+      _.each(provider.addresses, (address) => {
+        if (address === from) {
+          known = true
+        }
+      })
+    })
+    return known
+  },
   providerURL() {
     const { id } = this.token.nft
     let url = ''
@@ -476,7 +488,7 @@ Template.address.helpers({
     if (outputs) {
       _.each(outputs, (element, key) => {
         if (element === a) {
-          amount += (tx.transfer_token.amounts[key] / (Math.pow(10, parseInt(tx.token.decimals, 10))))
+          amount += (tx.transfer_token.amounts[key] / (10 ** parseInt(tx.token.decimals, 10)))
         }
       })
       return `${amount} ${tx.token.symbol}`

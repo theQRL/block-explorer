@@ -15,6 +15,9 @@
   <i class="tiny icon"></i>
   <div class="content wordBreak f-h">
     {{address.state.address}}
+    {{#if knownProviderNonSpecific}}
+    &nbsp;<i class="ui certificate icon" title="Verified NFT Provider"></i>
+    {{/if}}
   </div>
 </h3>
 
