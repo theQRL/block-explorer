@@ -2,7 +2,9 @@
 /* ^^^ remove once testing complete
  */
 import JSONFormatter from 'json-formatter-js'
-import qrlAddressValdidator from '@theqrl/validate-qrl-address'
+import qrlAddressValidator from '@theqrl/validate-qrl-address'
+import _ from 'underscore'
+import qrlNft from '@theqrl/nft-providers'
 import { BigNumber } from 'bignumber.js'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import './address.html'
@@ -218,7 +220,7 @@ const renderAddressBlock = () => {
   if (!tPage) { tPage = 1 }
   // TODO: validate aId before constructing Method call
   if (aId) {
-    const validate = qrlAddressValdidator.hexString(aId)
+    const validate = qrlAddressValidator.hexString(aId)
     if (validate.result === false) { return }
     const req = {
       address: anyAddressToRaw(aId),
@@ -261,7 +263,7 @@ const renderAddressBlock = () => {
             if (err) {
               Session.set('address', { error, id: aId })
             } else {
-              const ots = otsParse(result, qrlAddressValdidator.hexString(res.state.address).sig.number)
+              const ots = otsParse(result, qrlAddressValidator.hexString(res.state.address).sig.number)
               res.ots = ots
               res.ots.keysConsumed = res.state.used_ots_key_count
 
@@ -324,9 +326,57 @@ Template.address.helpers({
       return false
     }
   },
+  isCreateNFT() {
+    try {
+      if (this.token.nft.type === 'CREATE NFT') {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
+  knownProvider() {
+    const { id } = this.token.nft
+    const from = Session.get('address').state.address
+    let known = false
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        _.each(provider.addresses, (address) => {
+          if (address === from) {
+            known = true
+          }
+        })
+      }
+    })
+    return known
+  },
+  providerURL() {
+    const { id } = this.token.nft
+    let url = ''
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        url = provider.url
+      }
+    })
+    return url
+  },
+  providerName() {
+    const { id } = this.token.nft
+    let name = ''
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        name = provider.name
+      }
+    })
+    return name
+  },
+  providerID() {
+    return `0x${this.token.nft.id}`
+  },
   isMultiSig() {
     try {
-      if (qrlAddressValdidator.hexString(upperCaseFirst(FlowRouter.getParam('aId'))).sig.type === 'MULTISIG') {
+      if (qrlAddressValidator.hexString(upperCaseFirst(FlowRouter.getParam('aId'))).sig.type === 'MULTISIG') {
         return true
       }
       return false
@@ -635,7 +685,7 @@ Template.address.helpers({
         const thisAddress = rawAddressToHexAddress(anyAddressToRaw(Session.get('address').state.address))
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
         const result = {}
-        const validationResult = qrlAddressValdidator.hexString(thisAddress)
+        const validationResult = qrlAddressValidator.hexString(thisAddress)
 
         result.height = validationResult.sig.height
         result.totalSignatures = validationResult.sig.number

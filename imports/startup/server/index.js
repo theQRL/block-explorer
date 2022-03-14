@@ -340,6 +340,22 @@ const helpersaddressTransactions = (response) => {
       }
     }
     if (tx.tx.transactionType === 'token') {
+      // first check if NFT
+      const symbol = Buffer.from(txEdited.tx.token.symbol).toString('hex')
+      if (symbol.slice(0, 8) === '00ff00ff') {
+        const nftBytes = Buffer.concat([
+          Buffer.from(txEdited.tx.token.symbol),
+          Buffer.from(txEdited.tx.token.name),
+        ])
+        const idBytes = Buffer.from(nftBytes.slice(4, 8))
+        const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+        txEdited.tx.token.nft = {
+          type: 'CREATE NFT',
+          id: Buffer.from(idBytes).toString('hex'),
+          hash: Buffer.from(cryptoHashBytes).t,
+        }
+        console.log('Found an NFT')
+      }
       if (tx.tx.token.symbol) {
         txEdited.tx.token.symbol = Buffer.from(txEdited.tx.token.symbol).toString()
       }

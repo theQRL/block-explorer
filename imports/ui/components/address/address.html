@@ -159,14 +159,33 @@
             <img class="transactionTypeImage" src="/img/icons/send.svg" />
             <div class="content">
               <div class="header">
+                {{#if isCreateNFT}}
+                Mint NFT - 
+                        {{#if knownProvider}}
+                        <i class="ui certificate icon"></i>
+                        {{/if}}
+                        {{#if knownProvider}}
+                        <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+                        {{else}}
+                        Unknown provider {{providerID}} |
+                        {{/if}}
+                        {{this.timestamp}}
+                {{else}}
                 Token Creation - {{this.token.name}} ({{this.token.symbol}}) | {{this.timestamp}}
+                {{/if}}
               </div>
               <p class="transactionAddress value">
                 {{this.transaction_hash}}
               </p>
             </div>
             <div class="floatright ta-c">
-               <a href="/tx/{{this.transaction_hash}}">{{this.token.symbol}} &gt;</a>
+               <a href="/tx/{{this.transaction_hash}}">
+                 {{#if isCreateNFT}}
+                 View Tx &gt;
+                 {{else}}
+                  {{this.token.symbol}} &gt;
+                  {{/if}}
+                </a>
             </div>
           </div>
           {{/if}}
