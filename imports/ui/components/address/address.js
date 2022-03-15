@@ -155,14 +155,48 @@ const getTokenBalances = (getAddress, callback) => {
                 // TODO - Error handling here
               } else {
                 const tokenDetails = objRes.transaction.tx.token
-
                 thisToken.hash = tokenHash
                 thisToken.name = bytesToString(tokenDetails.name)
                 thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
                 thisToken.balance = tokenBalance / Math.pow(10, tokenDetails.decimals)
-
+                let nft = {}
+                const symbol = Buffer.from(tokenDetails.symbol).toString(
+                  'hex',
+                )
+                if (symbol.slice(0, 8) === '00ff00ff') {
+                  const nftBytes = Buffer.concat([
+                    Buffer.from(tokenDetails.symbol),
+                    Buffer.from(tokenDetails.name),
+                  ])
+                  const idBytes = Buffer.from(nftBytes.slice(4, 8))
+                  const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+                  const id = Buffer.from(idBytes).toString('hex')
+                  const provider = `Q${Buffer.from(objRes.transaction.addr_from).toString('hex')}`
+                  const providerDetails = {
+                    known: false,
+                  }
+                  _.each(qrlNft.providers, (providerList) => {
+                    if (providerList.id.slice(2, 10) === id) {
+                      _.each(providerList.addresses, (address) => {
+                        if (address === provider) {
+                          providerDetails.known = true
+                          providerDetails.name = providerList.name
+                          providerDetails.url = providerList.url
+                        }
+                      })
+                    }
+                  })
+                  nft = {
+                    provider,
+                    providerDetails,
+                    txhash: Buffer.from(objRes.transaction.tx.transaction_hash).toString('hex'),
+                    type: 'CREATE NFT',
+                    id,
+                    hash: Buffer.from(cryptoHashBytes).toString('hex'),
+                  }
+                  thisToken.nft = nft
+                }
                 tokensHeld.push(thisToken)
-
                 Session.set('tokensHeld', tokensHeld)
               }
             }
@@ -335,6 +369,12 @@ Template.address.helpers({
     } catch (e) {
       return false
     }
+  },
+  heldTokenIsNFT() {
+    if (this.nft) {
+      return true
+    }
+    return false
   },
   knownProvider() {
     const { id } = this.token.nft
@@ -691,6 +731,36 @@ Template.address.helpers({
   tokensHeld() {
     return Session.get('tokensHeld')
   },
+  ownTokens() {
+    const tokens = Session.get('tokensHeld')
+    let count = tokens.length
+    if (count > 0) {
+      _.each(tokens, (token) => {
+        if (token.nft) {
+          count -= 1
+        }
+      })
+    }
+    if (count > 0) {
+      return true
+    }
+    return false
+  },
+  ownNFTs() {
+    const tokens = Session.get('tokensHeld')
+    let count = tokens.length
+    if (count > 0) {
+      _.each(tokens, (token) => {
+        if (!token.nft) {
+          count -= 1
+        }
+      })
+    }
+    if (count > 0) {
+      return true
+    }
+    return false
+  },
   addressValidation() {
     try {
       if (Session.get('address').state) {
@@ -893,6 +963,7 @@ Template.address.onRendered(() => {
   // Get Tokens and Balances
   getTokenBalances(upperCaseFirst(FlowRouter.getParam('aId')), () => {
     $('#tokenBalancesLoading').hide()
+    $('#nftBalancesLoading').hide()
   })
 
   // Render identicon (needs to be here for initial load).
