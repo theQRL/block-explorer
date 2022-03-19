@@ -798,7 +798,6 @@ Meteor.methods({
                 id: Buffer.from(idBytes).toString('hex'),
                 hash: Buffer.from(cryptoHashBytes).toString('hex'),
               }
-              console.log('Found an NFT')
               adjusted.nft = nft
             }
           }
