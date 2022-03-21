@@ -67,12 +67,20 @@
                       <a href="/a/{{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}">{{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}</a>
                     {{else}}
                       {{#if isTokenTransfer}}
+                        {{#if isTransferNFT}}
+                        <div class="value">{{explorer.totalTransferred}}</div>
+                        {{explorer.symbol}} ({{explorer.name}})<br />
+                        NFT transferred
+                        <div class="label">NFT creation transaction: </div>
+                        <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
+                        {{else}}
                         <div class="value">{{explorer.totalTransferred}}</div>
                         {{explorer.symbol}} ({{explorer.name}})<br />
                         tokens transferred
                         <div class="label">Token creation transaction: </div>
                         <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
-                      {{else}}
+                        {{/if}}
+                        {{else}}
                         {{#if isCreateNFT}}
                         <!-- NFT -->
                         {{else}}

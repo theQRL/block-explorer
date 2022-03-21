@@ -834,8 +834,26 @@ Meteor.methods({
             adjusted.transfer_token.totalTransferred = thisTotalTransferred / Math.pow(10, thisDecimals)
             adjusted.transfer_token.totalOutputs = totalOutputs
             adjusted.transfer_token.tokenSymbol = thisSymbol
+            let nft = {}
+            console.log(thisSymbolResponse)
+            const symbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString(
+              'hex',
+            )
+            if (symbol.slice(0, 8) === '00ff00ff') {
+              const nftBytes = Buffer.concat([
+                Buffer.from(thisSymbolResponse.transaction.tx.token.symbol),
+                Buffer.from(thisSymbolResponse.transaction.tx.token.name),
+              ])
+              const idBytes = Buffer.from(nftBytes.slice(4, 8))
+              const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+              nft = {
+                type: 'TRANSFER NFT',
+                id: Buffer.from(idBytes).toString('hex'),
+                hash: Buffer.from(cryptoHashBytes).toString('hex'),
+              }
+              adjusted.nft = nft
+            }
           }
-
           transactions.push(adjusted)
         })
 

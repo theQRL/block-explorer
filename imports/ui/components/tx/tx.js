@@ -237,7 +237,7 @@ Template.tx.helpers({
     return false
   },
   isTokenTransfer() {
-    if (this.explorer.type === 'TRANSFER TOKEN') {
+    if (this.explorer.type === 'TRANSFER TOKEN' || this.explorer.type === 'TRANSFER NFT') {
       return true
     }
     return false
@@ -280,6 +280,13 @@ Template.tx.helpers({
   },
   isLattice() {
     if (this.explorer.type === 'LATTICE PK') {
+      return true
+    }
+    return false
+  },
+  isTransferNFT() {
+    console.log(this)
+    if (this.explorer.type === 'TRANSFER NFT') {
       return true
     }
     return false
