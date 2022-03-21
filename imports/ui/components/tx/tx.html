@@ -56,7 +56,7 @@
                 <div class="ui statistic">
 
                   <div class="label">
-                    <div class="ui {{color}} label">{{explorer.type}}{{#if isTokenTransfer}}: {{explorer.symbol}} {{/if}}</div>
+                    <div class="ui {{color}} label">{{explorer.type}}{{#if isTokenTransfer}}{{#if isTransferNFT}}{{else}}: {{explorer.symbol}} {{/if}}{{/if}}</div>
                   </div>
                   {{#if isNotMultiSig}}
                   {{#if isNotMessage}}
@@ -68,9 +68,21 @@
                     {{else}}
                       {{#if isTokenTransfer}}
                         {{#if isTransferNFT}}
+                        {{#if knownProvider}}
+                        <p>
+                          <i class="ui certificate icon"></i>Verified provider:
+                          <a href="{{providerURL}}/{{tx.tx.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+                        </p>
+                        {{else}}
+                        <p>
+                          <i class="ui warning icon"></i>Unverified provider:
+                          {{providerID}}
+                        </p>
+                        {{/if}}
+                        
                         <div class="value">{{explorer.totalTransferred}}</div>
-                        {{explorer.symbol}} ({{explorer.name}})<br />
-                        NFT transferred
+                        
+                        NFT transferred<br /><br />
                         <div class="label">NFT creation transaction: </div>
                         <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
                         {{else}}

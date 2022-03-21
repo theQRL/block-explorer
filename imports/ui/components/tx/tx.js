@@ -285,7 +285,6 @@ Template.tx.helpers({
     return false
   },
   isTransferNFT() {
-    console.log(this)
     if (this.explorer.type === 'TRANSFER NFT') {
       return true
     }
