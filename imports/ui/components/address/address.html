@@ -160,7 +160,11 @@
 
           {{#if isTokenCreation this.transactionType}}
           <div class="ui icon message transactionRecord">
+            {{#if isCreateNFT}}
+            <img class="transactionTypeImage" src="/img/icons/receive.svg" />
+            {{else}}
             <img class="transactionTypeImage" src="/img/icons/send.svg" />
+            {{/if}}
             <div class="content">
               <div class="header">
                 {{#if isCreateNFT}}
@@ -204,13 +208,34 @@
             <div class="content">
               <div class="header">
                 {{#if isThisAddress this.addr_from}}
-                Tokens Sent
+                {{#if isNFTTransfer}}NFT Sent - 
+                      {{#if knownProvider}}
+                        <i class="ui certificate icon"></i>
+                        {{/if}}
+                        {{#if knownProvider}}
+                        <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+                        {{else}}
+                        Unknown provider {{providerID}}
+                        {{/if}}
+                {{else}}Tokens Sent{{/if}}
                 {{else}}
-                Tokens Received
+                    {{#if isNFTTransfer}}NFT Received - 
+                      {{#if knownProvider}}
+                        <i class="ui certificate icon"></i>
+                        {{/if}}
+                        {{#if knownProvider}}
+                        <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+                        {{else}}
+                        Unknown provider {{providerID}}
+                        {{/if}}
+                {{else}}Tokens Received{{/if}}
                 {{/if}}
                  | {{this.timestamp}}
               </div>
               <p class="transactionAddress value">
+                {{#if isNFTTransfer}}
+                {{this.transaction_hash}}
+                {{else}}
                 {{#if isThisAddress this.addr_from}}
                   {{#each this.outputs}}
                     {{this.amount}} &raquo; {{this.address_hex}}<br />  
@@ -218,10 +243,17 @@
                 {{else}}
                   {{this.from}}
                 {{/if}}
+                {{/if}}
               </p>
             </div>
             <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{receivedTokens this}} &gt;</a>
+              <a href="/tx/{{this.transaction_hash}}">
+                {{#if isNFTTransfer}}
+                View Tx
+                {{else}}
+                {{receivedTokens this}}
+                {{/if}}
+                &gt;</a>
             </div>
           </div>
           {{/if}}
