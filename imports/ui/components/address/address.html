@@ -170,7 +170,7 @@
                 {{#if isCreateNFT}}
                 Create NFT - 
                         {{#if knownProvider}}
-                        <i class="ui certificate icon"></i>
+                        <i class="ui certificate icon" title="Verified NFT Provider"></i>
                         {{/if}}
                         {{#if knownProvider}}
                         <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
@@ -210,7 +210,7 @@
                 {{#if isThisAddress this.addr_from}}
                 {{#if isNFTTransfer}}NFT Sent - 
                       {{#if knownProvider}}
-                        <i class="ui certificate icon"></i>
+                        <i class="ui certificate icon" title="Verified NFT Provider"></i>
                         {{/if}}
                         {{#if knownProvider}}
                         <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
@@ -221,7 +221,7 @@
                 {{else}}
                     {{#if isNFTTransfer}}NFT Received - 
                       {{#if knownProvider}}
-                        <i class="ui certificate icon"></i>
+                        <i class="ui certificate icon" title="Verified NFT Provider"></i>
                         {{/if}}
                         {{#if knownProvider}}
                         <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
@@ -527,9 +527,9 @@
               {{#if this.nft.providerDetails.known}}
               <a href="{{this.nft.providerDetails.url}}/{{this.nft.txhash}}">
               {{this.nft.providerDetails.name}} (0x{{this.nft.id}})</a>
-              <i class="ui certificate icon"></i>Verified Provider
+              <i class="ui certificate icon" title="Verified NFT Provider"></i>Verified Provider
               {{else}}
-              <i class="ui warning icon"></i>Unverified Provider (0x{{this.nft.id}})
+              <i class="ui warning icon" title="Unverified NFT Provider"></i>Unverified Provider (0x{{this.nft.id}})
               {{/if}}
             </p>
             <div class="description tc-w">
