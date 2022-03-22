@@ -118,8 +118,17 @@ Template.block.helpers({
     }
     return ''
   },
+  isTransferNFT() {
+    try {
+      if (this.nft.type === 'TRANSFER NFT') {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
   isCreateNFT() {
-    console.log(this)
     try {
       if (this.nft.type === 'CREATE NFT') {
         return true
@@ -134,6 +143,9 @@ Template.block.helpers({
       return `${numberToString(this.transfer.totalTransferred)} Quanta`
     }
     if (this.transactionType === 'transfer_token') {
+      if (this.nft) {
+        return 1
+      }
       return `${numberToString(this.transfer_token.totalTransferred)} ${this.transfer_token.tokenSymbol}`
     }
     if (this.transactionType === 'coinbase') {
@@ -146,6 +158,9 @@ Template.block.helpers({
       return this.fee
     }
     if (this.token) {
+      return this.fee
+    }
+    if (this.nft) {
       return this.fee
     }
     return ''

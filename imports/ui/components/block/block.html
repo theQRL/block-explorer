@@ -55,7 +55,11 @@
               {{#if isCreateNFT}}
               Create&nbsp;NFT
               {{else}}
+              {{#if isTransferNFT}}
+              Transfer&nbsp;NFT
+              {{else}}
               {{this.transactionType}}
+              {{/if}}
               {{/if}}
             </div>
           </td>
