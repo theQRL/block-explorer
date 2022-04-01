@@ -1,4 +1,6 @@
 import { BigNumber } from 'bignumber.js'
+import _ from 'underscore'
+import qrlNft from '@theqrl/nft-providers'
 import { lasttx } from '/imports/api/index.js'
 import './lasttx.html'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
@@ -56,6 +58,56 @@ Template.lasttx.helpers({
       return true
     }
     return false
+  },
+  isNFT() {
+    if (this.nft || this.explorer.nft) {
+      return true
+    }
+    return false
+  },
+  isTransferNFT() {
+    if (this.explorer.type === 'TRANSFER NFT') {
+      return true
+    }
+    return false
+  },
+  providerID() {
+    return `0x${this.explorer.nft.id}`
+  },
+  knownProvider() {
+    const { id } = this.explorer.nft
+    const from = this.explorer.from_hex
+    let known = false
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        _.each(provider.addresses, (address) => {
+          if (address === from) {
+            known = true
+          }
+        })
+      }
+    })
+    return known
+  },
+  providerURL() {
+    const { id } = this.explorer.nft
+    let url = ''
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        url = provider.url
+      }
+    })
+    return url
+  },
+  providerName() {
+    const { id } = this.explorer.nft
+    let name = ''
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        name = provider.name
+      }
+    })
+    return name
   },
   isCoinbaseTxn(txType) {
     if (txType === 'coinbase') {
