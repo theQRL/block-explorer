@@ -793,34 +793,42 @@ Template.address.helpers({
     return Session.get('tokensHeld')
   },
   ownTokens() {
-    const tokens = Session.get('tokensHeld')
-    let count = tokens.length
-    if (count > 0) {
-      _.each(tokens, (token) => {
-        if (token.nft) {
-          count -= 1
-        }
-      })
+    try {
+      const tokens = Session.get('tokensHeld')
+      let count = tokens.length
+      if (count > 0) {
+        _.each(tokens, (token) => {
+          if (token.nft) {
+            count -= 1
+          }
+        })
+      }
+      if (count > 0) {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
     }
-    if (count > 0) {
-      return true
-    }
-    return false
   },
   ownNFTs() {
-    const tokens = Session.get('tokensHeld')
-    let count = tokens.length
-    if (count > 0) {
-      _.each(tokens, (token) => {
-        if (!token.nft) {
-          count -= 1
-        }
-      })
+    try {
+      const tokens = Session.get('tokensHeld')
+      let count = tokens.length
+      if (count > 0) {
+        _.each(tokens, (token) => {
+          if (!token.nft) {
+            count -= 1
+          }
+        })
+      }
+      if (count > 0) {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
     }
-    if (count > 0) {
-      return true
-    }
-    return false
   },
   addressValidation() {
     try {
