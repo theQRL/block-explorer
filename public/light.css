@@ -355,6 +355,10 @@ div.ui.celled.horizontal.list>.item {
   font-family: 'Alte DIN 1451 Mittelschrift', sans-serif !important;
 }
 
+.ui.list .list>.item .header,
+.ui.list>.item .header {
+  color: #000;
+}
 
 /* Footer links */
 .footer {

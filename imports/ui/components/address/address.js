@@ -2,7 +2,9 @@
 /* ^^^ remove once testing complete
  */
 import JSONFormatter from 'json-formatter-js'
-import qrlAddressValdidator from '@theqrl/validate-qrl-address'
+import qrlAddressValidator from '@theqrl/validate-qrl-address'
+import _ from 'underscore'
+import qrlNft from '@theqrl/nft-providers'
 import { BigNumber } from 'bignumber.js'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import './address.html'
@@ -153,14 +155,48 @@ const getTokenBalances = (getAddress, callback) => {
                 // TODO - Error handling here
               } else {
                 const tokenDetails = objRes.transaction.tx.token
-
                 thisToken.hash = tokenHash
                 thisToken.name = bytesToString(tokenDetails.name)
                 thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
                 thisToken.balance = tokenBalance / Math.pow(10, tokenDetails.decimals)
-
+                let nft = {}
+                const symbol = Buffer.from(tokenDetails.symbol).toString(
+                  'hex',
+                )
+                if (symbol.slice(0, 8) === '00ff00ff') {
+                  const nftBytes = Buffer.concat([
+                    Buffer.from(tokenDetails.symbol),
+                    Buffer.from(tokenDetails.name),
+                  ])
+                  const idBytes = Buffer.from(nftBytes.slice(4, 8))
+                  const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+                  const id = Buffer.from(idBytes).toString('hex')
+                  const provider = `Q${Buffer.from(objRes.transaction.addr_from).toString('hex')}`
+                  const providerDetails = {
+                    known: false,
+                  }
+                  _.each(qrlNft.providers, (providerList) => {
+                    if (providerList.id.slice(2, 10) === id) {
+                      _.each(providerList.addresses, (address) => {
+                        if (address === provider) {
+                          providerDetails.known = true
+                          providerDetails.name = providerList.name
+                          providerDetails.url = providerList.url
+                        }
+                      })
+                    }
+                  })
+                  nft = {
+                    provider,
+                    providerDetails,
+                    txhash: Buffer.from(objRes.transaction.tx.transaction_hash).toString('hex'),
+                    type: 'CREATE NFT',
+                    id,
+                    hash: Buffer.from(cryptoHashBytes).toString('hex'),
+                  }
+                  thisToken.nft = nft
+                }
                 tokensHeld.push(thisToken)
-
                 Session.set('tokensHeld', tokensHeld)
               }
             }
@@ -218,7 +254,7 @@ const renderAddressBlock = () => {
   if (!tPage) { tPage = 1 }
   // TODO: validate aId before constructing Method call
   if (aId) {
-    const validate = qrlAddressValdidator.hexString(aId)
+    const validate = qrlAddressValidator.hexString(aId)
     if (validate.result === false) { return }
     const req = {
       address: anyAddressToRaw(aId),
@@ -261,7 +297,7 @@ const renderAddressBlock = () => {
             if (err) {
               Session.set('address', { error, id: aId })
             } else {
-              const ots = otsParse(result, qrlAddressValdidator.hexString(res.state.address).sig.number)
+              const ots = otsParse(result, qrlAddressValidator.hexString(res.state.address).sig.number)
               res.ots = ots
               res.ots.keysConsumed = res.state.used_ots_key_count
 
@@ -314,7 +350,7 @@ Template.address.helpers({
       if (address !== undefined) {
         if (address.state !== undefined) {
           address.state.address = hexOrB32(
-            anyAddressToRaw(address.state.address),
+            anyAddressToRaw(address.state.address)
           )
           return address
         }
@@ -324,9 +360,115 @@ Template.address.helpers({
       return false
     }
   },
+  isCreateNFT() {
+    try {
+      if (this.token.nft.type === 'CREATE NFT') {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
+  heldTokenIsNFT() {
+    if (this.nft) {
+      return true
+    }
+    return false
+  },
+  isNFTTransfer() {
+    try {
+      if (this.transfer_token.nft.type === 'TRANSFER NFT') {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
+  knownProvider() {
+    let id
+    if (this.token) {
+      id = this.token.nft.id
+    } else if (this.transfer_token) {
+      id = this.transfer_token.nft.id
+    }
+    try {
+      const from = Session.get('address').state.address
+      let known = false
+      _.each(qrlNft.providers, (provider) => {
+        if (provider.id === `0x${id}`) {
+          _.each(provider.addresses, (address) => {
+            if (address === from) {
+              known = true
+            }
+          })
+        }
+      })
+      return known
+    } catch (e) {
+      return false
+    }
+  },
+  knownProviderNonSpecific() {
+    try {
+      const from = Session.get('address').state.address
+      let known = false
+      _.each(qrlNft.providers, (provider) => {
+        _.each(provider.addresses, (address) => {
+          if (address === from) {
+            known = true
+          }
+        })
+      })
+      return known
+    } catch (e) {
+      return false
+    }
+  },
+  providerURL() {
+    let id
+    if (this.token) {
+      id = this.token.nft.id
+    } else {
+      id = this.transfer_token.nft.id
+    }
+    let url = ''
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        url = provider.url
+      }
+    })
+    return url
+  },
+  providerName() {
+    let id
+    if (this.token) {
+      id = this.token.nft.id
+    } else {
+      id = this.transfer_token.nft.id
+    }
+    let name = ''
+    _.each(qrlNft.providers, (provider) => {
+      if (provider.id === `0x${id}`) {
+        name = provider.name
+      }
+    })
+    return name
+  },
+  providerID() {
+    if (this.token) {
+      return `0x${this.token.nft.id}`
+    }
+    return `0x${this.transfer_token.nft.id}`
+  },
   isMultiSig() {
     try {
-      if (qrlAddressValdidator.hexString(upperCaseFirst(FlowRouter.getParam('aId'))).sig.type === 'MULTISIG') {
+      if (
+        qrlAddressValidator.hexString(
+          upperCaseFirst(FlowRouter.getParam('aId'))
+        ).sig.type === 'MULTISIG'
+      ) {
         return true
       }
       return false
@@ -339,11 +481,11 @@ Template.address.helpers({
     const active = Session.get('active')
     if (Session.get('pages').length > 0) {
       ret = Session.get('pages')
-      if ((active - 5) <= 0) {
+      if (active - 5 <= 0) {
         ret = ret.slice(0, 9)
       } else {
         // eslint-disable-next-line
-        if ((active + 10) > ret.length) {
+        if (active + 10 > ret.length) {
           ret = ret.slice(ret.length - 10, ret.length)
         } else {
           ret = ret.slice(active - 5, active + 4)
@@ -372,14 +514,18 @@ Template.address.helpers({
   addressTransactions() {
     try {
       const transactions = []
-      const thisAddress = rawAddressToB32Address(Session.get('address').state.address)
+      const thisAddress = rawAddressToB32Address(
+        Session.get('address').state.address
+      )
       _.each(Session.get('addressTransactions'), (transaction) => {
         // Store modified transaction
         const y = transaction.tx
 
         // Update timestamp from unix epoch to human readable time/date.
         if (moment.unix(transaction.timestamp).isValid()) {
-          y.timestamp = moment.unix(transaction.timestamp).format('HH:mm D MMM YYYY')
+          y.timestamp = moment
+            .unix(transaction.timestamp)
+            .format('HH:mm D MMM YYYY')
         } else {
           y.timestamp = 'Unconfirmed Tx'
         }
@@ -388,7 +534,10 @@ Template.address.helpers({
 
         // Set total received amount if sent to this address
         let thisReceivedAmount = 0
-        if ((transaction.type === 'transfer') || (transaction.type === 'transfer_token')) {
+        if (
+          transaction.type === 'transfer' ||
+          transaction.type === 'transfer_token'
+        ) {
           _.each(transaction.outputs, (output) => {
             if (output.address_b32 === thisAddress) {
               thisReceivedAmount += parseFloat(output.amount)
@@ -406,27 +555,41 @@ Template.address.helpers({
     }
   },
   receivedAmount(tx) {
-    const a = Session.get('address').state.address
-    const outputs = tx.transfer
-    if (outputs) {
-      let amount = 0
-      _.each(outputs.addrs_to, (element, key) => {
-        if (element === a) {
-          amount += (outputs.amounts[key] / SHOR_PER_QUANTA)
-        }
-      })
-      return amount
+    if (tx.transfer_token) {
+      if (tx.transfer_token.nft) {
+        return ''
+      }
     }
-    return ''
+    try {
+      const a = Session.get('address').state.address
+      const outputs = tx.transfer
+      if (outputs) {
+        let amount = 0
+        _.each(outputs.addrs_to, (element, key) => {
+          if (element === a) {
+            amount += outputs.amounts[key] / SHOR_PER_QUANTA
+          }
+        })
+        return amount
+      }
+      return ''
+    } catch (e) {
+      return ''
+    }
   },
   receivedTokens(tx) {
+    if (tx.transfer_token.nft) {
+      return ''
+    }
     const a = Session.get('address').state.address
     const outputs = tx.transfer_token.addrs_to
     let amount = 0
     if (outputs) {
       _.each(outputs, (element, key) => {
         if (element === a) {
-          amount += (tx.transfer_token.amounts[key] / (Math.pow(10, parseInt(tx.token.decimals, 10))))
+          amount +=
+            tx.transfer_token.amounts[key] /
+            10 ** parseInt(tx.token.decimals, 10)
         }
       })
       return `${amount} ${tx.token.symbol}`
@@ -500,7 +663,7 @@ Template.address.helpers({
     try {
       const value = address.state.balance
       const x = Session.get('qrl')
-      return Math.round((x * value) * 100) / 100
+      return Math.round(x * value * 100) / 100
     } catch (e) {
       return '...'
     }
@@ -523,7 +686,7 @@ Template.address.helpers({
   isActive() {
     let ret = ''
     const tPage = parseInt(FlowRouter.getParam('tPage'), 10)
-    if ((this.number === Session.get('active')) || (tPage === this.number)) {
+    if (this.number === Session.get('active') || tPage === this.number) {
       ret = 'active'
     }
     return ret
@@ -629,13 +792,53 @@ Template.address.helpers({
   tokensHeld() {
     return Session.get('tokensHeld')
   },
+  ownTokens() {
+    try {
+      const tokens = Session.get('tokensHeld')
+      let count = tokens.length
+      if (count > 0) {
+        _.each(tokens, (token) => {
+          if (token.nft) {
+            count -= 1
+          }
+        })
+      }
+      if (count > 0) {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
+  ownNFTs() {
+    try {
+      const tokens = Session.get('tokensHeld')
+      let count = tokens.length
+      if (count > 0) {
+        _.each(tokens, (token) => {
+          if (!token.nft) {
+            count -= 1
+          }
+        })
+      }
+      if (count > 0) {
+        return true
+      }
+      return false
+    } catch (e) {
+      return false
+    }
+  },
   addressValidation() {
     try {
       if (Session.get('address').state) {
-        const thisAddress = rawAddressToHexAddress(anyAddressToRaw(Session.get('address').state.address))
+        const thisAddress = rawAddressToHexAddress(
+          anyAddressToRaw(Session.get('address').state.address)
+        )
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
         const result = {}
-        const validationResult = qrlAddressValdidator.hexString(thisAddress)
+        const validationResult = qrlAddressValidator.hexString(thisAddress)
 
         result.height = validationResult.sig.height
         result.totalSignatures = validationResult.sig.number
@@ -644,7 +847,8 @@ Template.address.helpers({
         result.hashFunction = validationResult.hash.function
         if (Session.get('address').ots) {
           const { keysConsumed } = Session.get('address').ots
-          result.keysRemaining = parseInt(result.totalSignatures, 10) - parseInt(keysConsumed, 10)
+          result.keysRemaining =
+            parseInt(result.totalSignatures, 10) - parseInt(keysConsumed, 10)
         }
         return result
       }
@@ -831,6 +1035,7 @@ Template.address.onRendered(() => {
   // Get Tokens and Balances
   getTokenBalances(upperCaseFirst(FlowRouter.getParam('aId')), () => {
     $('#tokenBalancesLoading').hide()
+    $('#nftBalancesLoading').hide()
   })
 
   // Render identicon (needs to be here for initial load).

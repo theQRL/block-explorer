@@ -42,18 +42,62 @@
           <div class="header">
             {{ts}}
           </div>
+          {{#if isNFT}}
+          Create NFT - 
+          {{#if knownProvider}}
+            <i class="ui certificate icon" title="Verified Provider"></i>
+            <a href="{{providerURL}}/{{tx.tx.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+          {{else}}
+            <i class="ui warning icon" title="Unverified Provider: ask your provider to contact support@theqrl.org"></i>Unverified provider:
+            {{providerID}}
+          {{/if}}
+          {{else}}
           Token Creation - ({{this.explorer.symbol}}) | Block <a href="/block/{{block}}">{{block}}</a>
+          {{/if}}
           <p class="transactionAddress value">
             {{this.tx.transaction_hash}}
           </p>
         </div>
         <div class="floatright ta-c">
-           <a href="/tx/{{this.tx.transaction_hash}}">{{this.explorer.symbol}}<br><small>Creation</small></a>
+           <a href="/tx/{{this.tx.transaction_hash}}">
+             {{#if isNFT}}
+             <small>View<br>Transaction</small>
+             {{else}}
+             {{this.explorer.symbol}}<br><small>Creation</small>
+             {{/if}}
+          </a>
         </div>
       </div>
       {{/if}}
 
       {{#if isTokenTransfer this.tx.transactionType}}
+      {{#if isTransferNFT}}
+      <div class="ui icon message transactionRecord">
+        <img class="transactionTypeImage" src="/img/icons/send.svg" />
+        <div class="content">
+          <div class="header">
+            {{ts}}
+          </div>
+          Transfer NFT - 
+          
+          {{#if knownProvider}}
+            <i class="ui certificate icon" title="Verified Provider"></i>
+            <a href="{{providerURL}}/{{tx.tx.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+          {{else}}
+            <i class="ui warning icon" title="Unverified Provider: ask your provider to contact support@theqrl.org"></i>Unverified provider:
+            {{providerID}}
+          {{/if}}
+          
+          | Block <a href="/block/{{block}}">{{block}}</a>
+          <p class="transactionAddress value">
+            {{this.tx.transaction_hash}}
+          </p>
+        </div>
+        <div class="floatright ta-c">
+          <a href="/tx/{{this.tx.transaction_hash}}"><small>View<br>Transaction</small></a>
+        </div>
+      </div>
+      {{else}}
       <div class="ui icon message transactionRecord">
         <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
@@ -69,6 +113,7 @@
           <a href="/tx/{{this.tx.transaction_hash}}">{{amount}} {{this.explorer.symbol}}</a>
         </div>
       </div>
+      {{/if}}
       {{/if}}
 
       {{#if isCoinbaseTxn this.tx.transactionType}}
@@ -258,7 +303,11 @@
         <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
+            {{#if isNFT}}
+            Create NFT | Unconfirmed | First Seen: {{ts}}
+            {{else}}
             Token Creation - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
+            {{/if}}
           </div>
           <p class="transactionAddress value">
             {{this.tx.transaction_hash}}
@@ -275,7 +324,11 @@
         <img class="transactionTypeImage" src="/img/icons/send.svg" />
         <div class="content">
           <div class="header">
+            {{#if isNFT}}
+            Transfer NFT | Unconfirmed | First Seen: {{ts}}
+            {{else}}
             Token Transfer - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
+            {{/if}}
           </div>
           <p class="transactionAddress">
             {{this.tx.transaction_hash}}
