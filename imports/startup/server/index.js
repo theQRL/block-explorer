@@ -1,4 +1,6 @@
 /* eslint no-console: 0, max-len: 0 */
+/* global _ */
+
 // server-side startup
 import grpc from '@grpc/grpc-js'
 import protoloader from '@grpc/proto-loader'
@@ -10,7 +12,7 @@ import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { check } from 'meteor/check'
 import { BrowserPolicy } from 'meteor/qrl:browser-policy'
-import { blockData } from '/imports/api/index.js'
+import { blockData, quantausd } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
 import {
   EXPLORER_VERSION, SHOR_PER_QUANTA, anyAddressToRaw,
@@ -686,13 +688,9 @@ Meteor.methods({
   QRLvalue() {
     console.log('QRLvalue method called')
     this.unblock()
-    const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl'
-    const apiUrlUSD = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=usdt-btc'
-    // asynchronous call to API
-    const response = Meteor.wrapAsync(apiCall)(apiUrl)
-    const responseUSD = Meteor.wrapAsync(apiCall)(apiUrlUSD)
-    const usd = response.result[0].Last * responseUSD.result[0].Last
-    return usd
+    const priceData = quantausd.findOne({})
+    console.log(priceData)
+    return priceData.price
   },
 
   status() {
