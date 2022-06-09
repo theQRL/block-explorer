@@ -1,7 +1,8 @@
 /* eslint max-len: 0 */
+/* global _ */
 import { HTTP } from 'meteor/http'
 import { JsonRoutes } from 'meteor/simple:json-routes'
-import sha512 from 'sha512'
+import { SHA512 } from 'jscrypto/es6'
 // import helpers from '@theqrl/explorer-helpers'
 /* eslint import/no-cycle: 0 */
 import {
@@ -13,6 +14,7 @@ import {
 } from '/imports/api/index.js'
 
 import { SHOR_PER_QUANTA } from '../both/index.js'
+import axios from 'axios'
 
 const refreshBlocks = () => {
   const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 10 }
@@ -231,15 +233,13 @@ function refreshStats() {
   homechart.insert(chartLineData)
 }
 
-const refreshQuantaUsd = () => {
-  const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl'
-  const apiUrlUSD = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=usdt-btc'
-  const response = Meteor.wrapAsync(apiCall)(apiUrl)
-  const responseUSD = Meteor.wrapAsync(apiCall)(apiUrlUSD)
-  const usd = response.result[0].Last * responseUSD.result[0].Last
-  const price = { price: usd }
+const refreshQuantaUsd = async () => {
+  const apiUrl = 'https://market-data.automated.theqrl.org/'
+  const response = await axios.get(apiUrl)
+  console.log(response.data)
+  const { price } = response.data
   quantausd.remove({})
-  quantausd.insert(price)
+  quantausd.insert({ price })
 }
 
 const refreshPeerStats = () => {
@@ -247,7 +247,7 @@ const refreshPeerStats = () => {
 
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
-    response.peers_stat[index].peer_ip = sha512(Buffer.from(peer.peer_ip).toString()).toString('hex').slice(0, 10)
+    response.peers_stat[index].peer_ip = SHA512.hash(Buffer.from(peer.peer_ip).toString()).toString().toString('hex').slice(0, 10)
     response.peers_stat[index].node_chain_state.header_hash = Buffer.from(peer.node_chain_state.header_hash).toString('hex')
     response.peers_stat[index].node_chain_state.cumulative_difficulty = parseInt(Buffer.from(peer.node_chain_state.cumulative_difficulty).toString('hex'), 16)
   })

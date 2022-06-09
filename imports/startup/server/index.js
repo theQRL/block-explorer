@@ -1,6 +1,8 @@
 /* eslint no-console: 0, max-len: 0 */
+/* global _ */
+
 // server-side startup
-import grpc from 'grpc'
+import grpc from '@grpc/grpc-js'
 import protoloader from '@grpc/proto-loader'
 import tmp from 'tmp'
 import fs from 'fs'
@@ -10,7 +12,7 @@ import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { check } from 'meteor/check'
 import { BrowserPolicy } from 'meteor/qrl:browser-policy'
-import { blockData } from '/imports/api/index.js'
+import { blockData, quantausd } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
 import {
   EXPLORER_VERSION, SHOR_PER_QUANTA, anyAddressToRaw,
@@ -340,6 +342,21 @@ const helpersaddressTransactions = (response) => {
       }
     }
     if (tx.tx.transactionType === 'token') {
+      // first check if NFT
+      const symbol = Buffer.from(txEdited.tx.token.symbol).toString('hex')
+      if (symbol.slice(0, 8) === '00ff00ff') {
+        const nftBytes = Buffer.concat([
+          Buffer.from(txEdited.tx.token.symbol),
+          Buffer.from(txEdited.tx.token.name),
+        ])
+        const idBytes = Buffer.from(nftBytes.slice(4, 8))
+        const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+        txEdited.tx.token.nft = {
+          type: 'CREATE NFT',
+          id: Buffer.from(idBytes).toString('hex'),
+          hash: Buffer.from(cryptoHashBytes).toString('hex'),
+        }
+      }
       if (tx.tx.token.symbol) {
         txEdited.tx.token.symbol = Buffer.from(txEdited.tx.token.symbol).toString()
       }
@@ -351,19 +368,50 @@ const helpersaddressTransactions = (response) => {
       if (tx.tx.transfer_token.token_txhash) {
         txEdited.tx.transfer_token.token_txhash = Buffer.from(txEdited.tx.transfer_token.token_txhash).toString('hex')
       }
-      txEdited.tx.token = addTokenDetail(tx)
+      txEdited.tx.transfer_token = addTokenDetail(tx)
+      // now check if NFT
+      const symbol = Buffer.from(txEdited.tx.transfer_token.symbol).toString('hex')
+      if (symbol.slice(0, 8) === '00ff00ff') {
+        const nftBytes = Buffer.concat([
+          Buffer.from(txEdited.tx.transfer_token.symbol),
+          Buffer.from(txEdited.tx.transfer_token.name),
+        ])
+        const idBytes = Buffer.from(nftBytes.slice(4, 8))
+        const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+        txEdited.tx.transfer_token.nft = {
+          type: 'TRANSFER NFT',
+          id: Buffer.from(idBytes).toString('hex'),
+          hash: Buffer.from(cryptoHashBytes).toString('hex'),
+        }
+      }
       const hexlified = []
       const outputs = []
       _.each(tx.tx.transfer_token.addrs_to, (txOutput, index) => {
         hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
         outputs.push({
           address_hex: `Q${Buffer.from(txOutput).toString('hex')}`,
-          amount: `${formatTokenAmount(tx.tx.transfer_token.amounts[index], txEdited.tx.token.decimals)} ${txEdited.tx.token.symbol}`,
+          amount: `${formatTokenAmount(
+            tx.tx.transfer_token.amounts[index],
+            txEdited.tx.transfer_token.decimals,
+          )} ${txEdited.tx.transfer_token.symbol}`,
         })
       })
       txEdited.tx.outputs = outputs
-      txEdited.tx.totalTransferred = `${sumTokenTotal(tx.tx.transfer_token.amounts, txEdited.tx.token.decimals)} ${txEdited.tx.token.symbol}`
+      txEdited.tx.totalTransferred = `${sumTokenTotal(
+        tx.tx.transfer_token.amounts,
+        txEdited.tx.transfer_token.decimals,
+      )} ${txEdited.tx.transfer_token.symbol}`
       txEdited.tx.transfer_token.addrs_to = hexlified
+      if (tx.tx.transfer_token.symbol) {
+        txEdited.tx.transfer_token.symbol = Buffer.from(
+          txEdited.tx.transfer_token.symbol,
+        ).toString()
+      }
+      if (tx.tx.transfer_token.name) {
+        txEdited.tx.transfer_token.name = Buffer.from(
+          txEdited.tx.transfer_token.name,
+        ).toString()
+      }
     }
     if (tx.tx.transaction_hash) {
       txEdited.tx.transaction_hash = Buffer.from(txEdited.tx.transaction_hash).toString('hex')
@@ -381,6 +429,7 @@ const helpersaddressTransactions = (response) => {
       txEdited.block_header_hash = Buffer.from(txEdited.block_header_hash).toString('hex')
     }
     txEdited.addr_from = `Q${Buffer.from(txEdited.addr_from).toString('hex')}`
+    console.dir(txEdited, { depth: null })
     output.push(txEdited)
   })
   return response
@@ -426,12 +475,18 @@ const getFullAddressState = (request, callback) => {
 const getAddressState = (request, callback) => {
   try {
     qrlApi('GetOptimizedAddressState', request, (error, response) => {
-      if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetOptimizedAddressState', '**ERROR/getAddressState** ')
+      if (error || response.state === null) {
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetOptimizedAddressState',
+          '**ERROR/getAddressState** ',
+        )
         callback(myError, null)
       } else {
         if (response.state.address) {
-          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+          response.state.address = `Q${Buffer.from(
+            response.state.address,
+          ).toString('hex')}`
         }
 
         callback(null, response)
@@ -450,6 +505,15 @@ const getMultiSigAddressState = (request, callback) => {
         const myError = errorCallback(error, 'Cannot access API/GetMultiSigAddressState', '**ERROR/getMultiSigAddressState** ')
         callback(myError, null)
       } else {
+        if (response.state === null) {
+          const myError = errorCallback(
+            error,
+            'No state returned for this address',
+            '**ERROR/getMultiSigAddressState** ',
+          )
+          callback(myError, null)
+          return
+        }
         if (response.state.address) {
           response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
         }
@@ -624,13 +688,9 @@ Meteor.methods({
   QRLvalue() {
     console.log('QRLvalue method called')
     this.unblock()
-    const apiUrl = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-qrl'
-    const apiUrlUSD = 'https://bittrex.com/api/v1.1/public/getmarketsummary?market=usdt-btc'
-    // asynchronous call to API
-    const response = Meteor.wrapAsync(apiCall)(apiUrl)
-    const responseUSD = Meteor.wrapAsync(apiCall)(apiUrlUSD)
-    const usd = response.result[0].Last * responseUSD.result[0].Last
-    return usd
+    const priceData = quantausd.findOne({})
+    console.log(priceData)
+    return priceData.price
   },
 
   status() {
@@ -749,7 +809,27 @@ Meteor.methods({
             // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)
             adjusted.transfer = adjusted.coinbase
           }
-
+          if (adjusted.transactionType === 'token') {
+          // first check if NFT
+            let nft = {}
+            const symbol = Buffer.from(adjusted.token.symbol).toString(
+              'hex',
+            )
+            if (symbol.slice(0, 8) === '00ff00ff') {
+              const nftBytes = Buffer.concat([
+                Buffer.from(adjusted.token.symbol),
+                Buffer.from(adjusted.token.name),
+              ])
+              const idBytes = Buffer.from(nftBytes.slice(4, 8))
+              const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+              nft = {
+                type: 'CREATE NFT',
+                id: Buffer.from(idBytes).toString('hex'),
+                hash: Buffer.from(cryptoHashBytes).toString('hex'),
+              }
+              adjusted.nft = nft
+            }
+          }
           if (adjusted.transactionType === 'transfer') {
             // Calculate total transferred, and generate a clean structure to display outputs from
             let thisTotalTransferred = 0
@@ -783,8 +863,26 @@ Meteor.methods({
             adjusted.transfer_token.totalTransferred = thisTotalTransferred / Math.pow(10, thisDecimals)
             adjusted.transfer_token.totalOutputs = totalOutputs
             adjusted.transfer_token.tokenSymbol = thisSymbol
+            let nft = {}
+            console.log(thisSymbolResponse)
+            const symbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString(
+              'hex',
+            )
+            if (symbol.slice(0, 8) === '00ff00ff') {
+              const nftBytes = Buffer.concat([
+                Buffer.from(thisSymbolResponse.transaction.tx.token.symbol),
+                Buffer.from(thisSymbolResponse.transaction.tx.token.name),
+              ])
+              const idBytes = Buffer.from(nftBytes.slice(4, 8))
+              const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+              nft = {
+                type: 'TRANSFER NFT',
+                id: Buffer.from(idBytes).toString('hex'),
+                hash: Buffer.from(cryptoHashBytes).toString('hex'),
+              }
+              adjusted.nft = nft
+            }
           }
-
           transactions.push(adjusted)
         })
 
@@ -826,9 +924,30 @@ Meteor.methods({
           }
           result.push(thisTxn)
         } else if (output.transaction.tx.transactionType === 'token') {
+          // first check if NFT
+          let nft = {}
+          const symbol = Buffer.from(output.transaction.tx.token.symbol).toString(
+            'hex',
+          )
+          if (symbol.slice(0, 8) === '00ff00ff') {
+            const nftBytes = Buffer.concat([
+              Buffer.from(output.transaction.tx.token.symbol),
+              Buffer.from(output.transaction.tx.token.name),
+            ])
+            const idBytes = Buffer.from(nftBytes.slice(4, 8))
+            const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+            nft = {
+              type: 'CREATE NFT',
+              id: Buffer.from(idBytes).toString('hex'),
+              hash: Buffer.from(cryptoHashBytes).toString('hex'),
+            }
+            console.log('Found an NFT')
+          }
+
           thisTxn = {
             type: output.transaction.tx.transactionType,
             txhash: arr.txhash,
+            nft,
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
             symbol: output.transaction.tx.token.symbol,

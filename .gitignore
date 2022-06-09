@@ -10,3 +10,4 @@ node_modules/
 /run.sh
 /testnet.json
 /mainnet.json
+/development.json
