@@ -236,7 +236,6 @@ function refreshStats() {
 const refreshQuantaUsd = async () => {
   const apiUrl = 'https://market-data.automated.theqrl.org/'
   const response = await axios.get(apiUrl)
-  console.log(response.data)
   const { price } = response.data
   quantausd.remove({})
   quantausd.insert({ price })
