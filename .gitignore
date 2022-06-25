@@ -3,6 +3,8 @@ node_modules/
 .deploy/
 .DS_Store
 /public/img/offline.png
+.vscode/launch.json
+jsconfig.json
 
 \.idea/
 /production.json
