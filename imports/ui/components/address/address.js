@@ -268,7 +268,9 @@ const renderAddressBlock = () => {
           if (!(res.state.address)) {
             res.state.address = aId
           }
-          res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(8)
+          let bal = new BigNumber(res.state.balance)
+          bal = bal.div(SHOR_PER_QUANTA)
+          res.state.balance = bal.toString()
           Session.set('address', addressResultsRefactor(res))
         }
       })
