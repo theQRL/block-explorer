@@ -279,14 +279,14 @@
                         {{/if}}
                         provider: 
                         {{#if knownProvider}}
-                        <a href="{{providerURL}}/{{tx.tx.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+                        <a href="{{providerURL}}/{{explorer.token_txhash}}">{{providerName}}</a> ({{providerID}})
                         {{else}}
                         {{providerID}}
                         {{/if}}
                         <p style="word-break: break-all;">Hash: {{nftHash}}</p>
                         <div>
                           {{#if knownProvider}}
-                            <a href="{{providerURL}}/{{tx.tx.transaction_hash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>
+                            <a href="{{providerURL}}/{{explorer.token_txhash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>
                           {{else}}
                             Contact your NFT provider
                           {{/if}}
