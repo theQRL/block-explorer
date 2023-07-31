@@ -29,6 +29,12 @@
         {{/each}}
       </tbody>
     </table>
+    {{#if richlistButtonLoading}}
+    <button class="ui small loading button" id="fetchMore">Loading</button>
+    {{else}}
+    <button class="ui small button" id="fetchMore">Fetch more</button>
+    {{/if}}
+    <button class="ui small right floated button" id="csvExport">Full .csv export</button>
   {{/if}}
   {{#if richlistError}}
     <div class="ui negative message">

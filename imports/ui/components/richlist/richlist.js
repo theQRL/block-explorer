@@ -16,14 +16,14 @@ Template.richlist.onCreated(() => {
     }
     Session.set('network', 'Testnet')
   })
-  fetch('https://richlist-api.theqrl.org/richlist').then((response) => {
+  fetch('https://richlist-api.theqrl.org/richlist?page=0').then((response) => {
     if (response.status !== 200) {
       Session.set('richlist', 'error')
       Session.set('richlistError', true)
       return
     }
     response.json().then((data) => {
-      Session.set('richlist', 'loaded')
+      Session.set('richlist', 0)
       Session.set('richlistError', false)
       Session.set('richlistData', data)
     })
@@ -43,6 +43,12 @@ Template.richlist.helpers({
     }
     return false
   },
+  richlistButtonLoading() {
+    if (Session.get('richlistButton') === 'loading') {
+      return true
+    }
+    return false
+  },
   richlistError() {
     if (Session.get('richlistError')) {
       return true
@@ -58,5 +64,31 @@ Template.richlist.helpers({
   shorToQuanta(shor) {
     const s = new BigNumber(shor)
     return s.dividedBy(SHOR_PER_QUANTA).toString()
+  },
+})
+
+Template.richlist.events({
+  'click #fetchMore': () => {
+    let page = Session.get('richlist')
+    page += 1
+    Session.set('richlistButton', 'loading')
+    fetch(`https://richlist-api.theqrl.org/richlist?page=${page}`).then((response) => {
+      if (response.status !== 200) {
+        Session.set('richlist', 'error')
+        Session.set('richlistError', true)
+        return
+      }
+      response.json().then((data) => {
+        Session.set('richlistButton', 'loaded')
+        Session.set('richlist', page)
+        Session.set('richlistError', false)
+        const richlistData = Session.get('richlistData')
+        richlistData.push(...data)
+        Session.set('richlistData', richlistData)
+      })
+    })
+  },
+  'click #csvExport': () => {
+    window.location.href = 'https://richlist-api.theqrl.org/richlist?csv=1'
   },
 })
