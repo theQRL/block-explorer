@@ -1,4 +1,9 @@
+import { BigNumber } from 'bignumber.js'
+import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+
 import './richlist.html'
+
+BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 
 Template.richlist.onCreated(() => {
   Session.set('richlist', 'loading')
@@ -49,5 +54,9 @@ Template.richlist.helpers({
   },
   rank(i) {
     return i + 1
+  },
+  shorToQuanta(shor) {
+    const s = new BigNumber(shor)
+    return s.dividedBy(SHOR_PER_QUANTA).toString()
   },
 })

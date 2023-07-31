@@ -16,7 +16,7 @@
         <tr>
           <th class="two wide" style="text-align: right;">Rank</th>
           <th class="six wide" style="text-align: center;">Address</th>
-          <th class="four wide">Balance</th>
+          <th class="four wide">Balance (Quanta)</th>
         </tr>
       </thead>
       <tbody>
@@ -24,7 +24,7 @@
           <tr>
             <td style="text-align: right;">{{rank (@index)}}</td>
             <td><a href="/a/{{address}}">{{address}}</a></td>
-            <td>{{balance}}</td>
+            <td>{{shorToQuanta (balance)}}</td>
           </tr>
         {{/each}}
       </tbody>
