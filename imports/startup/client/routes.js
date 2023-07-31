@@ -13,6 +13,7 @@ import '../../ui/components/lastunconfirmedtx/lastunconfirmedtx.js'
 import '../../ui/components/block/block.js'
 import '../../ui/components/peerstats/peerstats.js'
 import '../../ui/components/search/search.js'
+import '../../ui/components/richlist/richlist.js'
 import '../../ui/mobile/mobile.js'
 
 // Set up all routes in the app
@@ -74,6 +75,16 @@ FlowRouter.route('/lastblocks', {
       BlazeLayout.render('appBody', { main: 'lastblocks' })
     } else {
       BlazeLayout.render('mobile', { main: 'lastblocks' })
+    }
+  },
+})
+FlowRouter.route('/richlist', {
+  name: 'Richlist.home',
+  action() {
+    if (useMobile()) {
+      BlazeLayout.render('appBody', { main: 'richlist' })
+    } else {
+      BlazeLayout.render('mobile', { main: 'richlist' })
     }
   },
 })
