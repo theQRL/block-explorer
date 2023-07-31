@@ -5,22 +5,45 @@
     Richlist
   </div>
 </h4>
-
-<div class="ui negative message">
-  <i class="close icon"></i>
-  <div class="header">
-    Richlist data not found
+{{#if networkIsMainnet}}
+  {{#if richlistLoading}}
+    <div class="ui active dimmer">
+      <div class="ui text loader">Loading richlist data...</div>
+    </div>
+  {{else}}
+    <table class="ui compact table">
+      <thead>
+        <tr>
+          <th class="two wide" style="text-align: right;">Rank</th>
+          <th class="six wide" style="text-align: center;">Address</th>
+          <th class="four wide">Balance</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each richlistData}}
+          <tr>
+            <td style="text-align: right;">{{rank (@index)}}</td>
+            <td><a href="/a/{{address}}">{{address}}</a></td>
+            <td>{{balance}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{/if}}
+  {{#if richlistError}}
+    <div class="ui negative message">
+      <i class="close icon"></i>
+      <div class="header">
+        Richlist data not found
+      </div>
+    </div>
+  {{/if}}
+{{else}}
+  <div class="ui negative message">
+    <i class="close icon"></i>
+    <div class="header">
+      Richlist is only available on Mainnet
+    </div>
   </div>
-</div>
-<table class="ui padded table">
-  <thead>
-    <tr>
-      <th class="two wide">Rank</th>
-      <th class="four wide">Address</th>
-      <th class="four wide">Balance</th>
-    </tr>
-  </thead>
-  <tbody>
-  </tbody>
-</table>
+{{/if}}
 </template>
