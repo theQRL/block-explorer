@@ -560,7 +560,7 @@
       <h4>Slave addresses</h4>
       {{#if hasSlaves}}
       <div class="ui bulleted list">
-        {{#each slaves}}<div class="ui item"><a href="/a/{{this.slave_address}}">{{this.slave_address}}</a></div>{{/each}}
+        {{#each slaves}}<div class="ui item slave-address"><a href="/a/{{this.slave_address}}">{{this.slave_address}}</a></div>{{/each}}
         </div>
         {{else}}
         <p>None found for this address</p>
