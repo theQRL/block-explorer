@@ -280,7 +280,7 @@ const renderAddressBlock = () => {
           Session.set('address', { error: err, id: aId })
         } else {
           if (res) {
-            res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(8)
+            res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(9)
             if (!(res.state.address)) {
               res.state.address = aId
             }
