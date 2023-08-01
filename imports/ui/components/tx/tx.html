@@ -71,7 +71,7 @@
                         {{#if knownProvider}}
                         <p>
                           <i class="ui certificate icon"></i>Verified provider:
-                          <a href="{{providerURL}}/{{tx.tx.transaction_hash}}">{{providerName}}</a> ({{providerID}})
+                          <a href="{{providerURL}}/{{explorer.token_txhash}}">{{providerName}}</a> ({{providerID}})
                         </p>
                         {{else}}
                         <p>
@@ -86,7 +86,7 @@
                         <div class="label">NFT creation transaction: </div>
                         <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
                         {{#if knownProvider}}
-                          <a href="{{providerURL}}/{{tx.tx.transaction_hash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>
+                          <a href="{{providerURL}}/{{explorer.token_txhash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>
                         {{/if}}
                         {{else}}
                         <div class="value">{{explorer.totalTransferred}}</div>
@@ -283,7 +283,7 @@
                         {{else}}
                         {{providerID}}
                         {{/if}}
-                        <p>Hash: {{nftHash}}</p>
+                        <p style="word-break: break-all;">Hash: {{nftHash}}</p>
                         <div>
                           {{#if knownProvider}}
                             <a href="{{providerURL}}/{{tx.tx.transaction_hash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>

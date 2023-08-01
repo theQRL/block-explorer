@@ -5,7 +5,7 @@ import { rawAddressToB32Address, rawAddressToHexAddress, b32AddressToRawAddress 
 export const SHOR_PER_QUANTA = 1000000000
 
 // Explorer Version
-export const EXPLORER_VERSION = '1.3.0'
+export const EXPLORER_VERSION = '1.4.0'
 
 // Function to cleanly represent large decimal numbers without exponential formatting.
 export function numberToString(num) {

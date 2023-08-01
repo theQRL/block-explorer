@@ -1159,7 +1159,9 @@ Meteor.methods({
       const res = { colour: 'red' }
       return res
     }
-    const res = { colour: 'green' }
+    // get first 7 characters of the first node
+    const firstNode = activeNodes[0].substring(0, 7)
+    const res = { colour: 'green', network: firstNode }
     return res
   },
 })

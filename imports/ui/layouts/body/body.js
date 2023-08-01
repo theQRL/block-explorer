@@ -126,8 +126,8 @@ Template.appBody.helpers({
   /* Active Menu Item Helpers */
   menuBlocksActive() {
     if (
-      (FlowRouter.getRouteName() === 'Block.home') ||
-      (FlowRouter.getRouteName() === 'Lastblocks.home')
+      FlowRouter.getRouteName() === 'Block.home' ||
+      FlowRouter.getRouteName() === 'Lastblocks.home'
     ) {
       return 'active'
     }
@@ -135,26 +135,28 @@ Template.appBody.helpers({
   },
   menuTransactionsActive() {
     if (
-      (FlowRouter.getRouteName() === 'Lasttx.home') ||
-      (FlowRouter.getRouteName() === 'Tx.home') ||
-      (FlowRouter.getRouteName() === 'Address.home')
+      FlowRouter.getRouteName() === 'Lasttx.home' ||
+      FlowRouter.getRouteName() === 'Tx.home' ||
+      FlowRouter.getRouteName() === 'Address.home'
     ) {
       return 'active'
     }
     return ''
   },
   menuUnconfirmedTransactionsActive() {
-    if (
-      (FlowRouter.getRouteName() === 'Lastunconfirmedtx.home')
-    ) {
+    if (FlowRouter.getRouteName() === 'Lastunconfirmedtx.home') {
       return 'active'
     }
     return ''
   },
   menuPeersActive() {
-    if (
-      (FlowRouter.getRouteName() === 'Peerstats.home')
-    ) {
+    if (FlowRouter.getRouteName() === 'Peerstats.home') {
+      return 'active'
+    }
+    return ''
+  },
+  menuRichListActive() {
+    if (FlowRouter.getRouteName() === 'Richlist.home') {
       return 'active'
     }
     return ''

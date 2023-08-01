@@ -1,0 +1,55 @@
+<template name="richlist">
+
+<h4 class="ui pageHeader header">
+  <div class="content">
+    Richlist
+  </div>
+</h4>
+{{#if networkIsMainnet}}
+  {{#if richlistLoading}}
+    <div class="ui active dimmer">
+      <div class="ui text loader">Loading richlist data...</div>
+    </div>
+  {{else}}
+    <table class="ui compact table">
+      <thead>
+        <tr>
+          <th class="two wide" style="text-align: right;">Rank</th>
+          <th class="six wide" style="text-align: center;">Address</th>
+          <th class="four wide">Balance (Quanta)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each richlistData}}
+          <tr>
+            <td style="text-align: right;">{{rank (@index)}}</td>
+            <td><a href="/a/{{address}}">{{address}}</a></td>
+            <td>{{shorToQuanta (balance)}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    {{#if richlistButtonLoading}}
+    <button class="ui small loading button" id="fetchMore">Loading</button>
+    {{else}}
+    <button class="ui small button" id="fetchMore">Fetch more</button>
+    {{/if}}
+    <button class="ui small right floated button" id="csvExport">Full .csv export</button>
+  {{/if}}
+  {{#if richlistError}}
+    <div class="ui negative message">
+      <i class="close icon"></i>
+      <div class="header">
+        Richlist data not found
+      </div>
+    </div>
+  {{/if}}
+{{else}}
+  <div class="ui negative message">
+    <i class="close icon"></i>
+    <div class="header">
+      Richlist is only available on Mainnet
+    </div>
+  </div>
+{{/if}}
+</template>
