@@ -955,6 +955,11 @@ Template.address.events({
     }
     $('.jsonbox').toggle()
   },
+  'click .slave-address': () => {
+    $('#addressTabs').tab('change tab', 'transactions')
+    $('#addressTabs > a').last().removeClass('active')
+    $('#addressTabs > a').first().addClass('active')
+  },
   'click .pagination': (event) => {
     let b = 0
     Session.set('addressTransactions', {})
