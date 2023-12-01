@@ -6,11 +6,21 @@ import { SHA512 } from 'jscrypto/es6'
 // import helpers from '@theqrl/explorer-helpers'
 /* eslint import/no-cycle: 0 */
 import {
-  getLatestData, getObject, getStats, getPeersStat, apiCall, makeTxListHumanReadable,
+  getLatestData,
+  getObject,
+  getStats,
+  getPeersStat,
+  apiCall,
+  makeTxListHumanReadable,
 } from '/imports/startup/server/index.js'
 
 import {
-  Blocks, lasttx, homechart, quantausd, status, peerstats,
+  Blocks,
+  lasttx,
+  homechart,
+  quantausd,
+  status,
+  peerstats,
 } from '/imports/api/index.js'
 
 import { SHOR_PER_QUANTA } from '../both/index.js'
@@ -82,7 +92,9 @@ const refreshBlocks = () => {
     }
     // if there is a Glip webhook, post an alert to Glip
     try {
-      if (Meteor.settings.glip.webhook.slice(0, 23) === 'https://hooks.glip.com/') {
+      if (
+        Meteor.settings.glip.webhook.slice(0, 23) === 'https://hooks.glip.com/'
+      ) {
         const httpPostUrl = Meteor.settings.glip.webhook
         try {
           HTTP.call('POST', httpPostUrl, {
@@ -103,14 +115,25 @@ const refreshBlocks = () => {
 
 function refreshLasttx() {
   // First get confirmed transactions
-  const confirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 10 })
+  const confirmed = Meteor.wrapAsync(getLatestData)({
+    filter: 'TRANSACTIONS',
+    offset: 0,
+    quantity: 10,
+  })
 
   // Now get unconfirmed transactions
-  const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 10 })
+  const unconfirmed = Meteor.wrapAsync(getLatestData)({
+    filter: 'TRANSACTIONS_UNCONFIRMED',
+    offset: 0,
+    quantity: 10,
+  })
 
   // Merge the two together
   const confirmedTxns = makeTxListHumanReadable(confirmed.transactions, true)
-  const unconfirmedTxns = makeTxListHumanReadable(unconfirmed.transactions_unconfirmed, false)
+  const unconfirmedTxns = makeTxListHumanReadable(
+    unconfirmed.transactions_unconfirmed,
+    false
+  )
   const merged = {}
   merged.transactions = unconfirmedTxns.concat(confirmedTxns)
 
@@ -130,10 +153,12 @@ function refreshLasttx() {
         if (currentTxn.tx.transaction_hash === newTxn.tx.transaction_hash) {
           try {
             // If they both have null header (unconfirmed) there is no change
-            if ((currentTxn.header === null) && (newTxn.header === null)) {
+            if (currentTxn.header === null && newTxn.header === null) {
               thisFound = true
-            // If they have same block number, there is also no change.
-            } else if (currentTxn.header.block_number === newTxn.header.block_number) {
+              // If they have same block number, there is also no change.
+            } else if (
+              currentTxn.header.block_number === newTxn.header.block_number
+            ) {
               thisFound = true
             }
           } catch (e) {
@@ -213,8 +238,32 @@ function refreshStats() {
   }
 
   // Loop all API responses and push data into axis objects
+  //
+  //  number: '546281',
+  //  difficulty: '2244',
+  //  timestamp: '1701439377',
+  //  time_last: '7',
+  //  time_movavg: '66',
+  //  hash_power: 2040,
+  //  header_hash: <Buffer f9 58 74 08 8f 76 2c 0f 0b e5 52 9b 86 c8 c5 90 98 92 cb 29 2e e2 30 df 7c 1c 20 fa 35 94 08 00>,
+  //  header_hash_prev: <Buffer d1 4f f2 13 d2 36 15 f3 c2 4f 37 a7 53 88 17 db c4 3d 7c fa cc 6b 05 68 34 ea 38 dd 01 4e 01 00>
+  //
   _.each(res.block_timeseries, (entry) => {
-    labels.push(entry.number)
+    // Create a new Date object using the Unix timestamp
+    var date = new Date(entry.timestamp * 1000);
+
+    // Get the day, month, and year from the Date object
+    var day = date.getDate();
+    var month = date.getMonth() + 1; // Months are zero-based, so we add 1
+    var year = date.getFullYear();
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+
+    // Format the date as dd/mm/yyyy
+    var formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+    labels.push([entry.number, formattedDateTime])
+    // labels.push(entry.timestamp)
     hashPower.data.push(entry.hash_power)
     difficulty.data.push(entry.difficulty)
     movingAverage.data.push(entry.time_movavg)
@@ -227,7 +276,6 @@ function refreshStats() {
   chartLineData.datasets.push(difficulty)
   chartLineData.datasets.push(movingAverage)
   chartLineData.datasets.push(blockTime)
-
   // Save in mongo
   homechart.remove({})
   homechart.insert(chartLineData)
@@ -246,9 +294,22 @@ const refreshPeerStats = () => {
 
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
-    response.peers_stat[index].peer_ip = SHA512.hash(Buffer.from(peer.peer_ip).toString()).toString().toString('hex').slice(0, 10)
-    response.peers_stat[index].node_chain_state.header_hash = Buffer.from(peer.node_chain_state.header_hash).toString('hex')
-    response.peers_stat[index].node_chain_state.cumulative_difficulty = parseInt(Buffer.from(peer.node_chain_state.cumulative_difficulty).toString('hex'), 16)
+    response.peers_stat[index].peer_ip = SHA512.hash(
+      Buffer.from(peer.peer_ip).toString()
+    )
+      .toString()
+      .toString('hex')
+      .slice(0, 10)
+    response.peers_stat[index].node_chain_state.header_hash = Buffer.from(
+      peer.node_chain_state.header_hash
+    ).toString('hex')
+    response.peers_stat[index].node_chain_state.cumulative_difficulty =
+      parseInt(
+        Buffer.from(peer.node_chain_state.cumulative_difficulty).toString(
+          'hex'
+        ),
+        16
+      )
   })
 
   // Update mongo collection
