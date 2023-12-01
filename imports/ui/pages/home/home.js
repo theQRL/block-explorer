@@ -45,10 +45,6 @@ export function renderChart() {
           xAxes: [{
             ticks: {
               fontColor: graphLabels,
-              // callback: function(val, index) {
-              //   // Display only the first index of the array
-              //   return val[0];
-              // }
             },
             scaleLabel: {
               display: true,

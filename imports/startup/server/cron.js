@@ -253,12 +253,12 @@ function refreshStats() {
     var date = new Date(entry.timestamp * 1000);
 
     // Get the day, month, and year from the Date object
-    var day = date.getDate();
-    var month = date.getMonth() + 1; // Months are zero-based, so we add 1
+    var day = String(date.getDate()).padStart(2, '0');
+    var month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so we add 1
     var year = date.getFullYear();
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var seconds = date.getSeconds();
+    var hours = String(date.getHours()).padStart(2, '0');
+    var minutes = String(date.getMinutes()).padStart(2, '0');
+    var seconds = String(date.getSeconds()).padStart(2, '0');
 
     // Format the date as dd/mm/yyyy
     var formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
