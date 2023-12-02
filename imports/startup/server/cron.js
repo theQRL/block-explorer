@@ -248,21 +248,9 @@ function refreshStats() {
   //  header_hash: <Buffer f9 58 74 08 8f 76 2c 0f 0b e5 52 9b 86 c8 c5 90 98 92 cb 29 2e e2 30 df 7c 1c 20 fa 35 94 08 00>,
   //  header_hash_prev: <Buffer d1 4f f2 13 d2 36 15 f3 c2 4f 37 a7 53 88 17 db c4 3d 7c fa cc 6b 05 68 34 ea 38 dd 01 4e 01 00>
   //
+ 
   _.each(res.block_timeseries, (entry) => {
-    // Create a new Date object using the Unix timestamp
-    var date = new Date(entry.timestamp * 1000);
-
-    // Get the day, month, and year from the Date object
-    var day = String(date.getDate()).padStart(2, '0');
-    var month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so we add 1
-    var year = date.getFullYear();
-    var hours = String(date.getHours()).padStart(2, '0');
-    var minutes = String(date.getMinutes()).padStart(2, '0');
-    var seconds = String(date.getSeconds()).padStart(2, '0');
-
-    // Format the date as dd/mm/yyyy
-    var formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-    labels.push([entry.number, formattedDateTime])
+    labels.push([entry.number, entry.timestamp])
     // labels.push(entry.timestamp)
     hashPower.data.push(entry.hash_power)
     difficulty.data.push(entry.difficulty)
