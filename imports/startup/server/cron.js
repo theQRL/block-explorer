@@ -3,6 +3,7 @@
 import { HTTP } from 'meteor/http'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { SHA512 } from 'jscrypto/es6'
+import axios from 'axios'
 // import helpers from '@theqrl/explorer-helpers'
 /* eslint import/no-cycle: 0 */
 import {
@@ -10,7 +11,7 @@ import {
   getObject,
   getStats,
   getPeersStat,
-  apiCall,
+  // apiCall,
   makeTxListHumanReadable,
 } from '/imports/startup/server/index.js'
 
@@ -24,7 +25,6 @@ import {
 } from '/imports/api/index.js'
 
 import { SHOR_PER_QUANTA } from '../both/index.js'
-import axios from 'axios'
 
 const refreshBlocks = () => {
   const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 10 }
@@ -132,7 +132,7 @@ function refreshLasttx() {
   const confirmedTxns = makeTxListHumanReadable(confirmed.transactions, true)
   const unconfirmedTxns = makeTxListHumanReadable(
     unconfirmed.transactions_unconfirmed,
-    false
+    false,
   )
   const merged = {}
   merged.transactions = unconfirmedTxns.concat(confirmedTxns)
@@ -248,7 +248,7 @@ function refreshStats() {
   //  header_hash: <Buffer f9 58 74 08 8f 76 2c 0f 0b e5 52 9b 86 c8 c5 90 98 92 cb 29 2e e2 30 df 7c 1c 20 fa 35 94 08 00>,
   //  header_hash_prev: <Buffer d1 4f f2 13 d2 36 15 f3 c2 4f 37 a7 53 88 17 db c4 3d 7c fa cc 6b 05 68 34 ea 38 dd 01 4e 01 00>
   //
- 
+
   _.each(res.block_timeseries, (entry) => {
     labels.push([entry.number, entry.timestamp])
     // labels.push(entry.timestamp)
@@ -283,21 +283,20 @@ const refreshPeerStats = () => {
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
     response.peers_stat[index].peer_ip = SHA512.hash(
-      Buffer.from(peer.peer_ip).toString()
+      Buffer.from(peer.peer_ip).toString(),
     )
       .toString()
       .toString('hex')
       .slice(0, 10)
     response.peers_stat[index].node_chain_state.header_hash = Buffer.from(
-      peer.node_chain_state.header_hash
+      peer.node_chain_state.header_hash,
     ).toString('hex')
-    response.peers_stat[index].node_chain_state.cumulative_difficulty =
-      parseInt(
-        Buffer.from(peer.node_chain_state.cumulative_difficulty).toString(
-          'hex'
-        ),
-        16
-      )
+    response.peers_stat[index].node_chain_state.cumulative_difficulty = parseInt(
+      Buffer.from(peer.node_chain_state.cumulative_difficulty).toString(
+        'hex',
+      ),
+      16,
+    )
   })
 
   // Update mongo collection

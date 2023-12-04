@@ -6,7 +6,105 @@ import '../../components/status/status.js'
 
 let chartIntervalHandle
 
-export function renderChart() {
+// Function to validate if the input is a valid Unix timestamp
+function isValidUnixTimestamp(timestamp) {
+  const unixTimestampRegex = /^\d+$/ // Regex to match digits only
+  return unixTimestampRegex.test(timestamp)
+}
+
+function revertTimeAgoToTimestamp(formattedTimeAgo) {
+  const now = new Date()
+
+  // Check if the input is 'Just now'
+  if (formattedTimeAgo === 'Just now') {
+    return Math.floor(now / 1000)
+  }
+
+  // Extract values and units from the formatted string
+  const matches = formattedTimeAgo.match(/(\d+)\s*(day|hr|min)s? ago/)
+
+  if (!matches || matches.length !== 3) {
+    // Invalid input format
+    return null
+  }
+
+  const [fullMatch, value, unit] = matches // eslint-disable-line
+  const intValue = parseInt(value, 10)
+
+  // Calculate timestamp based on the provided values and units
+  let timestamp
+  switch (unit) {
+    case 'day':
+      timestamp = now - intValue * 24 * 60 * 60 * 1000
+      break
+    case 'hr':
+      timestamp = now - intValue * 60 * 60 * 1000
+      break
+    case 'min':
+      timestamp = now - intValue * 60 * 1000
+      break
+    default:
+      // Invalid unit
+      return null
+  }
+
+  return Math.floor(timestamp / 1000)
+}
+function formatFullDate(timestamp) {
+  if (!isValidUnixTimestamp(timestamp)) {
+    return timestamp
+  }
+  // Create a new Date object using the Unix timestamp
+  const date = new Date(timestamp * 1000)
+
+  // Get the day, month, year, hours, minutes, and seconds from the Date object
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0') // Months are zero-based, so we add 1
+  const year = date.getFullYear()
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+
+  // Format the date as dd/mm/yyyy hh:mm:ss
+  const formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`
+  return formattedDateTime
+}
+
+function formatTimeAgo(timestamp) {
+  if (!isValidUnixTimestamp(timestamp)) {
+    return timestamp
+  }
+  const now = new Date()
+  const targetDate = new Date(timestamp * 1000) // Assuming the timestamp is in seconds
+
+  const diffMilliseconds = now - targetDate
+  const diffSeconds = Math.floor(diffMilliseconds / 1000)
+  const diffMinutes = Math.floor(diffSeconds / 60)
+  const diffHours = Math.floor(diffMinutes / 60)
+  const diffDays = Math.floor(diffHours / 24)
+
+  let result = ''
+
+  if (diffDays > 0) {
+    result += diffDays + (diffDays === 1 ? ' day ' : ' days ')
+  }
+
+  if (diffHours % 24 > 0) {
+    result += (diffHours % 24) + (diffHours % 24 === 1 ? ' hr ' : ' hrs ')
+  }
+
+  if (diffMinutes % 60 > 0) {
+    result
+          += (diffMinutes % 60) + (diffMinutes % 60 === 1 ? ' min ' : ' mins ')
+  }
+
+  if (result === '') {
+    return 'Just now'
+  }
+  return `${result.trim()} ago`
+}
+
+function renderChart() {
   // Get Chart data from Mongo
   const chartLineData = homechart.findOne()
 
@@ -24,104 +122,7 @@ export function renderChart() {
 
     // Draw chart
     const ctx = document.getElementById('myChart').getContext('2d')
-    // Function to validate if the input is a valid Unix timestamp
-    function isValidUnixTimestamp(timestamp) {
-      const unixTimestampRegex = /^\d+$/; // Regex to match digits only
-      return unixTimestampRegex.test(timestamp);
-    }
-    function revertTimeAgoToTimestamp(formattedTimeAgo) {
-      const now = new Date();
-  
-      // Check if the input is 'Just now'
-      if (formattedTimeAgo === 'Just now') {
-          return Math.floor(now / 1000);
-      }
-  
-      // Extract values and units from the formatted string
-      const matches = formattedTimeAgo.match(/(\d+)\s*(day|hr|min)s? ago/);
-  
-      if (!matches || matches.length !== 3) {
-          // Invalid input format
-          return null;
-      }
-  
-      const [fullMatch, value, unit] = matches;
-      const intValue = parseInt(value, 10);
-  
-      // Calculate timestamp based on the provided values and units
-      let timestamp;
-      switch (unit) {
-          case 'day':
-              timestamp = now - intValue * 24 * 60 * 60 * 1000;
-              break;
-          case 'hr':
-              timestamp = now - intValue * 60 * 60 * 1000;
-              break;
-          case 'min':
-              timestamp = now - intValue * 60 * 1000;
-              break;
-          default:
-              // Invalid unit
-              return null;
-      }
-  
-      return Math.floor(timestamp / 1000);
-  }
-    function formatFullDate(timestamp) {
-      if (!isValidUnixTimestamp(timestamp)) {
-        return timestamp;
-      }else{
-      // Create a new Date object using the Unix timestamp
-      var date = new Date(timestamp * 1000);
 
-      // Get the day, month, year, hours, minutes, and seconds from the Date object
-      var day = String(date.getDate()).padStart(2, '0');
-      var month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so we add 1
-      var year = date.getFullYear();
-      var hours = String(date.getHours()).padStart(2, '0');
-      var minutes = String(date.getMinutes()).padStart(2, '0');
-      var seconds = String(date.getSeconds()).padStart(2, '0');
-
-      // Format the date as dd/mm/yyyy hh:mm:ss
-      var formattedDateTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
-      return formattedDateTime;
-      }
-    }
-    function formatTimeAgo(timestamp) {
-      if (!isValidUnixTimestamp(timestamp)) {
-        return timestamp;
-      }else{
-      const now = new Date();
-      const targetDate = new Date(timestamp * 1000); // Assuming the timestamp is in seconds
-  
-      const diffMilliseconds = now - targetDate;
-      const diffSeconds = Math.floor(diffMilliseconds / 1000);
-      const diffMinutes = Math.floor(diffSeconds / 60);
-      const diffHours = Math.floor(diffMinutes / 60);
-      const diffDays = Math.floor(diffHours / 24);
-  
-      let result = '';
-  
-      if (diffDays > 0) {
-          result += diffDays + (diffDays === 1 ? ' day ' : ' days ');
-      }
-  
-      if (diffHours % 24 > 0) {
-          result += diffHours % 24 + (diffHours % 24 === 1 ? ' hr ' : ' hrs ');
-      }
-  
-      if (diffMinutes % 60 > 0) {
-          result += diffMinutes % 60 + (diffMinutes % 60 === 1 ? ' min ' : ' mins ');
-      }
-  
-      if (result === '') {
-          return 'Just now';
-      } else {
-          return result.trim() + ' ago';
-      }
-    }
-  }
-  
     // eslint-disable-next-line
     const myChart = new Chart(ctx, {
       type: 'line',
@@ -136,19 +137,18 @@ export function renderChart() {
           mode: 'index',
           callbacks: {
             title:
-            context => {
-              var formattedTooltipTitle = context[0].xLabel[0];
-            return formattedTooltipTitle;
-             }
-             ,
-             afterTitle:
-            context => {
-              var unix = revertTimeAgoToTimestamp(context[0].xLabel[1]);
-              var formattedTooltipSubTitle = formatFullDate(unix);
-              return formattedTooltipSubTitle;
+            (context) => {
+              const formattedTooltipTitle = `Block ${context[0].xLabel[0]}`
+              return formattedTooltipTitle
             },
-        }
-      },
+            afterTitle:
+            (context) => {
+              const unix = revertTimeAgoToTimestamp(context[0].xLabel[1])
+              const formattedTooltipSubTitle = formatFullDate(unix)
+              return formattedTooltipSubTitle
+            },
+          },
+        },
         responsive: true,
         maintainAspectRatio: false,
         hoverMode: 'index',
@@ -157,12 +157,12 @@ export function renderChart() {
           xAxes: [{
             ticks: {
               fontColor: graphLabels,
-              callback: function(value, index, ticks) {
-                return [value[0], formatTimeAgo(value[1])];
-            }
+              callback(value) {
+                return [value[0], formatTimeAgo(value[1])]
+              },
             },
             scaleLabel: {
-              display: true,
+              display: false,
               labelString: 'Human-readable time ago',
               fontColor: graphLabels,
             },
