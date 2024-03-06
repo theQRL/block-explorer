@@ -102,7 +102,7 @@ export const MINING_POOLS = [
     name: 'qrl.herominers.com',
   },
   {
-    address: 'Q010600e2785d301d0488c84d60f58e59d13453d1f3f2eebfc241e7d1ef864dd12a87035c56ae8a',
+    address: 'Q01060069a92bd3e541e296042f7c4108ac4295466da512795525b38c1ee8d900f41e0dea316f48',
     email: 'support@volt-mine.com',
     link: 'https://qrl.volt-mine.com',
     name: 'qrl.volt-mine.com',
