@@ -1,3 +1,4 @@
+/* global jdenticon */
 /* eslint no-console: 0 */
 /* ^^^ remove once testing complete
  */
@@ -352,7 +353,7 @@ Template.address.helpers({
       if (address !== undefined) {
         if (address.state !== undefined) {
           address.state.address = hexOrB32(
-            anyAddressToRaw(address.state.address)
+            anyAddressToRaw(address.state.address),
           )
           return address
         }
@@ -396,15 +397,11 @@ Template.address.helpers({
       id = this.transfer_token.nft.id
     }
     try {
-      const from = Session.get('address').state.address
+      // const from = Session.get('address').state.address
       let known = false
       _.each(qrlNft.providers, (provider) => {
         if (provider.id === `0x${id}`) {
-          _.each(provider.addresses, (address) => {
-            if (address === from) {
-              known = true
-            }
-          })
+          known = true
         }
       })
       return known
@@ -468,7 +465,7 @@ Template.address.helpers({
     try {
       if (
         qrlAddressValidator.hexString(
-          upperCaseFirst(FlowRouter.getParam('aId'))
+          upperCaseFirst(FlowRouter.getParam('aId')),
         ).sig.type === 'MULTISIG'
       ) {
         return true
@@ -517,7 +514,7 @@ Template.address.helpers({
     try {
       const transactions = []
       const thisAddress = rawAddressToB32Address(
-        Session.get('address').state.address
+        Session.get('address').state.address,
       )
       _.each(Session.get('addressTransactions'), (transaction) => {
         // Store modified transaction
@@ -537,8 +534,8 @@ Template.address.helpers({
         // Set total received amount if sent to this address
         let thisReceivedAmount = 0
         if (
-          transaction.type === 'transfer' ||
-          transaction.type === 'transfer_token'
+          transaction.type === 'transfer'
+          || transaction.type === 'transfer_token'
         ) {
           _.each(transaction.outputs, (output) => {
             if (output.address_b32 === thisAddress) {
@@ -589,9 +586,9 @@ Template.address.helpers({
     if (outputs) {
       _.each(outputs, (element, key) => {
         if (element === a) {
-          amount +=
-            tx.transfer_token.amounts[key] /
-            10 ** parseInt(tx.token.decimals, 10)
+          amount
+          += tx.transfer_token.amounts[key]
+          / 10 ** parseInt(tx.token.decimals, 10)
         }
       })
       return `${amount} ${tx.token.symbol}`
@@ -836,7 +833,7 @@ Template.address.helpers({
     try {
       if (Session.get('address').state) {
         const thisAddress = rawAddressToHexAddress(
-          anyAddressToRaw(Session.get('address').state.address)
+          anyAddressToRaw(Session.get('address').state.address),
         )
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
         const result = {}
@@ -849,8 +846,7 @@ Template.address.helpers({
         result.hashFunction = validationResult.hash.function
         if (Session.get('address').ots) {
           const { keysConsumed } = Session.get('address').ots
-          result.keysRemaining =
-            parseInt(result.totalSignatures, 10) - parseInt(keysConsumed, 10)
+          result.keysRemaining = parseInt(result.totalSignatures, 10) - parseInt(keysConsumed, 10)
         }
         return result
       }
@@ -1026,7 +1022,7 @@ Template.address.onRendered(() => {
 
   Tracker.autorun(() => {
     if (Session.equals('addressFormat', 'bech32') || Session.equals('addressFormat', 'hex')) {
-      addressToRender = hexOrB32(Session.get('address').state.address)
+      const addressToRender = hexOrB32(Session.get('address').state.address)
 
       // Re-render identicon
       jdenticon.update('#identicon', addressToRender)

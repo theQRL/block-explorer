@@ -84,7 +84,7 @@
                         
                         NFT transferred<br /><br />
                         <div class="label">NFT creation transaction: </div>
-                        <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
+                        <a href="/tx/{{explorer.token_txhash}}" class="unbreakable" style="word-break: break-all;">{{explorer.token_txhash}}</a>
                         {{#if knownProvider}}
                           <a href="{{providerURL}}/{{explorer.token_txhash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>
                         {{/if}}
