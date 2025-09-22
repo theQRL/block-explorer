@@ -9,6 +9,10 @@ Template.richlist.onCreated(() => {
   Session.set('richlist', 'loading')
   Session.set('richlistError', false)
   Session.set('richlistData', {})
+  // Add session variables for latest block
+  Session.set('latestBlock', null)
+  Session.set('latestBlockError', false)
+  
   Meteor.call('connectionStatus', (error, result) => {
     if (result.network === 'mainnet') {
       Session.set('network', 'Mainnet')
@@ -16,6 +20,21 @@ Template.richlist.onCreated(() => {
     }
     Session.set('network', 'Testnet')
   })
+  
+  // Fetch latest block information
+  fetch('https://richlist-api.theqrl.org/richlist/latest-block').then((response) => {
+    if (response.status === 200) {
+      response.json().then((blockData) => {
+        Session.set('latestBlock', blockData)
+        Session.set('latestBlockError', false)
+      })
+    } else {
+      Session.set('latestBlockError', true)
+    }
+  }).catch(() => {
+    Session.set('latestBlockError', true)
+  })
+  
   fetch('https://richlist-api.theqrl.org/richlist?page=0').then((response) => {
     if (response.status !== 200) {
       Session.set('richlist', 'error')
@@ -57,6 +76,12 @@ Template.richlist.helpers({
   },
   richlistData() {
     return Session.get('richlistData')
+  },
+  latestBlock() {
+    return Session.get('latestBlock')
+  },
+  latestBlockError() {
+    return Session.get('latestBlockError')
   },
   rank(i) {
     return i + 1
