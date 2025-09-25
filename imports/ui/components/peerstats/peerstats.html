@@ -1,45 +1,68 @@
 <template name="peerstats">
-
-<h4 class="ui pageHeader header">
-  <div class="content">
-    Block Explorer Peers
+  <div class="space-y-6">
+    <h4 class="text-2xl font-bold text-qrl-text">Block Explorer Peers</h4>
+    
+    {{#with peerstats}} 
+      {{#if zeroCheck}}
+        <div class="card border-red-500/30 bg-red-500/10">
+          <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-red-400 mb-2">No peers found</h3>
+              <p class="text-red-300">Unable to find any connected peers.</p>
+            </div>
+          </div>
+        </div>
+      {{else}}
+        <div class="card">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-qrl-border">
+              <thead class="bg-qrl-secondary">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Node</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Port</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Block #</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Header Hash</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Cumulative Difficulty</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Version</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Last Update</th>
+                </tr>
+              </thead>
+              <tbody class="bg-qrl-primary divide-y divide-qrl-border">
+                {{#each peerstats.peers_stat}}
+                  <tr class="hover:bg-qrl-secondary/50 transition-colors duration-200">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                      {{this.peer_ip}}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                      {{this.port}}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                      {{this.node_chain_state.block_number}}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono break-all">
+                      {{this.node_chain_state.header_hash}}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                      {{this.node_chain_state.cumulative_difficulty}}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                      {{this.node_chain_state.version}}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text-secondary">
+                      {{ts}}
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {{/if}}
+    {{/with}}
   </div>
-</h4>
-
-{{#with peerstats}} {{#if zeroCheck}}
-<div class="ui negative message">
-  <i class="close icon"></i>
-  <div class="header">
-    No peers found.
-  </div>
-</div>
-{{else}}
-<table class="ui padded table">
-  <thead>
-    <tr>
-      <th class="two wide">Node</th>
-      <th class="two wide">Port</th>
-      <th class="two wide">Block #</th>
-      <th>Header Hash</th>
-      <th class="two wide">Cumulative Difficulty</th>
-      <th class="two wide">Version</th>
-      <th class="two wide">Last Update</th>
-    </tr>
-  </thead>
-  <tbody>
-  {{#each peerstats.peers_stat}}
-    <tr>
-      <td>{{this.peer_ip}}</td>
-      <td>{{this.port}}</td>
-      <td>{{this.node_chain_state.block_number}}</td>
-      <td>{{this.node_chain_state.header_hash}}</td>
-      <td>{{this.node_chain_state.cumulative_difficulty}}</td>
-      <td>{{this.node_chain_state.version}}</td>
-      <td>{{ts}}</td>
-    </tr>
-  {{/each}}
-  </tbody>
-</table>
-
-{{/if}} {{/with}}
 </template>

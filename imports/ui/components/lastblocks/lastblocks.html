@@ -1,54 +1,74 @@
 <template name="lastblocks">
-<h4 class="ui pageHeader header">
-  <div class="content">
-    Latest Blocks
+  <div class="space-y-6">
+    <h4 class="text-2xl font-bold text-qrl-text">Latest Blocks</h4>
+
+    {{#with lastblocks}} 
+      {{#if error}}
+        <div class="card border-red-500/30 bg-red-500/10">
+          <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-red-400 mb-2">Error reading blocks</h3>
+              <p class="text-red-300">{{error.error}} : {{error.reason}}</p>
+            </div>
+          </div>
+        </div>
+      {{else}}
+        <div class="space-y-4">
+          {{#each lastblocks.blockheaders}}
+            <div class="card hover:bg-qrl-secondary/80 transition-colors duration-200 cursor-pointer min-h-[180px] flex flex-col" 
+                 id="lastBlocks" 
+                 data-dest="{{this.header.block_number}}">
+              
+              <div class="flex items-start space-x-4 flex-1">
+                <div class="flex-shrink-0">
+                  <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-qrl-primary" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="text-sm text-qrl-text-secondary">{{tsReadable}}</div>
+                    <div class="text-sm text-qrl-text-secondary font-mono">{{ts}}</div>
+                  </div>
+                  
+                  <div class="text-qrl-text font-semibold mb-2">
+                    Block {{this.header.block_number}}
+                  </div>
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-2">
+                    <div class="flex flex-col">
+                      <span class="text-xs text-qrl-text-secondary mb-1">Transactions</span>
+                      <span class="text-sm text-qrl-text font-mono">{{numberTransactions}}</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-xs text-qrl-text-secondary mb-1">Quanta</span>
+                      <span class="text-sm text-qrl-text font-mono">{{transacted(this.totalTransacted)}}</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="text-xs text-qrl-text-secondary mb-1">Interval</span>
+                      <span class="text-sm text-qrl-text font-mono">{{interval}}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="pt-1">
+                    <div class="text-xs text-qrl-text-secondary mb-1">Mined by</div>
+                    <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{minerTip}}" title="{{miner}}">
+                      {{{miner}}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{/if}}
+    {{/with}}
   </div>
-</h4>
-
-
-
-  {{#with lastblocks}} {{#if error}}
-  <div class="ui negative message">
-    <i class="close icon"></i>
-    <div class="header">
-      Error reading last blocks
-    </div>
-    <p>{{error.error}} : {{error.reason}}</p>
-  </div>
-  {{else}}
-    
-  {{#each lastblocks.blockheaders}}
- 
-    <div class="ui message lastBlocks" id="lastBlocks" data-dest="{{this.header.block_number}}">
-      <div class="ui responsive grid container">
-        <div class="two column row pt-0">
-          <div class="ofe column t-l"><span class="plain-r">{{tsReadable}}</span></div>
-          <div class="right aligned column ofe"><span class="plain-r">{{ts}}</span></div>
-        </div>
-        <div class="cyan row pt-0">
-          <div class="ofe four wide left aligned column">
-            Block<br>
-            <span class="plain">{{this.header.block_number}}</span>
-          </div>
-          <div class="ofe six wide t-c column">
-            Transactions<br>
-            <span class="plain">{{numberTransactions}}</span>
-          </div>
-          <div class="ofe six wide t-c column">
-            Quanta<br>
-            <span class="plain">{{transacted(this.totalTransacted)}}</span>
-          </div>
-        </div>
-        <div class="cyan row pt-0">
-          <div class="sixteen wide left aligned ofe column">
-            Mined by<br>
-            <span class="plain">{{{miner}}}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  {{/each}}
- 
-  {{/if}} {{/with}}
 </template>

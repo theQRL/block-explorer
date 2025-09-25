@@ -796,30 +796,9 @@ h3.ui.header {
   text-align: right;
 }
 
-.lastBlocks {
-  /*  padding-top: 0px !important;
-  padding-bottom: 0px !important;
-  padding-left: 10px !important;*/
-  background: #eee !important;
-  transition: all 0.3s linear;
-  -webkit-transition: all 0.3s linear;
-  -moz-transition: all 0.3s linear;
 
-  border-radius: 0px !important;
-}
 
-.lastBlocks:hover {
-  background: #6D7478 !important;
-  /* color: #0f0f0f !important; */
-}
 
-.lastBlocks:hover .plain {
-  /* color: #0f0f0f !important; */
-}
-
-.lastBlocks:hover .cyan {
-  /* color: #dc255d !important; */
-}
 
 .miner {
   text-overflow: ellipsis;
@@ -955,16 +934,6 @@ html {
   color: #FFA729!important;
 }
 
-#lastBlocks {
-  max-width: 1288px;
-  min-width: 100px;
-  background: #2E3C5A;
-  color: #EAEFF5 !important;
-  margin-top: 15px;
-  margin-bottom: 10px;
-  margin-left: 0px;
-  margin-right: 0px;
-}
 
 #txnPageSegment>div.ui.bottom.attached.tab.segment.active {
   background: rgba(255, 255, 255, 0.1) !important;
@@ -1013,9 +982,6 @@ table {
   color: #EAEFF5 !important;
 }
 
-.lastBlocks:hover .plain-r {
-  /* color: #000 !important; */
-}
 
 #loadingTransactions {
   background: rgba(255, 255, 255, 0.9) !important;
@@ -1082,9 +1048,6 @@ table {
   color: #f4bfcf !important;
 }
 
-.lastBlocks:hover .plain a {
-  color: #4183c4 !important;
-}
 .used {
   background-color: rgba(165,37,37,0.7);
   color: #EAEFF5;

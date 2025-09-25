@@ -1,41 +1,62 @@
 <template name="mobile">
-  <div class="mobile-explorer">
-<div class="ui labeled icon bottom fixed four item inverted menu">
-  <a class="main-menu-btn item {{menuStatusActive}}" href="/status">
-    <i class="share alternate icon"></i>
-    Status
-  </a>
-  <a class="main-menu-btn item {{menuTransactionsActive}}" href="/lasttx">
-    <i class="send mail icon"></i>
-    Transactions
-  </a>
-  <a class="main-menu-btn item {{menuBlocksActive}}" href="/lastblocks">
-    <i class="cube icon"></i>
-    Blocks
-  </a>
-  <a class="main-menu-btn item {{menuSearchActive}}" href="/search">
-    <i class="search icon"></i>
-    Search
-  </a>
-</div>
-{{> Template.dynamic template=main}}
-<div class="footer">
-              <div class="ui center aligned container">
-                <p>The Quantum Resistant Ledger<br><strong>Block Explorer</strong></p>
-                <a href="/">
-                  <img class="footerLogo" src="{{logo}}">
-                </a>
-                <br />           
-                <button class="ui small basic grey icon button themeToggle">
-                  <i class="ui {{theme}} icon"></i> Toggle theme
-                </button>
-                <br />
-                <div class="ui horizontal small divided link list">
-                  <a class="item" target="_blank" href="https://theqrl.org/">theQRL.org</a>
-                  <a class="item" target="_blank" href="https://github.com/theQRL/block-explorer/issues">Found a Problem?</a>
-                  <a class="item" target="_blank" href="https://github.com/theQRL/block-explorer">qrl-explorer v{{qrlExplorerVersion}}</a>
-                </div>
-              </div>
-            </div>
-</div>
+  <div class="min-h-screen bg-qrl-primary">
+    <!-- Mobile Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-qrl-secondary border-t border-qrl-border z-50">
+      <div class="flex">
+        <a class="flex-1 flex flex-col items-center py-3 px-2 text-qrl-text hover:bg-qrl-secondary/80 transition-colors {{menuStatusActive}}" href="/status">
+          <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="text-xs">Status</span>
+        </a>
+        <a class="flex-1 flex flex-col items-center py-3 px-2 text-qrl-text hover:bg-qrl-secondary/80 transition-colors {{menuTransactionsActive}}" href="/lasttx">
+          <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="text-xs">Transactions</span>
+        </a>
+        <a class="flex-1 flex flex-col items-center py-3 px-2 text-qrl-text hover:bg-qrl-secondary/80 transition-colors {{menuBlocksActive}}" href="/lastblocks">
+          <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+          </svg>
+          <span class="text-xs">Blocks</span>
+        </a>
+        <a class="flex-1 flex flex-col items-center py-3 px-2 text-qrl-text hover:bg-qrl-secondary/80 transition-colors {{menuSearchActive}}" href="/search">
+          <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <span class="text-xs">Search</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="pb-20">
+      {{> Template.dynamic template=main}}
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-qrl-secondary border-t border-qrl-border px-4 py-6">
+      <div class="max-w-7xl mx-auto text-center">
+        <p class="text-qrl-text font-semibold mb-2">The Quantum Resistant Ledger</p>
+        <p class="text-qrl-text-secondary mb-4"><strong>Block Explorer</strong></p>
+        <a href="/" class="inline-block mb-4">
+          <img class="h-8 w-auto mx-auto" src="/img/qrl-full-logo.svg" alt="QRL Explorer">
+        </a>
+        
+        <button class="btn-secondary mb-4 themeToggle">
+          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+          Toggle theme
+        </button>
+        
+        <div class="flex flex-wrap justify-center gap-4 text-sm text-qrl-text-secondary">
+          <a class="hover:text-qrl-accent transition-colors" target="_blank" href="https://theqrl.org/">theQRL.org</a>
+          <a class="hover:text-qrl-accent transition-colors" target="_blank" href="https://github.com/theQRL/block-explorer/issues">Found a Problem?</a>
+          <a class="hover:text-qrl-accent transition-colors" target="_blank" href="https://github.com/theQRL/block-explorer">qrl-explorer v{{qrlExplorerVersion}}</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>

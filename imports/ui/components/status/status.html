@@ -1,66 +1,106 @@
 <template name="status">
+  <div class="space-y-6">
+    <h4 class="text-2xl font-bold text-qrl-text">Network Status</h4>
+    
+    {{#with status}} 
+      {{#if error}}
+        <div class="card border-red-500/30 bg-red-500/10">
+          <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-red-400 mb-2">Connection Error</h3>
+              <p class="text-red-300">No connection to API node</p>
+              <p class="text-sm text-red-400 mt-1 break-words">{{error.error}} : {{error.reason}}</p>
+            </div>
+          </div>
+        </div>
+      {{else}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Network Status Card -->
+          <div class="card">
+            <h3 class="text-lg font-semibold text-qrl-text mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+              Network Status
+            </h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">State:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{status.node_info.state}}</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Uptime:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{uptime}}</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Network ID:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{status.node_info.network_id}}</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Peers:</span>
+                <span class="text-qrl-text font-mono text-right">{{status.node_info.num_connections}}</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Version:</span>
+                <span class="text-qrl-text font-mono text-right break-all">{{status.node_info.version}}</span>
+              </div>
+            </div>
+          </div>
 
-<h4 class="ui pageHeader header">
-  <div class="content">
-    <!-- Market Cap: ${{marketCap}}<br /> 
-    ${{quantaUsd}} USD / Quanta -->
-    Network Status
-  </div>
-</h4>
-<br />
-{{#with status}} {{#if error}}
-<div class="ui stackable three column grid">
-  <div class="stretched column">
-    <div class="ui icon message statusBoard">
-      <div class="content">
-        <strong>Status</strong><br />
-        No connection <i class="ui tiny middle aligned red circle icon"></i>
-        <small>API node returned an error</small>
-      </div>
-    </div>
-  </div>
-</div>
-{{else}}
-<div class="ui stackable grid">
-    <div class="eight wide column">
-      <div class="ui message statusBoard">
-        <div class="content">
-          <strong>Network Status</strong><br />
-          <small>
-            Connected: {{status.node_info.state}}<br />
-            Uptime: {{uptime}}<br />
-            {{status.node_info.network_id}}<br />
-            Explorer node active peers: {{status.node_info.num_connections}}<br />
-            Version: <span class="break-word">{{status.node_info.version}}</span>
-          </small>
-        </div>
-      </div>
-    </div>
-    <div class="eight wide column">
-      <div class="ui message statusBoard">
-        <div class="content">
-          <strong>Blocks</strong><br />
-          <small>
-            Max Index: {{max_block_index}}<br />
-            Block Time: {{status.block_time_mean}}<br />
-            Block Time Std Dev: {{status.block_time_sd}}
-          </small>
-        </div>
-      </div>
-    </div>
-    <div class="eight wide column">
-      <div class="ui message statusBoard">
-        <div class="content">
-          <strong>Coin Supply</strong><br />
-          <small>
-            Emission: {{emission}}% ({{emission_raw}})<br />
-            Unmined: {{unmined}}<br />
-            Block Reward: {{reward(status.block_last_reward)}}
-          </small>
-        </div>
-      </div>
-    </div>
-</div>
-{{/if}} {{/with}}
+          <!-- Blocks Card -->
+          <div class="card">
+            <h3 class="text-lg font-semibold text-qrl-text mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+              </svg>
+              Blocks
+            </h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Max Index:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{max_block_index}}</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Block Time:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{status.block_time_mean}}</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Std Dev:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{status.block_time_sd}}</span>
+              </div>
+            </div>
+          </div>
 
+          <!-- Coin Supply Card -->
+          <div class="card">
+            <h3 class="text-lg font-semibold text-qrl-text mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"></path>
+              </svg>
+              Coin Supply
+            </h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Emission:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{emission}}% ({{emission_raw}})</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Unmined:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{unmined}}</span>
+              </div>
+              <div class="flex justify-between items-start">
+                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Block Reward:</span>
+                <span class="text-qrl-text font-mono text-right break-words">{{reward(status.block_last_reward)}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{/if}} 
+    {{/with}}
+  </div>
 </template>

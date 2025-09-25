@@ -14,6 +14,18 @@ Template.lasttx.helpers({
     const res = lasttx.findOne()
     return res
   },
+  fromAddress() {
+    return this.explorer.from_hex
+  },
+  toAddress() {
+    if (this.explorer.outputs) {
+      if (this.explorer.outputs.length > 1) {
+        return 'Multiple outputs'
+      }
+      return this.explorer.outputs[0].address_hex
+    }
+    return ''
+  },
   amount() {
     if (this.tx.transfer) {
       return this.explorer.totalTransferred
@@ -37,8 +49,14 @@ Template.lasttx.helpers({
   zeroCheck() {
     let ret = false
     const x = lasttx.findOne()
-    if (x) { if (x.length === 0) { ret = true } }
-    if (x === undefined) { ret = true }
+    if (x) {
+      if (x.length === 0) {
+        ret = true
+      }
+    }
+    if (x === undefined) {
+      ret = true
+    }
     return ret
   },
   isTransfer(txType) {
@@ -145,6 +163,7 @@ Template.lasttx.helpers({
     }
     return false
   },
+
   isMultiSigVoteTxn(txType) {
     if (txType === 'multi_sig_vote') {
       return true
@@ -157,6 +176,7 @@ Template.lasttx.helpers({
     }
     return false
   },
+
   isKeybaseTxn(txType) {
     if (txType === 'KEYBASE') {
       return true
@@ -194,8 +214,8 @@ Template.lasttx.helpers({
 
 Template.lasttx.events({
   'click .transactionRecord': (event) => {
-    const route = event.currentTarget.childNodes[5].childNodes[1].attributes[0].nodeValue
+    const route =
+      event.currentTarget.childNodes[5].childNodes[1].attributes[0].nodeValue
     FlowRouter.go(route)
   },
 })
-

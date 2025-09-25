@@ -10,7 +10,7 @@ const addHex = (b) => {
   return result
 }
 
-const sumValues = obj => Object.values(obj).reduce((a, b) => a + b)
+const sumValues = (obj) => Object.values(obj).reduce((a, b) => a + b)
 
 Template.lastblocks.onCreated(() => {
   Meteor.subscribe('blocks')
@@ -50,9 +50,43 @@ Template.lastblocks.helpers({
     }
     return ret
   },
+  minerTip() {
+    return this.minedBy
+  },
   interval() {
-    const x = Math.round(this.block_interval)
-    return `${x} seconds`
+    // Get the current block data
+    const res = Blocks.findOne()
+    if (!res || !res.blockheaders) {
+      return 'N/A'
+    }
+
+    // Find the current block in the list
+    const currentBlockIndex = res.blockheaders.findIndex((block) => (
+      block.header.block_number === this.header.block_number
+    ))
+
+    if (currentBlockIndex === -1 || currentBlockIndex === 0) {
+      // If this is the first block (index 0) or not found, return N/A
+      return 'N/A'
+    }
+
+    // Get the previous block (lower block number, earlier timestamp)
+    const previousBlock = res.blockheaders[currentBlockIndex - 1]
+
+    if (!previousBlock) {
+      return 'N/A'
+    }
+
+    // Calculate the time difference
+    const currentTime = parseInt(this.header.timestamp_seconds, 10)
+    const previousTime = parseInt(previousBlock.header.timestamp_seconds, 10)
+    const intervalSeconds = currentTime - previousTime
+
+    if (intervalSeconds < 0) {
+      return 'N/A'
+    }
+
+    return `${Math.round(intervalSeconds)}s`
   },
   transacted(rew) {
     let r = 'Undetermined'
@@ -86,5 +120,4 @@ Template.lastblocks.events({
     const route = event.currentTarget.getAttribute('data-dest')
     FlowRouter.go(`/block/${route}`)
   },
-
 })
