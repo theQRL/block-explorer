@@ -7,70 +7,48 @@
       </div>
     </div>
 
-    <!-- Network Activity Chart - Always Full Width -->
+    <!-- Modern Network Activity Chart -->
     <div class="card">
-      <h3 class="text-lg font-semibold text-qrl-text mb-4">Network Activity</h3>
-      <div id="chart" class="relative w-full h-64">
-        <section id="chartLoading" class="snapshot__loading absolute inset-0 flex items-center justify-center">
-          <svg class="svg__loading w-full h-32" viewBox="0 0 311 120" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M0,0 L0,119 L74.6161228,119 L74.6161228,0 L0,0 Z M78.7946257,0 L78.7946257,119 L153.410749,119 L153.410749,0 L78.7946257,0 Z M157.589251,0 L157.589251,119 L232.205374,119 L232.205374,0 L157.589251,0 Z M236.383877,0 L236.383877,119 L311,119 L311,0 L236.383877,0 Z" id="Rectangle-1-copy" fill="#EEE"></path>
-              <rect class="svg__loading-new" x="0" y="74.618705" width="74.6161228" height="100%">
-                <animate id="animate__new-bar"
-                  attributeName="y"
-                  from="74.618705"
-                  to="74.618705"
-                  begin="0s"
-                  dur="1.5s"
-                  values="74.618705; 0; 74.618705; 74.618705; 74.618705"
-                  keySplines=".75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99"
-                  keyTimes="0; 0.25; 0.5; 0.75; 1"
-                  calcMode="spline"
-                  repeatCount="indefinite"/>
-              </rect>
-              <rect class="svg__loading-open" x="78.7946257" y="37" width="74.6161228" height="100%">
-                <animate id="animate__open-bar"
-                  attributeName="y"
-                  from="37"
-                  to="37"
-                  begin="0.2s"
-                  dur="1.5s"
-                  values="37; 0; 37; 37; 37"
-                  keySplines=".75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99"
-                  keyTimes="0; 0.25; 0.5; 0.75; 1"
-                  calcMode="spline"
-                  repeatCount="indefinite"/>
-              </rect>
-              <rect class="svg__loading-pending" x="157.589251" y="74.618705" width="74.6161228" height="100%">
-                <animate id="animate__pending-bar"
-                  attributeName="y"
-                  from="74.618705"
-                  to="74.618705"
-                  begin="0.4s"
-                  dur="1.5s"
-                  values="74.618705; 0; 74.618705; 74.618705; 74.618705"
-                  keySplines=".75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99"
-                  keyTimes="0; 0.25; 0.5; 0.75; 1"
-                  calcMode="spline"
-                  repeatCount="indefinite"/>
-              </rect>
-              <rect class="svg__loading-finalized" x="236.383877" y="37" width="74.6161228" height="100%">
-                <animate id="animate__finalized-bar"
-                  attributeName="y"
-                  from="37"
-                  to="37"
-                  begin="0.6s"
-                  dur="1.5s"
-                  values="37; 0; 37; 37; 37"
-                  keySplines=".75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99; .75 .06 .38 .99"
-                  keyTimes="0; 0.25; 0.5; 0.75; 1"
-                  calcMode="spline"
-                  repeatCount="indefinite"/>
-              </rect>
-            </g>
-          </svg>
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold text-qrl-text">Network Activity</h3>
+        <div class="flex items-center space-x-4">
+          <!-- Chart Legend -->
+          <div class="flex items-center space-x-4 text-sm">
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded-full" style="background-color: #4AAFFF;"></div>
+              <span class="text-qrl-text-secondary">Block Time</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded-full" style="background-color: #FFA729;"></div>
+              <span class="text-qrl-text-secondary">Hash Power</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 rounded-full" style="background-color: #9CA3AF;"></div>
+              <span class="text-qrl-text-secondary">Difficulty</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chart Container -->
+      <div id="chart" class="relative w-full h-80 bg-gradient-to-br from-qrl-secondary/20 to-transparent rounded-lg overflow-hidden">
+        <!-- Modern Loading Animation -->
+        <section id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-qrl-secondary/10 backdrop-blur-sm">
+          <div class="flex flex-col items-center space-y-4">
+            <div class="relative">
+              <div class="w-16 h-16 border-4 border-qrl-accent/20 border-t-qrl-accent rounded-full animate-spin"></div>
+              <div class="absolute top-2 left-2 w-12 h-12 border-4 border-transparent border-t-qrl-accent/60 rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 0.8s;"></div>
+            </div>
+            <div class="text-qrl-text-secondary font-medium">Loading network data...</div>
+            <div class="flex space-x-1">
+              <div class="w-2 h-2 bg-qrl-accent rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
+              <div class="w-2 h-2 bg-qrl-accent rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
+              <div class="w-2 h-2 bg-qrl-accent rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
+            </div>
+          </div>
         </section>
-        <!-- Chart canvas will be inserted here by JavaScript -->
+        
+        <!-- Chart Canvas -->
         <canvas id="myChart" class="w-full h-full"></canvas>
       </div>
     </div>

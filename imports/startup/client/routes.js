@@ -19,15 +19,9 @@ import '../../ui/components/search/search.js'
 import '../../ui/components/richlist/richlist.js'
 import '../../ui/components/status/status.html'
 import '../../ui/components/status/status.js'
-import '../../ui/mobile/mobile.js'
 
 // Set up all routes in the app
 
-function useMobile() {
-  // For now, always use the main appBody template
-  // TODO: Implement proper mobile detection later
-  return true
-}
 
 FlowRouter.route('/', {
   name: 'App.home',

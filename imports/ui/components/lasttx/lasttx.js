@@ -20,7 +20,7 @@ Template.lasttx.helpers({
   toAddress() {
     if (this.explorer.outputs) {
       if (this.explorer.outputs.length > 1) {
-        return 'Multiple outputs'
+        return `${this.explorer.outputs.length} destinations`
       }
       return this.explorer.outputs[0].address_hex
     }
@@ -170,6 +170,37 @@ Template.lasttx.helpers({
     }
     return false
   },
+  isStake(txType) {
+    if (txType === 'stake') {
+      return true
+    }
+    return false
+  },
+  isCoinbase(txType) {
+    if (txType === 'coinbase') {
+      return true
+    }
+    return false
+  },
+  isSlave(txType) {
+    if (txType === 'slave') {
+      return true
+    }
+    return false
+  },
+  isLatticePK(txType) {
+    if (txType === 'latticePK') {
+      return true
+    }
+    return false
+  },
+  isMessage(txType) {
+    if (txType === 'message') {
+      return true
+    }
+    return false
+  },
+
   isDocumentNotarisation(txType) {
     if (txType === 'DOCUMENT_NOTARISATION') {
       return true

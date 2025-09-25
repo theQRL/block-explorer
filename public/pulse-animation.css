@@ -3,6 +3,7 @@
   animation: pulse-yellow 2s ease-in-out infinite !important;
   background-color: rgba(245, 158, 11, 0.2) !important;
   border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #f59e0b !important;
 }
 
 @keyframes pulse-yellow {
@@ -28,6 +29,7 @@
   animation: pulse-yellow-light 2s ease-in-out infinite !important;
   background-color: rgba(245, 158, 11, 0.1) !important;
   border-color: rgba(245, 158, 11, 0.2) !important;
+  color: #d97706 !important;
 }
 
 @keyframes pulse-yellow-light {

@@ -5,6 +5,7 @@ import './richlist.html'
 BigNumber.config({ EXPONENTIAL_AT: 1e9 })
 
 Template.richlist.onCreated(() => {
+  Meteor.subscribe('status')
   Session.set('richlist', 'loading')
   Session.set('richlistError', false)
   Session.set('richlistData', {})
@@ -90,6 +91,18 @@ Template.richlist.helpers({
     return s.dividedBy(SHOR_PER_QUANTA).toString()
   },
   percentage() {
+    // Get the total emission from status
+    const status = Session.get('explorer-status')
+    if (!status || !status.coins_emitted) {
+      return '0.00'
+    }
+    
+    // Calculate percentage: (balance / total_emission) * 100
+    const totalEmission = new BigNumber(status.coins_emitted)
+    const balance = new BigNumber(this.balance)
+    const percentage = balance.dividedBy(totalEmission).multipliedBy(100)
+    
+    return percentage.toFixed(2)
     // Calculate percentage if not provided by API
     if (this.percentage !== undefined) {
       return this.percentage
@@ -132,7 +145,14 @@ Template.richlist.events({
     if (data && data.length > 0) {
       let csv = 'Rank,Address,Balance (Quanta),Percentage\n'
       data.forEach((item, index) => {
-        const percentage = item.percentage || '0.00'
+        // Calculate percentage using the same logic as the template
+        const status = Session.get('explorer-status')
+        let percentage = '0.00'
+        if (status && status.coins_emitted) {
+          const totalEmission = new BigNumber(status.coins_emitted)
+          const balance = new BigNumber(item.balance)
+          percentage = balance.dividedBy(totalEmission).multipliedBy(100).toFixed(2)
+        }
         csv += `${index + 1},${item.address},${item.balance},${percentage}\n`
       })
 

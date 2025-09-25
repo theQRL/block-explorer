@@ -32,9 +32,8 @@
     </div>
     {{else}}
     <div class="space-y-4">
-      {{#each transactions}} {{#if isConfirmed this.tx.confirmed}}
-      <!-- Confirmed Transaction -->
-      {{#if isTransfer this.tx.transactionType}}
+      {{#each transactions}}
+      <!-- All Transactions (Confirmed and Unconfirmed) -->
       <div
         class="card hover:bg-qrl-secondary/80 transition-colors duration-200 min-h-[180px] flex flex-col"
       >
@@ -43,19 +42,76 @@
             <div
               class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center"
             >
-              <img class="w-8 h-8 brightness-0" src="/img/icons/send.svg" alt="Transfer" />
+              {{#if isTransfer this.tx.transactionType}}
+                <img class="w-8 h-8 brightness-0" src="/img/icons/send.svg" alt="Transfer" />
+              {{else}}
+                {{#if isTokenTransfer this.tx.transactionType}}
+                  <img class="w-8 h-8 brightness-0" src="/img/icons/token.svg" alt="Token Transfer" />
+                {{else}}
+                  {{#if isCoinbase this.tx.transactionType}}
+                    <img class="w-8 h-8 brightness-0" src="/img/icons/mining.svg" alt="Coinbase" />
+                  {{else}}
+                    {{#if isStake this.tx.transactionType}}
+                      <img class="w-8 h-8 brightness-0" src="/img/icons/vote.svg" alt="Stake" />
+                    {{else}}
+                      {{#if isSlave this.tx.transactionType}}
+                        <img class="w-8 h-8 brightness-0" src="/img/icons/slave.svg" alt="Slave" />
+                      {{else}}
+                        {{#if isLatticePK this.tx.transactionType}}
+                          <img class="w-8 h-8 brightness-0" src="/img/icons/lattice.svg" alt="Lattice PK" />
+                        {{else}}
+                          {{#if isMessage this.tx.transactionType}}
+                            <img class="w-8 h-8 brightness-0" src="/img/icons/message.svg" alt="Message" />
+                          {{else}}
+                            <img class="w-8 h-8 brightness-0" src="/img/icons/multisig.svg" alt="Transaction" />
+                          {{/if}}
+                        {{/if}}
+                      {{/if}}
+                    {{/if}}
+                  {{/if}}
+                {{/if}}
+              {{/if}}
             </div>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-2">
               <div class="text-sm text-qrl-text-secondary">{{ts}}</div>
-              <div class="status-indicator status-connected">
+              <div class="status-indicator {{#if isConfirmed this.tx.confirmed}}status-connected{{else}}status-warning{{/if}}">
                 <div class="w-2 h-2 rounded-full bg-current mr-2"></div>
-                <span class="text-xs">Confirmed</span>
+                <span class="text-xs">{{#if isConfirmed this.tx.confirmed}}Confirmed{{else}}Unconfirmed{{/if}}</span>
               </div>
             </div>
             <div class="text-qrl-text font-semibold mb-2">
-              Transfer | Block
+              {{#if isTransfer this.tx.transactionType}}
+                Transfer
+              {{else}}
+                {{#if isTokenTransfer this.tx.transactionType}}
+                  Token Transfer
+                {{else}}
+                  {{#if isCoinbase this.tx.transactionType}}
+                    Coinbase
+                  {{else}}
+                    {{#if isStake this.tx.transactionType}}
+                      Stake
+                    {{else}}
+                      {{#if isSlave this.tx.transactionType}}
+                        Slave
+                      {{else}}
+                        {{#if isLatticePK this.tx.transactionType}}
+                          Lattice PK
+                        {{else}}
+                          {{#if isMessage this.tx.transactionType}}
+                            Message
+                          {{else}}
+                            {{this.tx.transactionType}}
+                          {{/if}}
+                        {{/if}}
+                      {{/if}}
+                    {{/if}}
+                  {{/if}}
+                {{/if}}
+              {{/if}}
+              | Block
               <a
                 href="/block/{{block}}"
                 class="text-qrl-accent hover:text-qrl-accent/80 transition-colors"
@@ -66,6 +122,8 @@
             <div class="pb-1 text-qrl-text-secondary font-mono text-sm truncate-with-tooltip" data-full-text="{{this.tx.transaction_hash}}" title="{{this.tx.transaction_hash}}">
               {{this.tx.transaction_hash}}
             </div>
+            
+            {{#if isTransfer this.tx.transactionType}}
             <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
               <div class="flex items-center justify-between mb-1">
                 <span class="text-xs text-qrl-text-secondary">From</span>
@@ -82,11 +140,54 @@
                 </div>
               </div>
             </div>
+            {{else}}
+            {{#if isTokenTransfer this.tx.transactionType}}
+            <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs text-qrl-text-secondary">From</span>
+                <span class="text-sm text-qrl-accent font-semibold">{{amount}} Tokens</span>
+                <span class="text-xs text-qrl-text-secondary">To</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 mr-2" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
+                  {{fromAddress}}
+                </div>
+                <div class="text-qrl-accent mx-2">→</div>
+                <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 ml-2" data-full-text="{{toAddress}}" title="{{toAddress}}">
+                  {{toAddress}}
+                </div>
+              </div>
+            </div>
+            {{else}}
+            {{#if isCoinbase this.tx.transactionType}}
+            <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs text-qrl-text-secondary">Miner</span>
+                <span class="text-sm text-qrl-accent font-semibold">{{amount}} QRL</span>
+                <span class="text-xs text-qrl-text-secondary">Reward</span>
+              </div>
+              <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
+                {{fromAddress}}
+              </div>
+            </div>
+            {{else}}
+            <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs text-qrl-text-secondary">Type</span>
+                <span class="text-sm text-qrl-accent font-semibold">{{this.tx.transactionType}}</span>
+                <span class="text-xs text-qrl-text-secondary">Transaction</span>
+              </div>
+              <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
+                {{fromAddress}}
+              </div>
+            </div>
+            {{/if}}
+            {{/if}}
+            {{/if}}
           </div>
         </div>
       </div>
-      {{/if}}
-      {{/if}} {{/each}}
+      {{/each}}
     </div>
     {{/if}} {{/with}}
   </div>
