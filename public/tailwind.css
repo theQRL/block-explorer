@@ -67,8 +67,8 @@
   }
 
   .status-connected {
-
-
+    @apply bg-green-500/20 text-green-400 border border-green-500/30;
+  }
 
   .status-disconnected {
     @apply bg-red-500/20 text-red-400 border border-red-500/30;

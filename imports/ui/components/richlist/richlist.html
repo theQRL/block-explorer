@@ -60,7 +60,7 @@
               </thead>
               <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
                 {{#each richlistData}}
-                  <tr class="hover:bg-qrl-primary/50 transition-colors duration-200">
+                  <tr class="hover:bg-qrl-primary/50 hover:shadow-[0_0_0_1px_rgb(255_167_41)] transition-all duration-200">
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-qrl-text text-right">
                       {{rank(@index)}}
                     </td>
@@ -95,7 +95,7 @@
           
           <!-- Export Button -->
           <div class="mt-4 flex justify-end">
-            <button class="btn-secondary" id="csvExport">
+            <button class="btn-secondary flex items-center hover:bg-qrl-accent/20 hover:border-qrl-accent/50" id="csvExport">
               <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
               </svg>

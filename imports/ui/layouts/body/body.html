@@ -2,14 +2,34 @@
   <!-- Top Header -->
   <header class="bg-qrl-secondary border-b border-qrl-border sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo -->
-        <div class="flex items-center">
+      <!-- First Line: Logo, Title, and Search -->
+      <div class="flex items-center justify-between py-3">
+        <!-- Logo and Title -->
+        <div class="flex items-center space-x-4">
           <a href="/" class="flex items-center">
-            <img class="h-8 w-auto" src="/img/qrl-full-logo.svg" alt="QRL Explorer" />
+            <div class="bg-qrl-accent p-2 rounded-lg">
+              <img class="h-8 w-auto brightness-0" src="/img/qrl-full-logo.svg" alt="QRL Explorer" />
+            </div>
           </a>
+          <h1 class="text-xl font-bold text-qrl-text">QRL Blockchain Explorer</h1>
         </div>
 
+        <!-- Search and Mobile Menu -->
+        <div class="flex items-center space-x-4">
+          <!-- Search -->
+          {{> search }}
+          
+          <!-- Mobile Menu Button -->
+          <button class="lg:hidden p-2 text-qrl-text hover:text-qrl-accent transition-colors" id="mobile-menu-toggle">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Second Line: Navigation Links -->
+      <div class="border-t border-qrl-border pt-3 pb-3">
         <!-- Desktop Navigation (lg and up) -->
         <nav class="hidden lg:flex items-center space-x-8">
           <a href="/lastblocks" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuBlocksActive}}">
@@ -66,19 +86,6 @@
             </div>
           </a>
         </nav>
-
-        <!-- Search and Mobile Menu -->
-        <div class="flex items-center space-x-4">
-          <!-- Search -->
-          {{> search }}
-          
-          <!-- Mobile Menu Button -->
-          <button class="lg:hidden p-2 text-qrl-text hover:text-qrl-accent transition-colors" id="mobile-menu-toggle">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-          </button>
-        </div>
       </div>
     </div>
 

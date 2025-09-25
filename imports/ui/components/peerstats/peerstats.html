@@ -44,7 +44,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
                       {{this.node_chain_state.block_number}}
                     </td>
-                    <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono break-all">
+                    <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono truncate-with-tooltip max-w-xs" data-full-text="{{this.node_chain_state.header_hash}}" title="{{this.node_chain_state.header_hash}}">
                       {{this.node_chain_state.header_hash}}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
