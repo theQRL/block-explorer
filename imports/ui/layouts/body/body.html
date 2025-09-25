@@ -2,20 +2,20 @@
   <!-- Top Header -->
   <header class="bg-qrl-secondary border-b border-qrl-border sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- First Line: Logo, Title, and Search -->
-      <div class="flex items-center justify-between py-3">
-        <!-- Logo and Title -->
-        <div class="flex items-center space-x-4">
+      <!-- First Line: Logo and Search -->
+      <div class="flex items-start justify-between py-3">
+        <!-- Logo (left) -->
+        <div class="flex flex-col items-start">
           <a href="/" class="flex items-center">
-            <div class="bg-qrl-accent p-2 rounded-lg">
-              <img class="h-8 w-auto brightness-0" src="/img/qrl-full-logo.svg" alt="QRL Explorer" />
+            <div class="flex items-center justify-center">
+              <img class="w-auto" style="height: 64px;" src="/img/yellow.svg" alt="QRL Explorer" />
             </div>
           </a>
-          <h1 class="text-xl font-bold text-qrl-text">QRL Blockchain Explorer</h1>
+          <span class="text-sm text-qrl-text-secondary font-medium" style="margin-top: -16px; margin-left: 54px;">Explorer</span>
         </div>
 
-        <!-- Search and Mobile Menu -->
-        <div class="flex items-center space-x-4">
+        <!-- Search and Mobile Menu (right) -->
+        <div class="flex items-center space-x-4 flex-1 max-w-md ml-8 mt-2">
           <!-- Search -->
           {{> search }}
           
@@ -29,7 +29,7 @@
       </div>
 
       <!-- Second Line: Navigation Links -->
-      <div class="border-t border-qrl-border pt-3 pb-3">
+      <div class="hidden lg:flex border-t border-qrl-border pt-3 pb-3">
         <!-- Desktop Navigation (lg and up) -->
         <nav class="hidden lg:flex items-center space-x-8">
           <a href="/lastblocks" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuBlocksActive}}">

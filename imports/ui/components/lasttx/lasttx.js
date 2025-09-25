@@ -36,7 +36,11 @@ Template.lasttx.helpers({
     return ''
   },
   block() {
-    return this.header.block_number
+    if (this.header) {
+      // this will be undefined for unconfirmed transactions
+      return this.header.block_number
+    }
+    return ''
   },
   ts() {
     if (this.header) {
