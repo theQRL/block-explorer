@@ -183,4 +183,23 @@
       </div>
     </div>
   </footer>
+
+  <!-- Disconnect Modal -->
+  <div class="rv-vanilla-modal-overlay-fi" id="disconnect-modal-overlay">
+    <div class="rv-vanilla-modal-fi" id="disconnect-modal">
+      <div class="rv-vanilla-modal-header">
+        <h3 class="rv-vanilla-modal-title">Connection Lost</h3>
+        <button class="rv-vanilla-modal-close" id="disconnect-modal-close">&times;</button>
+      </div>
+      <div class="rv-vanilla-modal-body">
+        <p>You have been disconnected due to inactivity.</p>
+        <p>Click "Reconnect" to restore your connection to the QRL network.</p>
+        <div style="margin-top: 20px; text-align: center;">
+          <button id="reconnect-btn" class="btn-primary" style="margin-right: 10px;">Reconnect</button>
+          <button id="dismiss-btn" class="btn-secondary">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </template>
