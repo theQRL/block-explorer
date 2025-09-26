@@ -132,11 +132,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 mr-2" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
-                  {{fromAddress}}
+                  <a href="/a/{{fromAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{fromAddress}}</a>
                 </div>
                 <div class="text-qrl-accent mx-2">→</div>
                 <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 ml-2" data-full-text="{{toAddress}}" title="{{toAddress}}">
-                  {{toAddress}}
+                  <a href="/a/{{toAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{toAddress}}</a>
                 </div>
               </div>
             </div>
@@ -150,11 +150,11 @@
               </div>
               <div class="flex items-center justify-between">
                 <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 mr-2" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
-                  {{fromAddress}}
+                  <a href="/a/{{fromAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{fromAddress}}</a>
                 </div>
                 <div class="text-qrl-accent mx-2">→</div>
                 <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 ml-2" data-full-text="{{toAddress}}" title="{{toAddress}}">
-                  {{toAddress}}
+                  <a href="/a/{{toAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{toAddress}}</a>
                 </div>
               </div>
             </div>
@@ -167,7 +167,7 @@
                 <span class="text-xs text-qrl-text-secondary">Reward</span>
               </div>
               <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
-                {{fromAddress}}
+                <a href="/a/{{fromAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{fromAddress}}</a>
               </div>
             </div>
             {{else}}
@@ -178,7 +178,7 @@
                 <span class="text-xs text-qrl-text-secondary">Transaction</span>
               </div>
               <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
-                {{fromAddress}}
+                <a href="/a/{{fromAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{fromAddress}}</a>
               </div>
             </div>
             {{/if}}

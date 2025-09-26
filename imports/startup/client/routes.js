@@ -22,7 +22,6 @@ import '../../ui/components/status/status.js'
 
 // Set up all routes in the app
 
-
 FlowRouter.route('/', {
   name: 'App.home',
   action() {

@@ -343,3 +343,33 @@
     content: '';
     @apply absolute bottom-full left-4 mb-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-qrl-border z-50;
   }
+
+/* Custom Tab Styles for Address Component */
+.tab-button {
+  @apply px-4 py-2 border-b-2 border-transparent text-qrl-text-secondary hover:text-qrl-text hover:border-qrl-accent transition-colors duration-200 cursor-pointer;
+}
+
+.tab-button.active {
+  @apply text-qrl-accent border-qrl-accent;
+}
+
+.tab-content {
+  @apply hidden;
+}
+
+.tab-content.active {
+  @apply block;
+}
+
+/* JSON Toggle Styles */
+.jsonbox {
+  @apply transition-all duration-200;
+}
+
+.jsonclick svg {
+  @apply transition-transform duration-200;
+}
+
+.jsonclick.active svg {
+  @apply transform rotate-180;
+}

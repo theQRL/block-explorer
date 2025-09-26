@@ -6,8 +6,6 @@ import sha256 from 'sha256'
 import $ from 'jquery'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
-import 'fomantic-ui-css/semantic.js'
-import 'fomantic-ui-css/semantic.css'
 import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
@@ -412,26 +410,69 @@ Template.tx.helpers({
   },
 })
 
+// Helper function to toggle JSON display
+function toggleJSON() {
+  const jsonBox = document.querySelector('.jsonbox')
+  const jsonContent = document.querySelector('.json')
+  
+  if (jsonBox) {
+    if (jsonBox.style.display === 'none' || !jsonBox.style.display) {
+      if (!jsonContent.innerHTML) {
+        const myJSON = Session.get('txhash').transaction
+        const formatter = new JSONFormatter(myJSON)
+        jsonContent.innerHTML = ''
+        jsonContent.appendChild(formatter.render())
+      }
+      jsonBox.style.display = 'block'
+    } else {
+      jsonBox.style.display = 'none'
+    }
+  }
+}
+
+// Helper function to hide messages
+function hideMessages() {
+  const messages = document.querySelectorAll('.message')
+  messages.forEach(msg => msg.style.display = 'none')
+}
+
+// Helper function to show/hide verification results
+function showVerificationResult(elementId) {
+  const element = document.getElementById(elementId)
+  if (element) {
+    element.classList.remove('hidden')
+    element.style.display = 'block'
+  }
+}
+
+function hideVerificationResults() {
+  const verified = document.getElementById('documentVerified')
+  const failed = document.getElementById('documentVerifcationFailed')
+  
+  if (verified) {
+    verified.classList.add('hidden')
+    verified.style.display = 'none'
+  }
+  if (failed) {
+    failed.classList.add('hidden')
+    failed.style.display = 'none'
+  }
+}
+
 Template.tx.events({
   'click .close': () => {
-    $('.message').hide()
+    hideMessages()
   },
   'click .jsonclick': () => {
-    if (!($('.json').html())) {
-      const myJSON = Session.get('txhash').transaction
-      const formatter = new JSONFormatter(myJSON)
-      $('.json').html(formatter.render())
-    }
-    $('.jsonbox').toggle()
+    toggleJSON()
   },
   'submit #notariseVerificationForm': (event) => {
     event.preventDefault()
     event.stopPropagation()
 
-    $('#documentVerified').hide()
-    $('#documentVerifcationFailed').hide()
+    hideVerificationResults()
 
-    const notaryDocuments = $('#notaryDocument').prop('files')
+    const notaryDocuments = document.getElementById('notaryDocument').files
     const notaryDocument = notaryDocuments[0]
 
     // Get notary details from txn
@@ -479,23 +520,23 @@ Template.tx.events({
           resulting in the hash '${txnFileHash}'.`
 
           Session.set('documentNotarisationVerificationMessage', successMessage)
-          $('#documentVerified').show()
+          showVerificationResult('documentVerified')
         } else {
           Session.set('documentNotarisationError', 'The file provided does not match the notary hash in this transaction.')
-          $('#documentVerifcationFailed').show()
+          showVerificationResult('documentVerifcationFailed')
         }
       } catch (err) {
         console.log(err)
         // Invalid file format
         Session.set('documentNotarisationError', 'Unable to open Document - Are you sure you selected a document to verify?')
-        $('#documentVerifcationFailed').show()
+        showVerificationResult('documentVerifcationFailed')
       }
     }
 
     // Verify user selected a document to notarise
     if (notaryDocument === undefined) {
       Session.set('documentNotarisationError', 'Unable to open Document - Are you sure you selected a document to verify?')
-      $('#documentVerifcationFailed').show()
+      showVerificationResult('documentVerifcationFailed')
     } else {
       console.log('reading file ', notaryDocument)
       reader.readAsArrayBuffer(notaryDocument)
@@ -504,7 +545,29 @@ Template.tx.events({
 })
 
 Template.tx.onRendered(() => {
-  $('.value').popup()
+  // Tooltip for values
+  document.querySelectorAll('.value').forEach((element) => {
+    element.addEventListener('mouseenter', (event) => {
+      const tooltipText = event.target.dataset.html
+      if (tooltipText) {
+        const tooltip = document.createElement('div')
+        tooltip.className = 'absolute z-50 px-3 py-2 text-sm font-medium text-qrl-text bg-qrl-secondary rounded-lg shadow-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300'
+        tooltip.innerHTML = tooltipText
+        event.target.appendChild(tooltip)
+        // Position tooltip
+        const rect = event.target.getBoundingClientRect()
+        tooltip.style.left = `${rect.width / 2 - tooltip.offsetWidth / 2}px`
+        tooltip.style.top = `${-tooltip.offsetHeight - 5}px`
+      }
+    })
+    element.addEventListener('mouseleave', (event) => {
+      const tooltip = event.target.querySelector('.absolute')
+      if (tooltip) {
+        tooltip.remove()
+      }
+    })
+  })
+
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('txhash', {})

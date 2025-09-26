@@ -1,577 +1,779 @@
 <template name="address">
-  {{#if notFound}}
-    <h3 class="ui pageHeader header">
-      <i class="tiny icon"></i>
-      <div class="content wordBreak">
-        {{address.parameter}}
-      </div>
-    </h3>
-    <div class="ui negative message">
-      State for <span class="hack">{{address.parameter}}</span> not found on this chain.<br>
-      Is this address from a different QRL network?
-    </div>
-  {{else}}
-<h3 class="ui pageHeader header">
-  <i class="tiny icon"></i>
-  <div class="content wordBreak f-h">
-    {{address.state.address}}
-    {{#if knownProviderNonSpecific}}
-    &nbsp;<i class="ui certificate icon" title="Verified NFT Provider"></i>
-    {{/if}}
-  </div>
-</h3>
-
-<div class="ui segment pageSegment">
-
-  <div class="description">
-    <div class="ui hidden divider"></div>
-    <div class="ui stackable grid">
-      <div class="twelve wide column">
-        <div class="ui basic center aligned segment">
-          <div class="ui statistic">
-            <div class="label">
-              <div class="ui label">
-                {{#if isMultiSig}}
-                MultiSig Balance
-                {{else}}
-                Balance
-                {{/if}}
-              </div>
-            </div>
-            <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
-              {{address.state.balance}}
-            </div>
-            <div class="label">
-              Quanta<br><small>USD ${{qrl}}</small>
-            </div>
+  <div class="space-y-6">
+    {{#if notFound}}
+      <div class="card border-red-500/30 bg-red-500/10">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
           </div>
-        </div>
-      </div>
-      <div class="four wide column center aligned" style="display: none;">
-        <div class="row">
-          <canvas id="identicon" width="100" height="100"></canvas>
-          <div class="qr-code-container"></div>
-        </div>
-        <!-- <div class="row"> -->
-          <!-- <button class="ui button blue" id="clickHelp" data-html="<p>This is an identicon and a QR code.  The identicon is a visual representation of the address: you will be able to recognise this address from the identicon across the QRL network.</p><p>The QR code contains the QRL address for scanning with our mobile wallet app.</p><p>Click the help icon to visit our documentation site to learn more.</p>" data-position="bottom center"><i class="help icon" style="margin-right: 0px"></i> </button> -->
-        <!-- </div> -->
-        <div class="row"></div>
-      </div>
-    </div>
-    <div class="ui grid">
-    <div class="ui celled horizontal list">
-      <div class="item"><strong>Transactions</strong> {{address.state.transaction_hash_count}}</div>
-      {{#if isMultiSig}}{{else}}<div class="item"><strong>Nonce</strong> {{address.state.nonce}}</div>{{/if}}
-      <div class="item"><strong>Signature Scheme</strong> {{addressValidation.signatureScheme}}</div>
-      {{#if isMultiSig}}{{else}}<div class="item"><strong>Tree Height</strong> {{addressValidation.height}}</div>{{/if}}
-      {{#if isMultiSig}}{{else}}<div class="item"><strong>Total Signatures</strong> {{addressValidation.totalSignatures}}</div>{{/if}}
-      {{#if isMultiSig}}{{else}}<div class="item"><strong>Signatures Remaining</strong> {{addressValidation.keysRemaining}}</div>{{/if}}
-      <div class="item"><strong>Hash Function</strong> {{addressValidation.hashFunction}}</div>
-      <!-- <div class="item" id="OTStracker"><button class="ui small button secondary"><i class="expand arrows alternate icon"></i>OTS tracker</button></div> -->
-    </div>
-  </div>
-
-  </div>
-
-  {{#if isMultiSig}}
-  <h3 class="value">Signatories</h3>
-  <table class="ui table">
-    <thead><th>Address</th><th>Weight</th></thead>
-    <tbody>
-      {{#each signatories 'MULTISIG'}}
-      <tr>
-      <td class="hack">
-        <!-- {{# if bech32}}{{ this.address_b32 }}{{else}} -->
-        <a href="/a/{{ this.address_hex}}">{{ this.address_hex}}</a>
-        <!-- {{/if}} -->
-      </td>
-      <td>{{ this.weight }}</td>
-      </tr>
-      {{/each}}
-    </tbody>
-    <tfoot>
-      <th>Threshold for spend</th>
-      <th>{{ threshold }}</th>
-    </tfoot>
-  </table>
-  {{else}}
-  <!-- Send/Receive Section -->
-  <div id="addressTabs" class="ui top attached tabular menu">
-    <a class="item active" data-tab="transactions">Quanta</a>
-    <a class="item" data-tab="tokenBalances">Tokens</a>
-    <a class="item" data-tab="nftBalances">NFTs</a>
-    <a class="item" data-tab="otsTrackerTab">OTS</a>
-    <a class="item" data-tab="slavesTab">Slaves</a>
-  </div>
-  <div class="ui bottom attached tab segment active" data-tab="transactions">
-
-    <h2 class="ui header">
-      <div class="content">
-        Transactions
-      </div>
-    </h2>
-
-    <div id="loadingTransactions" class="ui icon message">
-      <br /><br />
-      <i class="notched circle loading icon"></i>
-      <div class="content">
-        <div class="header">
-          Just a moment
-        </div>
-        <p id="relayingMsg">Transaction history loading ...</p>
-      </div>
-    </div>
-
-    {{#if addressHasTransactions}}
-      {{#each addressTransactions}}
-
-
-          {{#if isTransfer this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            {{#if isThisAddress this.addr_from}}
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            {{else}}
-            <img class="transactionTypeImage" src="/img/icons/receive.svg" />
-            {{/if}}
-            <div class="content">
-              <div class="header">
-                {{#if isThisAddress this.addr_from}}
-                Sent
-                {{else}}
-                Received
-                {{/if}}
-                 | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{#if isThisAddress this.addr_from}}
-                  {{#each sendingOutputs this}}
-                    {{this.amount}} &raquo; {{this.to}}<br />
-                  {{/each}}
-                {{else}}
-                  {{# if bech32}}{{this.addr_from}}{{else}}{{this.addr_from}}{{/if}}
-                {{/if}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{#if isThisAddress this.addr_from}} {{totalTransferred this}} {{else}} {{receivedAmount this}} {{/if}} Quanta &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isTokenCreation this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            {{#if isCreateNFT}}
-            <img class="transactionTypeImage" src="/img/icons/receive.svg" />
-            {{else}}
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            {{/if}}
-            <div class="content">
-              <div class="header">
-                {{#if isCreateNFT}}
-                Create NFT - 
-                        {{#if knownProvider}}
-                        <i class="ui certificate icon" title="Verified NFT Provider"></i>
-                        {{/if}}
-                        {{#if knownProvider}}
-                        <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
-                        {{else}}
-                        Unknown provider {{providerID}} |
-                        {{/if}}
-                        {{this.timestamp}}
-                {{else}}
-                Token Creation - {{this.token.name}} ({{this.token.symbol}}) | {{this.timestamp}}
-                {{/if}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-               <a href="/tx/{{this.transaction_hash}}">
-                 {{#if isCreateNFT}}
-                 View Tx &gt;
-                 {{else}}
-                  {{this.token.symbol}} &gt;
-                  {{/if}}
-                </a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isTokenTransfer this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            {{#if isThisAddress this.addr_from}}
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            {{else}}
-            <img class="transactionTypeImage" src="/img/icons/receive.svg" />
-            {{/if}}
-            <div class="content">
-              <div class="header">
-                {{#if isThisAddress this.addr_from}}
-                {{#if isNFTTransfer}}NFT Sent - 
-                      {{#if knownProvider}}
-                        <i class="ui certificate icon" title="Verified NFT Provider"></i>
-                        {{/if}}
-                        {{#if knownProvider}}
-                        <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
-                        {{else}}
-                        Unknown provider {{providerID}}
-                        {{/if}}
-                {{else}}Tokens Sent{{/if}}
-                {{else}}
-                    {{#if isNFTTransfer}}NFT Received - 
-                      {{#if knownProvider}}
-                        <i class="ui certificate icon" title="Verified NFT Provider"></i>
-                        {{/if}}
-                        {{#if knownProvider}}
-                        <a href="{{providerURL}}/{{this.transaction_hash}}">{{providerName}}</a> ({{providerID}})
-                        {{else}}
-                        Unknown provider {{providerID}}
-                        {{/if}}
-                {{else}}Tokens Received{{/if}}
-                {{/if}}
-                 | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{#if isNFTTransfer}}
-                {{this.transaction_hash}}
-                {{else}}
-                {{#if isThisAddress this.addr_from}}
-                  {{#each this.outputs}}
-                    {{this.amount}} &raquo; {{this.address_hex}}<br />  
-                  {{/each}}
-                {{else}}
-                  {{this.from}}
-                {{/if}}
-                {{/if}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">
-                {{#if isNFTTransfer}}
-                View Tx
-                {{else}}
-                {{receivedTokens this}}
-                {{/if}}
-                &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isCoinbaseTxn this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/receive.svg" />
-            <div class="content">
-              <div class="header">
-                Coinbase Received | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{# if bech32}}{{this.from_b32}}{{else}}{{this.from_hex}}{{/if}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{coinbaseValue}} Quanta &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isSlaveTxn this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            <div class="content">
-              <div class="header">
-                Slave Transaction | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{this.amount}} Quanta &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isMultiSigCreateTxn this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            <div class="content">
-              <div class="header">
-                MultiSig CREATE | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{signatories this}} &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isMultiSigSpendTxn this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            <div class="content">
-              <div class="header">
-                MultiSig SPEND | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{msSpendAmount this}} Quanta &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isMultiSigVoteTxn this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            <div class="content">
-              <div class="header">
-                MultiSig VOTE | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">{{msVoteStatus this}} &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isLatticePKTxn this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            <div class="content">
-              <div class="header">
-                Lattice Public Key | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">View Transaction &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isMessageTxn this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            <div class="content">
-              <div class="header">
-                Message | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">View Transaction &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isKeybaseTxn this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            <div class="content">
-              <div class="header">
-                Keybase | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">View Transaction &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-          {{#if isDocumentNotarisation this.transactionType}}
-          <div class="ui icon message transactionRecord">
-            <img class="transactionTypeImage" src="/img/icons/send.svg" />
-            <div class="content">
-              <div class="header">
-                Document Notarisation | {{this.timestamp}}
-              </div>
-              <p class="transactionAddress value">
-                {{this.transaction_hash}}
-              </p>
-            </div>
-            <div class="floatright ta-c">
-              <a href="/tx/{{this.transaction_hash}}">View Transaction &gt;</a>
-            </div>
-          </div>
-          {{/if}}
-
-      {{/each}}
-    {{else}}
-      <div id="noTransactionsFound" style="display: none;" class="ui icon message">
-        <br /><br />
-        <div class="content">
-          <div class="header">
-            No transactions found
-          </div>
-        </div>
-      </div>
-    {{/if}}
-
-    <table class="ui striped table">
-      {{#if pagination}}
-      <tfoot>
-          <tr><th colspan="7">
-            <div class="ui left floated menu">
-            <div class="ui right labeled fluid input">
-              <label for="paginator" class="ui label">Page </label>
-              <input type="text" placeholder="{{currentPage}}" id="paginator">
-              <div class="ui label"> of {{totalPages}}</div>
-            </div>
-          </div>
-            <div class="ui right floated pagination menu">
-              {{#if pback}}
-              <a qrl-data="back" class="icon item">
-                <i qrl-data="back" class="left chevron icon"></i>
-              </a>
-              {{/if}}
-              {{#each pages}}
-              <a class="item {{isActive}}">{{this.number}}</a>
-              {{/each}}
-              {{#if pforward}}
-              <a qrl-data="forward" class="icon item">
-                <i qrl-data="forward" class="right chevron icon"></i>
-              </a>
-              {{/if}}
-            </div>
-          </th>
-        </tr>
-      </tfoot>
-      {{/if}}
-    </table>
-  </div>
-
-
-    <!-- Token Balances -->
-    <div class="ui bottom attached tab segment" data-tab="tokenBalances">
-      <h2 class="ui header">
-        <div class="content">
-          Token Balances
-        </div>
-      </h2>
-
-      <div id="tokenBalancesLoading" class="ui icon message">
-        <br /><br />
-        <i class="notched circle loading icon"></i>
-        <div class="content">
-          <div class="header">
-            Just a moment
-          </div>
-          <p>Token balances are loading...</p>
-        </div>
-      </div>
-
-      <div class="ui middle aligned divided list">
-        {{#if ownTokens}}
-        {{#each tokensHeld}}
-        <div class="item">
-          <i class="large tags middle aligned icon"></i>
-          <div class="content">
-            {{#if heldTokenIsNFT}}
-
-            {{else}}
-            <p class="header"><a href="/tx/{{this.hash}}">{{this.name}} ({{this.symbol}})</a></p>
-            <div class="description tc-w">{{this.balance}}</div>
-            {{/if}}
-          </div>
-        </div>
-        {{/each}}
-        {{else}}
-          No tokens owned
-        {{/if}}
-      </div>
-    </div>
-
-    <!-- NFTs -->
-    <div class="ui bottom attached tab segment" data-tab="nftBalances">
-      <h2 class="ui header">
-        <div class="content">
-          NFTs
-        </div>
-      </h2>
-
-    <div id="nftBalancesLoading" class="ui icon message">
-        <br /><br />
-        <i class="notched circle loading icon"></i>
-        <div class="content">
-          <div class="header">
-            Just a moment
-          </div>
-          <p>NFTs are loading...</p>
-        </div>
-      </div>
-
-      <div class="ui middle aligned divided list">
-        {{#if ownNFTs}}
-        {{#each tokensHeld}}
-        <div class="item">
-          <i class="large tags middle aligned icon"></i>
-          <div class="content">
-            {{#if heldTokenIsNFT}}
-            <p class="header">
-              {{#if this.nft.providerDetails.known}}
-              <a href="{{this.nft.providerDetails.url}}/{{this.nft.txhash}}">
-              {{this.nft.providerDetails.name}} (0x{{this.nft.id}})</a>
-              <i class="ui certificate icon" title="Verified NFT Provider"></i>Verified Provider
-              {{else}}
-              <i class="ui warning icon" title="Unverified NFT Provider"></i>Unverified Provider (0x{{this.nft.id}})
-              {{/if}}
+          <div>
+            <h3 class="text-lg font-semibold text-red-400 mb-2">
+              Address Not Found
+            </h3>
+            <p class="text-red-300 break-all">
+              State for <span class="font-mono">{{address.parameter}}</span> not found on this chain.<br>
+              Is this address from a different QRL network?
             </p>
-            <div class="description tc-w">
-              <a href="/tx/{{this.nft.txhash}}">{{this.nft.txhash}}</a>
-            </div>
-            {{else}}
+          </div>
+        </div>
+      </div>
+    {{else}}
+      <!-- Address Header -->
+      <div class="card">
+        <h3 class="text-2xl font-bold text-qrl-text mb-4 break-all font-mono">
+          {{address.state.address}}
+          {{#if knownProviderNonSpecific}}
+            <svg class="inline-block w-5 h-5 text-qrl-accent ml-2" fill="currentColor" viewBox="0 0 20 20" title="Verified NFT Provider">
+              <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+          {{/if}}
+        </h3>
 
+        <!-- Balance Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+          <div class="lg:col-span-3">
+            <div class="text-center bg-qrl-secondary/50 rounded-lg p-6">
+              <div class="mb-2">
+                <span class="inline-block px-3 py-1 text-sm font-medium bg-qrl-accent text-qrl-primary rounded-full">
+                  {{#if isMultiSig}}
+                    MultiSig Balance
+                  {{else}}
+                    Balance
+                  {{/if}}
+                </span>
+              </div>
+              <div class="text-4xl font-bold text-qrl-text mb-2" title="USD ${{qrl}}">
+                {{address.state.balance}}
+              </div>
+              <div class="text-qrl-text-secondary">
+                Quanta<br><small>USD ${{qrl}}</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Identicon Section (hidden by default) -->
+          <div class="lg:col-span-1 text-center" style="display: none;">
+            <canvas id="identicon" width="100" height="100" class="mx-auto mb-2"></canvas>
+            <div class="qr-code-container"></div>
+          </div>
+        </div>
+
+        <!-- Address Details -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+          <div class="flex justify-between">
+            <strong class="text-qrl-text-secondary">Transactions:</strong>
+            <span class="text-qrl-text">{{address.state.transaction_hash_count}}</span>
+          </div>
+          {{#unless isMultiSig}}
+            <div class="flex justify-between">
+              <strong class="text-qrl-text-secondary">Nonce:</strong>
+              <span class="text-qrl-text">{{address.state.nonce}}</span>
+            </div>
+          {{/unless}}
+          <div class="flex justify-between">
+            <strong class="text-qrl-text-secondary">Signature Scheme:</strong>
+            <span class="text-qrl-text">{{addressValidation.signatureScheme}}</span>
+          </div>
+          {{#unless isMultiSig}}
+            <div class="flex justify-between">
+              <strong class="text-qrl-text-secondary">Tree Height:</strong>
+              <span class="text-qrl-text">{{addressValidation.height}}</span>
+            </div>
+            <div class="flex justify-between">
+              <strong class="text-qrl-text-secondary">Total Signatures:</strong>
+              <span class="text-qrl-text">{{addressValidation.totalSignatures}}</span>
+            </div>
+            <div class="flex justify-between">
+              <strong class="text-qrl-text-secondary">Signatures Remaining:</strong>
+              <span class="text-qrl-text">{{addressValidation.keysRemaining}}</span>
+            </div>
+          {{/unless}}
+          <div class="flex justify-between">
+            <strong class="text-qrl-text-secondary">Hash Function:</strong>
+            <span class="text-qrl-text">{{addressValidation.hashFunction}}</span>
+          </div>
+        </div>
+      </div>
+
+      {{#if isMultiSig}}
+        <!-- MultiSig Signatories -->
+        <div class="card">
+          <h3 class="text-xl font-bold text-qrl-text mb-4">Signatories</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-qrl-secondary/50">
+                <tr>
+                  <th class="text-left p-3 text-qrl-text">Address</th>
+                  <th class="text-left p-3 text-qrl-text">Weight</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-qrl-border">
+                {{#each signatories 'MULTISIG'}}
+                  <tr class="hover:bg-qrl-secondary/30">
+                    <td class="p-3">
+                      <a href="/a/{{ this.address_hex}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono break-all">
+                        {{ this.address_hex}}
+                      </a>
+                    </td>
+                    <td class="p-3 text-qrl-text">{{ this.weight }}</td>
+                  </tr>
+                {{/each}}
+              </tbody>
+              <tfoot class="bg-qrl-secondary/50">
+                <tr>
+                  <th class="text-left p-3 text-qrl-text">Threshold for spend</th>
+                  <th class="text-left p-3 text-qrl-text">{{ threshold }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      {{else}}
+        <!-- Tabs Section -->
+        <div class="card">
+          <div id="addressTabs" class="flex border-b border-qrl-border mb-6">
+            <button class="tab-button active" data-tab="transactions">Quanta</button>
+            <button class="tab-button" data-tab="tokenBalances">Tokens</button>
+            <button class="tab-button" data-tab="nftBalances">NFTs</button>
+            <button class="tab-button" data-tab="otsTrackerTab">OTS</button>
+            <button class="tab-button" data-tab="slavesTab">Slaves</button>
+          </div>
+
+          <!-- Transactions Tab -->
+          <div class="tab-content active" data-tab="transactions">
+            <h2 class="text-xl font-bold text-qrl-text mb-4">Transactions</h2>
+
+            <!-- Loading State -->
+            <div id="loadingTransactions" class="card">
+              <div class="flex items-center justify-center py-12">
+                <div class="text-center">
+                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
+                  <div class="text-qrl-text-secondary">
+                    <div class="font-semibold mb-2">Just a moment</div>
+                    <p id="relayingMsg">Transaction history loading ...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {{#if addressHasTransactions}}
+              <div class="space-y-4">
+                {{#each addressTransactions}}
+                  {{#if isTransfer this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            {{#if isThisAddress this.addr_from}}
+                              <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Send" />
+                            {{else}}
+                              <img class="w-6 h-6 brightness-0" src="/img/icons/receive.svg" alt="Receive" />
+                            {{/if}}
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">
+                              {{#if isThisAddress this.addr_from}}
+                                Sent
+                              {{else}}
+                                Received
+                              {{/if}}
+                            </h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                {{#if isThisAddress this.addr_from}} {{totalTransferred this}} {{else}} {{receivedAmount this}} {{/if}} Quanta →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{#if isThisAddress this.addr_from}}
+                              {{#each sendingOutputs this}}
+                                {{this.amount}} → {{this.to}}<br />
+                              {{/each}}
+                            {{else}}
+                              {{# if bech32}}{{this.addr_from}}{{else}}{{this.addr_from}}{{/if}}
+                            {{/if}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isTokenCreation this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            {{#if isCreateNFT}}
+                              <img class="w-6 h-6 brightness-0" src="/img/icons/receive.svg" alt="NFT" />
+                            {{else}}
+                              <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Token" />
+                            {{/if}}
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">
+                              {{#if isCreateNFT}}
+                                Create NFT
+                                {{#if knownProvider}}
+                                  <svg class="inline-block w-4 h-4 text-qrl-accent ml-1" fill="currentColor" viewBox="0 0 20 20" title="Verified NFT Provider">
+                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                  </svg>
+                                {{/if}}
+                              {{else}}
+                                Token Creation
+                              {{/if}}
+                            </h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                {{#if isCreateNFT}}
+                                  View Tx →
+                                {{else}}
+                                  {{this.token.symbol}} →
+                                {{/if}}
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">
+                            {{#if isCreateNFT}}
+                              {{#if knownProvider}}
+                                <a href="{{providerURL}}/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{providerName}}</a> ({{providerID}}) |
+                              {{else}}
+                                Unknown provider {{providerID}} |
+                              {{/if}}
+                            {{else}}
+                              {{this.token.name}} ({{this.token.symbol}}) |
+                            {{/if}}
+                            {{this.timestamp}}
+                          </p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isTokenTransfer this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            {{#if isThisAddress this.addr_from}}
+                              <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Send" />
+                            {{else}}
+                              <img class="w-6 h-6 brightness-0" src="/img/icons/receive.svg" alt="Receive" />
+                            {{/if}}
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">
+                              {{#if isThisAddress this.addr_from}}
+                                {{#if isNFTTransfer}}NFT Sent{{else}}Tokens Sent{{/if}}
+                              {{else}}
+                                {{#if isNFTTransfer}}NFT Received{{else}}Tokens Received{{/if}}
+                              {{/if}}
+                              {{#if isNFTTransfer}}
+                                {{#if knownProvider}}
+                                  <svg class="inline-block w-4 h-4 text-qrl-accent ml-1" fill="currentColor" viewBox="0 0 20 20" title="Verified NFT Provider">
+                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                  </svg>
+                                {{/if}}
+                              {{/if}}
+                            </h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                {{#if isNFTTransfer}}
+                                  View Tx →
+                                {{else}}
+                                  {{receivedTokens this}} →
+                                {{/if}}
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">
+                            {{#if isNFTTransfer}}
+                              {{#if knownProvider}}
+                                <a href="{{providerURL}}/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{providerName}}</a> ({{providerID}}) |
+                              {{else}}
+                                Unknown provider {{providerID}} |
+                              {{/if}}
+                            {{/if}}
+                            {{this.timestamp}}
+                          </p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{#if isNFTTransfer}}
+                              {{this.transaction_hash}}
+                            {{else}}
+                              {{#if isThisAddress this.addr_from}}
+                                {{#each this.outputs}}
+                                  {{this.amount}} → {{this.address_hex}}<br />
+                                {{/each}}
+                              {{else}}
+                                {{this.from}}
+                              {{/if}}
+                            {{/if}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isCoinbaseTxn this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/receive.svg" alt="Coinbase" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">Coinbase Received</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                {{coinbaseValue}} Quanta →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{# if bech32}}{{this.from_b32}}{{else}}{{this.from_hex}}{{/if}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isSlaveTxn this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Slave" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">Slave Transaction</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                {{this.amount}} Quanta →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isMultiSigCreateTxn this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="MultiSig" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">MultiSig CREATE</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                {{signatories this}} →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isMultiSigSpendTxn this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="MultiSig" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">MultiSig SPEND</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                {{msSpendAmount this}} Quanta →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isMultiSigVoteTxn this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="MultiSig" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">MultiSig VOTE</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                {{msVoteStatus this}} →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isLatticePKTxn this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Lattice" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">Lattice Public Key</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                View Transaction →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isMessageTxn this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Message" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">Message</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                View Transaction →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isKeybaseTxn this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Keybase" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">Keybase</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                View Transaction →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{#if isDocumentNotarisation this.transactionType}}
+                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                      <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Document" />
+                          </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-qrl-text">Document Notarisation</h3>
+                            <div class="text-right">
+                              <a href="/tx/{{this.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-semibold">
+                                View Transaction →
+                              </a>
+                            </div>
+                          </div>
+                          <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
+                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                            {{this.transaction_hash}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+                {{/each}}
+              </div>
+            {{else}}
+              <div id="noTransactionsFound" style="display: none;" class="card">
+                <div class="text-center py-12">
+                  <div class="text-qrl-text-secondary">
+                    <h3 class="text-lg font-semibold mb-2">No transactions found</h3>
+                  </div>
+                </div>
+              </div>
+            {{/if}}
+
+            <!-- Pagination -->
+            {{#if pagination}}
+              <div class="card mt-6">
+                <div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+                  <div class="flex items-center space-x-2">
+                    <label for="paginator" class="text-sm text-qrl-text-secondary">Page</label>
+                    <input type="text" placeholder="{{currentPage}}" id="paginator" class="w-16 px-2 py-1 bg-qrl-secondary border border-qrl-border rounded text-qrl-text text-center">
+                    <span class="text-sm text-qrl-text-secondary">of {{totalPages}}</span>
+                  </div>
+                  <div class="flex items-center space-x-1">
+                    {{#if pback}}
+                      <button qrl-data="back" class="px-3 py-1 text-sm border border-qrl-border rounded hover:bg-qrl-secondary text-qrl-text">
+                        ←
+                      </button>
+                    {{/if}}
+                    {{#each pages}}
+                      <button class="px-3 py-1 text-sm border border-qrl-border rounded hover:bg-qrl-secondary text-qrl-text {{#if isActive}}bg-qrl-accent text-qrl-primary{{/if}}">
+                        {{this.number}}
+                      </button>
+                    {{/each}}
+                    {{#if pforward}}
+                      <button qrl-data="forward" class="px-3 py-1 text-sm border border-qrl-border rounded hover:bg-qrl-secondary text-qrl-text">
+                        →
+                      </button>
+                    {{/if}}
+                  </div>
+                </div>
+              </div>
+            {{/if}}
+          </div>
+
+          <!-- Token Balances Tab -->
+          <div class="tab-content" data-tab="tokenBalances">
+            <h2 class="text-xl font-bold text-qrl-text mb-4">Token Balances</h2>
+
+            <div id="tokenBalancesLoading" class="card">
+              <div class="flex items-center justify-center py-12">
+                <div class="text-center">
+                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
+                  <div class="text-qrl-text-secondary">
+                    <div class="font-semibold mb-2">Just a moment</div>
+                    <p>Token balances are loading...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              {{#if ownTokens}}
+                {{#each tokensHeld}}
+                  {{#unless heldTokenIsNFT}}
+                    <div class="card hover:bg-qrl-secondary/80 transition-colors duration-200">
+                      <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-qrl-primary" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                        </div>
+                        <div class="flex-1">
+                          <h3 class="text-lg font-semibold text-qrl-text">
+                            <a href="/tx/{{this.hash}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                              {{this.name}} ({{this.symbol}})
+                            </a>
+                          </h3>
+                          <p class="text-qrl-text-secondary">{{this.balance}}</p>
+                        </div>
+                      </div>
+                    </div>
+                  {{/unless}}
+                {{/each}}
+              {{else}}
+                <div class="text-center py-8 text-qrl-text-secondary">
+                  No tokens owned
+                </div>
+              {{/if}}
+            </div>
+          </div>
+
+          <!-- NFTs Tab -->
+          <div class="tab-content" data-tab="nftBalances">
+            <h2 class="text-xl font-bold text-qrl-text mb-4">NFTs</h2>
+
+            <div id="nftBalancesLoading" class="card">
+              <div class="flex items-center justify-center py-12">
+                <div class="text-center">
+                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
+                  <div class="text-qrl-text-secondary">
+                    <div class="font-semibold mb-2">Just a moment</div>
+                    <p>NFTs are loading...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              {{#if ownNFTs}}
+                {{#each tokensHeld}}
+                  {{#if heldTokenIsNFT}}
+                    <div class="card hover:bg-qrl-secondary/80 transition-colors duration-200">
+                      <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-qrl-primary" fill="currentColor" viewBox="0 0 20 20">
+                              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                        </div>
+                        <div class="flex-1">
+                          <h3 class="text-lg font-semibold text-qrl-text">
+                            {{#if this.nft.providerDetails.known}}
+                              <a href="{{this.nft.providerDetails.url}}/{{this.nft.txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                {{this.nft.providerDetails.name}} (0x{{this.nft.id}})
+                              </a>
+                              <svg class="inline-block w-4 h-4 text-qrl-accent ml-1" fill="currentColor" viewBox="0 0 20 20" title="Verified NFT Provider">
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                              </svg>
+                              <span class="text-sm text-qrl-text-secondary">Verified Provider</span>
+                            {{else}}
+                              <svg class="inline-block w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20" title="Unverified NFT Provider">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                              </svg>
+                              <span class="text-yellow-400">Unverified Provider (0x{{this.nft.id}})</span>
+                            {{/if}}
+                          </h3>
+                          <p class="text-qrl-text-secondary">
+                            <a href="/tx/{{this.nft.txhash}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono break-all">
+                              {{this.nft.txhash}}
+                            </a>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  {{/if}}
+                {{/each}}
+              {{else}}
+                <div class="text-center py-8 text-qrl-text-secondary">
+                  No NFTs owned
+                </div>
+              {{/if}}
+            </div>
+          </div>
+
+          <!-- OTS Tracker Tab -->
+          <div class="tab-content" data-tab="otsTrackerTab">
+            <h2 class="text-xl font-bold text-qrl-text mb-4">OTS Tracker</h2>
+            <div class="card border-yellow-500/30 bg-yellow-500/10 mb-6">
+              <div class="flex items-start space-x-3">
+                <div class="flex-shrink-0">
+                  <svg class="h-6 w-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="text-lg font-semibold text-yellow-400 mb-2">Warning</h4>
+                  <p class="text-yellow-300 mb-2">The OTS tracker uses the blockchain to determine OTS key usage. It will not account for transactions which have not yet been confirmed into the blockchain.</p>
+                  <p class="text-yellow-300">More about OTS key use is contained in the <a href="https://docs.theqrl.org" class="text-yellow-200 hover:text-yellow-100 underline">documentation</a></p>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="grid grid-cols-10 gap-1 text-xs">
+                {{{OTStracker}}}
+              </div>
+            </div>
+          </div>
+
+          <!-- Slaves Tab -->
+          <div class="tab-content" data-tab="slavesTab">
+            <h2 class="text-xl font-bold text-qrl-text mb-4">Slave Addresses</h2>
+            {{#if hasSlaves}}
+              <div class="space-y-2">
+                {{#each slaves}}
+                  <div class="card hover:bg-qrl-secondary/80 transition-colors duration-200">
+                    <div class="slave-address">
+                      <a href="/a/{{this.slave_address}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono break-all">
+                        {{this.slave_address}}
+                      </a>
+                    </div>
+                  </div>
+                {{/each}}
+              </div>
+            {{else}}
+              <div class="text-center py-8 text-qrl-text-secondary">
+                None found for this address
+              </div>
             {{/if}}
           </div>
         </div>
-        {{/each}}
-        {{else}}
-          No NFTs owned
-        {{/if}}
-      </div>
-    </div>
-
-    <div class="ui bottom attached tab segment" data-tab="otsTrackerTab">
-        <h4>Warning</h4>
-        <p>The OTS tracker uses the blockchain to determine OTS key usage. It will not account for transactions which have not yet been confirmed into the blockchain.</p>
-        <p>More about OTS key use is contained in the <a href="https://docs.theqrl.org">documentation</a></p>
-        <div class="ui ten column celled grid">
-        {{{OTStracker}}}
-      </div>
-    </div>
-    
-    <div class="ui bottom attached tab segment" data-tab="slavesTab">
-      <h4>Slave addresses</h4>
-      {{#if hasSlaves}}
-      <div class="ui bulleted list">
-        {{#each slaves}}<div class="ui item slave-address"><a href="/a/{{this.slave_address}}">{{this.slave_address}}</a></div>{{/each}}
-        </div>
-        {{else}}
-        <p>None found for this address</p>
       {{/if}}
-  </div>
 
+      <!-- JSON Metadata -->
+      <div class="card">
+        <button class="flex items-center space-x-2 text-qrl-accent hover:text-qrl-accent/80 jsonclick">
+          <span>Meta</span>
+          <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div class="jsonbox json mt-4 p-4 bg-qrl-secondary/50 rounded overflow-auto" style="display: none">
+          <!-- JSON content will be populated by JavaScript -->
+        </div>
+      </div>
     {{/if}}
-    
-    <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
-    <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
-    
-</div>
-{{/if}}
+  </div>
 </template>

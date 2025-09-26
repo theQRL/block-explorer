@@ -1,360 +1,558 @@
 <template name="tx">
-  {{#if notFound}}
-    <h3 class="ui pageHeader header">
-      <i class="tiny plus icon"></i>
-      <div class="content wordBreak">
-        Transaction {{tx.parameter}}
-      </div>
-    </h3>
-    <div class="ui negative message">
-      <i class="close icon"></i>
-      Transaction <span class="hack">{{id}}</span> not found
-    </div>
-  {{/if}}
-{{#with tx}}
-    {{#if error}}
-    <h3 class="ui pageHeader header">
-      <i class="tiny plus icon"></i>
-      <div class="content wordBreak">
-        Transaction {{tx.parameter}}
-      </div>
-    </h3>
-    <div class="ui negative message">
-      <i class="close icon"></i>
-      <div class="header">
-        Error reading transaction
-      </div>
-      <p>{{tx.error}}</p>
-    </div>
-    {{else}}
-      <h3 class="ui pageHeader header">
-        <i class="tiny plus icon"></i>
-        <div class="content wordBreak">
-          Transaction {{tx.tx.transaction_hash}}
-        </div>
-      </h3>
-
-      <div id="txnPageSegment" class="ui segment pageSegment">
-
-        <div class="description">
-          <div class="ui celled horizontal list">
-            <div class="item"><strong>Confirmations</strong> {{#if isConfirmed}} {{confirmations}} confirmations {{else}}Unconfirmed{{/if}}</div>
-            <div class="item"><strong>Block</strong> <a href="/block/{{tx.header.block_number}}">{{tx.header.block_number}}</a></div>
-            <div class="item"><strong>Nonce</strong> {{tx.tx.nonce}}</div>
-            <div class="item"><strong>OTS key</strong> {{ots_key}}</div>
-            <div class="item"><strong>Fee</strong> {{tx.tx.fee}} Quanta</div>
-            <div class="item"><strong>Size</strong> {{txSize}}</div>            
-            <div class="item"><strong>Status</strong> {{#if isConfirmed}} OK <i class="ui green circle icon"></i> {{ts}} {{else}} Unconfirmed <!-- - First Seen: {{ts}} --><i class="ui yellow circle icon"></i>{{/if}}</div>
+  <div class="space-y-6">
+    {{#if notFound}}
+      <div class="card border-red-500/30 bg-red-500/10">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
           </div>
-          <div class="ui hidden divider"></div>
+          <div>
+            <h3 class="text-lg font-semibold text-red-400 mb-2">
+              Transaction Not Found
+            </h3>
+            <p class="text-red-300 break-all">
+              Transaction <span class="font-mono">{{id}}</span> not found
+            </p>
+          </div>
         </div>
+      </div>
+    {{/if}}
 
-        <div class="ui bottom attached tab segment active">
-          <div class="ui stackable grid">
-            <div class="sixteen wide column">
-              <div class="ui basic center aligned segment">
-                <div class="ui statistic">
+    {{#with tx}}
+      {{#if error}}
+        <div class="card border-red-500/30 bg-red-500/10">
+          <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-red-400 mb-2">
+                Error reading transaction
+              </h3>
+              <p class="text-red-300">{{tx.error}}</p>
+            </div>
+          </div>
+        </div>
+      {{else}}
+        <!-- Transaction Header -->
+        <div class="card">
+          <h3 class="text-2xl font-bold text-qrl-text mb-6 flex items-center">
+            <svg class="w-8 h-8 mr-3 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            Transaction {{tx.tx.transaction_hash}}
+          </h3>
 
-                  <div class="label">
-                    <div class="ui {{color}} label">{{explorer.type}}{{#if isTokenTransfer}}{{#if isTransferNFT}}{{else}}: {{explorer.symbol}} {{/if}}{{/if}}</div>
-                  </div>
-                  {{#if isNotMultiSig}}
-                  {{#if isNotMessage}}
-                  {{#if isNotLattice}}
-                    {{#if isToken}}
-                      <strong>{{explorer.name}} ({{explorer.symbol}})</strong><br />
-                      owned by:<br />
-                      <a href="/a/{{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}">{{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}</a>
-                    {{else}}
-                      {{#if isTokenTransfer}}
-                        {{#if isTransferNFT}}
-                        {{#if knownProvider}}
-                        <p>
-                          <i class="ui certificate icon"></i>Verified provider:
-                          <a href="{{providerURL}}/{{explorer.token_txhash}}">{{providerName}}</a> ({{providerID}})
-                        </p>
-                        {{else}}
-                        <p>
-                          <i class="ui warning icon"></i>Unverified provider:
-                          {{providerID}}
-                        </p>
-                        {{/if}}
-                        
-                        <div class="value">{{explorer.totalTransferred}}</div>
-                        
-                        NFT transferred<br /><br />
-                        <div class="label">NFT creation transaction: </div>
-                        <a href="/tx/{{explorer.token_txhash}}" class="unbreakable" style="word-break: break-all;">{{explorer.token_txhash}}</a>
-                        {{#if knownProvider}}
-                          <a href="{{providerURL}}/{{explorer.token_txhash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>
-                        {{/if}}
-                        {{else}}
-                        <div class="value">{{explorer.totalTransferred}}</div>
-                        {{explorer.symbol}} ({{explorer.name}})<br />
-                        tokens transferred
-                        <div class="label">Token creation transaction: </div>
-                        <a href="/tx/{{explorer.token_txhash}}" class="unbreakable">{{explorer.token_txhash}}</a>
-                        {{/if}}
-                        {{else}}
-                        {{#if isCreateNFT}}
-                        <!-- NFT -->
-                        {{else}}
-                        <div class="value" data-html="<div class='content'>USD ${{qrl}}</div>">
-                          {{tx.tx.amount}}
-                        </div>
-                        <div class="label">
-                          Quanta<br><small>USD ${{qrl}}</small>
-                        </div>
-                        {{/if}}
-                      {{/if}}
-                      {{/if}}
-                    {{/if}}
-                  {{/if}}
-                  {{else}}
-                  {{#if isMultiSigSpend }}
-                    <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigSpendAddress}}">{{multiSigSpendAddress}}</a></div></div>
-                  {{else}}
-                        {{#if isMultiSigVote }}
-                        <!-- nil -->
-                        {{else}}
-  <div class="ui large horizontal list wordBreak f-h"><div class="item"><a href="/a/{{multiSigAddress}}">{{multiSigAddress}}</a></div></div>
-                          {{/if}}
-                      {{/if}}
-                  {{/if}}
-                </div>
+          <!-- Transaction Details Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Confirmations</div>
+              <div class="text-lg font-mono text-qrl-text">
+                {{#if isConfirmed}} {{confirmations}} confirmations {{else}}Unconfirmed{{/if}}
+              </div>
+            </div>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Block</div>
+              <div class="text-lg font-mono text-qrl-text">
+                <a href="/block/{{tx.header.block_number}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{tx.header.block_number}}
+                </a>
+              </div>
+            </div>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Nonce</div>
+              <div class="text-lg font-mono text-qrl-text">{{tx.tx.nonce}}</div>
+            </div>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">OTS Key</div>
+              <div class="text-lg font-mono text-qrl-text">{{ots_key}}</div>
+            </div>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Fee</div>
+              <div class="text-lg font-mono text-qrl-text">{{tx.tx.fee}} Quanta</div>
+            </div>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Size</div>
+              <div class="text-lg font-mono text-qrl-text">{{txSize}}</div>
+            </div>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Status</div>
+              <div class="text-lg font-mono text-qrl-text flex items-center">
+                {{#if isConfirmed}}
+                  <svg class="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                  </svg>
+                  OK {{ts}}
+                {{else}}
+                  <svg class="w-4 h-4 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd"></path>
+                  </svg>
+                  Unconfirmed
+                {{/if}}
               </div>
             </div>
           </div>
+        </div>
 
-          {{#if isToken}}
-            <h4>Initial balances</h4>
-            <table class="ui stackable table">
-              <thead>
-                <th>Address</th>
-                <th>Balance</th>
-              </thead>
-              <tbody>
-                {{#each explorer.initialBalances}}
-                  <tr>
-                    <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
-                    <td>{{this.amount}}</td>
-                  </tr>
-                {{/each}}
-              </tbody>
-            </table>
-          {{else}}
-            {{#if isNotCoinbase}}
-              <table class="ui stackable table">
-                <tbody>
-                  <tr>
-                    <td class="single line">
-                      <div class="ui red label"><i class="sign out icon"></i>
-                        {{#if isMultiSigSpend }}initiated by{{else}}from{{/if}}
+        <!-- Transaction Content -->
+        <div class="card">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Transaction Type and Amount -->
+            <div class="text-center">
+              <div class="bg-qrl-secondary/50 rounded-lg p-6">
+                <div class="mb-4">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{#if isTransfer}}bg-yellow-100 text-yellow-800{{else}}{{#if isTokenTransfer}}bg-blue-100 text-blue-800{{else}}bg-gray-100 text-gray-800{{/if}}{{/if}}">
+                    {{explorer.type}}{{#if isTokenTransfer}}{{#if isTransferNFT}}{{else}}: {{explorer.symbol}} {{/if}}{{/if}}
+                  </span>
+                </div>
+
+                {{#if isNotMultiSig}}
+                  {{#if isNotMessage}}
+                    {{#if isNotLattice}}
+                      {{#if isToken}}
+                        <div class="text-lg font-semibold text-qrl-text mb-2">
+                          <strong>{{explorer.name}} ({{explorer.symbol}})</strong>
+                        </div>
+                        <div class="text-qrl-text-secondary mb-2">owned by:</div>
+                        <div class="font-mono text-qrl-accent">
+                          <a href="/a/{{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}" class="hover:text-qrl-accent/80">
+                            {{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}
+                          </a>
+                        </div>
+                      {{else}}
+                        {{#if isTokenTransfer}}
+                          {{#if isTransferNFT}}
+                            {{#if knownProvider}}
+                              <div class="mb-4">
+                                <svg class="inline-block w-5 h-5 text-qrl-accent mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Verified provider:
+                                <a href="{{providerURL}}/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{providerName}}</a> ({{providerID}})
+                              </div>
+                            {{else}}
+                              <div class="mb-4">
+                                <svg class="inline-block w-5 h-5 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                Unverified provider: {{providerID}}
+                              </div>
+                            {{/if}}
+                            
+                            <div class="text-2xl font-bold text-qrl-text mb-2">{{explorer.totalTransferred}}</div>
+                            <div class="text-qrl-text-secondary mb-4">NFT transferred</div>
+                            
+                            <div class="text-sm text-qrl-text-secondary mb-2">NFT creation transaction:</div>
+                            <div class="font-mono text-sm break-all mb-4">
+                              <a href="/tx/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{explorer.token_txhash}}</a>
+                            </div>
+                            
+                            {{#if knownProvider}}
+                              <a href="{{providerURL}}/{{explorer.token_txhash}}" class="btn-primary">
+                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                View at {{providerName}}
+                              </a>
+                            {{/if}}
+                          {{else}}
+                            <div class="text-2xl font-bold text-qrl-text mb-2">{{explorer.totalTransferred}}</div>
+                            <div class="text-qrl-text-secondary mb-2">{{explorer.symbol}} ({{explorer.name}}) tokens transferred</div>
+                            
+                            <div class="text-sm text-qrl-text-secondary mb-2">Token creation transaction:</div>
+                            <div class="font-mono text-sm break-all">
+                              <a href="/tx/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{explorer.token_txhash}}</a>
+                            </div>
+                          {{/if}}
+                        {{else}}
+                          {{#if isCreateNFT}}
+                            <!-- NFT Creation -->
+                          {{else}}
+                            <div class="text-2xl font-bold text-qrl-text mb-2" title="USD ${{qrl}}">
+                              {{tx.tx.amount}}
+                            </div>
+                            <div class="text-qrl-text-secondary">
+                              Quanta<br><small>USD ${{qrl}}</small>
+                            </div>
+                          {{/if}}
+                        {{/if}}
+                      {{/if}}
+                    {{/if}}
+                  {{else}}
+                    {{#if isMultiSigSpend}}
+                      <div class="text-lg font-mono text-qrl-accent break-all">
+                        <a href="/a/{{multiSigSpendAddress}}" class="hover:text-qrl-accent/80">{{multiSigSpendAddress}}</a>
                       </div>
-                    </td>
-                    <td><a href="/a/{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}">{{# if bech32 }}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</a></td>
-                  </tr>
-                </tbody>
-              </table>
-            {{/if}}
+                    {{else}}
+                      {{#if isMultiSigVote}}
+                        <!-- MultiSig Vote -->
+                      {{else}}
+                        <div class="text-lg font-mono text-qrl-accent break-all">
+                          <a href="/a/{{multiSigAddress}}" class="hover:text-qrl-accent/80">{{multiSigAddress}}</a>
+                        </div>
+                      {{/if}}
+                    {{/if}}
+                  {{/if}}
+                {{/if}}
+              </div>
+            </div>
 
-            {{#if isMessage}}
-              <h3>Message</h3>
-              <p><pre>{{explorer.message}}</pre></p>
-            {{else}}
-              {{#if isDocumentNotarisation}}
-                <h3>Document Notarisation</h3>
-                <span>Notary <a class="ui">{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</a></span>
-                <br />
-                <span>Hash Function <a class="ui">{{explorer.hash_function}}</a></span>
-                <br />
-                <span>File Hash <a class="ui">{{explorer.hash}}</a></span>
-                <br />
-                <span>Additional Text <a class="ui">{{explorer.text}}</a></span>
-                <br /><br />
-                <h3>Verify Notarisation</h3>
-                <form id="notariseVerificationForm" class="ui form">
-                  <div class="field">
-                    <label>Select Document</label>
-                    <input type="file" id="notaryDocument" accept="text/json" name="notaryDocument[]" />
-                  </div>
-                  <div class="field">
-                    <button id="verifyNotarisation" class="ui huge primary button red" style="float: left;">Verify Notarisation</button>
-                    <br />
-                  </div>
-                </form>
-
-                <br /><br />
-
-                <div id="documentVerified" class="ui green segment pageSegment" style="display: none;">
-                  <h4>Document Verified</h4>
-                  <p style="word-wrap: break-word; word-break: break-all;">
-                    {{documentNotarisationVerificationMessage}}
-                  </p>
-                </div>
-                <div id="documentVerifcationFailed" class="ui red segment pageSegment" style="display: none;">
-                  <h4>Document Verification Failed</h4>
-                  <p style="word-wrap: break-word; word-break: break-all;">Error: {{documentNotarisationError}}</p>
-                </div>
-
-                <br /><br />
-              {{else}}
-                {{#if isKeybase}}
-                    <h4>Keybase Message Transaction</h4>
-                    <table class="ui stackable table">
-                      <thead>
-                        <th>Action</th>
-                        <th>Keybase User ID</th>
-                        <th>Keybase Hash</th>
-                      </thead>
-                      <tbody>
+            <!-- Transaction Details -->
+            <div class="space-y-6">
+              {{#if isToken}}
+                <!-- Token Initial Balances -->
+                <div>
+                  <h4 class="text-lg font-semibold text-qrl-text mb-4">Initial Balances</h4>
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-qrl-border">
+                      <thead class="bg-qrl-primary/50">
                         <tr>
-                          <td>{{this.explorer.keybaseType}}</td>
-                          <td>{{this.explorer.keybaseUser}}</td>
-                          <td>{{this.explorer.keybaseHex}}</td>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+                          <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Balance</th>
                         </tr>
+                      </thead>
+                      <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
+                        {{#each explorer.initialBalances}}
+                          <tr>
+                            <td class="px-4 py-2 text-sm font-mono">
+                              <a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                {{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                              </a>
+                            </td>
+                            <td class="px-4 py-2 text-sm text-qrl-text">{{this.amount}}</td>
+                          </tr>
+                        {{/each}}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              {{else}}
+                {{#if isNotCoinbase}}
+                  <!-- From Address -->
+                  <div class="bg-qrl-primary/50 rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                      <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                      <span class="text-sm font-medium text-qrl-text-secondary">
+                        {{#if isMultiSigSpend}}initiated by{{else}}from{{/if}}
+                      </span>
+                    </div>
+                    <div class="font-mono text-sm text-qrl-text break-all">
+                      <a href="/a/{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                        {{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                      </a>
+                    </div>
+                  </div>
+                {{/if}}
+
+                {{#if isMessage}}
+                  <!-- Message Content -->
+                  <div class="bg-qrl-primary/50 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-qrl-text mb-3">Message</h3>
+                    <pre class="text-sm text-qrl-text font-mono whitespace-pre-wrap">{{explorer.message}}</pre>
+                  </div>
                 {{else}}
-                {{#if isMultiSigCreate}}
-                  <h4>Signatories</h4>
-                  <table class="ui table">
-                    <thead><th>Address</th><th>Weight</th></thead>
-                    <tbody>
-                      {{#each multiSigSignatories this.tx.multi_sig_create}}
-                      <tr>
-                      <td>
-                        <!-- {{# if bech32}}{{ this.address_b32 }}{{else}} -->
-                        {{ this.address_hex}}
-                        <!-- {{/if}} -->
-                      </td>
-                      <td>{{ this.weight }}</td>
-                      </tr>
-                      {{/each}}
-                    </tbody>
-                    <tfoot>
-                      <th>Threshold for spend</th>
-                      <th>{{ this.tx.multi_sig_create.threshold }}</th>
-                    </tfoot>
-                  </table>
-                {{else}}
-                {{#if isMultiSigVote}}
-                <table class="ui table">
-                  <tr>
-                    <td><strong>Spend transaction</strong></td>
-                    <td style="font-family: Hack;"><a href="/tx/{{ this.tx.multi_sig_vote.shared_key }}">{{ this.tx.multi_sig_vote.shared_key }}</a></td>
-                  </tr>
-                  <tr>
-                      <td><strong>Vote status</strong></td>
-                      <td>{{ #if this.tx.multi_sig_vote.unvote }}Vote REJECT spend{{else}}Vote APPROVE spend{{/if}}</td>
-                  </tr>
-                </table>
-                {{else}}
-                  {{#if isLattice}}
-                  <table class="ui stackable celled table">
-                    <tr>
-                      <td style="text-align: right;" width="30%"><strong>PK1</strong></td><td>{{bf this.tx.latticePK.pk1}}</td>
-                    </tr>
-                    <tr>
-                      <td style="text-align: right;" width="30%"><strong>PK2</strong></td><td>{{bf this.tx.latticePK.pk2}}</td>
-                    </tr>
-                    <tr>
-                      <td style="text-align: right;" width="30%"><strong>PK3</strong></td><td>{{bf this.tx.latticePK.pk3}}</td>
-                    </tr>
-                </table>
-                <table class="ui stackable celled table">
-                  <tr>
-                    <td style="text-align: right;" width="30%"><strong>public_key</strong></td><td>{{bf this.tx.public_key}}</td>
-                  </tr>
-                  <tr>
-                    <td style="text-align: right;" width="30%"><strong>signature</strong></td><td>{{bf this.tx.signature}}</td>
-                  </tr>
-              </table>
-                  {{else}}
-                    {{#if isCreateNFT}}
-                        {{#if knownProvider}}
-                        <i class="ui certificate icon"></i>Verified
-                        {{else}}
-                        <i class="ui warning icon"></i>Unverified
-                        {{/if}}
-                        provider: 
-                        {{#if knownProvider}}
-                        <a href="{{providerURL}}/{{tx.tx.transaction_hash}}">{{providerName}}</a> ({{providerID}})
-                        {{else}}
-                        {{providerID}}
-                        {{/if}}
-                        <p style="word-break: break-all;">Hash: {{nftHash}}</p>
-                        <div>
-                          {{#if knownProvider}}
-                            <a href="{{providerURL}}/{{tx.tx.transaction_hash}}"><button class="ui red button"><i class="ui eye icon"></i>View at {{providerName}}</button></a>
-                          {{else}}
-                            Contact your NFT provider
-                          {{/if}}
+                  {{#if isDocumentNotarisation}}
+                    <!-- Document Notarisation -->
+                    <div class="space-y-6">
+                      <div class="bg-qrl-primary/50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-qrl-text mb-4">Document Notarisation</h3>
+                        <div class="space-y-3 text-sm">
+                          <div>
+                            <span class="font-medium text-qrl-text-secondary">Notary:</span>
+                            <span class="font-mono text-qrl-text">{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</span>
+                          </div>
+                          <div>
+                            <span class="font-medium text-qrl-text-secondary">Hash Function:</span>
+                            <span class="font-mono text-qrl-text">{{explorer.hash_function}}</span>
+                          </div>
+                          <div>
+                            <span class="font-medium text-qrl-text-secondary">File Hash:</span>
+                            <span class="font-mono text-qrl-text break-all">{{explorer.hash}}</span>
+                          </div>
+                          <div>
+                            <span class="font-medium text-qrl-text-secondary">Additional Text:</span>
+                            <span class="font-mono text-qrl-text">{{explorer.text}}</span>
+                          </div>
                         </div>
-                        <p>&nbsp;</p>
+                      </div>
+
+                      <!-- Verification Form -->
+                      <div class="bg-qrl-primary/50 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-qrl-text mb-4">Verify Notarisation</h3>
+                        <form id="notariseVerificationForm" class="space-y-4">
+                          <div>
+                            <label class="block text-sm font-medium text-qrl-text-secondary mb-2">Select Document</label>
+                            <input type="file" id="notaryDocument" accept="text/json" name="notaryDocument[]" class="w-full px-3 py-2 bg-qrl-secondary border border-qrl-border rounded text-qrl-text" />
+                          </div>
+                          <div>
+                            <button id="verifyNotarisation" class="btn-primary">
+                              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                              </svg>
+                              Verify Notarisation
+                            </button>
+                          </div>
+                        </form>
+
+                        <!-- Verification Results -->
+                        <div id="documentVerified" class="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg hidden">
+                          <h4 class="text-lg font-semibold text-green-400 mb-2">Document Verified</h4>
+                          <p class="text-green-300 break-all">{{documentNotarisationVerificationMessage}}</p>
+                        </div>
+                        <div id="documentVerifcationFailed" class="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg hidden">
+                          <h4 class="text-lg font-semibold text-red-400 mb-2">Document Verification Failed</h4>
+                          <p class="text-red-300 break-all">Error: {{documentNotarisationError}}</p>
+                        </div>
+                      </div>
+                    </div>
+                  {{else}}
+                    {{#if isKeybase}}
+                      <!-- Keybase Message -->
+                      <div class="bg-qrl-primary/50 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-qrl-text mb-4">Keybase Message Transaction</h4>
+                        <div class="overflow-x-auto">
+                          <table class="min-w-full divide-y divide-qrl-border">
+                            <thead class="bg-qrl-secondary">
+                              <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Action</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Keybase User ID</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Keybase Hash</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td class="px-4 py-2 text-sm text-qrl-text">{{this.explorer.keybaseType}}</td>
+                                <td class="px-4 py-2 text-sm text-qrl-text">{{this.explorer.keybaseUser}}</td>
+                                <td class="px-4 py-2 text-sm text-qrl-text font-mono">{{this.explorer.keybaseHex}}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
                     {{else}}
-                  <h3>To</h3>
-                  <table class="ui stackable table">
-                    <thead>
-                      <th>Address</th>
-                      <th>Amount</th>
-                    </thead>
-                    <tbody>
-                      {{#if isTransfer}}
-                        {{#each explorer.outputs}}
-                          <tr>
-                            <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
-                            <td class="tc-w">{{this.amount}}</td>
-                          </tr>
-                        {{/each}}
-                      {{else if isTokenTransfer}}
-                        {{#each explorer.outputs}}
-                          <tr>
-                            <td><a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}">{{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}</a></td>
-                            <td class="tc-w">{{this.amount}}</td>
-                          </tr>
-                        {{/each}}
-                      {{else if isMultiSigSpend }}
-                      {{#each mso this.tx.multi_sig_spend}}
-                      <tr>
-                        <td><a href="/a/{{this.address}}">{{this.address}}</a></td>
-                        <td class="tc-w" style="word-break: keep-all">{{this.amount}} Quanta</td>
-                      </tr>
-                    {{/each}}
+                      {{#if isMultiSigCreate}}
+                        <!-- MultiSig Signatories -->
+                        <div class="bg-qrl-primary/50 rounded-lg p-4">
+                          <h4 class="text-lg font-semibold text-qrl-text mb-4">Signatories</h4>
+                          <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-qrl-border">
+                              <thead class="bg-qrl-secondary">
+                                <tr>
+                                  <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+                                  <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Weight</th>
+                                </tr>
+                              </thead>
+                              <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
+                                {{#each multiSigSignatories this.tx.multi_sig_create}}
+                                  <tr>
+                                    <td class="px-4 py-2 text-sm font-mono text-qrl-text">{{ this.address_hex}}</td>
+                                    <td class="px-4 py-2 text-sm text-qrl-text">{{ this.weight }}</td>
+                                  </tr>
+                                {{/each}}
+                              </tbody>
+                              <tfoot class="bg-qrl-secondary">
+                                <tr>
+                                  <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary">Threshold for spend</th>
+                                  <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text">{{ this.tx.multi_sig_create.threshold }}</th>
+                                </tr>
+                              </tfoot>
+                            </table>
+                          </div>
+                        </div>
                       {{else}}
-                        <tr>
-                          <td><a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}">{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}</a>  </td>
-                          <td class="tc-w" style="word-break: keep-all">{{tx.tx.amount}}</td>
-                        </tr>
+                        {{#if isMultiSigVote}}
+                          <!-- MultiSig Vote -->
+                          <div class="bg-qrl-primary/50 rounded-lg p-4">
+                            <div class="space-y-3">
+                              <div>
+                                <span class="font-medium text-qrl-text-secondary">Spend transaction:</span>
+                                <div class="font-mono text-sm text-qrl-text break-all">
+                                  <a href="/tx/{{ this.tx.multi_sig_vote.shared_key }}" class="text-qrl-accent hover:text-qrl-accent/80">{{ this.tx.multi_sig_vote.shared_key }}</a>
+                                </div>
+                              </div>
+                              <div>
+                                <span class="font-medium text-qrl-text-secondary">Vote status:</span>
+                                <span class="text-qrl-text">
+                                  {{ #if this.tx.multi_sig_vote.unvote }}Vote REJECT spend{{else}}Vote APPROVE spend{{/if}}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        {{else}}
+                          {{#if isLattice}}
+                            <!-- Lattice Public Key -->
+                            <div class="space-y-4">
+                              <div class="bg-qrl-primary/50 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-qrl-text mb-4">Lattice Public Key</h4>
+                                <div class="space-y-3 text-sm">
+                                  <div>
+                                    <span class="font-medium text-qrl-text-secondary">PK1:</span>
+                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.latticePK.pk1}}</div>
+                                  </div>
+                                  <div>
+                                    <span class="font-medium text-qrl-text-secondary">PK2:</span>
+                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.latticePK.pk2}}</div>
+                                  </div>
+                                  <div>
+                                    <span class="font-medium text-qrl-text-secondary">PK3:</span>
+                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.latticePK.pk3}}</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="bg-qrl-primary/50 rounded-lg p-4">
+                                <div class="space-y-3 text-sm">
+                                  <div>
+                                    <span class="font-medium text-qrl-text-secondary">Public Key:</span>
+                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.public_key}}</div>
+                                  </div>
+                                  <div>
+                                    <span class="font-medium text-qrl-text-secondary">Signature:</span>
+                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.signature}}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          {{else}}
+                            {{#if isCreateNFT}}
+                              <!-- NFT Creation -->
+                              <div class="bg-qrl-primary/50 rounded-lg p-4">
+                                <div class="flex items-center mb-4">
+                                  {{#if knownProvider}}
+                                    <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Verified
+                                  {{else}}
+                                    <svg class="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Unverified
+                                  {{/if}}
+                                  <span class="text-qrl-text">provider:</span>
+                                </div>
+                                <div class="text-sm text-qrl-text-secondary mb-2">
+                                  {{#if knownProvider}}
+                                    <a href="{{providerURL}}/{{tx.tx.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{providerName}}</a> ({{providerID}})
+                                  {{else}}
+                                    {{providerID}}
+                                  {{/if}}
+                                </div>
+                                <div class="text-sm text-qrl-text-secondary mb-2">Hash: <span class="font-mono break-all">{{nftHash}}</span></div>
+                                <div class="mt-4">
+                                  {{#if knownProvider}}
+                                    <a href="{{providerURL}}/{{tx.tx.transaction_hash}}" class="btn-primary">
+                                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                      </svg>
+                                      View at {{providerName}}
+                                    </a>
+                                  {{else}}
+                                    <span class="text-qrl-text-secondary">Contact your NFT provider</span>
+                                  {{/if}}
+                                </div>
+                              </div>
+                            {{else}}
+                              <!-- Transaction Outputs -->
+                              <div class="bg-qrl-primary/50 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold text-qrl-text mb-4">To</h3>
+                                <div class="overflow-x-auto">
+                                  <table class="min-w-full divide-y divide-qrl-border">
+                                    <thead class="bg-qrl-secondary">
+                                      <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary uppercase">Amount</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
+                                      {{#if isTransfer}}
+                                        {{#each explorer.outputs}}
+                                          <tr>
+                                            <td class="px-4 py-2 text-sm font-mono">
+                                              <a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                                {{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                                              </a>
+                                            </td>
+                                            <td class="px-4 py-2 text-sm text-qrl-text">{{this.amount}}</td>
+                                          </tr>
+                                        {{/each}}
+                                      {{else if isTokenTransfer}}
+                                        {{#each explorer.outputs}}
+                                          <tr>
+                                            <td class="px-4 py-2 text-sm font-mono">
+                                              <a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                                {{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                                              </a>
+                                            </td>
+                                            <td class="px-4 py-2 text-sm text-qrl-text">{{this.amount}}</td>
+                                          </tr>
+                                        {{/each}}
+                                      {{else if isMultiSigSpend}}
+                                        {{#each mso this.tx.multi_sig_spend}}
+                                          <tr>
+                                            <td class="px-4 py-2 text-sm font-mono">
+                                              <a href="/a/{{this.address}}" class="text-qrl-accent hover:text-qrl-accent/80">{{this.address}}</a>
+                                            </td>
+                                            <td class="px-4 py-2 text-sm text-qrl-text">{{this.amount}} Quanta</td>
+                                          </tr>
+                                        {{/each}}
+                                      {{else}}
+                                        <tr>
+                                          <td class="px-4 py-2 text-sm font-mono">
+                                            <a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                              {{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}
+                                            </a>
+                                          </td>
+                                          <td class="px-4 py-2 text-sm text-qrl-text">{{tx.tx.amount}}</td>
+                                        </tr>
+                                      {{/if}}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            {{/if}}
+                          {{/if}}
+                        {{/if}}
                       {{/if}}
-                    </tbody>
-                  </table>
-                  {{/if}}
-                  {{/if}}
-                  {{/if}}
+                    {{/if}}
                   {{/if}}
                 {{/if}}
               {{/if}}
-            {{/if}}
-          {{/if}}
-          {{#if hasMessage}}
-          <table class="ui stackable table">
-            <thead>
-              <th>Message</th>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{{tfMessage}}</td>
-              </tr>
-            </tbody>
-            </table>
-          {{/if}}
-          <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
-          <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
+
+              {{#if hasMessage}}
+                <!-- Transfer Message -->
+                <div class="bg-qrl-primary/50 rounded-lg p-4">
+                  <h3 class="text-lg font-semibold text-qrl-text mb-3">Message</h3>
+                  <div class="text-sm text-qrl-text font-mono whitespace-pre-wrap">{{tfMessage}}</div>
+                </div>
+              {{/if}}
+            </div>
+          </div>
+
+          <!-- JSON Metadata -->
+          <div class="mt-8 pt-6 border-t border-qrl-border">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-qrl-text">Transaction Metadata</h3>
+              <button class="btn-secondary jsonclick">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+                Meta
+              </button>
+            </div>
+            <div class="jsonbox json bg-qrl-primary/50 border border-qrl-border rounded-lg p-4 hidden">
+              <pre class="text-sm text-qrl-text font-mono whitespace-pre-wrap">{{json}}</pre>
+            </div>
+          </div>
         </div>
-      </div>
-
-    {{/if}}
-{{/with}}
-
+      {{/if}}
+    {{/with}}
+  </div>
 </template>

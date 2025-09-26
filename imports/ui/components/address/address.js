@@ -926,10 +926,47 @@ Template.address.helpers({
   },
 })
 
+// Helper function to toggle JSON display
+function toggleJSON() {
+  const jsonBox = document.querySelector('.jsonbox')
+  const jsonContent = document.querySelector('.json')
+  
+  if (jsonBox) {
+    if (jsonBox.style.display === 'none' || !jsonBox.style.display) {
+      if (!jsonContent.innerHTML) {
+        const myJSON = Session.get('address')
+        const formatter = new JSONFormatter(myJSON)
+        jsonContent.innerHTML = ''
+        jsonContent.appendChild(formatter.render())
+      }
+      jsonBox.style.display = 'block'
+    } else {
+      jsonBox.style.display = 'none'
+    }
+  }
+}
+
+// Helper function to switch to transactions tab
+function switchToTransactionsTab() {
+  const tabButtons = document.querySelectorAll('.tab-button')
+  const tabContents = document.querySelectorAll('.tab-content')
+  
+  // Remove active from all
+  tabButtons.forEach(btn => btn.classList.remove('active'))
+  tabContents.forEach(content => content.classList.remove('active'))
+  
+  // Activate transactions tab
+  const transactionsButton = document.querySelector('[data-tab="transactions"]')
+  const transactionsContent = document.querySelector('.tab-content[data-tab="transactions"]')
+  
+  if (transactionsButton) transactionsButton.classList.add('active')
+  if (transactionsContent) transactionsContent.classList.add('active')
+}
+
 Template.address.events({
   'keypress #paginator': (event) => {
     if (event.keyCode === 13) {
-      const x = parseInt($('#paginator').val(), 10)
+      const x = parseInt(document.getElementById('paginator').value, 10)
       const max = Session.get('pages').length
       if ((x < (max + 1)) && (x > 0)) {
         FlowRouter.go(`/a/${upperCaseFirst(FlowRouter.getParam('aId'))}/${x}`)
@@ -941,26 +978,20 @@ Template.address.events({
     renderAddressBlock()
   },
   'click .close': () => {
-    $('.message').hide()
+    const messages = document.querySelectorAll('.message')
+    messages.forEach(msg => msg.style.display = 'none')
   },
   'click .jsonclick': () => {
-    if (!($('.json').html())) {
-      const myJSON = Session.get('address')
-      const formatter = new JSONFormatter(myJSON)
-      $('.json').html(formatter.render())
-    }
-    $('.jsonbox').toggle()
+    toggleJSON()
   },
   'click .slave-address': () => {
-    $('#addressTabs').tab('change tab', 'transactions')
-    $('#addressTabs > a').last().removeClass('active')
-    $('#addressTabs > a').first().addClass('active')
+    switchToTransactionsTab()
   },
-  'click .pagination': (event) => {
+  'click button[qrl-data]': (event) => {
     let b = 0
     Session.set('addressTransactions', {})
-    if (parseInt(event.target.text, 10)) {
-      b = parseInt(event.target.text, 10)
+    if (parseInt(event.target.textContent, 10)) {
+      b = parseInt(event.target.textContent, 10)
       Session.set('active', b)
     } else {
       const a = event.target.getAttribute('qrl-data')
@@ -979,11 +1010,10 @@ Template.address.events({
         b = 1
       }
     }
-    // const startIndex = (b - 1) * 10
     Session.set('active', b)
     Session.set('fetchedTx', false)
-    $('.loader').show()
-    $('#loadingTransactions').show()
+    const loading = document.getElementById('loadingTransactions')
+    if (loading) loading.style.display = 'block'
     FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${b}`)
   },
   'click #clickHelp': () => {
@@ -991,21 +1021,33 @@ Template.address.events({
   },
   'click .transactionRecord': (event) => {
     let route = ''
-    route = event.currentTarget.attributes[0].ownerElement.childNodes[5].children[0].attributes[0].nodeValue
-    if (route.length !== 68) {
-      route = event.currentTarget.lastElementChild.children[0].attributes[0].nodeValue
+    const links = event.currentTarget.querySelectorAll('a[href^="/tx/"]')
+    if (links.length > 0) {
+      route = links[0].getAttribute('href')
+      FlowRouter.go(route)
     }
-    FlowRouter.go(route)
+  },
+  'click .tab-button': (event) => {
+    event.preventDefault()
+    const tabId = event.currentTarget.getAttribute('data-tab')
+    
+    // Remove active class from all buttons and contents
+    const allButtons = document.querySelectorAll('.tab-button')
+    const allContents = document.querySelectorAll('.tab-content')
+    
+    allButtons.forEach(btn => btn.classList.remove('active'))
+    allContents.forEach(content => content.classList.remove('active'))
+    
+    // Add active class to clicked button and corresponding content
+    event.currentTarget.classList.add('active')
+    const targetContent = document.querySelector(`.tab-content[data-tab="${tabId}"]`)
+    if (targetContent) {
+      targetContent.classList.add('active')
+    }
   },
 })
 
 Template.address.onRendered(() => {
-  this.$('.value').popup()
-  $('#addressTabs .item').tab()
-  $('#clickHelp')
-    .popup({
-      on: 'hover',
-    })
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('address', {})
@@ -1025,10 +1067,16 @@ Template.address.onRendered(() => {
       const addressToRender = hexOrB32(Session.get('address').state.address)
 
       // Re-render identicon
-      jdenticon.update('#identicon', addressToRender)
+      const identicon = document.getElementById('identicon')
+      if (identicon && typeof jdenticon !== 'undefined') {
+        jdenticon.update('#identicon', addressToRender)
+      }
+      
       // Re-render QR Code
-      $('.qr-code-container').empty()
-      // $('.qr-code-container').qrcode({ width: 100, height: 100, text: addressToRender })
+      const qrContainer = document.querySelector('.qr-code-container')
+      if (qrContainer) {
+        qrContainer.innerHTML = ''
+      }
     }
   })
 
@@ -1037,12 +1085,9 @@ Template.address.onRendered(() => {
 
   // Get Tokens and Balances
   getTokenBalances(upperCaseFirst(FlowRouter.getParam('aId')), () => {
-    $('#tokenBalancesLoading').hide()
-    $('#nftBalancesLoading').hide()
+    const tokenLoading = document.getElementById('tokenBalancesLoading')
+    const nftLoading = document.getElementById('nftBalancesLoading')
+    if (tokenLoading) tokenLoading.style.display = 'none'
+    if (nftLoading) nftLoading.style.display = 'none'
   })
-
-  // Render identicon (needs to be here for initial load).
-  // Also Session.get('address') is blank at this point
-  // $('.qr-code-container').qrcode({ width: 100, height: 100, text: upperCaseFirst(FlowRouter.getParam('aId')) })
-  // jdenticon.update('#identicon', upperCaseFirst(FlowRouter.getParam('aId'))) /* eslint no-undef:0 */
 })
