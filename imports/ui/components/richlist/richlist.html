@@ -11,6 +11,27 @@
       <div class="ui text loader">Loading richlist data...</div>
     </div>
   {{else}}
+    {{#if latestBlock}}
+      <div class="ui info message">
+        <div class="content">
+          <div class="header">
+            <i class="grey info icon"></i>
+            <span class="ui grey text">
+              Data based on block {{latestBlock.number}}
+            </span>
+          </div>
+        </div>
+      </div>
+    {{/if}}
+    {{#if latestBlockError}}
+      <div class="ui warning message">
+        <div class="content">
+          <div class="header">
+            <i class="warning icon"></i>
+            Unable to fetch latest block information</div>
+        </div>
+      </div>
+    {{/if}}
     <table class="ui compact table">
       <thead>
         <tr>
