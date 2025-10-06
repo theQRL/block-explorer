@@ -15,10 +15,13 @@ import { BrowserPolicy } from 'meteor/qrl:browser-policy'
 import { blockData, quantausd } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
 import {
-  EXPLORER_VERSION, SHOR_PER_QUANTA, anyAddressToRaw,
+  EXPLORER_VERSION,
+  SHOR_PER_QUANTA,
+  anyAddressToRaw,
 } from '../both/index.js'
 
-const PROTO_PATH = Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
+const PROTO_PATH =
+  Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
 
 // Apply BrowserPolicy
@@ -112,39 +115,58 @@ const loadGrpcClient = (endpoint, callback) => {
     oneofs: true,
     includeDirs: [PROTO_PATH],
   }
-  protoloader.load(`${PROTO_PATH}qrlbase.proto`).then((packageDefinitionBase) => {
-    const baseGrpcObject = grpc.loadPackageDefinition(packageDefinitionBase)
-    const client = new baseGrpcObject.qrl.Base(endpoint, grpc.credentials.createInsecure())
-    client.getNodeInfo({}, (err, res) => {
-      if (err) {
-        console.log(`Error fetching qrl.proto from ${endpoint}`)
-        callback(err, null)
-      } else {
-        // Write a new temp file for this grpc connection
-        const qrlProtoFilePath = tmp.fileSync({ mode: '0644', prefix: 'qrl-', postfix: '.proto' }).name
-        fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
-          if (fsErr) {
-            console.log(fsErr)
-            throw fsErr
-          }
-          protoloader.load(qrlProtoFilePath, options).then((packageDefinition) => {
-            const grpcObject = grpc.loadPackageDefinition(packageDefinition)
-            // Create the gRPC Connection
-            qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(endpoint, grpc.credentials.createInsecure())
-            console.log(`qrlClient loaded for ${endpoint} from ${qrlProtoFilePath}`)
-            callback(null, true)
+  protoloader
+    .load(`${PROTO_PATH}qrlbase.proto`)
+    .then((packageDefinitionBase) => {
+      const baseGrpcObject = grpc.loadPackageDefinition(packageDefinitionBase)
+      const client = new baseGrpcObject.qrl.Base(
+        endpoint,
+        grpc.credentials.createInsecure()
+      )
+      client.getNodeInfo({}, (err, res) => {
+        if (err) {
+          console.log(`Error fetching qrl.proto from ${endpoint}`)
+          callback(err, null)
+        } else {
+          // Write a new temp file for this grpc connection
+          const qrlProtoFilePath = tmp.fileSync({
+            mode: '0644',
+            prefix: 'qrl-',
+            postfix: '.proto',
+          }).name
+          fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
+            if (fsErr) {
+              console.log(fsErr)
+              throw fsErr
+            }
+            protoloader
+              .load(qrlProtoFilePath, options)
+              .then((packageDefinition) => {
+                const grpcObject = grpc.loadPackageDefinition(packageDefinition)
+                // Create the gRPC Connection
+                qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(
+                  endpoint,
+                  grpc.credentials.createInsecure()
+                )
+                console.log(
+                  `qrlClient loaded for ${endpoint} from ${qrlProtoFilePath}`
+                )
+                callback(null, true)
+              })
           })
-        })
-      }
+        }
+      })
     })
-  })
 }
 
 const errorCallback = (error, message, alert) => {
   const d = new Date()
   const getTime = d.toUTCString()
   console.log(`${alert} [Timestamp: ${getTime}] ${error}`)
-  const meteorError = new Meteor.Error(500, `[${getTime}] ${message} (${error})`)
+  const meteorError = new Meteor.Error(
+    500,
+    `[${getTime}] ${message} (${error})`
+  )
   return meteorError
 }
 
@@ -153,8 +175,13 @@ const errorCallback = (error, message, alert) => {
 // this function will call loadGrpcClient to establish one.
 const connectToNode = (endpoint, callback) => {
   // First check if there is an existing object to store the gRPC connection
-  if (qrlClient.hasOwnProperty(endpoint) === true) { // eslint-disable-line
-    console.log('Existing connection found for ', endpoint, ' - attempting getNodeState')
+  if (qrlClient.hasOwnProperty(endpoint) === true) {
+    // eslint-disable-line
+    console.log(
+      'Existing connection found for ',
+      endpoint,
+      ' - attempting getNodeState'
+    )
     // There is already a gRPC object for this server stored.
     // Attempt to connect to it.
     try {
@@ -167,7 +194,11 @@ const connectToNode = (endpoint, callback) => {
           loadGrpcClient(endpoint, (loadErr, loadResponse) => {
             if (loadErr) {
               console.log(`Failed to re-connect to node ${endpoint}`)
-              const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
+              const myError = errorCallback(
+                err,
+                'Cannot connect to remote node',
+                '**ERROR/connection** '
+              )
               callback(myError, null)
             } else {
               console.log(`Connected to ${endpoint}`)
@@ -181,7 +212,11 @@ const connectToNode = (endpoint, callback) => {
       })
     } catch (err) {
       console.log('node state error exception')
-      const myError = errorCallback(err, 'Cannot access API/getNodeState', '**ERROR/getNodeState**')
+      const myError = errorCallback(
+        err,
+        'Cannot access API/getNodeState',
+        '**ERROR/getNodeState**'
+      )
       callback(myError, null)
     }
   } else {
@@ -190,14 +225,22 @@ const connectToNode = (endpoint, callback) => {
     loadGrpcClient(endpoint, (err) => {
       if (err) {
         console.log(`Failed to connect to node ${endpoint}`)
-        const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
+        const myError = errorCallback(
+          err,
+          'Cannot connect to remote node',
+          '**ERROR/connection** '
+        )
         callback(myError, null)
       } else {
         console.log(`Connected to ${endpoint}`)
         qrlClient[endpoint].getNodeState({}, (errState, response) => {
           if (errState) {
             console.log(`Failed to query node state ${endpoint}`)
-            const myError = errorCallback(err, 'Cannot connect to remote node', '**ERROR/connection** ')
+            const myError = errorCallback(
+              err,
+              'Cannot connect to remote node',
+              '**ERROR/connection** '
+            )
             callback(myError, null)
           } else {
             callback(null, response)
@@ -288,7 +331,11 @@ const qrlApi = (api, request, callback) => {
 
   // If all three nodes have gone offline, fail
   if (activeNodes.length === 0) {
-    const myError = errorCallback('The block explorer server cannot connect to any API node', 'Cannot connect to API', '**ERROR/noActiveNodes/b**')
+    const myError = errorCallback(
+      'The block explorer server cannot connect to any API node',
+      'Cannot connect to API',
+      '**ERROR/noActiveNodes/b**'
+    )
     callback(myError, null)
   } else {
     // Make the API call
@@ -300,13 +347,17 @@ const qrlApi = (api, request, callback) => {
 
 function addTokenDetail(transaction) {
   const tokenDetail = {}
-  const req = { query: Buffer.from(transaction.tx.transfer_token.token_txhash, 'hex') }
+  const req = {
+    query: Buffer.from(transaction.tx.transfer_token.token_txhash, 'hex'),
+  }
   const response = Meteor.wrapAsync(getObject)(req) // eslint-disable-line no-use-before-define
   const formattedData = makeTxHumanReadable(response) // eslint-disable-line no-use-before-define
   tokenDetail.name = formattedData.transaction.tx.token.name
   tokenDetail.symbol = formattedData.transaction.tx.token.symbol
   tokenDetail.decimals = formattedData.transaction.tx.token.decimals
-  tokenDetail.owner = `Q${Buffer.from(formattedData.transaction.tx.token.owner).toString('hex')}`
+  tokenDetail.owner = `Q${Buffer.from(
+    formattedData.transaction.tx.token.owner
+  ).toString('hex')}`
   return tokenDetail
 }
 
@@ -338,7 +389,9 @@ const helpersaddressTransactions = (response) => {
     }
     if (tx.tx.coinbase) {
       if (tx.tx.coinbase.addr_to) {
-        txEdited.tx.coinbase.addr_to = `Q${Buffer.from(txEdited.tx.coinbase.addr_to).toString('hex')}`
+        txEdited.tx.coinbase.addr_to = `Q${Buffer.from(
+          txEdited.tx.coinbase.addr_to
+        ).toString('hex')}`
       }
     }
     if (tx.tx.transactionType === 'token') {
@@ -358,7 +411,9 @@ const helpersaddressTransactions = (response) => {
         }
       }
       if (tx.tx.token.symbol) {
-        txEdited.tx.token.symbol = Buffer.from(txEdited.tx.token.symbol).toString()
+        txEdited.tx.token.symbol = Buffer.from(
+          txEdited.tx.token.symbol
+        ).toString()
       }
       if (tx.tx.token.name) {
         txEdited.tx.token.name = Buffer.from(txEdited.tx.token.name).toString()
@@ -366,11 +421,15 @@ const helpersaddressTransactions = (response) => {
     }
     if (tx.tx.transactionType === 'transfer_token') {
       if (tx.tx.transfer_token.token_txhash) {
-        txEdited.tx.transfer_token.token_txhash = Buffer.from(txEdited.tx.transfer_token.token_txhash).toString('hex')
+        txEdited.tx.transfer_token.token_txhash = Buffer.from(
+          txEdited.tx.transfer_token.token_txhash
+        ).toString('hex')
       }
       txEdited.tx.transfer_token = addTokenDetail(tx)
       // now check if NFT
-      const symbol = Buffer.from(txEdited.tx.transfer_token.symbol).toString('hex')
+      const symbol = Buffer.from(txEdited.tx.transfer_token.symbol).toString(
+        'hex'
+      )
       if (symbol.slice(0, 8) === '00ff00ff') {
         const nftBytes = Buffer.concat([
           Buffer.from(txEdited.tx.transfer_token.symbol),
@@ -392,46 +451,55 @@ const helpersaddressTransactions = (response) => {
           address_hex: `Q${Buffer.from(txOutput).toString('hex')}`,
           amount: `${formatTokenAmount(
             tx.tx.transfer_token.amounts[index],
-            txEdited.tx.transfer_token.decimals,
+            txEdited.tx.transfer_token.decimals
           )} ${txEdited.tx.transfer_token.symbol}`,
         })
       })
       txEdited.tx.outputs = outputs
       txEdited.tx.totalTransferred = `${sumTokenTotal(
         tx.tx.transfer_token.amounts,
-        txEdited.tx.transfer_token.decimals,
+        txEdited.tx.transfer_token.decimals
       )} ${txEdited.tx.transfer_token.symbol}`
       txEdited.tx.transfer_token.addrs_to = hexlified
       if (tx.tx.transfer_token.symbol) {
         txEdited.tx.transfer_token.symbol = Buffer.from(
-          txEdited.tx.transfer_token.symbol,
+          txEdited.tx.transfer_token.symbol
         ).toString()
       }
       if (tx.tx.transfer_token.name) {
         txEdited.tx.transfer_token.name = Buffer.from(
-          txEdited.tx.transfer_token.name,
+          txEdited.tx.transfer_token.name
         ).toString()
       }
     }
     if (tx.tx.transaction_hash) {
-      txEdited.tx.transaction_hash = Buffer.from(txEdited.tx.transaction_hash).toString('hex')
+      txEdited.tx.transaction_hash = Buffer.from(
+        txEdited.tx.transaction_hash
+      ).toString('hex')
     }
     if (tx.tx.master_addr) {
-      txEdited.tx.master_addr = Buffer.from(txEdited.tx.master_addr).toString('hex')
+      txEdited.tx.master_addr = Buffer.from(txEdited.tx.master_addr).toString(
+        'hex'
+      )
     }
     if (tx.tx.public_key) {
-      txEdited.tx.public_key = Buffer.from(txEdited.tx.public_key).toString('hex')
+      txEdited.tx.public_key = Buffer.from(txEdited.tx.public_key).toString(
+        'hex'
+      )
     }
     if (tx.tx.signature) {
       txEdited.tx.signature = Buffer.from(txEdited.tx.signature).toString('hex')
     }
     if (tx.block_header_hash) {
-      txEdited.block_header_hash = Buffer.from(txEdited.block_header_hash).toString('hex')
+      txEdited.block_header_hash = Buffer.from(
+        txEdited.block_header_hash
+      ).toString('hex')
     }
     txEdited.addr_from = `Q${Buffer.from(txEdited.addr_from).toString('hex')}`
     console.dir(txEdited, { depth: null })
     output.push(txEdited)
   })
+  response.transactions_detail = output
   return response
 }
 
@@ -439,7 +507,11 @@ const getOTS = (request, callback) => {
   try {
     qrlApi('GetOTS', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetOTS', '**ERROR/getOTS** ')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetOTS',
+          '**ERROR/getOTS** '
+        )
         callback(myError, null)
       } else {
         // console.log(response)
@@ -447,7 +519,11 @@ const getOTS = (request, callback) => {
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetOTS', '**ERROR/GetOTS**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetOTS',
+      '**ERROR/GetOTS**'
+    )
     callback(myError, null)
   }
 }
@@ -456,18 +532,28 @@ const getFullAddressState = (request, callback) => {
   try {
     qrlApi('GetAddressState', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetOptimizedAddressState', '**ERROR/getAddressState** ')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetOptimizedAddressState',
+          '**ERROR/getAddressState** '
+        )
         callback(myError, null)
       } else {
         if (response.state.address) {
-          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+          response.state.address = `Q${Buffer.from(
+            response.state.address
+          ).toString('hex')}`
         }
 
         callback(null, response)
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/GetAddressState**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetAddressState',
+      '**ERROR/GetAddressState**'
+    )
     callback(myError, null)
   }
 }
@@ -479,13 +565,13 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(
           error,
           'Cannot access API/GetOptimizedAddressState',
-          '**ERROR/getAddressState** ',
+          '**ERROR/getAddressState** '
         )
         callback(myError, null)
       } else {
         if (response.state.address) {
           response.state.address = `Q${Buffer.from(
-            response.state.address,
+            response.state.address
           ).toString('hex')}`
         }
 
@@ -493,7 +579,11 @@ const getAddressState = (request, callback) => {
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetAddressState', '**ERROR/GetAddressState**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetAddressState',
+      '**ERROR/GetAddressState**'
+    )
     callback(myError, null)
   }
 }
@@ -502,23 +592,31 @@ const getMultiSigAddressState = (request, callback) => {
   try {
     qrlApi('GetMultiSigAddressState', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetMultiSigAddressState', '**ERROR/getMultiSigAddressState** ')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetMultiSigAddressState',
+          '**ERROR/getMultiSigAddressState** '
+        )
         callback(myError, null)
       } else {
         if (response.state === null) {
           const myError = errorCallback(
             error,
             'No state returned for this address',
-            '**ERROR/getMultiSigAddressState** ',
+            '**ERROR/getMultiSigAddressState** '
           )
           callback(myError, null)
           return
         }
         if (response.state.address) {
-          response.state.address = `Q${Buffer.from(response.state.address).toString('hex')}`
+          response.state.address = `Q${Buffer.from(
+            response.state.address
+          ).toString('hex')}`
         }
         if (response.state.creation_tx_hash) {
-          response.state.creation_tx_hash = Buffer.from(response.state.creation_tx_hash).toString('hex')
+          response.state.creation_tx_hash = Buffer.from(
+            response.state.creation_tx_hash
+          ).toString('hex')
         }
         if (response.state.signatories) {
           const formatted = []
@@ -531,7 +629,11 @@ const getMultiSigAddressState = (request, callback) => {
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetMultiSigAddressState', '**ERROR/GetMultiSigAddressState**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetMultiSigAddressState',
+      '**ERROR/GetMultiSigAddressState**'
+    )
     callback(myError, null)
   }
 }
@@ -540,14 +642,22 @@ export const getLatestData = (request, callback) => {
   try {
     qrlApi('GetLatestData', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/GetLatestData** ')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetLatestData',
+          '**ERROR/GetLatestData** '
+        )
         callback(myError, null)
       } else {
         callback(null, response)
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetLatestData', '**ERROR/GetLatestData**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetLatestData',
+      '**ERROR/GetLatestData**'
+    )
     callback(myError, null)
   }
 }
@@ -556,14 +666,22 @@ export const getStats = (request, callback) => {
   try {
     qrlApi('GetStats', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetStats/a', '**ERROR/GetStats/a** ')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetStats/a',
+          '**ERROR/GetStats/a** '
+        )
         callback(myError, null)
       } else {
         callback(null, response)
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetStats/b', '**ERROR/GetStats/b**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetStats/b',
+      '**ERROR/GetStats/b**'
+    )
     callback(myError, null)
   }
 }
@@ -572,14 +690,22 @@ export const getPeersStat = (request, callback) => {
   try {
     qrlApi('GetPeersStat', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetPeersStat/a', '**ERROR/GetPeersStat/a** ')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetPeersStat/a',
+          '**ERROR/GetPeersStat/a** '
+        )
         callback(myError, null)
       } else {
         callback(null, response)
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetPeersStat/b', '**ERROR/GetPeersStat/b**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetPeersStat/b',
+      '**ERROR/GetPeersStat/b**'
+    )
     callback(myError, null)
   }
 }
@@ -588,7 +714,11 @@ export const getObject = (request, callback) => {
   try {
     qrlApi('GetObject', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/GetObject**')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetObject',
+          '**ERROR/GetObject**'
+        )
         callback(myError, null)
       } else {
         // console.log(response)
@@ -596,7 +726,11 @@ export const getObject = (request, callback) => {
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetObject', '**ERROR/GetObject**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetObject',
+      '**ERROR/GetObject**'
+    )
     callback(myError, null)
   }
 }
@@ -605,7 +739,11 @@ export const getTransactionsByAddress = (request, callback) => {
   try {
     qrlApi('GetTransactionsByAddress', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetTransactionsByAddress', '**ERROR/GetTransactionsByAddress**')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetTransactionsByAddress',
+          '**ERROR/GetTransactionsByAddress**'
+        )
         callback(myError, null)
       } else {
         // console.log(response)
@@ -613,7 +751,11 @@ export const getTransactionsByAddress = (request, callback) => {
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetTransactionsByAddress', '**ERROR/GetTransactionsByAddress**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetTransactionsByAddress',
+      '**ERROR/GetTransactionsByAddress**'
+    )
     callback(myError, null)
   }
 }
@@ -622,7 +764,11 @@ export const getSlavesByAddress = (request, callback) => {
   try {
     qrlApi('GetSlavesByAddress', request, (error, response) => {
       if (error) {
-        const myError = errorCallback(error, 'Cannot access API/GetSlavesByAddress', '**ERROR/GetSlavesByAddress**')
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetSlavesByAddress',
+          '**ERROR/GetSlavesByAddress**'
+        )
         callback(myError, null)
       } else {
         // console.log(response)
@@ -630,7 +776,11 @@ export const getSlavesByAddress = (request, callback) => {
       }
     })
   } catch (error) {
-    const myError = errorCallback(error, 'Cannot access API/GetSlavesByAddress', '**ERROR/GetSlavesByAddress**')
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetSlavesByAddress',
+      '**ERROR/GetSlavesByAddress**'
+    )
     callback(myError, null)
   }
 }
@@ -652,7 +802,9 @@ export const makeTxHumanReadable = (item) => {
     if (item.transaction.tx.transactionType === 'transfer_token') {
       try {
         // Request Token Decimals / Symbol
-        const symbolRequest = { query: item.transaction.tx.transfer_token.token_txhash }
+        const symbolRequest = {
+          query: item.transaction.tx.transfer_token.token_txhash,
+        }
         const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
         output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
       } catch (e) {
@@ -707,7 +859,11 @@ Meteor.methods({
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
-    const response = Meteor.wrapAsync(getLatestData)({ filter: 'BLOCKHEADERS', offset: 0, quantity: 5 })
+    const response = Meteor.wrapAsync(getLatestData)({
+      filter: 'BLOCKHEADERS',
+      offset: 0,
+      quantity: 5,
+    })
     return response
   },
 
@@ -716,8 +872,15 @@ Meteor.methods({
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
-    const response = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 5 })
-    const unconfirmedReadable = makeTxListHumanReadable(response.transactions_unconfirmed, false)
+    const response = Meteor.wrapAsync(getLatestData)({
+      filter: 'TRANSACTIONS_UNCONFIRMED',
+      offset: 0,
+      quantity: 5,
+    })
+    const unconfirmedReadable = makeTxListHumanReadable(
+      response.transactions_unconfirmed,
+      false
+    )
     response.transactions_unconfirmed = unconfirmedReadable
     return response
   },
@@ -727,7 +890,7 @@ Meteor.methods({
     console.log(`txhash method called for: ${txId}`)
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
-    if (!((Match.test(txId, String)) && (txId.length === 64))) {
+    if (!(Match.test(txId, String) && txId.length === 64)) {
       const errorCode = 400
       const errorMessage = 'Badly formed transaction ID'
       throw new Meteor.Error(errorCode, errorMessage)
@@ -765,7 +928,7 @@ Meteor.methods({
   block(blockId) {
     check(blockId, Number)
     console.log(`block Method called for: ${blockId}`)
-    if (!(Match.test(blockId, Number)) || (Number.isNaN(blockId))) {
+    if (!Match.test(blockId, Number) || Number.isNaN(blockId)) {
       const errorCode = 400
       const errorMessage = 'Invalid block number'
       console.log('Throwing invalid block number error')
@@ -789,12 +952,19 @@ Meteor.methods({
 
       // Refactor for block_extended and extended_transactions
       response.block = response.block_extended
-      response.block.transactions = response.block_extended.extended_transactions
+      response.block.transactions =
+        response.block_extended.extended_transactions
 
       if (response.block.header) {
-        response.block.header.hash_header = Buffer.from(response.block.header.hash_header).toString('hex')
-        response.block.header.hash_header_prev = Buffer.from(response.block.header.hash_header_prev).toString('hex')
-        response.block.header.merkle_root = Buffer.from(response.block.header.merkle_root).toString('hex')
+        response.block.header.hash_header = Buffer.from(
+          response.block.header.hash_header
+        ).toString('hex')
+        response.block.header.hash_header_prev = Buffer.from(
+          response.block.header.hash_header_prev
+        ).toString('hex')
+        response.block.header.merkle_root = Buffer.from(
+          response.block.header.merkle_root
+        ).toString('hex')
 
         // transactions
         const transactions = []
@@ -802,7 +972,9 @@ Meteor.methods({
           const adjusted = value.tx
           adjusted.addr_from = value.addr_from
           adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
-          adjusted.transaction_hash = Buffer.from(adjusted.transaction_hash).toString('hex')
+          adjusted.transaction_hash = Buffer.from(
+            adjusted.transaction_hash
+          ).toString('hex')
           adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
           if (adjusted.transactionType === 'coinbase') {
             // adjusted.coinbase.addr_to = adjusted.coinbase.addr_to <--- FIXME: why was this here?
@@ -810,11 +982,9 @@ Meteor.methods({
             adjusted.transfer = adjusted.coinbase
           }
           if (adjusted.transactionType === 'token') {
-          // first check if NFT
+            // first check if NFT
             let nft = {}
-            const symbol = Buffer.from(adjusted.token.symbol).toString(
-              'hex',
-            )
+            const symbol = Buffer.from(adjusted.token.symbol).toString('hex')
             if (symbol.slice(0, 8) === '00ff00ff') {
               const nftBytes = Buffer.concat([
                 Buffer.from(adjusted.token.symbol),
@@ -836,10 +1006,14 @@ Meteor.methods({
             let totalOutputs = 0
             _.each(adjusted.transfer.addrs_to, (thisAddress, index) => {
               totalOutputs += 1
-              thisTotalTransferred += parseInt(adjusted.transfer.amounts[index], 10)
+              thisTotalTransferred += parseInt(
+                adjusted.transfer.amounts[index],
+                10
+              )
               // adjusted.transfer.addrs_to[index] = adjusted.transfer.addrs_to[index] <-- FIXME: why was this here?
             })
-            adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
+            adjusted.transfer.totalTransferred =
+              thisTotalTransferred / SHOR_PER_QUANTA
             adjusted.transfer.totalOutputs = totalOutputs
           }
           if (adjusted.transactionType === 'transfer_token') {
@@ -847,27 +1021,35 @@ Meteor.methods({
             const symbolRequest = {
               query: Buffer.from(adjusted.transfer_token.token_txhash, 'hex'),
             }
-            const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+            const thisSymbolResponse =
+              Meteor.wrapAsync(getObject)(symbolRequest)
             // eslint-disable-next-line
-            const thisSymbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString()
-            const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
+            const thisSymbol = Buffer.from(
+              thisSymbolResponse.transaction.tx.token.symbol
+            ).toString()
+            const thisDecimals =
+              thisSymbolResponse.transaction.tx.token.decimals
             // Calculate total transferred, and generate a clean structure to display outputs from
             let thisTotalTransferred = 0
             let totalOutputs = 0
             _.each(adjusted.transfer_token.addrs_to, (thisAddress, index) => {
               totalOutputs += 1
-              thisTotalTransferred += parseInt(adjusted.transfer_token.amounts[index], 10)
+              thisTotalTransferred += parseInt(
+                adjusted.transfer_token.amounts[index],
+                10
+              )
               // adjusted.transfer_token.addrs_to[index] = adjusted.transfer_token.addrs_to[index] <-- FIXME: why was this here?
             })
             // eslint-disable-next-line
-            adjusted.transfer_token.totalTransferred = thisTotalTransferred / Math.pow(10, thisDecimals)
+            adjusted.transfer_token.totalTransferred =
+              thisTotalTransferred / 10 ** thisDecimals
             adjusted.transfer_token.totalOutputs = totalOutputs
             adjusted.transfer_token.tokenSymbol = thisSymbol
             let nft = {}
             console.log(thisSymbolResponse)
-            const symbol = Buffer.from(thisSymbolResponse.transaction.tx.token.symbol).toString(
-              'hex',
-            )
+            const symbol = Buffer.from(
+              thisSymbolResponse.transaction.tx.token.symbol
+            ).toString('hex')
             if (symbol.slice(0, 8) === '00ff00ff') {
               const nftBytes = Buffer.concat([
                 Buffer.from(thisSymbolResponse.transaction.tx.token.symbol),
@@ -897,7 +1079,9 @@ Meteor.methods({
 
   addressTransactions(request) {
     check(request, Object)
-    console.log(`addressTransactions method called for ${request.tx.length} transactions`)
+    console.log(
+      `addressTransactions method called for ${request.tx.length} transactions`
+    )
     const targets = request.tx
     const result = []
     targets.forEach((arr) => {
@@ -917,7 +1101,10 @@ Meteor.methods({
             outputs: output.transaction.explorer.outputs,
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
-            ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: parseInt(
+              output.transaction.tx.signature.substring(0, 8),
+              16
+            ),
             fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
@@ -926,9 +1113,9 @@ Meteor.methods({
         } else if (output.transaction.tx.transactionType === 'token') {
           // first check if NFT
           let nft = {}
-          const symbol = Buffer.from(output.transaction.tx.token.symbol).toString(
-            'hex',
-          )
+          const symbol = Buffer.from(
+            output.transaction.tx.token.symbol
+          ).toString('hex')
           if (symbol.slice(0, 8) === '00ff00ff') {
             const nftBytes = Buffer.concat([
               Buffer.from(output.transaction.tx.token.symbol),
@@ -953,30 +1140,48 @@ Meteor.methods({
             symbol: output.transaction.tx.token.symbol,
             name: output.transaction.tx.token.name,
             decimals: output.transaction.tx.token.decimals,
-            ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: parseInt(
+              output.transaction.tx.signature.substring(0, 8),
+              16
+            ),
             fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
           }
 
           result.push(thisTxn)
-        } else if (thisTxnHashResponse.transaction.tx.transactionType === 'transfer_token') {
+        } else if (
+          thisTxnHashResponse.transaction.tx.transactionType ===
+          'transfer_token'
+        ) {
           // Request Token Symbol
           const symbolRequest = {
-            query: Buffer.from(Buffer.from(thisTxnHashResponse.transaction.tx.transfer_token.token_txhash).toString('hex'), 'hex'),
+            query: Buffer.from(
+              Buffer.from(
+                thisTxnHashResponse.transaction.tx.transfer_token.token_txhash
+              ).toString('hex'),
+              'hex'
+            ),
           }
           const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-          const helpersResponse = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, thisTxnHashResponse)
+          const helpersResponse = helpers.parseTokenAndTransferTokenTx(
+            thisSymbolResponse,
+            thisTxnHashResponse
+          )
           thisTxn = {
             type: helpersResponse.transaction.tx.transactionType,
             txhash: arr.txhash,
             symbol: helpersResponse.transaction.explorer.symbol,
             // eslint-disable-next-line
-            totalTransferred: helpersResponse.transaction.explorer.totalTransferred,
+            totalTransferred:
+              helpersResponse.transaction.explorer.totalTransferred,
             outputs: helpersResponse.transaction.explorer.outputs,
             from_hex: helpersResponse.transaction.explorer.from_hex,
             from_b32: helpersResponse.transaction.explorer.from_b32,
-            ots_key: parseInt(helpersResponse.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: parseInt(
+              helpersResponse.transaction.tx.signature.substring(0, 8),
+              16
+            ),
             fee: helpersResponse.transaction.tx.fee / SHOR_PER_QUANTA,
             block: helpersResponse.transaction.header.block_number,
             timestamp: helpersResponse.transaction.header.timestamp_seconds,
@@ -1005,7 +1210,10 @@ Meteor.methods({
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
             to: '',
-            ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: parseInt(
+              output.transaction.tx.signature.substring(0, 8),
+              16
+            ),
             fee: output.transaction.tx.fe,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
@@ -1019,7 +1227,10 @@ Meteor.methods({
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
             to: '',
-            ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: parseInt(
+              output.transaction.tx.signature.substring(0, 8),
+              16
+            ),
             fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
@@ -1033,7 +1244,10 @@ Meteor.methods({
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
             to: '',
-            ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: parseInt(
+              output.transaction.tx.signature.substring(0, 8),
+              16
+            ),
             fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
@@ -1047,13 +1261,18 @@ Meteor.methods({
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
             to: '',
-            ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: parseInt(
+              output.transaction.tx.signature.substring(0, 8),
+              16
+            ),
             fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
           }
           result.push(thisTxn)
-        } else if (output.transaction.explorer.type === 'DOCUMENT_NOTARISATION') {
+        } else if (
+          output.transaction.explorer.type === 'DOCUMENT_NOTARISATION'
+        ) {
           thisTxn = {
             type: output.transaction.explorer.type,
             txhash: arr.txhash,
@@ -1061,7 +1280,10 @@ Meteor.methods({
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
             to: '',
-            ots_key: parseInt(output.transaction.tx.signature.substring(0, 8), 16),
+            ots_key: parseInt(
+              output.transaction.tx.signature.substring(0, 8),
+              16
+            ),
             fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
@@ -1069,7 +1291,9 @@ Meteor.methods({
           result.push(thisTxn)
         }
       } catch (err) {
-        console.log(`Error fetching transaction hash in addressTransactions '${arr.txhash}' - ${err}`)
+        console.log(
+          `Error fetching transaction hash in addressTransactions '${arr.txhash}' - ${err}`
+        )
       }
     })
     return result
@@ -1192,6 +1416,128 @@ JsonRoutes.add('get', '/api/a/:id', (req, res) => {
   JsonRoutes.sendResult(res, {
     data: response,
   })
+})
+
+/* take an object and deep iterate through it replacing any buffer objects with hex strings */
+const bufferToHex = (obj) => {
+  // Handle null, undefined, or non-objects
+  if (obj === null || obj === undefined || typeof obj !== 'object') {
+    return obj
+  }
+
+  // Handle Buffer objects
+  if (Buffer.isBuffer(obj)) {
+    return obj.toString('hex')
+  }
+
+  // Handle serialized Buffer objects (from JSON.stringify/parse)
+  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
+    return Buffer.from(obj.data).toString('hex')
+  }
+
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    return obj.map((item) => bufferToHex(item))
+  }
+
+  // Handle plain objects
+  const res = {}
+  Object.keys(obj).forEach((key) => {
+    res[key] = bufferToHex(obj[key])
+  })
+  return res
+}
+
+function apiTxList(req, res, num) {
+  const aId = req.params.id
+  check(aId, String)
+  const validate = qrlAddressValdidator.hexString(aId)
+  let response = {}
+  let totalPages = 0
+
+  if (validate.result === true) {
+    try {
+      const request = {
+        address: anyAddressToRaw(aId),
+        item_per_page: 10,
+        page_number: num,
+      }
+
+      // Get address state to calculate total pages
+      const addressStateRequest = {
+        address: anyAddressToRaw(aId),
+      }
+
+      let addressState
+      if (validate.sig.type !== 'MULTISIG') {
+        addressState = Meteor.wrapAsync(getAddressState)(addressStateRequest)
+      } else {
+        addressState = Meteor.wrapAsync(getMultiSigAddressState)(
+          addressStateRequest
+        )
+      }
+
+      // Calculate total pages based on transaction count
+      console.log(
+        'Address state response:',
+        JSON.stringify(addressState, null, 2)
+      )
+      let totalTransactions = 0
+      if (addressState.state && addressState.state.transaction_hashes) {
+        totalTransactions = addressState.state.transaction_hashes.length
+        console.log('Found transaction_hashes length:', totalTransactions)
+      } else if (
+        addressState.state &&
+        addressState.state.transaction_hash_count
+      ) {
+        totalTransactions = parseInt(
+          addressState.state.transaction_hash_count,
+          10
+        )
+      }
+      totalPages = Math.ceil(totalTransactions / 10)
+
+      const rawResponse = Meteor.wrapAsync(getTransactionsByAddress)(request)
+      const processedResponse = helpersaddressTransactions(rawResponse)
+      response = bufferToHex(processedResponse)
+    } catch (e) {
+      response = e
+      JsonRoutes.sendResult(res, {
+        data: { found: false, message: response.message, code: 3001 },
+      })
+      return
+    }
+  } else {
+    JsonRoutes.sendResult(res, {
+      data: { found: false, message: 'Invalid QRL address', code: 3000 },
+    })
+    return
+  }
+  JsonRoutes.sendResult(res, {
+    data: {
+      found: true,
+      address: aId,
+      page: num,
+      totalPages,
+      transactions: response,
+    },
+  })
+}
+
+JsonRoutes.add('get', '/api/a/tx/:id/:num', (req, res) => {
+  const num = parseInt(req.params.num, 10) || 0
+  if (num === 0) {
+    // return that page number, if passed, must start with a 1
+    JsonRoutes.sendResult(res, {
+      data: { found: false, message: 'Invalid page number', code: 3003 },
+    })
+    return
+  }
+  apiTxList(req, res, num)
+})
+
+JsonRoutes.add('get', '/api/a/tx/:id', (req, res) => {
+  apiTxList(req, res, 1)
 })
 
 JsonRoutes.add('get', '/api/tx/:id', (req, res) => {
