@@ -374,4 +374,273 @@
   @apply transform rotate-180;
 }
 
+/* JSON Formatter Dark Theme Styles - Override injected styles */
+.json-formatter-dark.json-formatter-row {
+  @apply text-sm !important;
+}
+
+.json-formatter-dark.json-formatter-toggler-link {
+  @apply text-qrl-text hover:text-qrl-accent transition-colors duration-200 cursor-pointer !important;
+}
+
+/* Meta button styling */
+.jsonclick {
+  @apply border border-qrl-border rounded px-3 py-2 bg-qrl-accent/10 !important;
+}
+
+.jsonclick:hover {
+  @apply border-qrl-accent bg-qrl-accent/20 !important;
+}
+
+.json-formatter-dark.json-formatter-toggler {
+  @apply text-qrl-accent mr-2 !important;
+}
+
+.json-formatter-dark.json-formatter-row .json-formatter-key {
+  @apply text-qrl-accent font-semibold !important;
+  color: #FFA729 !important;
+}
+
+.json-formatter-dark.json-formatter-row .json-formatter-string,
+.json-formatter-dark.json-formatter-row .json-formatter-stringifiable {
+  @apply text-white font-mono !important;
+  color: white !important;
+}
+
+.json-formatter-dark.json-formatter-row .json-formatter-number {
+  @apply text-white font-mono !important;
+  color: white !important;
+}
+
+.json-formatter-dark.json-formatter-row .json-formatter-boolean {
+  @apply text-white font-mono !important;
+  color: white !important;
+}
+
+.json-formatter-dark.json-formatter-row .json-formatter-null {
+  @apply text-gray-400 font-mono !important;
+  color: #9ca3af !important;
+}
+
+.json-formatter-dark.json-formatter-row .json-formatter-undefined {
+  @apply text-gray-400 font-mono !important;
+  color: #9ca3af !important;
+}
+
+.json-formatter-dark.json-formatter-row .json-formatter-constructor-name {
+  @apply text-gray-400 font-semibold !important;
+  color: #9ca3af !important;
+  display: none !important; /* Hide "Object" text */
+}
+
+.json-formatter-children {
+  @apply ml-4 border-l border-qrl-border pl-2;
+}
+
+/* Hide empty objects from user unless expanded */
+.json-formatter-dark.json-formatter-children.json-formatter-empty.json-formatter-object {
+  @apply hidden !important;
+}
+
+.json-formatter-dark.json-formatter-children.json-formatter-empty.json-formatter-array {
+  @apply hidden !important;
+}
+
+/* Show empty objects only when parent is expanded */
+.json-formatter-dark.json-formatter-open .json-formatter-children.json-formatter-empty.json-formatter-object {
+  @apply block !important;
+}
+
+.json-formatter-dark.json-formatter-open .json-formatter-children.json-formatter-empty.json-formatter-array {
+  @apply block !important;
+}
+
+.json-formatter-object {
+  @apply bg-qrl-primary/30 rounded p-2 my-1;
+}
+
+.json-formatter-array {
+  @apply bg-qrl-primary/30 rounded p-2 my-1;
+}
+
+/* Hide empty objects with maximum specificity */
+.json-formatter-dark .json-formatter-empty,
+.json-formatter-dark.json-formatter-empty,
+.json-formatter-children.json-formatter-empty,
+.json-formatter-children.json-formatter-empty.json-formatter-object,
+.json-formatter-children.json-formatter-empty.json-formatter-array {
+  display: none !important;
+}
+
+/* Override the library's open state rules with even higher specificity */
+.json-formatter-dark.json-formatter-open .json-formatter-children.json-formatter-empty.json-formatter-object,
+.json-formatter-dark.json-formatter-open .json-formatter-children.json-formatter-empty.json-formatter-array {
+  display: none !important;
+}
+
+/* Hide empty children containers */
+.json-formatter-children.json-formatter-object:empty,
+.json-formatter-children.json-formatter-array:empty {
+  display: none !important;
+}
+
+/* JSON Formatter Hover Effects */
+.json-formatter-row:hover {
+  @apply bg-qrl-secondary/30 rounded px-1;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* JSON Formatter Toggle Animation */
+.json-formatter-toggler {
+  @apply transition-transform duration-200;
+}
+
+.json-formatter-open .json-formatter-toggler {
+  @apply transform rotate-90;
+}
+
+/* Remove all bounce/scale animations from JSON formatter */
+.json-formatter-row,
+.json-formatter-key,
+.json-formatter-value,
+.json-formatter-string,
+.json-formatter-number,
+.json-formatter-boolean,
+.json-formatter-null,
+.json-formatter-undefined,
+.json-formatter-constructor-name,
+.json-formatter-toggler-link,
+.json-formatter-toggler,
+.json-formatter-children,
+.json-formatter-object,
+.json-formatter-array,
+.json-formatter-empty,
+.json-formatter-open,
+.json-formatter-dark {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+  translate: none !important;
+}
+
+.json-formatter-row:hover,
+.json-formatter-key:hover,
+.json-formatter-value:hover,
+.json-formatter-string:hover,
+.json-formatter-number:hover,
+.json-formatter-boolean:hover,
+.json-formatter-null:hover,
+.json-formatter-undefined:hover,
+.json-formatter-constructor-name:hover,
+.json-formatter-toggler-link:hover,
+.json-formatter-toggler:hover,
+.json-formatter-children:hover,
+.json-formatter-object:hover,
+.json-formatter-array:hover,
+.json-formatter-empty:hover,
+.json-formatter-open:hover,
+.json-formatter-dark:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+  translate: none !important;
+}
+
+/* Disable all hover animations globally for JSON formatter */
+.jsonbox * {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+  translate: none !important;
+}
+
+.jsonbox *:hover {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+  translate: none !important;
+}
+
+/* Specific override for the problematic element - maximum specificity */
+.jsonbox .json-formatter-row.json-formatter-dark.json-formatter-open,
+.jsonbox .json-formatter-row.json-formatter-dark.json-formatter-open:hover,
+.jsonbox .json-formatter-row.json-formatter-dark.json-formatter-open:focus,
+.jsonbox .json-formatter-row.json-formatter-dark.json-formatter-open:active {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+  scale: none !important;
+  translate: none !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  will-change: auto !important;
+  backface-visibility: visible !important;
+  perspective: none !important;
+  transform-style: flat !important;
+}
+
+/* JSON Formatter Container */
+.jsonbox {
+  @apply max-w-full overflow-x-auto overflow-y-auto;
+  max-height: 400px;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+
+/* JSON Formatter Content */
+.json-formatter-row {
+  @apply text-sm break-words;
+}
+
+.json-formatter-string,
+.json-formatter-number,
+.json-formatter-boolean,
+.json-formatter-null,
+.json-formatter-undefined {
+  @apply break-all;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+  white-space: normal !important;
+}
+
+/* JSON Formatter Scrollbar */
+.jsonbox::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.jsonbox::-webkit-scrollbar-track {
+  @apply bg-qrl-secondary;
+}
+
+.jsonbox::-webkit-scrollbar-thumb {
+  @apply bg-qrl-border rounded;
+}
+
+.jsonbox::-webkit-scrollbar-thumb:hover {
+  @apply bg-qrl-accent;
+}
+
 

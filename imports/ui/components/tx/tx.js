@@ -3,10 +3,9 @@ import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import CryptoJS from 'crypto-js'
 import sha256 from 'sha256'
-import $ from 'jquery'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
-import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
+import { numberToString, SHOR_PER_QUANTA, formatBytes, bufferToHex } from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
@@ -413,19 +412,72 @@ Template.tx.helpers({
 // Helper function to toggle JSON display
 function toggleJSON() {
   const jsonBox = document.querySelector('.jsonbox')
-  const jsonContent = document.querySelector('.json')
-  
+  const toggleButton = document.querySelector('.jsonclick')
+
   if (jsonBox) {
     if (jsonBox.style.display === 'none' || !jsonBox.style.display) {
-      if (!jsonContent.innerHTML) {
-        const myJSON = Session.get('txhash').transaction
-        const formatter = new JSONFormatter(myJSON)
-        jsonContent.innerHTML = ''
-        jsonContent.appendChild(formatter.render())
+      // Check if content is already populated (not just the comment)
+      if (!jsonBox.innerHTML || jsonBox.innerHTML.includes('JSON content will be populated by JavaScript')) {
+        const myJSON = bufferToHex(Session.get('txhash'))
+        const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark' })
+        jsonBox.innerHTML = ''
+        const rendered = formatter.render()
+        
+        // Find and extract from the first json-formatter-children element
+        const childrenElement = rendered.querySelector('.json-formatter-children')
+        if (childrenElement) {
+          // Move all children to the root level
+          while (childrenElement.firstChild) {
+            jsonBox.appendChild(childrenElement.firstChild)
+          }
+        } else {
+          // Fallback to full rendered content
+          jsonBox.appendChild(rendered)
+        }
+        
+        // Open the first toggler after extraction is complete
+        setTimeout(() => {
+          const firstToggler = jsonBox.querySelector('.json-formatter-toggler-link')
+          if (firstToggler) {
+            firstToggler.click()
+          }
+        }, 0)
+        
+        // Remove empty objects from DOM unless expanded
+        setTimeout(() => {
+          const emptyObjects = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-object')
+          const emptyArrays = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-array')
+          
+          emptyObjects.forEach(el => {
+            if (!el.closest('.json-formatter-open')) {
+              el.remove() // Remove from DOM entirely
+            }
+          })
+          
+          emptyArrays.forEach(el => {
+            if (!el.closest('.json-formatter-open')) {
+              el.remove() // Remove from DOM entirely
+            }
+          })
+        }, 0)
       }
       jsonBox.style.display = 'block'
+      // Rotate the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(180deg)'
+        }
+      }
     } else {
       jsonBox.style.display = 'none'
+      // Reset the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(0deg)'
+        }
+      }
     }
   }
 }
@@ -433,7 +485,7 @@ function toggleJSON() {
 // Helper function to hide messages
 function hideMessages() {
   const messages = document.querySelectorAll('.message')
-  messages.forEach(msg => msg.style.display = 'none')
+  messages.forEach((msg) => { msg.style.display = 'none' })
 }
 
 // Helper function to show/hide verification results
@@ -448,7 +500,7 @@ function showVerificationResult(elementId) {
 function hideVerificationResults() {
   const verified = document.getElementById('documentVerified')
   const failed = document.getElementById('documentVerifcationFailed')
-  
+
   if (verified) {
     verified.classList.add('hidden')
     verified.style.display = 'none'

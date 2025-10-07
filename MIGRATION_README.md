@@ -20,7 +20,8 @@ This document outlines the migration from Fomantic UI (Semantic UI fork) to Tail
 - **Custom QRL Colors**:
   - `qrl-primary`: #1a1a1a (main background)
   - `qrl-secondary`: #2d2d2d (cards, sidebar)
-  - `qrl-accent`: #00d4aa (QRL brand color)
+  - `qrl-accent`: #FFA729 (QRL brand color)
+  - `qrl-blue`: #4AAFFF (secondary accent color)
   - `qrl-text`: #ffffff (primary text)
   - `qrl-text-secondary`: #b3b3b3 (secondary text)
   - `qrl-border`: #404040 (borders)

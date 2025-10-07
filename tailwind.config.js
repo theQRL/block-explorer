@@ -13,6 +13,8 @@ module.exports = {
         'qrl-primary': '#1a1a1a',
         'qrl-secondary': '#2d2d2d',
         'qrl-accent': '#FFA729',
+        'qrl-accent-secondary': '#4AAFFF',
+        'qrl-blue': '#4AAFFF',
         'qrl-text': '#ffffff',
         'qrl-text-secondary': '#b3b3b3',
         'qrl-border': '#404040',

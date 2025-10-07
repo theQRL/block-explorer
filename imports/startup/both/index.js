@@ -75,3 +75,39 @@ export function anyAddressToRaw(address) {
 export function upperCaseFirst(string) {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
+
+// Take an object and deep iterate through it replacing any buffer objects with hex strings
+export function bufferToHex(obj) {
+  // Handle null, undefined, or non-objects
+  if (obj === null || obj === undefined || typeof obj !== 'object') {
+    return obj
+  }
+
+  // Handle Buffer objects
+  if (Buffer.isBuffer(obj)) {
+    return obj.toString('hex')
+  }
+
+  // Handle serialized Buffer objects (from JSON.stringify/parse)
+  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
+    return Buffer.from(obj.data).toString('hex')
+  }
+
+  // Handle arrays
+  if (Array.isArray(obj)) {
+    return obj.map((item) => bufferToHex(item))
+  }
+
+  // Handle plain objects
+  const res = {}
+  Object.keys(obj).forEach((key) => {
+    const value = bufferToHex(obj[key])
+    // If the key contains "addr" and the value is a string that doesn't start with "Q", add "Q" prefix
+    if (key.toLowerCase().includes('addr') && typeof value === 'string' && !value.startsWith('Q')) {
+      res[key] = `Q${value}`
+    } else {
+      res[key] = value
+    }
+  })
+  return res
+}

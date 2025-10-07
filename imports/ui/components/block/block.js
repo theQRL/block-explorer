@@ -1,7 +1,7 @@
 import JSONFormatter from 'json-formatter-js'
 import './block.html'
 import {
-  numberToString, SHOR_PER_QUANTA, formatBytes, hexOrB32,
+  numberToString, SHOR_PER_QUANTA, formatBytes, hexOrB32, bufferToHex,
 } from '../../../startup/both/index.js'
 
 const calculateEpoch = (blockNumber) => {
@@ -185,18 +185,83 @@ Template.block.helpers({
   },
 })
 
+// Helper function to toggle JSON display
+function toggleJSON() {
+  const jsonBox = document.querySelector('.jsonbox')
+  const toggleButton = document.querySelector('.jsonclick')
+
+  if (jsonBox) {
+    if (jsonBox.style.display === 'none' || !jsonBox.style.display) {
+      // Check if content is already populated (not just the comment)
+      if (!jsonBox.innerHTML || jsonBox.innerHTML.includes('JSON content will be populated by JavaScript')) {
+        const myJSON = bufferToHex(Session.get('block').block)
+        const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark' })
+        jsonBox.innerHTML = ''
+        const rendered = formatter.render()
+        
+        // Extract content from first parent element and move children up
+        const firstParent = rendered.querySelector('.json-formatter-row')
+        if (firstParent) {
+          const children = firstParent.querySelector('.json-formatter-children')
+          if (children && children.children.length > 0) {
+            // Move all children to the root level
+            while (children.firstChild) {
+              jsonBox.appendChild(children.firstChild)
+            }
+          } else {
+            // If no children, append the first parent itself
+            jsonBox.appendChild(firstParent)
+          }
+        } else {
+          jsonBox.appendChild(rendered)
+        }
+        
+        // Remove empty objects from DOM unless expanded
+        setTimeout(() => {
+          const emptyObjects = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-object')
+          const emptyArrays = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-array')
+          
+          emptyObjects.forEach(el => {
+            if (!el.closest('.json-formatter-open')) {
+              el.remove() // Remove from DOM entirely
+            }
+          })
+          
+          emptyArrays.forEach(el => {
+            if (!el.closest('.json-formatter-open')) {
+              el.remove() // Remove from DOM entirely
+            }
+          })
+        }, 0)
+      }
+      jsonBox.style.display = 'block'
+      // Rotate the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(180deg)'
+        }
+      }
+    } else {
+      jsonBox.style.display = 'none'
+      // Reset the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(0deg)'
+        }
+      }
+    }
+  }
+}
+
 Template.block.events({
   'click .close': () => {
-    $('.message')
-      .hide()
+    const messages = document.querySelectorAll('.message')
+    messages.forEach((msg) => { msg.style.display = 'none' })
   },
   'click .jsonclick': () => {
-    if (!($('.json').html())) {
-      const myJSON = Session.get('block').block
-      const formatter = new JSONFormatter(myJSON)
-      $('.json').html(formatter.render())
-    }
-    $('.jsonbox').toggle()
+    toggleJSON()
   },
 })
 

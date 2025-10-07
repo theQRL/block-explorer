@@ -18,6 +18,7 @@ import {
   EXPLORER_VERSION,
   SHOR_PER_QUANTA,
   anyAddressToRaw,
+  bufferToHex,
 } from '../both/index.js'
 
 const PROTO_PATH = Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
@@ -1413,36 +1414,6 @@ JsonRoutes.add('get', '/api/a/:id', (req, res) => {
   })
 })
 
-/* take an object and deep iterate through it replacing any buffer objects with hex strings */
-const bufferToHex = (obj) => {
-  // Handle null, undefined, or non-objects
-  if (obj === null || obj === undefined || typeof obj !== 'object') {
-    return obj
-  }
-
-  // Handle Buffer objects
-  if (Buffer.isBuffer(obj)) {
-    return obj.toString('hex')
-  }
-
-  // Handle serialized Buffer objects (from JSON.stringify/parse)
-  if (obj.type === 'Buffer' && Array.isArray(obj.data)) {
-    return Buffer.from(obj.data).toString('hex')
-  }
-
-  // Handle arrays
-  if (Array.isArray(obj)) {
-    return obj.map((item) => bufferToHex(item))
-  }
-
-  // Handle plain objects
-  const res = {}
-  Object.keys(obj).forEach((key) => {
-    res[key] = bufferToHex(obj[key])
-  })
-  return res
-}
-
 function apiTxList(req, res, num) {
   const aId = req.params.id
   check(aId, String)
@@ -1473,14 +1444,9 @@ function apiTxList(req, res, num) {
       }
 
       // Calculate total pages based on transaction count
-      console.log(
-        'Address state response:',
-        JSON.stringify(addressState, null, 2),
-      )
       let totalTransactions = 0
       if (addressState.state && addressState.state.transaction_hashes) {
         totalTransactions = addressState.state.transaction_hashes.length
-        console.log('Found transaction_hashes length:', totalTransactions)
       } else if (
         addressState.state
         && addressState.state.transaction_hash_count

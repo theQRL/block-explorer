@@ -8,6 +8,7 @@ import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
 import { BigNumber } from 'bignumber.js'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
+import { bufferToHex } from '../../../startup/both/index.js'
 import './address.html'
 import {
   bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst, decimalToBinary,
@@ -929,19 +930,76 @@ Template.address.helpers({
 // Helper function to toggle JSON display
 function toggleJSON() {
   const jsonBox = document.querySelector('.jsonbox')
-  const jsonContent = document.querySelector('.json')
-  
+  const toggleButton = document.querySelector('.jsonclick')
+
   if (jsonBox) {
     if (jsonBox.style.display === 'none' || !jsonBox.style.display) {
-      if (!jsonContent.innerHTML) {
-        const myJSON = Session.get('address')
-        const formatter = new JSONFormatter(myJSON)
-        jsonContent.innerHTML = ''
-        jsonContent.appendChild(formatter.render())
+      // Check if content is already populated (not just the comment)
+      if (!jsonBox.innerHTML || jsonBox.innerHTML.includes('JSON content will be populated by JavaScript')) {
+        const myJSON = bufferToHex(Session.get('address'))
+        const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark', hoverPreviewEnabled: false })
+        jsonBox.innerHTML = ''
+        const rendered = formatter.render()
+        
+        // Find and extract from the first json-formatter-children element
+        const childrenElement = rendered.querySelector('.json-formatter-children')
+        if (childrenElement) {
+          // Move all children to the root level
+          while (childrenElement.firstChild) {
+            jsonBox.appendChild(childrenElement.firstChild)
+          }
+        } else {
+          // Fallback to full rendered content
+          jsonBox.appendChild(rendered)
+        }
+        
+        // Open the "state" property after extraction is complete
+        setTimeout(() => {
+          const stateToggler = jsonBox.querySelector('.json-formatter-toggler-link')
+          if (stateToggler) {
+            // Check if this is the state property by looking at the key
+            const keyElement = stateToggler.querySelector('.json-formatter-key')
+            if (keyElement && keyElement.textContent.includes('state')) {
+              stateToggler.click()
+            }
+          }
+        }, 0)
+        
+        // Remove empty objects from DOM unless expanded
+        setTimeout(() => {
+          const emptyObjects = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-object')
+          const emptyArrays = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-array')
+          
+          emptyObjects.forEach(el => {
+            if (!el.closest('.json-formatter-open')) {
+              el.remove() // Remove from DOM entirely
+            }
+          })
+          
+          emptyArrays.forEach(el => {
+            if (!el.closest('.json-formatter-open')) {
+              el.remove() // Remove from DOM entirely
+            }
+          })
+        }, 0)
       }
       jsonBox.style.display = 'block'
+      // Rotate the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(180deg)'
+        }
+      }
     } else {
       jsonBox.style.display = 'none'
+      // Reset the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(0deg)'
+        }
+      }
     }
   }
 }
@@ -950,15 +1008,15 @@ function toggleJSON() {
 function switchToTransactionsTab() {
   const tabButtons = document.querySelectorAll('.tab-button')
   const tabContents = document.querySelectorAll('.tab-content')
-  
+
   // Remove active from all
   tabButtons.forEach(btn => btn.classList.remove('active'))
   tabContents.forEach(content => content.classList.remove('active'))
-  
+
   // Activate transactions tab
   const transactionsButton = document.querySelector('[data-tab="transactions"]')
   const transactionsContent = document.querySelector('.tab-content[data-tab="transactions"]')
-  
+
   if (transactionsButton) transactionsButton.classList.add('active')
   if (transactionsContent) transactionsContent.classList.add('active')
 }
@@ -979,7 +1037,7 @@ Template.address.events({
   },
   'click .close': () => {
     const messages = document.querySelectorAll('.message')
-    messages.forEach(msg => msg.style.display = 'none')
+    messages.forEach((msg) => { msg.style.display = 'none' })
   },
   'click .jsonclick': () => {
     toggleJSON()
@@ -1030,14 +1088,14 @@ Template.address.events({
   'click .tab-button': (event) => {
     event.preventDefault()
     const tabId = event.currentTarget.getAttribute('data-tab')
-    
+
     // Remove active class from all buttons and contents
     const allButtons = document.querySelectorAll('.tab-button')
     const allContents = document.querySelectorAll('.tab-content')
-    
-    allButtons.forEach(btn => btn.classList.remove('active'))
-    allContents.forEach(content => content.classList.remove('active'))
-    
+
+    allButtons.forEach((btn) => { btn.classList.remove('active') })
+    allContents.forEach((content) => { content.classList.remove('active') })
+
     // Add active class to clicked button and corresponding content
     event.currentTarget.classList.add('active')
     const targetContent = document.querySelector(`.tab-content[data-tab="${tabId}"]`)
@@ -1071,7 +1129,7 @@ Template.address.onRendered(() => {
       if (identicon && typeof jdenticon !== 'undefined') {
         jdenticon.update('#identicon', addressToRender)
       }
-      
+
       // Re-render QR Code
       const qrContainer = document.querySelector('.qr-code-container')
       if (qrContainer) {
