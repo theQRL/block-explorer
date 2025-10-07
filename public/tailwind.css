@@ -433,6 +433,11 @@
   display: none !important; /* Hide "Object" text */
 }
 
+.json-formatter-dark.json-formatter-row .json-formatter-bracket {
+  @apply text-qrl-blue font-mono !important;
+  color: #4AAFFF !important; /* Explicit color override */
+}
+
 .json-formatter-children {
   @apply ml-4 border-l border-qrl-border pl-2;
 }

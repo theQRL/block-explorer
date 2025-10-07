@@ -2290,6 +2290,14 @@ h1, h2, h3, h4, h5, h6 {
   /* Hide "Object" text */
 }
 
+.json-formatter-dark.json-formatter-row .json-formatter-bracket {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  --tw-text-opacity: 1 !important;
+  color: rgb(74 175 255 / var(--tw-text-opacity, 1)) !important;
+  color: #4AAFFF !important;
+  /* Explicit color override */
+}
+
 .json-formatter-children {
   margin-left: 1rem;
   border-left-width: 1px;
@@ -2584,6 +2592,10 @@ h1, h2, h3, h4, h5, h6 {
 .hover\:text-yellow-100:hover {
   --tw-text-opacity: 1;
   color: rgb(254 249 195 / var(--tw-text-opacity, 1));
+}
+
+.hover\:underline:hover {
+  text-decoration-line: underline;
 }
 
 .hover\:shadow-\[0_0_0_1px_rgb\(255_167_41\)\]:hover {
