@@ -65,7 +65,7 @@
                       {{rank(@index)}}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text-secondary text-center">
-                      <div class="font-mono break-all">{{address}}</div>
+                      <a href="/a/{{address}}" class="font-mono break-all text-qrl-accent hover:text-qrl-accent/80 hover:underline transition-colors duration-200 cursor-pointer">{{address}}</a>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
                       {{shorToQuanta(balance)}}
@@ -81,8 +81,8 @@
           
           <!-- Load More Button -->
           <div class="mt-6 flex justify-center">
-            {{#if loadingMore}}
-              <button class="btn-secondary" disabled>
+            {{#if richlistButtonLoading}}
+              <button class="btn-secondary flex items-center justify-center" disabled>
                 <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
                 Loading
               </button>

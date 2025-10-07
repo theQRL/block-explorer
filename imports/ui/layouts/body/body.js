@@ -1,3 +1,4 @@
+import { EXPLORER_VERSION } from '../../../startup/both/index.js'
 // Mobile menu functionality
 Template.appBody.onRendered(() => {
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')
@@ -5,15 +6,15 @@ Template.appBody.onRendered(() => {
 
   if (mobileMenuToggle && mobileMenu) {
     // Toggle mobile menu
-    mobileMenuToggle.addEventListener('click', function () {
+    mobileMenuToggle.addEventListener('click', () => {
       mobileMenu.classList.toggle('hidden')
     })
 
     // Close menu when clicking outside
-    document.addEventListener('click', function (event) {
+    document.addEventListener('click', (event) => {
       if (
-        !mobileMenuToggle.contains(event.target) &&
-        !mobileMenu.contains(event.target)
+        !mobileMenuToggle.contains(event.target)
+        && !mobileMenu.contains(event.target)
       ) {
         mobileMenu.classList.add('hidden')
       }
@@ -22,9 +23,12 @@ Template.appBody.onRendered(() => {
     // Close menu when clicking menu links
     const menuLinks = mobileMenu.querySelectorAll('a')
     menuLinks.forEach((link) => {
-      link.addEventListener('click', function () {
+      link.addEventListener('click', () => {
         mobileMenu.classList.add('hidden')
       })
     })
   }
+})
+Template.appBody.helpers({
+  EXPLORER_VERSION: () => EXPLORER_VERSION,
 })
