@@ -478,9 +478,9 @@ const helpersaddressTransactions = (response) => {
       ).toString('hex')
     }
     if (tx.tx.master_addr) {
-      txEdited.tx.master_addr = Buffer.from(txEdited.tx.master_addr).toString(
+      txEdited.tx.master_addr = `Q${Buffer.from(txEdited.tx.master_addr).toString(
         'hex',
-      )
+      )}`
     }
     if (tx.tx.public_key) {
       txEdited.tx.public_key = Buffer.from(txEdited.tx.public_key).toString(
@@ -948,11 +948,14 @@ Meteor.methods({
       const req = {
         query: Buffer.from(blockId.toString()),
       }
-      const response = Meteor.wrapAsync(getObject)(req)
+      let response = Meteor.wrapAsync(getObject)(req)
 
       // Refactor for block_extended and extended_transactions
       response.block = response.block_extended
       response.block.transactions = response.block_extended.extended_transactions
+      
+      // Process all address fields in the entire response
+      response = bufferToHex(response)
 
       if (response.block.header) {
         response.block.header.hash_header = Buffer.from(
@@ -969,7 +972,7 @@ Meteor.methods({
         const transactions = []
         response.block.transactions.forEach((value) => {
           const adjusted = value.tx
-          adjusted.addr_from = value.addr_from
+          // addr_from is now processed by bufferToHex above
           adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
           adjusted.transaction_hash = Buffer.from(
             adjusted.transaction_hash,

@@ -416,51 +416,49 @@ function toggleJSON() {
 
   if (jsonBox) {
     if (jsonBox.style.display === 'none' || !jsonBox.style.display) {
-      // Check if content is already populated (not just the comment)
-      if (!jsonBox.innerHTML || jsonBox.innerHTML.includes('JSON content will be populated by JavaScript')) {
-        const myJSON = bufferToHex(Session.get('txhash'))
-        const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark' })
-        jsonBox.innerHTML = ''
-        const rendered = formatter.render()
-        
-        // Find and extract from the first json-formatter-children element
-        const childrenElement = rendered.querySelector('.json-formatter-children')
-        if (childrenElement) {
-          // Move all children to the root level
-          while (childrenElement.firstChild) {
-            jsonBox.appendChild(childrenElement.firstChild)
-          }
-        } else {
-          // Fallback to full rendered content
-          jsonBox.appendChild(rendered)
+      // Always re-process the data to ensure it's up-to-date with reactive changes
+      const myJSON = bufferToHex(Session.get('txhash'))
+      const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark' })
+      jsonBox.innerHTML = ''
+      const rendered = formatter.render()
+      
+      // Find and extract from the first json-formatter-children element
+      const childrenElement = rendered.querySelector('.json-formatter-children')
+      if (childrenElement) {
+        // Move all children to the root level
+        while (childrenElement.firstChild) {
+          jsonBox.appendChild(childrenElement.firstChild)
         }
-        
-        // Open the first toggler after extraction is complete
-        setTimeout(() => {
-          const firstToggler = jsonBox.querySelector('.json-formatter-toggler-link')
-          if (firstToggler) {
-            firstToggler.click()
-          }
-        }, 0)
-        
-        // Remove empty objects from DOM unless expanded
-        setTimeout(() => {
-          const emptyObjects = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-object')
-          const emptyArrays = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-array')
-          
-          emptyObjects.forEach(el => {
-            if (!el.closest('.json-formatter-open')) {
-              el.remove() // Remove from DOM entirely
-            }
-          })
-          
-          emptyArrays.forEach(el => {
-            if (!el.closest('.json-formatter-open')) {
-              el.remove() // Remove from DOM entirely
-            }
-          })
-        }, 0)
+      } else {
+        // Fallback to full rendered content
+        jsonBox.appendChild(rendered)
       }
+      
+      // Open the first toggler after extraction is complete
+      setTimeout(() => {
+        const firstToggler = jsonBox.querySelector('.json-formatter-toggler-link')
+        if (firstToggler) {
+          firstToggler.click()
+        }
+      }, 0)
+      
+      // Remove empty objects from DOM unless expanded
+      setTimeout(() => {
+        const emptyObjects = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-object')
+        const emptyArrays = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-array')
+        
+        emptyObjects.forEach(el => {
+          if (!el.closest('.json-formatter-open')) {
+            el.remove() // Remove from DOM entirely
+          }
+        })
+        
+        emptyArrays.forEach(el => {
+          if (!el.closest('.json-formatter-open')) {
+            el.remove() // Remove from DOM entirely
+          }
+        })
+      }, 0)
       jsonBox.style.display = 'block'
       // Rotate the arrow icon
       if (toggleButton) {
