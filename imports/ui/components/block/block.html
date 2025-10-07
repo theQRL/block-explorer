@@ -73,7 +73,7 @@
           </thead>
           <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
             {{#each transactions}}
-              <tr class="hover:bg-qrl-primary/50 transition-colors duration-200">
+              <tr class="hover:bg-qrl-primary/50 transition-colors duration-200 cursor-pointer transaction-row" data-txhash="{{transaction_hash}}">
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{#if isTransfer transactionType}}bg-yellow-100 text-yellow-800{{else}}{{#if isTokenTransfer transactionType}}bg-blue-100 text-blue-800{{else}}bg-gray-100 text-gray-800{{/if}}{{/if}}">
                     {{transactionType}}
@@ -87,17 +87,21 @@
                 </td>
                 <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono">
                   <div class="max-w-xs truncate">
-                    {{render_addr_from}}
+                    <a href="/a/{{render_addr_from}}" class="text-qrl-accent hover:text-qrl-accent/80 hover:underline transition-colors duration-200 cursor-pointer" onclick="event.stopPropagation()">
+                      {{render_addr_from}}
+                    </a>
                   </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono">
                   <div class="max-w-xs truncate">
-                    {{render_addr_to}}
+                    <a href="/a/{{render_addr_to}}" class="text-qrl-accent hover:text-qrl-accent/80 hover:underline transition-colors duration-200 cursor-pointer" onclick="event.stopPropagation()">
+                      {{render_addr_to}}
+                    </a>
                   </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono">
                   <div class="max-w-xs truncate">
-                    <a href="/tx/{{transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 transition-colors">
+                    <a href="/tx/{{transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 transition-colors" onclick="event.stopPropagation()">
                       {{transaction_hash}}
                     </a>
                   </div>

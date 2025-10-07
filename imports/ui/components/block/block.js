@@ -98,19 +98,31 @@ Template.block.helpers({
     return ''
   },
   render_addr_from() {
+    if (!this.addr_from) {
+      return ''
+    }
     return hexOrB32(this.addr_from)
   },
   render_addr_to() {
     if (this.transactionType === 'coinbase') {
-      return hexOrB32(this.coinbase.addr_to)
+      if (!this.coinbase || !this.coinbase.addr_to) {
+        return ''
+      }
+      return this.coinbase.addr_to
     }
     if (this.transactionType === 'transfer') {
+      if (!this.transfer || !this.transfer.addrs_to || this.transfer.addrs_to.length === 0) {
+        return ''
+      }
       if (this.transfer.totalOutputs === 1) {
         return hexOrB32(this.transfer.addrs_to[0])
       }
       return `${this.transfer.totalOutputs} addresses`
     }
     if (this.transactionType === 'transfer_token') {
+      if (!this.transfer_token || !this.transfer_token.addrs_to || this.transfer_token.addrs_to.length === 0) {
+        return ''
+      }
       if (this.transfer_token.totalOutputs === 1) {
         return hexOrB32(this.transfer_token.addrs_to[0])
       }
@@ -249,6 +261,12 @@ Template.block.events({
   },
   'click .jsonclick': () => {
     toggleJSON()
+  },
+  'click .transaction-row': (event) => {
+    const txhash = event.currentTarget.getAttribute('data-txhash')
+    if (txhash) {
+      window.location.href = `/tx/${txhash}`
+    }
   },
 })
 

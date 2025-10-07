@@ -1146,4 +1146,31 @@ Template.address.onRendered(() => {
     if (tokenLoading) tokenLoading.style.display = 'none'
     if (nftLoading) nftLoading.style.display = 'none'
   })
+
+  // Mobile touch tooltip functionality
+  const balanceElement = document.querySelector('[data-tooltip]')
+  if (balanceElement) {
+    let touchTimeout = null
+    
+    balanceElement.addEventListener('touchstart', (e) => {
+      e.preventDefault()
+      clearTimeout(touchTimeout)
+      balanceElement.classList.add('opacity-100')
+    })
+    
+    balanceElement.addEventListener('touchend', (e) => {
+      e.preventDefault()
+      touchTimeout = setTimeout(() => {
+        balanceElement.classList.remove('opacity-100')
+      }, 2000) // Hide after 2 seconds
+    })
+    
+    // Hide tooltip when touching elsewhere
+    document.addEventListener('touchstart', (e) => {
+      if (!balanceElement.contains(e.target)) {
+        balanceElement.classList.remove('opacity-100')
+        clearTimeout(touchTimeout)
+      }
+    })
+  }
 })

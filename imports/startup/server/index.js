@@ -972,12 +972,8 @@ Meteor.methods({
         const transactions = []
         response.block.transactions.forEach((value) => {
           const adjusted = value.tx
-          // addr_from is now processed by bufferToHex above
-          adjusted.public_key = Buffer.from(adjusted.public_key).toString('hex')
-          adjusted.transaction_hash = Buffer.from(
-            adjusted.transaction_hash,
-          ).toString('hex')
-          adjusted.signature = Buffer.from(adjusted.signature).toString('hex')
+          // All Buffer fields are now processed by bufferToHex above
+          // No need for manual conversion
           if (adjusted.transactionType === 'coinbase') {
             // adjusted.coinbase.addr_to = adjusted.coinbase.addr_to <--- FIXME: why was this here?
             // FIXME: need to refactor to explorer.[GUI] format (below allow amount to be displayed)

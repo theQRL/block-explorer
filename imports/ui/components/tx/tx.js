@@ -130,6 +130,10 @@ Template.tx.helpers({
     try {
       if (Session.get('txhash').found) {
         const txhash = Session.get('txhash').transaction
+        // OTS key is not applicable for coinbase transactions
+        if (txhash.tx.transactionType === 'coinbase') {
+          return 'N/A'
+        }
         const otsKey = parseInt(txhash.tx.signature.substring(0, 8), 16)
         return otsKey
       }
