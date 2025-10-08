@@ -249,8 +249,11 @@ Template.lasttx.helpers({
 
 Template.lasttx.events({
   'click .transactionRecord': (event) => {
-    const route =
-      event.currentTarget.childNodes[5].childNodes[1].attributes[0].nodeValue
-    FlowRouter.go(route)
+    // Find the transaction hash in the clicked element
+    const hashElement = event.currentTarget.querySelector('[data-full-text]')
+    if (hashElement) {
+      const transactionHash = hashElement.getAttribute('data-full-text')
+      FlowRouter.go(`/tx/${transactionHash}`)
+    }
   },
 })

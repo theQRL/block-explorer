@@ -35,7 +35,7 @@
       {{#each transactions}}
       <!-- All Transactions (Confirmed and Unconfirmed) -->
       <div
-        class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 min-h-[180px] flex flex-col"
+        class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 h-48 flex flex-col transactionRecord cursor-pointer"
       >
         <div class="flex items-start space-x-4 flex-1">
           <div class="flex-shrink-0">
@@ -43,27 +43,27 @@
               class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center"
             >
               {{#if isTransfer this.tx.transactionType}}
-                <img class="w-8 h-8 brightness-0" src="/img/icons/send.svg" alt="Transfer" />
+                <i data-lucide="arrow-right" class="w-5 h-5 text-qrl-primary"></i>
               {{else}}
                 {{#if isTokenTransfer this.tx.transactionType}}
-                  <img class="w-8 h-8 brightness-0" src="/img/icons/token.svg" alt="Token Transfer" />
+                  <i data-lucide="coins" class="w-5 h-5 text-qrl-primary"></i>
                 {{else}}
                   {{#if isCoinbase this.tx.transactionType}}
-                    <img class="w-8 h-8 brightness-0" src="/img/icons/mining.svg" alt="Coinbase" />
+                    <i data-lucide="star" class="w-5 h-5 text-qrl-primary"></i>
                   {{else}}
                     {{#if isStake this.tx.transactionType}}
-                      <img class="w-8 h-8 brightness-0" src="/img/icons/vote.svg" alt="Stake" />
+                      <i data-lucide="vote" class="w-5 h-5 text-qrl-primary"></i>
                     {{else}}
                       {{#if isSlave this.tx.transactionType}}
-                        <img class="w-8 h-8 brightness-0" src="/img/icons/slave.svg" alt="Slave" />
+                        <i data-lucide="folder-tree" class="w-5 h-5 text-qrl-primary"></i>
                       {{else}}
                         {{#if isLatticePK this.tx.transactionType}}
-                          <img class="w-8 h-8 brightness-0" src="/img/icons/lattice.svg" alt="Lattice PK" />
+                          <i data-lucide="grid-3x3" class="w-5 h-5 text-qrl-primary"></i>
                         {{else}}
                           {{#if isMessage this.tx.transactionType}}
-                            <img class="w-8 h-8 brightness-0" src="/img/icons/message.svg" alt="Message" />
+                            <i data-lucide="message-circle" class="w-5 h-5 text-qrl-primary"></i>
                           {{else}}
-                            <img class="w-8 h-8 brightness-0" src="/img/icons/multisig.svg" alt="Transaction" />
+                            <i data-lucide="users" class="w-5 h-5 text-qrl-primary"></i>
                           {{/if}}
                         {{/if}}
                       {{/if}}

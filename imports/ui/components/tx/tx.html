@@ -42,9 +42,15 @@
         <div class="card">
           <div class="mb-4">
             <div class="text-xs font-medium text-qrl-text-secondary uppercase tracking-wider mb-2">TRANSACTION</div>
-            <h3 class="text-2xl font-bold text-qrl-text break-all font-mono">
-              {{tx.tx.transaction_hash}}
-            </h3>
+            <div class="flex items-center gap-3 txhash-container">
+              <h3 class="text-2xl font-bold text-qrl-text font-mono flex-1 min-w-0 truncate" title="{{tx.tx.transaction_hash}}">
+                {{tx.tx.transaction_hash}}
+              </h3>
+              <button class="copy-txhash-btn flex items-center gap-2 px-3 py-2 bg-qrl-accent/10 hover:bg-qrl-accent/20 text-qrl-accent rounded-lg transition-colors duration-200 text-sm font-medium min-h-[40px] cursor-pointer" title="Copy transaction hash to clipboard" style="pointer-events: auto !important;">
+                <i data-lucide="copy" class="w-4 h-4 flex-shrink-0 pointer-events-none"></i>
+                <span class="hidden sm:inline whitespace-nowrap pointer-events-none">Copy</span>
+              </button>
+            </div>
           </div>
 
           <!-- Transaction Details Grid -->
@@ -83,14 +89,10 @@
               <div class="text-sm text-qrl-text-secondary mb-1">Status</div>
               <div class="text-lg font-mono text-qrl-text flex items-center">
                 {{#if isConfirmed}}
-                  <svg class="w-4 h-4 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                  </svg>
+                  <i data-lucide="check-circle" class="w-4 h-4 text-green-400 mr-2"></i>
                   OK {{ts}}
                 {{else}}
-                  <svg class="w-4 h-4 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd"></path>
-                  </svg>
+                  <i data-lucide="clock" class="w-4 h-4 text-yellow-400 mr-2"></i>
                   Unconfirmed
                 {{/if}}
               </div>
@@ -100,15 +102,14 @@
 
         <!-- Transaction Content -->
         <div class="card">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Transaction Type and Amount -->
-            <div class="text-center">
-              <div class="bg-qrl-secondary/50 rounded-lg p-6">
-                <div class="mb-4">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{#if isTransfer}}bg-yellow-100 text-yellow-800{{else}}{{#if isTokenTransfer}}bg-blue-100 text-blue-800{{else}}bg-gray-100 text-gray-800{{/if}}{{/if}}">
-                    {{explorer.type}}{{#if isTokenTransfer}}{{#if isTransferNFT}}{{else}}: {{explorer.symbol}} {{/if}}{{/if}}
-                  </span>
-                </div>
+          <!-- Transaction Type and Amount - Full Width -->
+          <div class="text-center mb-6">
+            <div class="bg-qrl-secondary/50 rounded-lg p-6">
+              <div class="mb-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{#if isTransfer}}bg-yellow-100 text-yellow-800{{else}}{{#if isTokenTransfer}}bg-blue-100 text-blue-800{{else}}bg-gray-100 text-gray-800{{/if}}{{/if}}">
+                  {{explorer.type}}{{#if isTokenTransfer}}{{#if isTransferNFT}}{{else}}: {{explorer.symbol}} {{/if}}{{/if}}
+                </span>
+              </div>
 
                 {{#if isNotMultiSig}}
                   {{#if isNotMessage}}
@@ -119,8 +120,8 @@
                         </div>
                         <div class="text-qrl-text-secondary mb-2">owned by:</div>
                         <div class="font-mono text-qrl-accent">
-                          <a href="/a/{{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}" class="hover:text-qrl-accent/80">
-                            {{# if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}
+                           <a href="/a/{{#if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}" class="hover:text-qrl-accent/80">
+                             {{#if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}
                           </a>
                         </div>
                       {{else}}
@@ -136,9 +137,7 @@
                               </div>
                             {{else}}
                               <div class="mb-4">
-                                <svg class="inline-block w-5 h-5 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                </svg>
+                                <i data-lucide="alert-triangle" class="inline-block w-5 h-5 text-yellow-400 mr-1"></i>
                                 Unverified provider: {{providerID}}
                               </div>
                             {{/if}}
@@ -153,10 +152,7 @@
                             
                             {{#if knownProvider}}
                               <a href="{{providerURL}}/{{explorer.token_txhash}}" class="btn-primary">
-                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                </svg>
+                                <i data-lucide="external-link" class="w-4 h-4 mr-2"></i>
                                 View at {{providerName}}
                               </a>
                             {{/if}}
@@ -200,7 +196,6 @@
                   {{/if}}
                 {{/if}}
               </div>
-            </div>
 
             <!-- Transaction Details -->
             <div class="space-y-6">
@@ -220,8 +215,8 @@
                         {{#each explorer.initialBalances}}
                           <tr>
                             <td class="px-4 py-2 text-sm font-mono">
-                              <a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                {{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                               <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                 {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
                               </a>
                             </td>
                             <td class="px-4 py-2 text-sm text-qrl-text">{{this.amount}}</td>
@@ -236,16 +231,14 @@
                   <!-- From Address -->
                   <div class="bg-qrl-primary/50 rounded-lg p-4">
                     <div class="flex items-center mb-2">
-                      <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                      </svg>
+                      <i data-lucide="arrow-right" class="w-5 h-5 text-red-400 mr-2"></i>
                       <span class="text-sm font-medium text-qrl-text-secondary">
                         {{#if isMultiSigSpend}}initiated by{{else}}from{{/if}}
                       </span>
                     </div>
                     <div class="font-mono text-sm text-qrl-text break-all">
-                      <a href="/a/{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                        {{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                       <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                         {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
                       </a>
                     </div>
                   </div>
@@ -266,7 +259,7 @@
                         <div class="space-y-3 text-sm">
                           <div>
                             <span class="font-medium text-qrl-text-secondary">Notary:</span>
-                            <span class="font-mono text-qrl-text">{{# if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</span>
+                             <span class="font-mono text-qrl-text">{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</span>
                           </div>
                           <div>
                             <span class="font-medium text-qrl-text-secondary">Hash Function:</span>
@@ -293,9 +286,7 @@
                           </div>
                           <div>
                             <button id="verifyNotarisation" class="btn-primary">
-                              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                              </svg>
+                              <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
                               Verify Notarisation
                             </button>
                           </div>
@@ -352,15 +343,15 @@
                               <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
                                 {{#each multiSigSignatories this.tx.multi_sig_create}}
                                   <tr>
-                                    <td class="px-4 py-2 text-sm font-mono text-qrl-text">{{ this.address_hex}}</td>
-                                    <td class="px-4 py-2 text-sm text-qrl-text">{{ this.weight }}</td>
+                                     <td class="px-4 py-2 text-sm font-mono text-qrl-text">{{this.address_hex}}</td>
+                                     <td class="px-4 py-2 text-sm text-qrl-text">{{this.weight}}</td>
                                   </tr>
                                 {{/each}}
                               </tbody>
                               <tfoot class="bg-qrl-secondary">
                                 <tr>
                                   <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text-secondary">Threshold for spend</th>
-                                  <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text">{{ this.tx.multi_sig_create.threshold }}</th>
+                                   <th class="px-4 py-2 text-left text-xs font-medium text-qrl-text">{{this.tx.multi_sig_create.threshold}}</th>
                                 </tr>
                               </tfoot>
                             </table>
@@ -374,13 +365,13 @@
                               <div>
                                 <span class="font-medium text-qrl-text-secondary">Spend transaction:</span>
                                 <div class="font-mono text-sm text-qrl-text break-all">
-                                  <a href="/tx/{{ this.tx.multi_sig_vote.shared_key }}" class="text-qrl-accent hover:text-qrl-accent/80">{{ this.tx.multi_sig_vote.shared_key }}</a>
+                                   <a href="/tx/{{this.tx.multi_sig_vote.shared_key}}" class="text-qrl-accent hover:text-qrl-accent/80">{{this.tx.multi_sig_vote.shared_key}}</a>
                                 </div>
                               </div>
                               <div>
                                 <span class="font-medium text-qrl-text-secondary">Vote status:</span>
                                 <span class="text-qrl-text">
-                                  {{ #if this.tx.multi_sig_vote.unvote }}Vote REJECT spend{{else}}Vote APPROVE spend{{/if}}
+                                   {{#if this.tx.multi_sig_vote.unvote}}Vote REJECT spend{{else}}Vote APPROVE spend{{/if}}
                                 </span>
                               </div>
                             </div>
@@ -425,9 +416,7 @@
                               <div class="bg-qrl-primary/50 rounded-lg p-4">
                                 <div class="flex items-center mb-4">
                                   {{#if knownProvider}}
-                                    <svg class="w-5 h-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-green-400 mr-2"></i>
                                     Verified
                                   {{else}}
                                     <svg class="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -472,23 +461,23 @@
                                       </tr>
                                     </thead>
                                     <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
-                                      {{#if isTransfer}}
-                                        {{#each explorer.outputs}}
-                                          <tr>
-                                            <td class="px-4 py-2 text-sm font-mono">
-                                              <a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                                {{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
-                                              </a>
-                                            </td>
-                                            <td class="px-4 py-2 text-sm text-qrl-text">{{this.amount}}</td>
-                                          </tr>
-                                        {{/each}}
+                                       {{#if isTransfer}}
+                                         {{#each explorer.outputs}}
+                                           <tr>
+                                             <td class="px-4 py-2 text-sm font-mono">
+                                               <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                                 {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                                               </a>
+                                             </td>
+                                             <td class="px-4 py-2 text-sm text-qrl-text">{{this.amount}}</td>
+                                           </tr>
+                                         {{/each}}
                                       {{else if isTokenTransfer}}
                                         {{#each explorer.outputs}}
                                           <tr>
                                             <td class="px-4 py-2 text-sm font-mono">
-                                              <a href="/a/{{# if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                                {{# if  bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                                              <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                                {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
                                               </a>
                                             </td>
                                             <td class="px-4 py-2 text-sm text-qrl-text">{{this.amount}}</td>
@@ -506,8 +495,8 @@
                                       {{else}}
                                         <tr>
                                           <td class="px-4 py-2 text-sm font-mono">
-                                            <a href="/a/{{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                              {{# if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}
+                                            <a href="/a/{{#if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                                              {{#if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}
                                             </a>
                                           </td>
                                           <td class="px-4 py-2 text-sm text-qrl-text">{{tx.tx.amount}}</td>
@@ -541,9 +530,7 @@
             <div class="card">
               <button class="flex items-center space-x-2 text-qrl-accent hover:text-qrl-accent/80 jsonclick">
                 <span>Meta</span>
-                <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
+                <i data-lucide="chevron-down" class="w-4 h-4 transform transition-transform duration-200"></i>
               </button>
               <div class="jsonbox json p-4 bg-qrl-secondary/50 rounded overflow-auto" style="display: none">
                 <!-- JSON content will be populated by JavaScript -->
@@ -553,5 +540,15 @@
         </div>
       {{/if}}
     {{/with}}
+
+    <!-- Copy Success Overlay -->
+    {{#if copySuccess}}
+      <div class="fixed top-0 left-0 right-0 bottom-0 w-full h-full z-[9999] flex items-center justify-center pointer-events-auto" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important;" data-action="dismiss-copy-feedback">
+        <div class="bg-qrl-accent text-qrl-primary px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-2xl flex items-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold animate-bounce border-2 border-qrl-accent/20 mx-4 max-w-sm">
+          <i data-lucide="check" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+          <span>Copied!</span>
+        </div>
+      </div>
+    {{/if}}
   </div>
 </template>

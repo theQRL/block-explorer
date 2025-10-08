@@ -21,9 +21,7 @@
           
           <!-- Mobile Menu Button -->
           <button class="lg:hidden p-2 text-qrl-text hover:text-qrl-accent transition-colors" id="mobile-menu-toggle">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
+            <i data-lucide="menu" class="w-6 h-6 pointer-events-none"></i>
           </button>
         </div>
       </div>
@@ -34,54 +32,42 @@
         <nav class="hidden lg:flex items-center space-x-8">
           <a href="/lastblocks" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuBlocksActive}}">
             <div class="flex items-center space-x-2">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-              </svg>
+              <i data-lucide="box" class="w-4 h-4 pointer-events-none"></i>
               <span>Blocks</span>
             </div>
           </a>
           
           <a href="/lasttx" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
             <div class="flex items-center space-x-2">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-              </svg>
+              <i data-lucide="arrow-right" class="w-4 h-4 pointer-events-none"></i>
               <span>Transactions</span>
             </div>
           </a>
           
           <a href="/unconfirmed" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
             <div class="flex items-center space-x-2">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
-              </svg>
+              <i data-lucide="clock" class="w-4 h-4 pointer-events-none"></i>
               <span>Unconfirmed</span>
             </div>
           </a>
           
           <a href="/richlist" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuRichListActive}}">
             <div class="flex items-center space-x-2">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-              </svg>
+              <i data-lucide="list" class="w-4 h-4 pointer-events-none"></i>
               <span>Rich List</span>
             </div>
           </a>
           
           <a href="/peers" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuPeersActive}}">
             <div class="flex items-center space-x-2">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
-              </svg>
+              <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
               <span>Peers</span>
             </div>
           </a>
           
           <a href="http://wallet.theqrl.org/" target="_blank" class="text-qrl-text hover:text-qrl-accent transition-colors">
             <div class="flex items-center space-x-2">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"></path>
-              </svg>
+              <i data-lucide="wallet" class="w-4 h-4 pointer-events-none"></i>
               <span>Wallet</span>
             </div>
           </a>
@@ -94,54 +80,42 @@
       <div class="px-2 pt-2 pb-3 space-y-1 bg-qrl-secondary border-t border-qrl-border">
         <a href="/lastblocks" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuBlocksActive}}">
           <div class="flex items-center space-x-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-            </svg>
+            <i data-lucide="box" class="w-4 h-4 pointer-events-none"></i>
             <span>Blocks</span>
           </div>
         </a>
         
         <a href="/lasttx" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
           <div class="flex items-center space-x-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-            </svg>
+            <i data-lucide="arrow-right" class="w-4 h-4 pointer-events-none"></i>
             <span>Transactions</span>
           </div>
         </a>
         
         <a href="/unconfirmed" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
           <div class="flex items-center space-x-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
-            </svg>
+            <i data-lucide="clock" class="w-4 h-4 pointer-events-none"></i>
             <span>Unconfirmed</span>
           </div>
         </a>
         
         <a href="/richlist" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuRichListActive}}">
           <div class="flex items-center space-x-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-            </svg>
+            <i data-lucide="list" class="w-4 h-4 pointer-events-none"></i>
             <span>Rich List</span>
           </div>
         </a>
         
         <a href="/peers" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuPeersActive}}">
           <div class="flex items-center space-x-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
-            </svg>
+            <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
             <span>Peers</span>
           </div>
         </a>
         
         <a href="http://wallet.theqrl.org/" target="_blank" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors">
           <div class="flex items-center space-x-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"></path>
-            </svg>
+            <i data-lucide="wallet" class="w-4 h-4 pointer-events-none"></i>
             <span>Wallet</span>
           </div>
         </a>

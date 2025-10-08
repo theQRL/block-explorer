@@ -48,6 +48,13 @@ Template.search.events({
   },
 })
 Template.search.onRendered(() => {
+  // Initialize Lucide icons for this template
+  setTimeout(() => {
+    if (window.reinitializeLucideIcons) {
+      window.reinitializeLucideIcons()
+    }
+  }, 200)
+  
   if ($('.sidebar').hasClass('visible') && FlowRouter.getRouteName() === 'Search.home') {
     // sidebar is visible and on /find route
     this.$('.floatright').first().hide()

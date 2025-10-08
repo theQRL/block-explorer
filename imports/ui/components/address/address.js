@@ -8,11 +8,11 @@ import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
 import { BigNumber } from 'bignumber.js'
 import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
-import { bufferToHex } from '../../../startup/both/index.js'
-import './address.html'
 import {
+  bufferToHex,
   bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst, decimalToBinary,
 } from '../../../startup/both/index.js'
+import './address.html'
 
 BigNumber.config({ EXPONENTIAL_AT: 1e+9 })
 let tokensHeld = []
@@ -136,20 +136,40 @@ const getTokenBalances = (getAddress, callback) => {
       // Now for each res.state.token we find, go discover token name and symbol
       // eslint-disable-next-line
       if (res.state.address !== '') {
-        Object.keys(res.state.tokens).forEach((key) => {
-          const tokenHash = key
-          const tokenBalance = res.state.tokens[key]
+        const tokenKeys = Object.keys(res.state.tokens)
 
-          const thisToken = {}
+        // Limit the number of concurrent getObject calls to prevent backend overload
+        const maxConcurrentCalls = 5
+        let activeCalls = 0
+        let processedTokens = 0
+        const tokensToProcess = []
+
+        // Queue all tokens for processing
+        tokenKeys.forEach((key) => {
+          tokensToProcess.push({
+            tokenHash: key,
+            tokenBalance: res.state.tokens[key],
+          })
+        })
+
+        const processNextToken = () => {
+          if (tokensToProcess.length === 0 || activeCalls >= maxConcurrentCalls) {
+            return
+          }
+
+          const tokenData = tokensToProcess.shift()
+          activeCalls++
 
           const req = {
-            query: Buffer.from(tokenHash, 'hex'),
+            query: Buffer.from(tokenData.tokenHash, 'hex'),
           }
 
           Meteor.call('getObject', req, (objErr, objRes) => {
-            if (err) {
-              // TODO - Error handling here
-              console.log('err:', objErr)
+            activeCalls--
+            processedTokens++
+
+            if (objErr) {
+              console.log('getObject error:', objErr)
             } else {
               // Check if this is a token hash.
               // eslint-disable-next-line
@@ -157,10 +177,11 @@ const getTokenBalances = (getAddress, callback) => {
                 // TODO - Error handling here
               } else {
                 const tokenDetails = objRes.transaction.tx.token
-                thisToken.hash = tokenHash
+                const thisToken = {}
+                thisToken.hash = tokenData.tokenHash
                 thisToken.name = bytesToString(tokenDetails.name)
                 thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
-                thisToken.balance = tokenBalance / Math.pow(10, tokenDetails.decimals)
+                thisToken.balance = tokenData.tokenBalance / Math.pow(10, tokenDetails.decimals)
                 let nft = {}
                 const symbol = Buffer.from(tokenDetails.symbol).toString(
                   'hex',
@@ -202,13 +223,28 @@ const getTokenBalances = (getAddress, callback) => {
                 Session.set('tokensHeld', tokensHeld)
               }
             }
+
+            // Process next token if there are more in queue
+            if (tokensToProcess.length > 0) {
+              processNextToken()
+            }
+
+            // Check if all tokens have been processed
+            if (processedTokens === tokenKeys.length) {
+              callback()
+              // When done hide loading section
+              $('#loading').hide()
+            }
           })
-        })
 
-        callback()
+          // Start processing the next token
+          processNextToken()
+        }
 
-        // When done hide loading section
-        $('#loading').hide()
+        // Start processing tokens
+        for (let i = 0; i < Math.min(maxConcurrentCalls, tokensToProcess.length); i++) {
+          processNextToken()
+        }
       } else {
         // Wallet not found, put together an empty response
         callback()
@@ -344,6 +380,9 @@ const renderAddressBlock = () => {
 Template.address.helpers({
   bech32() {
     return Session.equals('addressFormat', 'bech32')
+  },
+  copySuccess() {
+    return Session.get('copySuccess')
   },
   address() {
     try {
@@ -663,7 +702,7 @@ Template.address.helpers({
     try {
       const value = address.state.balance
       const x = Session.get('qrl')
-      return Math.round(x * value * 100) / 100
+      return (x * value).toFixed(2)
     } catch (e) {
       return '...'
     }
@@ -939,7 +978,7 @@ function toggleJSON() {
       const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark', hoverPreviewEnabled: false })
       jsonBox.innerHTML = ''
       const rendered = formatter.render()
-      
+
       // Find and extract from the first json-formatter-children element
       const childrenElement = rendered.querySelector('.json-formatter-children')
       if (childrenElement) {
@@ -951,7 +990,7 @@ function toggleJSON() {
         // Fallback to full rendered content
         jsonBox.appendChild(rendered)
       }
-      
+
       // Open the "state" property after extraction is complete
       setTimeout(() => {
         const stateToggler = jsonBox.querySelector('.json-formatter-toggler-link')
@@ -963,19 +1002,19 @@ function toggleJSON() {
           }
         }
       }, 0)
-      
+
       // Remove empty objects from DOM unless expanded
       setTimeout(() => {
         const emptyObjects = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-object')
         const emptyArrays = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-array')
-        
-        emptyObjects.forEach(el => {
+
+        emptyObjects.forEach((el) => {
           if (!el.closest('.json-formatter-open')) {
             el.remove() // Remove from DOM entirely
           }
         })
-        
-        emptyArrays.forEach(el => {
+
+        emptyArrays.forEach((el) => {
           if (!el.closest('.json-formatter-open')) {
             el.remove() // Remove from DOM entirely
           }
@@ -1008,8 +1047,8 @@ function switchToTransactionsTab() {
   const tabContents = document.querySelectorAll('.tab-content')
 
   // Remove active from all
-  tabButtons.forEach(btn => btn.classList.remove('active'))
-  tabContents.forEach(content => content.classList.remove('active'))
+  tabButtons.forEach((btn) => btn.classList.remove('active'))
+  tabContents.forEach((content) => content.classList.remove('active'))
 
   // Activate transactions tab
   const transactionsButton = document.querySelector('[data-tab="transactions"]')
@@ -1100,10 +1139,69 @@ Template.address.events({
     if (targetContent) {
       targetContent.classList.add('active')
     }
+
+    // Hide loading spinners when tab is clicked
+    if (tabId === 'nftBalances') {
+      const nftLoading = document.getElementById('nftBalancesLoading')
+      if (nftLoading) nftLoading.style.display = 'none'
+    }
+    if (tabId === 'tokenBalances') {
+      const tokenLoading = document.getElementById('tokenBalancesLoading')
+      if (tokenLoading) tokenLoading.style.display = 'none'
+    }
+  },
+  'click .copy-address-btn': async (event) => {
+    event.preventDefault()
+    Session.set('copySuccess', true)
+    // Clear after 3 seconds
+    setTimeout(() => {
+      Session.set('copySuccess', false)
+    }, 3000)
+    const address = Session.get('address')
+    if (address && address.state && address.state.address) {
+      try {
+        await navigator.clipboard.writeText(address.state.address)
+        console.log('Copy successful')
+      } catch (err) {
+        console.error('Failed to copy address:', err)
+        // Fallback for older browsers
+        try {
+          const textArea = document.createElement('textarea')
+          textArea.value = address.state.address
+          document.body.appendChild(textArea)
+          textArea.select()
+          const success = document.execCommand('copy')
+          document.body.removeChild(textArea)
+
+          if (success) {
+            console.log('Fallback copy successful')
+            // Show success feedback using Session - only after copy succeeds
+          } else {
+            console.log('Fallback copy failed')
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback copy also failed:', fallbackErr)
+        }
+      }
+    }
+  },
+  'click [data-action="dismiss-copy-feedback"]': (event) => {
+    event.preventDefault()
+    Session.set('copySuccess', false)
   },
 })
 
 Template.address.onRendered(() => {
+  // Initialize copySuccess session variable
+  Session.set('copySuccess', false)
+
+  // Initialize Lucide icons for this template
+  setTimeout(() => {
+    if (window.reinitializeLucideIcons) {
+      window.reinitializeLucideIcons()
+    }
+  }, 200)
+
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('address', {})
@@ -1116,6 +1214,21 @@ Template.address.onRendered(() => {
     if (FlowRouter.getParam('aId')) {
       renderAddressBlock()
     }
+  })
+
+  // Add window resize listener to trigger re-rendering when screen size changes
+  const handleResize = () => {
+    // Force re-render by updating a reactive variable
+    Session.set('screenWidth', window.innerWidth)
+    // Also trigger address truncation update
+    Session.set('addressTruncationUpdate', Date.now())
+  }
+
+  window.addEventListener('resize', handleResize)
+
+  // Clean up listener when template is destroyed
+  Template.address.onDestroyed(() => {
+    window.removeEventListener('resize', handleResize)
   })
 
   Tracker.autorun(() => {
@@ -1151,20 +1264,20 @@ Template.address.onRendered(() => {
   const balanceElement = document.querySelector('[data-tooltip]')
   if (balanceElement) {
     let touchTimeout = null
-    
+
     balanceElement.addEventListener('touchstart', (e) => {
       e.preventDefault()
       clearTimeout(touchTimeout)
       balanceElement.classList.add('opacity-100')
     })
-    
+
     balanceElement.addEventListener('touchend', (e) => {
       e.preventDefault()
       touchTimeout = setTimeout(() => {
         balanceElement.classList.remove('opacity-100')
       }, 2000) // Hide after 2 seconds
     })
-    
+
     // Hide tooltip when touching elsewhere
     document.addEventListener('touchstart', (e) => {
       if (!balanceElement.contains(e.target)) {

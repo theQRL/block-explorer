@@ -20,16 +20,13 @@
       {{else}}
         <div class="space-y-4">
           {{#each lastblocks.blockheaders}}
-            <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 cursor-pointer min-h-[180px] flex flex-col" 
-                 id="lastBlocks" 
+            <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 cursor-pointer h-48 flex flex-col" id="lastBlocks" 
                  data-dest="{{this.header.block_number}}">
               
               <div class="flex items-start space-x-4 flex-1">
                 <div class="flex-shrink-0">
                   <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-qrl-primary" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-                    </svg>
+                    <i data-lucide="box" class="w-5 h-5 text-qrl-primary"></i>
                   </div>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -57,7 +54,7 @@
                     </div>
                   </div>
                   
-                  <div class="pt-1">
+                  <div class="mt-2">
                     <div class="text-xs text-qrl-text-secondary mb-1">Mined by</div>
                     <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{minerTip}}" title="{{miner}}">
                       {{{miner}}}

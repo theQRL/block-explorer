@@ -1,6 +1,13 @@
 import { EXPLORER_VERSION } from '../../../startup/both/index.js'
 // Mobile menu functionality
 Template.appBody.onRendered(() => {
+  // Initialize Lucide icons for the main app
+  setTimeout(() => {
+    if (window.reinitializeLucideIcons) {
+      window.reinitializeLucideIcons()
+    }
+  }, 100)
+  
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')
   const mobileMenu = document.getElementById('mobile-menu')
 

@@ -31,6 +31,7 @@
     "jscrypto": "^1.0.3",
     "json-formatter-js": "^2.3.4",
     "lodash": "^4.17.21",
+    "lucide": "^0.545.0",
     "mathjs": "^10.6.3",
     "meteor-babel-helpers": "0.0.3",
     "meteor-node-stubs": "^1.2.3",

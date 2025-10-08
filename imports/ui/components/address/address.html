@@ -4,9 +4,7 @@
       <div class="card border-red-500/30 bg-red-500/10">
         <div class="flex items-start space-x-3">
           <div class="flex-shrink-0">
-            <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-            </svg>
+            <i data-lucide="alert-circle" class="h-6 w-6 text-red-400"></i>
           </div>
           <div>
             <h3 class="text-lg font-semibold text-red-400 mb-2">
@@ -23,15 +21,19 @@
       <!-- Address Header -->
       <div class="card">
         <div class="mb-4">
-          <div class="text-xs font-medium text-qrl-text-secondary uppercase tracking-wider mb-2">PQ SECURE ADDRESS</div>
-          <h3 class="text-2xl font-bold text-qrl-text break-all font-mono">
-            {{address.state.address}}
-            {{#if knownProviderNonSpecific}}
-              <svg class="inline-block w-5 h-5 text-qrl-accent ml-2" fill="currentColor" viewBox="0 0 20 20" title="Verified NFT Provider">
-                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-              </svg>
-            {{/if}}
-          </h3>
+          <div class="text-xs font-medium text-qrl-text-secondary uppercase tracking-wider mb-2">ADDRESS</div>
+          <div class="flex items-center gap-3 address-container">
+            <h3 class="text-2xl font-bold text-qrl-text font-mono flex-1 min-w-0 truncate" title="{{address.state.address}}">
+              {{address.state.address}}
+              {{#if knownProviderNonSpecific}}
+                <i data-lucide="check-circle" class="inline-block w-5 h-5 text-qrl-accent ml-2" title="Verified NFT Provider"></i>
+              {{/if}}
+            </h3>
+            <button class="copy-address-btn flex items-center gap-2 px-3 py-2 bg-qrl-accent/10 hover:bg-qrl-accent/20 text-qrl-accent rounded-lg transition-colors duration-200 text-sm font-medium min-h-[40px] cursor-pointer" title="Copy address to clipboard" style="pointer-events: auto !important;">
+              <i data-lucide="copy" class="w-4 h-4 flex-shrink-0 pointer-events-none"></i>
+              <span class="hidden sm:inline whitespace-nowrap pointer-events-none">Copy</span>
+            </button>
+          </div>
         </div>
 
         <!-- Balance Section -->
@@ -47,7 +49,7 @@
                   {{/if}}
                 </span>
               </div>
-              <div class="text-4xl font-bold text-qrl-text mb-2 relative group cursor-help" data-tooltip="USD ${{qrl}}">
+              <div class="text-4xl font-bold font-mono text-qrl-text relative group cursor-help" data-tooltip="USD ${{qrl}}">
                 {{address.state.balance}}
                 <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-qrl-primary text-qrl-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
                   USD ${{qrl}}
@@ -68,38 +70,38 @@
         </div>
 
         <!-- Address Details -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-          <div class="flex items-center space-x-2">
-            <strong class="text-qrl-text-secondary">Transactions:</strong>
-            <span class="text-qrl-text">{{address.state.transaction_hash_count}}</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="bg-qrl-primary/50 rounded-lg p-4">
+            <div class="text-sm text-qrl-text-secondary mb-1">Transactions</div>
+            <div class="text-lg font-mono text-qrl-text">{{address.state.transaction_hash_count}}</div>
           </div>
           {{#unless isMultiSig}}
-            <div class="flex items-center space-x-2">
-              <strong class="text-qrl-text-secondary">Nonce:</strong>
-              <span class="text-qrl-text">{{address.state.nonce}}</span>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Nonce</div>
+              <div class="text-lg font-mono text-qrl-text">{{address.state.nonce}}</div>
             </div>
           {{/unless}}
-          <div class="flex items-center space-x-2">
-            <strong class="text-qrl-text-secondary">Signature Scheme:</strong>
-            <span class="text-qrl-text">{{addressValidation.signatureScheme}}</span>
+          <div class="bg-qrl-primary/50 rounded-lg p-4">
+            <div class="text-sm text-qrl-text-secondary mb-1">Signature Scheme</div>
+            <div class="text-lg font-mono text-qrl-text">{{addressValidation.signatureScheme}}</div>
           </div>
           {{#unless isMultiSig}}
-            <div class="flex items-center space-x-2">
-              <strong class="text-qrl-text-secondary">Tree Height:</strong>
-              <span class="text-qrl-text">{{addressValidation.height}}</span>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Tree Height</div>
+              <div class="text-lg font-mono text-qrl-text">{{addressValidation.height}}</div>
             </div>
-            <div class="flex items-center space-x-2">
-              <strong class="text-qrl-text-secondary">Total Signatures:</strong>
-              <span class="text-qrl-text">{{addressValidation.totalSignatures}}</span>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Total Signatures</div>
+              <div class="text-lg font-mono text-qrl-text">{{addressValidation.totalSignatures}}</div>
             </div>
-            <div class="flex items-center space-x-2">
-              <strong class="text-qrl-text-secondary">Signatures Remaining:</strong>
-              <span class="text-qrl-text">{{addressValidation.keysRemaining}}</span>
+            <div class="bg-qrl-primary/50 rounded-lg p-4">
+              <div class="text-sm text-qrl-text-secondary mb-1">Signatures Remaining</div>
+              <div class="text-lg font-mono text-qrl-text">{{addressValidation.keysRemaining}}</div>
             </div>
           {{/unless}}
-          <div class="flex items-center space-x-2">
-            <strong class="text-qrl-text-secondary">Hash Function:</strong>
-            <span class="text-qrl-text">{{addressValidation.hashFunction}}</span>
+          <div class="bg-qrl-primary/50 rounded-lg p-4">
+            <div class="text-sm text-qrl-text-secondary mb-1">Hash Function</div>
+            <div class="text-lg font-mono text-qrl-text">{{addressValidation.hashFunction}}</div>
           </div>
         </div>
       </div>
@@ -174,9 +176,9 @@
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
                             {{#if isThisAddress this.addr_from}}
-                              <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Send" />
+                              <i data-lucide="arrow-right" class="w-6 h-6 text-qrl-primary"></i>
                             {{else}}
-                              <img class="w-6 h-6 brightness-0" src="/img/icons/receive.svg" alt="Receive" />
+                              <i data-lucide="arrow-up" class="w-6 h-6 text-qrl-primary"></i>
                             {{/if}}
                           </div>
                         </div>
@@ -196,13 +198,13 @@
                             </div>
                           </div>
                           <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
-                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                          <div class="text-sm text-qrl-text-secondary font-mono min-w-0 max-w-full">
                             {{#if isThisAddress this.addr_from}}
                               {{#each sendingOutputs this}}
-                                {{this.amount}} → {{this.to}}<br />
+                                <div class="min-w-0 flex-1 flex items-center gap-1"><span class="whitespace-nowrap">{{this.amount}} →</span><a href="/a/{{this.to}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate min-w-0">{{this.to}}</a></div>
                               {{/each}}
                             {{else}}
-                              {{# if bech32}}{{this.addr_from}}{{else}}{{this.addr_from}}{{/if}}
+                              <div class="min-w-0 flex-1"><a href="/a/{{this.addr_from}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate block">{{#if bech32}}{{this.addr_from}}{{else}}{{this.addr_from}}{{/if}}</a></div>
                             {{/if}}
                           </div>
                         </div>
@@ -216,9 +218,9 @@
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
                             {{#if isCreateNFT}}
-                              <img class="w-6 h-6 brightness-0" src="/img/icons/receive.svg" alt="NFT" />
+                              <i data-lucide="image" class="w-6 h-6 text-qrl-primary"></i>
                             {{else}}
-                              <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Token" />
+                              <i data-lucide="coins" class="w-6 h-6 text-qrl-primary"></i>
                             {{/if}}
                           </div>
                         </div>
@@ -228,9 +230,7 @@
                               {{#if isCreateNFT}}
                                 Create NFT
                                 {{#if knownProvider}}
-                                  <svg class="inline-block w-4 h-4 text-qrl-accent ml-1" fill="currentColor" viewBox="0 0 20 20" title="Verified NFT Provider">
-                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                  </svg>
+                                  <i data-lucide="check-circle" class="inline-block w-4 h-4 text-qrl-accent ml-1" title="Verified NFT Provider"></i>
                                 {{/if}}
                               {{else}}
                                 Token Creation
@@ -272,9 +272,9 @@
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
                             {{#if isThisAddress this.addr_from}}
-                              <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Send" />
+                              <i data-lucide="arrow-right" class="w-6 h-6 text-qrl-primary"></i>
                             {{else}}
-                              <img class="w-6 h-6 brightness-0" src="/img/icons/receive.svg" alt="Receive" />
+                              <i data-lucide="arrow-up" class="w-6 h-6 text-qrl-primary"></i>
                             {{/if}}
                           </div>
                         </div>
@@ -288,9 +288,7 @@
                               {{/if}}
                               {{#if isNFTTransfer}}
                                 {{#if knownProvider}}
-                                  <svg class="inline-block w-4 h-4 text-qrl-accent ml-1" fill="currentColor" viewBox="0 0 20 20" title="Verified NFT Provider">
-                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                  </svg>
+                                  <i data-lucide="check-circle" class="inline-block w-4 h-4 text-qrl-accent ml-1" title="Verified NFT Provider"></i>
                                 {{/if}}
                               {{/if}}
                             </h3>
@@ -314,16 +312,16 @@
                             {{/if}}
                             {{this.timestamp}}
                           </p>
-                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
+                          <div class="text-sm text-qrl-text-secondary font-mono min-w-0 max-w-full">
                             {{#if isNFTTransfer}}
                               {{this.transaction_hash}}
                             {{else}}
                               {{#if isThisAddress this.addr_from}}
                                 {{#each this.outputs}}
-                                  {{this.amount}} → {{this.address_hex}}<br />
+                                  <div class="min-w-0 flex-1 flex items-center gap-1"><span class="whitespace-nowrap">{{this.amount}} →</span><a href="/a/{{this.address_hex}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate min-w-0">{{this.address_hex}}</a></div>
                                 {{/each}}
                               {{else}}
-                                {{this.from}}
+                                <div class="min-w-0 flex-1"><a href="/a/{{this.from}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate block">{{this.from}}</a></div>
                               {{/if}}
                             {{/if}}
                           </div>
@@ -337,7 +335,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/receive.svg" alt="Coinbase" />
+                            <i data-lucide="star" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -350,8 +348,10 @@
                             </div>
                           </div>
                           <p class="text-sm text-qrl-text-secondary mb-2">{{this.timestamp}}</p>
-                          <div class="text-sm text-qrl-text-secondary font-mono break-all">
-                            {{# if bech32}}{{this.from_b32}}{{else}}{{this.from_hex}}{{/if}}
+                          <div class="text-sm text-qrl-text-secondary font-mono min-w-0 max-w-full">
+                            <div class="min-w-0 flex-1">
+                              {{#if bech32}}<a href="/a/{{this.from_b32}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate block">{{this.from_b32}}</a>{{else}}<a href="/a/{{this.from_hex}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate block">{{this.from_hex}}</a>{{/if}}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -363,7 +363,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Slave" />
+                            <i data-lucide="folder-tree" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -389,7 +389,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="MultiSig" />
+                            <i data-lucide="users" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -415,7 +415,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="MultiSig" />
+                            <i data-lucide="users" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -441,7 +441,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="MultiSig" />
+                            <i data-lucide="users" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -467,7 +467,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Lattice" />
+                            <i data-lucide="grid-3x3" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -493,7 +493,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Message" />
+                            <i data-lucide="message-circle" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -519,7 +519,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Keybase" />
+                            <i data-lucide="message-circle" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -545,7 +545,7 @@
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <img class="w-6 h-6 brightness-0" src="/img/icons/send.svg" alt="Document" />
+                            <i data-lucide="message-circle" class="w-6 h-6 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -632,9 +632,7 @@
                       <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-qrl-primary" fill="currentColor" viewBox="0 0 20 20">
-                              <path fill-rule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clip-rule="evenodd"></path>
-                            </svg>
+                            <i data-lucide="activity" class="w-5 h-5 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1">
@@ -681,9 +679,7 @@
                       <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-qrl-primary" fill="currentColor" viewBox="0 0 20 20">
-                              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                            </svg>
+                            <i data-lucide="image" class="w-5 h-5 text-qrl-primary"></i>
                           </div>
                         </div>
                         <div class="flex-1">
@@ -697,9 +693,7 @@
                               </svg>
                               <span class="text-sm text-qrl-text-secondary">Verified Provider</span>
                             {{else}}
-                              <svg class="inline-block w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20" title="Unverified NFT Provider">
-                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                              </svg>
+                              <i data-lucide="alert-triangle" class="inline-block w-4 h-4 text-yellow-400 mr-1" title="Unverified NFT Provider"></i>
                               <span class="text-yellow-400">Unverified Provider (0x{{this.nft.id}})</span>
                             {{/if}}
                           </h3>
@@ -727,9 +721,7 @@
             <div class="card border-yellow-500/30 bg-yellow-500/10 mb-6">
               <div class="flex items-start space-x-3">
                 <div class="flex-shrink-0">
-                  <svg class="h-6 w-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                  </svg>
+                  <i data-lucide="alert-triangle" class="h-6 w-6 text-yellow-400"></i>
                 </div>
                 <div>
                   <h4 class="text-lg font-semibold text-yellow-400 mb-2">Warning</h4>
@@ -773,9 +765,7 @@
       <div class="card">
         <button class="flex items-center space-x-2 text-qrl-accent hover:text-qrl-accent/80 jsonclick">
           <span>Meta</span>
-          <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
+          <i data-lucide="chevron-down" class="w-4 h-4 transform transition-transform duration-200"></i>
         </button>
         <div class="jsonbox json p-4 bg-qrl-secondary/50 rounded overflow-auto" style="display: none">
           <!-- JSON content will be populated by JavaScript -->
@@ -783,4 +773,14 @@
       </div>
     {{/if}}
   </div>
+  
+  <!-- Copy Success Overlay -->
+  {{#if copySuccess}}
+    <div class="fixed top-0 left-0 right-0 bottom-0 w-full h-full z-[9999] flex items-center justify-center pointer-events-auto" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important;" data-action="dismiss-copy-feedback">
+      <div class="bg-qrl-accent text-qrl-primary px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-2xl flex items-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold animate-bounce border-2 border-qrl-accent/20 mx-4 max-w-sm">
+        <i data-lucide="check" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+        <span>Copied!</span>
+      </div>
+    </div>
+  {{/if}}
 </template>

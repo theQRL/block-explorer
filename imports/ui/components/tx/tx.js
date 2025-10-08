@@ -411,6 +411,9 @@ Template.tx.helpers({
   bf(b) {
     return Buffer.from(b).toString('hex')
   },
+  copySuccess() {
+    return Session.get('copySuccess')
+  },
 })
 
 // Helper function to toggle JSON display
@@ -596,9 +599,68 @@ Template.tx.events({
       reader.readAsArrayBuffer(notaryDocument)
     }
   },
+  'click .copy-txhash-btn': async (event) => {
+    event.preventDefault()
+    console.log('Copy txhash button clicked!')
+    
+    // Show success feedback immediately
+    Session.set('copySuccess', true)
+    console.log('copySuccess set to:', Session.get('copySuccess'))
+    
+    const txhash = Session.get('txhash')
+    console.log('Txhash from session:', txhash)
+    if (txhash && txhash.tx && txhash.tx.transaction_hash) {
+      console.log('About to copy:', txhash.tx.transaction_hash)
+      try {
+        await navigator.clipboard.writeText(txhash.tx.transaction_hash)
+        console.log('Copy successful')
+      } catch (err) {
+        console.error('Failed to copy transaction hash:', err)
+        // Fallback for older browsers
+        try {
+          const textArea = document.createElement('textarea')
+          textArea.value = txhash.tx.transaction_hash
+          document.body.appendChild(textArea)
+          textArea.select()
+          const success = document.execCommand('copy')
+          document.body.removeChild(textArea)
+
+          if (success) {
+            console.log('Fallback copy successful')
+          } else {
+            console.log('Fallback copy failed')
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback copy also failed:', fallbackErr)
+        }
+      }
+    } else {
+      console.log('No txhash data available')
+    }
+    
+    // Clear after 3 seconds
+    setTimeout(() => {
+      Session.set('copySuccess', false)
+      console.log('copySuccess cleared')
+    }, 3000)
+  },
+  'click [data-action="dismiss-copy-feedback"]': (event) => {
+    event.preventDefault()
+    Session.set('copySuccess', false)
+  },
 })
 
 Template.tx.onRendered(() => {
+  // Initialize copySuccess session variable
+  Session.set('copySuccess', false)
+  
+  // Initialize Lucide icons for this template
+  setTimeout(() => {
+    if (window.reinitializeLucideIcons) {
+      window.reinitializeLucideIcons()
+    }
+  }, 200)
+  
   // Tooltip for values
   document.querySelectorAll('.value').forEach((element) => {
     element.addEventListener('mouseenter', (event) => {
