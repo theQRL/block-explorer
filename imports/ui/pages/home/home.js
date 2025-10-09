@@ -21,7 +21,7 @@ function loadApexCharts() {
       resolve(window.ApexCharts)
       return
     }
-    
+
     console.log('Loading ApexCharts from CDN...')
     const script = document.createElement('script')
     script.src = 'https://cdn.jsdelivr.net/npm/apexcharts@latest'
@@ -37,25 +37,24 @@ function loadApexCharts() {
   })
 }
 
-
 // Calculate nice increments divisible by 10
 function calculateNiceIncrement(maxValue, minValue, targetTicks = 8) {
   const range = maxValue - minValue
   const roughStep = range / targetTicks
-  
+
   // Find the order of magnitude
-  const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)))
-  
+  const magnitude = 10 ** Math.floor(Math.log10(roughStep))
+
   // Normalize the rough step
   const normalizedStep = roughStep / magnitude
-  
+
   // Choose a nice step that's divisible by 10
   let niceStep
   if (normalizedStep <= 1) niceStep = 1
   else if (normalizedStep <= 2) niceStep = 2
   else if (normalizedStep <= 5) niceStep = 5
   else niceStep = 10
-  
+
   return niceStep * magnitude
 }
 
@@ -63,7 +62,7 @@ function calculateNiceIncrement(maxValue, minValue, targetTicks = 8) {
 async function initializeChart(dataToUse, isSampleData = false) {
   const isDark = LocalStore.get('theme') !== 'light'
   const chartContainer = document.getElementById('chart-container')
-  
+
   if (!chartContainer) {
     console.error('Chart container not found!')
     return
@@ -72,17 +71,17 @@ async function initializeChart(dataToUse, isSampleData = false) {
   try {
     // Clear any existing chart
     chartContainer.innerHTML = ''
-    
+
     // Load ApexCharts
     const ApexCharts = await loadApexCharts()
-    
+
     // Transform data for ApexCharts
-    const series = dataToUse.datasets.map(dataset => ({
+    const series = dataToUse.datasets.map((dataset) => ({
       name: dataset.label,
       data: dataset.data.map((value, index) => ({
         x: dataToUse.labels[index],
-        y: value
-      }))
+        y: value,
+      })),
     }))
 
     console.log('Initializing ApexCharts with series:', series)
@@ -102,7 +101,7 @@ async function initializeChart(dataToUse, isSampleData = false) {
         height: 320,
         background: 'transparent',
         toolbar: {
-          show: false
+          show: false,
         },
         animations: {
           enabled: true,
@@ -110,59 +109,59 @@ async function initializeChart(dataToUse, isSampleData = false) {
           speed: 800,
           animateGradually: {
             enabled: true,
-            delay: 150
+            delay: 150,
           },
           dynamicAnimation: {
             enabled: true,
-            speed: 350
-          }
+            speed: 350,
+          },
         },
         // Enable real-time updates
         redrawOnParentResize: true,
         redrawOnWindowResize: true,
         // Track user interactions
         events: {
-          zoom: function(chartContext, { xaxis }) {
+          zoom(chartContext, { xaxis }) {
             console.log('User zoomed chart')
             userHasInteracted = true
             // Update our tracking of current view
             currentViewRange = {
               min: xaxis.min,
-              max: xaxis.max
+              max: xaxis.max,
             }
           },
-          pan: function(chartContext, { xaxis }) {
+          pan(chartContext, { xaxis }) {
             console.log('User panned chart')
             userHasInteracted = true
             // Update our tracking of current view
             currentViewRange = {
               min: xaxis.min,
-              max: xaxis.max
+              max: xaxis.max,
             }
           },
-          selection: function(chartContext, { xaxis }) {
+          selection(chartContext, { xaxis }) {
             console.log('User selected range')
             userHasInteracted = true
             // Update our tracking of current view
             currentViewRange = {
               min: xaxis.min,
-              max: xaxis.max
+              max: xaxis.max,
             }
-          }
-        }
+          },
+        },
       },
       theme: {
-        mode: isDark ? 'dark' : 'light'
+        mode: isDark ? 'dark' : 'light',
       },
-      series: series,
+      series,
       colors: ['#4AAFFF', '#9CA3AF', '#8B5A0F', '#FFA729'],
       stroke: {
         curve: 'smooth',
-        width: [3, 3, 3, 1]
+        width: [3, 3, 3, 1],
       },
       grid: {
         show: true,
-        borderColor: isDark ? 'rgba(234, 239, 245, 0.1)' : 'rgba(11, 24, 30, 0.1)'
+        borderColor: isDark ? 'rgba(234, 239, 245, 0.1)' : 'rgba(11, 24, 30, 0.1)',
       },
       xaxis: {
         type: 'numeric',
@@ -173,16 +172,16 @@ async function initializeChart(dataToUse, isSampleData = false) {
           style: {
             color: isDark ? '#EAEFF5' : '#0B181E',
             fontSize: '12px',
-            fontWeight: 600
-          }
+            fontWeight: 600,
+          },
         },
         labels: {
           style: {
             colors: isDark ? '#EAEFF5' : '#0B181E',
             fontSize: '12px',
-            fontWeight: 500
+            fontWeight: 500,
           },
-          formatter: function(value) {
+          formatter(value) {
             // Show more labels with better formatting
             const roundedValue = Math.round(value)
             if (roundedValue % 5 === 0) { // Show every 5th block instead of 10th
@@ -192,12 +191,12 @@ async function initializeChart(dataToUse, isSampleData = false) {
           },
           rotate: 0,
           trim: false,
-          hideOverlappingLabels: false
+          hideOverlappingLabels: false,
         },
         // Show more labels
         tickAmount: 12,
         tickPlacement: 'between',
-        forceNiceScale: true
+        forceNiceScale: true,
       },
       yaxis: [
         {
@@ -208,18 +207,18 @@ async function initializeChart(dataToUse, isSampleData = false) {
             style: {
               color: isDark ? '#EAEFF5' : '#0B181E',
               fontSize: '12px',
-              fontWeight: 600
-            }
+              fontWeight: 600,
+            },
           },
           labels: {
             style: {
               colors: isDark ? '#EAEFF5' : '#0B181E',
-              fontSize: '11px'
+              fontSize: '11px',
             },
-            formatter: function(value) {
+            formatter(value) {
               return value.toLocaleString()
-            }
-          }
+            },
+          },
         },
         {
           // Right Y-axis for Block Time
@@ -230,37 +229,37 @@ async function initializeChart(dataToUse, isSampleData = false) {
             style: {
               color: isDark ? '#EAEFF5' : '#0B181E',
               fontSize: '12px',
-              fontWeight: 600
-            }
+              fontWeight: 600,
+            },
           },
           labels: {
             style: {
               colors: isDark ? '#EAEFF5' : '#0B181E',
-              fontSize: '11px'
+              fontSize: '11px',
             },
-            formatter: function(value) {
-              return value.toFixed(1) + 's'
-            }
+            formatter(value) {
+              return `${value.toFixed(1)}s`
+            },
           },
           min: 0,
-          max: undefined // Let it auto-scale
-        }
+          max: undefined, // Let it auto-scale
+        },
       ],
       tooltip: {
         theme: isDark ? 'dark' : 'light',
         style: {
           fontSize: '12px',
-          fontFamily: 'Inter, system-ui, sans-serif'
+          fontFamily: 'Inter, system-ui, sans-serif',
         },
         x: {
-          formatter: function(value) {
+          formatter(value) {
             return `Block ${Math.round(value).toLocaleString()}`
-          }
-        }
+          },
+        },
       },
       // Enable smooth scrolling for real-time updates
       dataLabels: {
-        enabled: false
+        enabled: false,
       },
       legend: {
         show: true,
@@ -271,30 +270,27 @@ async function initializeChart(dataToUse, isSampleData = false) {
         markers: {
           width: 8,
           height: 8,
-          radius: 2
+          radius: 2,
         },
         itemMargin: {
           horizontal: 10,
-          vertical: 5
-        }
-      }
+          vertical: 5,
+        },
+      },
     }
 
     // Create the chart
     currentChart = new ApexCharts(chartContainer, options)
     await currentChart.render()
-    
-    
-    
+
     console.log('ApexCharts initialized successfully')
     isChartInitialized = true
     lastDataLength = dataToUse.labels.length
     lastProcessedData = dataToUse // Store the initial data
-    
-    
   } catch (error) {
     console.error('Error initializing ApexCharts:', error)
-    chartContainer.innerHTML = '<div class="flex items-center justify-center h-full text-red-400">Error loading chart: ' + error.message + '</div>'
+    chartContainer.innerHTML = `<div class="flex items-center justify-center h-full text-red-400">Error loading chart: ${error.message}</div>`
+    Session.set('nodeError', true)
   }
 }
 
@@ -309,26 +305,26 @@ async function updateChart(newData) {
     // Check if we have new data (more data points than before)
     const currentDataLength = newData.labels.length
     const hasNewData = currentDataLength > lastDataLength
-    
+
     if (!hasNewData) {
       console.log('No new data to add, skipping update')
       return
     }
-    
+
     console.log(`Adding ${currentDataLength - lastDataLength} new data points`)
-    
+
     // Only add the new data points, don't change existing ones
     const newSeries = newData.datasets.map((dataset, datasetIndex) => {
       const existingData = lastProcessedData ? lastProcessedData.datasets[datasetIndex].data : []
       const newDataPoints = dataset.data.slice(existingData.length)
       const newLabels = newData.labels.slice(existingData.length)
-      
+
       return {
         name: dataset.label,
         data: newDataPoints.map((value, index) => ({
           x: newLabels[index],
-          y: value
-        }))
+          y: value,
+        })),
       }
     })
 
@@ -336,77 +332,76 @@ async function updateChart(newData) {
 
     // Add new data points to the chart (this preserves existing data)
     await currentChart.appendData(newSeries, true) // true = animate
-    
+
     // Only auto-scroll if user hasn't interacted with the chart
     if (!userHasInteracted && newData.labels.length > 0) {
       const latestBlock = Math.max(...newData.labels)
       const viewWidth = currentViewRange.max - currentViewRange.min
-      
+
       console.log('Auto-scrolling to show latest data')
-      
+
       // Calculate new view range - scroll to the right to show latest data
       const newMin = Math.max(0, latestBlock - viewWidth + 20) // Keep same width, show latest data
       const newMax = latestBlock + 20 // Add some padding
-      
+
       // Update our tracking
       currentViewRange = { min: newMin, max: newMax }
-      
+
       // Smooth scroll to new range
       await currentChart.zoomX(newMin, newMax, true) // true = animate
     } else if (userHasInteracted) {
       console.log('User has interacted with chart, not auto-scrolling')
     }
-    
+
     // Update tracking variables
     lastDataLength = currentDataLength
     lastProcessedData = newData // Store the updated data
-    
   } catch (error) {
     console.error('Error updating chart:', error)
   }
 }
 
-export function renderChart() {
-  console.log("renderChart called")
-  
+function renderChart() {
+  console.log('renderChart called')
+
   // Get Chart data from Mongo
   const chartLineData = homechart.findOne()
-  
+
   // Check if subscription is ready
   if (!chartLineData) {
-    console.log("No chart data found in collection")
-    console.log("Collection count:", homechart.find().count())
-    console.log("All collection data:", homechart.find().fetch())
-    console.log("Chart data not ready yet, waiting for subscription...")
+    console.log('No chart data found in collection')
+    console.log('Collection count:', homechart.find().count())
+    console.log('All collection data:', homechart.find().fetch())
+    console.log('Chart data not ready yet, waiting for subscription...')
     return
   }
-  console.log("Chart data:", chartLineData)
+  console.log('Chart data:', chartLineData)
 
   const dataToUse = chartLineData
 
   if (dataToUse !== undefined && dataToUse.labels && dataToUse.datasets) {
-    console.log("Valid chart data found, hiding loading...")
-    
+    console.log('Valid chart data found, hiding loading...')
+
     // Hide loading animation
-    const chartLoading = document.getElementById("chartLoading")
+    const chartLoading = document.getElementById('chartLoading')
     if (chartLoading) {
-      chartLoading.style.display = "none"
+      chartLoading.style.display = 'none'
       console.log('Loading element hidden successfully')
     }
 
     // If chart is not initialized, initialize it
     if (!isChartInitialized) {
-      console.log("Initializing chart for the first time...")
+      console.log('Initializing chart for the first time...')
       initializeChart(dataToUse, false)
     } else {
       // Chart is already initialized, just update it smoothly
-      console.log("Updating existing chart...")
+      console.log('Updating existing chart...')
       updateChart(dataToUse)
     }
   } else {
-    console.log("No valid chart data available yet")
+    console.log('No valid chart data available yet')
     // Show waiting message
-    const chartContainer = document.getElementById("chart-container")
+    const chartContainer = document.getElementById('chart-container')
     if (chartContainer) {
       chartContainer.innerHTML = `
         <div class="flex items-center justify-center h-full text-qrl-text-secondary">
@@ -422,16 +417,16 @@ export function renderChart() {
 }
 
 // Subscribe to chart data
-Template.appHome.onCreated(function() {
-  console.log("Subscribing to homechart...")
-  this.subscribe("homechart")
-  console.log("Subscription started")
+Template.appHome.onCreated(function () {
+  console.log('Subscribing to homechart...')
+  this.subscribe('homechart')
+  console.log('Subscription started')
 })
 
 // Initialize chart when template is rendered
 Template.appHome.onRendered(() => {
   console.log('Template rendered, initializing chart...')
-  
+
   // Set up reactive autorun to update chart when data changes
   Tracker.autorun(() => {
     renderChart()
@@ -466,5 +461,12 @@ Template.appHome.helpers({
   },
   isChartDataReady() {
     return this.subscriptionsReady()
-  }
+  },
+  nodeError() {
+    const nE = Session.get('nodeError')
+    if (!nE) {
+      return false
+    }
+    return nE
+  },
 })
