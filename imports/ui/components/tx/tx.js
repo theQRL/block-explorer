@@ -601,47 +601,34 @@ Template.tx.events({
   },
   'click .copy-txhash-btn': async (event) => {
     event.preventDefault()
-    console.log('Copy txhash button clicked!')
     
     // Show success feedback immediately
     Session.set('copySuccess', true)
-    console.log('copySuccess set to:', Session.get('copySuccess'))
     
     const txhash = Session.get('txhash')
-    console.log('Txhash from session:', txhash)
-    if (txhash && txhash.tx && txhash.tx.transaction_hash) {
-      console.log('About to copy:', txhash.tx.transaction_hash)
+    
+    if (txhash && txhash.transaction && txhash.transaction.tx && txhash.transaction.tx.transaction_hash) {
+      const transactionHash = txhash.transaction.tx.transaction_hash
       try {
-        await navigator.clipboard.writeText(txhash.tx.transaction_hash)
-        console.log('Copy successful')
+        await navigator.clipboard.writeText(transactionHash)
       } catch (err) {
-        console.error('Failed to copy transaction hash:', err)
         // Fallback for older browsers
         try {
           const textArea = document.createElement('textarea')
-          textArea.value = txhash.tx.transaction_hash
+          textArea.value = transactionHash
           document.body.appendChild(textArea)
           textArea.select()
           const success = document.execCommand('copy')
           document.body.removeChild(textArea)
-
-          if (success) {
-            console.log('Fallback copy successful')
-          } else {
-            console.log('Fallback copy failed')
-          }
         } catch (fallbackErr) {
-          console.error('Fallback copy also failed:', fallbackErr)
+          console.error('Copy failed:', fallbackErr)
         }
       }
-    } else {
-      console.log('No txhash data available')
     }
     
     // Clear after 3 seconds
     setTimeout(() => {
       Session.set('copySuccess', false)
-      console.log('copySuccess cleared')
     }, 3000)
   },
   'click [data-action="dismiss-copy-feedback"]': (event) => {
