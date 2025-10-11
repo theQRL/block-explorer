@@ -10,6 +10,14 @@ Template.lasttx.onCreated(() => {
 })
 
 Template.lasttx.helpers({
+  multipleDestinations() {
+    if (this.explorer.outputs) {
+      if (this.explorer.outputs.length > 1) {
+        return true
+      }
+    }
+    return false
+  },
   lasttx() {
     const res = lasttx.findOne()
     return res

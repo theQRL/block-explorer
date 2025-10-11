@@ -331,7 +331,7 @@
 
   /* Truncated text with hover tooltip */
   .truncate-with-tooltip {
-    @apply truncate cursor-help relative;
+    @apply truncate relative;
   }
 
   .truncate-with-tooltip:hover::after {

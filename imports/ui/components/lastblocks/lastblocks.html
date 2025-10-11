@@ -20,7 +20,7 @@
       {{else}}
         <div class="space-y-4">
           {{#each lastblocks.blockheaders}}
-            <div class="card hover:bg-qrl-secondary hover:border-qrl-accent transition-colors duration-200 cursor-pointer h-48 flex flex-col lastBlocks" 
+            <div class="card hover:bg-qrl-secondary hover:border-qrl-accent transition-colors duration-200 cursor-pointer min-h-44 sm:h-48 flex flex-col lastBlocks pt-6" 
                  data-dest="{{this.header.block_number}}">
               
               <div class="flex items-start space-x-4 flex-1">
@@ -56,7 +56,7 @@
                   
                   <div class="mt-2">
                     <div class="text-xs text-qrl-text-secondary mb-1">Mined by</div>
-                    <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{minerTip}}" title="{{miner}}">
+                    <div class="text-sm text-white hover:text-qrl-accent/80 transition-colors font-mono truncate-with-tooltip" data-full-text="{{minerTip}}" title="{{miner}}">
                       {{{miner}}}
                     </div>
                   </div>

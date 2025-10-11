@@ -997,10 +997,6 @@ h1, h2, h3, h4, h5, h6 {
   height: 11rem;
 }
 
-.h-48 {
-  height: 12rem;
-}
-
 .h-5 {
   height: 1.25rem;
 }
@@ -2200,7 +2196,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .truncate-with-tooltip {
   position: relative;
-  cursor: help;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2738,6 +2733,10 @@ h1, h2, h3, h4, h5, h6 {
 @media (min-width: 640px) {
   .sm\:inline {
     display: inline;
+  }
+
+  .sm\:h-48 {
+    height: 12rem;
   }
 
   .sm\:h-6 {
