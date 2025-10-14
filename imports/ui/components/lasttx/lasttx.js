@@ -262,6 +262,7 @@ Template.lasttx.events({
     if (hashElement) {
       const transactionHash = hashElement.getAttribute('data-full-text')
       FlowRouter.go(`/tx/${transactionHash}`)
+      window.scrollTo(0, 0)
     }
   },
 })

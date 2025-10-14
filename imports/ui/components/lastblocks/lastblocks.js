@@ -119,5 +119,6 @@ Template.lastblocks.events({
   'click .lastBlocks': (event) => {
     const route = event.currentTarget.getAttribute('data-dest')
     FlowRouter.go(`/block/${route}`)
+    window.scrollTo(0, 0)
   },
 })

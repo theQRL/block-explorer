@@ -1,4 +1,4 @@
-import { createIcons, ArrowRight, ArrowUp, Star, MessageCircle, Coins, Grid3x3, Users, Vote, Image, Box, Activity, Check, Menu, List, Clock, Wallet, FolderTree, ChevronDown, AlertCircle, CheckCircle, XCircle, Info, Copy, ExternalLink, AlertTriangle } from 'lucide';
+import { createIcons, ArrowRight, ArrowUp, Star, MessageCircle, Coins, Grid3x3, Users, Vote, Image, Box, Activity, Check, Menu, List, Clock, Wallet, FolderTree, ChevronDown, AlertCircle, CheckCircle, XCircle, Info, Copy, ExternalLink, AlertTriangle, Circle } from 'lucide';
 
 // Function to initialize Lucide icons
 function initializeLucideIcons() {
@@ -28,7 +28,8 @@ function initializeLucideIcons() {
       Info,
       Copy,
       ExternalLink,
-      AlertTriangle
+      AlertTriangle,
+      Circle
     }
   });
 }

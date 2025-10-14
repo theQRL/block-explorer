@@ -266,6 +266,7 @@ Template.block.events({
     const txhash = event.currentTarget.getAttribute('data-txhash')
     if (txhash) {
       window.location.href = `/tx/${txhash}`
+      window.scrollTo(0, 0)
     }
   },
 })

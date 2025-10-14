@@ -32,18 +32,21 @@ FlowRouter.route('/tx/:txId', {
   name: 'Tx.home',
   action() {
     BlazeLayout.render('appBody', { main: 'tx' })
+    window.scrollTo(0, 0)
   },
 })
 FlowRouter.route('/block/:blockId', {
   name: 'Block.home',
   action() {
     BlazeLayout.render('appBody', { main: 'block' })
+    window.scrollTo(0, 0)
   },
 })
 FlowRouter.route('/a/:aId/:tPage?', {
   name: 'Address.home',
   action() {
     BlazeLayout.render('appBody', { main: 'address' })
+    window.scrollTo(0, 0)
   },
 })
 FlowRouter.route('/lastblocks', {

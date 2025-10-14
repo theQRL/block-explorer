@@ -57,36 +57,140 @@ const addressResultsRefactor = (res) => {
 }
 
 async function parseOTS(obj) {
-  const k = Object.keys(obj)
-  let c = 0
-  let ret = ''
+  console.log('parseOTS called with:', obj)
+  
+  if (!obj || typeof obj !== 'object') {
+    console.error('parseOTS: Invalid object received:', obj)
+    return '<div class="p-2 text-center text-xs text-red-400">No OTS data available</div>'
+  }
+  
+  const k = Object.keys(obj).sort((a, b) => parseInt(a) - parseInt(b))
+  console.log('parseOTS sorted keys:', k)
+  console.log('parseOTS total keys:', k.length)
+  
+  if (k.length === 0) {
+    console.log('parseOTS: No keys found in object')
+    return '<div class="p-2 text-center text-xs text-gray-400">No OTS keys found</div>'
+  }
+  
+  // Count used vs unused keys
+  let usedCount = 0
+  let unusedCount = 0
   k.forEach((val) => {
-    let o = '<div class="column '
     if (obj[val] === 1) {
-      o = `${o}used`
+      usedCount++
     } else {
-      o = `${o}unused`
+      unusedCount++
     }
-    o = `${o}">${val}</div>`
-    c += 1
-    if (c > 10) {
-      ret = `${ret}</div><div class="row">`
-      c -= 10
+  })
+  
+  console.log(`parseOTS: ${usedCount} used keys, ${unusedCount} unused keys`)
+  
+  let ret = ''
+  
+  k.forEach((val) => {
+    let o = '<div class="p-1 sm:p-2 text-center text-xs sm:text-sm font-mono border rounded '
+    if (obj[val] === 1) {
+      o = `${o}bg-red-500/20 border-red-500/50 text-red-400`
+      o = `${o}"><i data-lucide="x-circle" class="w-4 h-4 sm:w-4 sm:h-4 inline-block mr-1"></i>${val}</div>`
+    } else {
+      o = `${o}bg-green-500/20 border-green-500/50 text-green-400`
+      o = `${o}"><i data-lucide="circle" class="w-4 h-4 sm:w-4 sm:h-4 inline-block mr-1"></i>${val}</div>`
     }
     ret = `${ret}${o}`
   })
-  if (c < 10) {
-    // add some empty columns
-    for (let i = c; i < 10; i += 1) {
-      ret = `${ret}<div class="column"></div>`
-    }
-  }
+  
+  console.log('parseOTS returning:', ret)
   return ret
 }
 
 async function OTS(obj) {
-  const x = await parseOTS(obj)
-  Session.set('OTStracker', `<div class="row">${x}</div>`)
+  console.log('OTS function called with:', obj)
+  
+  if (!obj || typeof obj !== 'object') {
+    console.error('OTS: Invalid object received:', obj)
+    Session.set('OTStracker', '<div class="p-2 text-center text-xs text-red-400">No OTS data available</div>')
+    return
+  }
+  
+  const k = Object.keys(obj).sort((a, b) => parseInt(a) - parseInt(b))
+  console.log('OTS sorted keys:', k)
+  console.log('OTS total keys:', k.length)
+  
+  if (k.length === 0) {
+    console.log('OTS: No keys found in object')
+    Session.set('OTStracker', '<div class="p-2 text-center text-xs text-gray-400">No OTS keys found</div>')
+    return
+  }
+  
+  // Count used vs unused keys
+  let usedCount = 0
+  let unusedCount = 0
+  k.forEach((val) => {
+    if (obj[val] === 1) {
+      usedCount++
+    } else {
+      unusedCount++
+    }
+  })
+  
+  console.log(`OTS: ${usedCount} used keys, ${unusedCount} unused keys`)
+  
+  // Generate clean HTML without any row breaking
+  let cellsHTML = ''
+  k.forEach((val) => {
+    let cellClass = 'p-1 sm:p-2 text-center text-sm sm:text-base font-mono border rounded '
+    let iconHTML = ''
+    
+    let tooltip = ''
+    if (obj[val] === 1) {
+      cellClass += 'bg-red-500/20 border-gray-500/30 text-red-400'
+      iconHTML = '<i data-lucide="x-circle" class="w-2 h-2 sm:w-3 sm:h-3 inline-block mr-1"></i>'
+      tooltip = `Key ${val}: USED`
+    } else {
+      cellClass += 'bg-green-500/20 border-gray-500/30 text-green-300'
+      iconHTML = '<i data-lucide="circle" class="w-2 h-2 sm:w-3 sm:h-3 inline-block mr-1"></i>'
+      tooltip = `Key ${val}: Available`
+    }
+    
+    cellsHTML += `<div class="${cellClass}" title="${tooltip}">${iconHTML}${val}</div>\n`
+  })
+  
+  console.log('Generated cells HTML:', cellsHTML)
+  
+  // Generate proper OTS cells with responsive grid (max 10 columns)
+  const html = `
+    <style>
+      .ots-responsive-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+        width: 100%;
+      }
+      @media (min-width: 640px) {
+        .ots-responsive-grid { grid-template-columns: repeat(8, 1fr); }
+      }
+      @media (min-width: 768px) {
+        .ots-responsive-grid { grid-template-columns: repeat(10, 1fr); }
+      }
+      @media (min-width: 1024px) {
+        .ots-responsive-grid { grid-template-columns: repeat(10, 1fr); }
+      }
+      @media (min-width: 1280px) {
+        .ots-responsive-grid { grid-template-columns: repeat(10, 1fr); }
+      }
+    </style>
+    <div class="ots-responsive-grid">${cellsHTML}</div>
+  `
+  console.log('Final OTS HTML:', html)
+  Session.set('OTStracker', html)
+  
+  // Re-initialize Lucide icons for the new HTML
+  if (window.reinitializeLucideIcons) {
+    setTimeout(() => {
+      window.reinitializeLucideIcons()
+    }, 100)
+  }
 }
 
 function loadAddressTransactions(aId, page) {
@@ -254,34 +358,48 @@ const getTokenBalances = (getAddress, callback) => {
 }
 
 const otsParse = (response, totalSignatures) => {
+  console.log('otsParse called with response:', response)
+  console.log('otsParse totalSignatures:', totalSignatures)
+  
   // Parse OTS Bitfield, and grab the lowest unused key
   let newOtsBitfield = {}
   let thisOtsBitfield = []
   if (response.ots_bitfield_by_page[0].ots_bitfield !== undefined) {
     thisOtsBitfield = response.ots_bitfield_by_page[0].ots_bitfield
   }
+  
+  console.log('thisOtsBitfield:', thisOtsBitfield)
+  
   thisOtsBitfield.forEach((item, index) => {
     const thisDecimal = new Uint8Array(item)[0]
     const thisBinary = decimalToBinary(thisDecimal).reverse()
     const startIndex = index * 8
+    console.log(`Processing bitfield item ${index}: decimal=${thisDecimal}, binary=${thisBinary}, startIndex=${startIndex}`)
+    
     for (let i = 0; i < 8; i += 1) {
       const thisOtsIndex = startIndex + i
       // Add to parsed array unless we have reached the end of the signatures
       if (thisOtsIndex < totalSignatures) {
         newOtsBitfield[thisOtsIndex] = thisBinary[i]
+        console.log(`  OTS index ${thisOtsIndex}: ${thisBinary[i]}`)
       }
     }
   })
-  // console.log('otslen', newOtsBitfield)
-  if (newOtsBitfield.length > totalSignatures) {
-    newOtsBitfield = newOtsBitfield.slice(0, totalSignatures + 1)
-  }
+  
+  console.log('newOtsBitfield before slice:', newOtsBitfield)
+  console.log('newOtsBitfield length:', Object.keys(newOtsBitfield).length)
+  console.log('totalSignatures:', totalSignatures)
+  
+  // Don't slice the bitfield - show all available data
+  // if (newOtsBitfield.length > totalSignatures) {
+  //   newOtsBitfield = newOtsBitfield.slice(0, totalSignatures + 1)
+  // }
 
   // Add in OTS fields to response
   const ots = {}
   ots.keys = newOtsBitfield
   ots.nextKey = response.next_unused_ots_index
-  // console.log('ots:', ots)
+  console.log('otsParse returning:', ots)
   return ots
 }
 
@@ -334,10 +452,13 @@ const renderAddressBlock = () => {
           req.unused_ots_index_from = 0
 
           Meteor.call('getOTS', req, (error, result) => {
-            if (err) {
+            if (error) {
+              console.error('OTS API error:', error)
               Session.set('address', { error, id: aId })
             } else {
+              console.log('OTS API result:', result)
               const ots = otsParse(result, qrlAddressValidator.hexString(res.state.address).sig.number)
+              console.log('Parsed OTS:', ots)
               res.ots = ots
               res.ots.keysConsumed = res.state.used_ots_key_count
 
@@ -1065,6 +1186,7 @@ Template.address.events({
       const max = Session.get('pages').length
       if ((x < (max + 1)) && (x > 0)) {
         FlowRouter.go(`/a/${upperCaseFirst(FlowRouter.getParam('aId'))}/${x}`)
+        window.scrollTo(0, 0)
       }
     }
   },
@@ -1110,6 +1232,7 @@ Template.address.events({
     const loading = document.getElementById('loadingTransactions')
     if (loading) loading.style.display = 'block'
     FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${b}`)
+    window.scrollTo(0, 0)
   },
   'click #clickHelp': () => {
     window.open('https://docs.theqrl.org', '_blank')
@@ -1120,6 +1243,7 @@ Template.address.events({
     if (links.length > 0) {
       route = links[0].getAttribute('href')
       FlowRouter.go(route)
+      window.scrollTo(0, 0)
     }
   },
   'click .tab-button': (event) => {
