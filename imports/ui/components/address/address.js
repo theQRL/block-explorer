@@ -527,6 +527,20 @@ Template.address.helpers({
       return Session.get('qrl')
     }
   },
+  balanceUSD() {
+    try {
+      const qrl = Session.get('qrl')
+      const address = Session.get('address')
+      const balance = parseFloat(address.state.balance)
+      if (!isNaN(balance)) {
+        const usdValue = qrl * balance
+        return usdValue.toFixed(2)
+      }
+      return '0.00'
+    } catch (e) {
+      return '0.00'
+    }
+  },
   address() {
     try {
       const address = Session.get('address')

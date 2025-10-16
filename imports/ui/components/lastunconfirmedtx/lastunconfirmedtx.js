@@ -1,31 +1,35 @@
 import './lastunconfirmedtx.html'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+import { lasttx } from '/imports/api/index.js'
 
 Template.lastunconfirmedtx.onCreated(() => {
-  Session.set('lastunconfirmedtx', {})
-  Meteor.call('lastunconfirmedtx', (err, res) => {
-    // The method call sets the Session variable to the callback value
-    if (err) {
-      Session.set('lastunconfirmedtx', { error: err })
-    } else {
-      Session.set('lastunconfirmedtx', res)
-    }
-  })
+  Meteor.subscribe('lasttx')
 })
 
 Template.lastunconfirmedtx.helpers({
   lastunconfirmedtx() {
-    return Session.get('lastunconfirmedtx')
+    const res = lasttx.findOne()
+    if (res && res.transactions) {
+      // Filter for unconfirmed transactions (those without block_number or with block_number = null)
+      const unconfirmedTransactions = res.transactions.filter(tx => 
+        !tx.header || !tx.header.block_number || tx.header.block_number === null
+      )
+      return {
+        transactions_unconfirmed: unconfirmedTransactions,
+        hasUnconfirmedTransactions: unconfirmedTransactions.length > 0
+      }
+    }
+    return { transactions_unconfirmed: [], hasUnconfirmedTransactions: false }
   },
   allConfirmed() {
-    try {
-      if (this.transactions_unconfirmed.length === 0) {
-        return true
-      }
-    } catch (e) {
-      return false
+    const res = lasttx.findOne()
+    if (res && res.transactions) {
+      const unconfirmedTransactions = res.transactions.filter(tx => 
+        !tx.header || !tx.header.block_number || tx.header.block_number === null
+      )
+      return unconfirmedTransactions.length === 0
     }
-    return false
+    return true
   },
   amount() {
     if (this.tx.transfer) {
@@ -100,17 +104,6 @@ Template.lastunconfirmedtx.helpers({
 })
 
 Template.lastunconfirmedtx.events({
-  'click .refresh': () => {
-    Session.set('lastunconfirmedtx', {})
-    Meteor.call('lastunconfirmedtx', (err, res) => {
-      // The method call sets the Session variable to the callback value
-      if (err) {
-        Session.set('lastunconfirmedtx', { error: err })
-      } else {
-        Session.set('lastunconfirmedtx', res)
-      }
-    })
-  },
   'click .close': () => {
     $('.message').hide()
   },
