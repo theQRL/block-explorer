@@ -10,7 +10,10 @@ import { numberToString, SHOR_PER_QUANTA, formatBytes, bufferToHex } from '../..
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
   if (txId) {
+    // Set loading state
+    Session.set('txLoading', true)
     Meteor.call('txhash', txId, (err, res) => {
+      Session.set('txLoading', false)
       if (err) {
         Session.set('txhash', { error: err, id: txId, found: false })
         return false
@@ -88,6 +91,9 @@ function toByteArray(hexString) {
 /* eslint-enable */
 
 Template.tx.helpers({
+  txLoading() {
+    return Session.get('txLoading')
+  },
   hasMessage() {
     try {
       if (this.tx.transfer.message_data.length > 0) {
@@ -103,6 +109,31 @@ Template.tx.helpers({
   },
   bech32() {
     return Session.equals('addressFormat', 'bech32')
+  },
+  qrlFormatted() {
+    try {
+      const qrl = Session.get('qrl')
+      if (qrl && typeof qrl === 'number') {
+        return qrl.toFixed(2)
+      }
+      return qrl
+    } catch (e) {
+      return Session.get('qrl')
+    }
+  },
+  coinbaseUSD() {
+    try {
+      const qrl = Session.get('qrl')
+      const txhash = Session.get('txhash')
+      if (qrl && typeof qrl === 'number' && txhash && txhash.transaction && txhash.transaction.tx && txhash.transaction.tx.coinbase) {
+        const coinbaseAmount = txhash.transaction.tx.coinbase.amount / SHOR_PER_QUANTA
+        const usdValue = qrl * coinbaseAmount
+        return usdValue.toFixed(2)
+      }
+      return qrl
+    } catch (e) {
+      return Session.get('qrl')
+    }
   },
   tx() {
     try {

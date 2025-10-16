@@ -58,21 +58,21 @@ const addressResultsRefactor = (res) => {
 
 async function parseOTS(obj) {
   console.log('parseOTS called with:', obj)
-  
+
   if (!obj || typeof obj !== 'object') {
     console.error('parseOTS: Invalid object received:', obj)
     return '<div class="p-2 text-center text-xs text-red-400">No OTS data available</div>'
   }
-  
+
   const k = Object.keys(obj).sort((a, b) => parseInt(a) - parseInt(b))
   console.log('parseOTS sorted keys:', k)
   console.log('parseOTS total keys:', k.length)
-  
+
   if (k.length === 0) {
     console.log('parseOTS: No keys found in object')
     return '<div class="p-2 text-center text-xs text-gray-400">No OTS keys found</div>'
   }
-  
+
   // Count used vs unused keys
   let usedCount = 0
   let unusedCount = 0
@@ -83,11 +83,11 @@ async function parseOTS(obj) {
       unusedCount++
     }
   })
-  
+
   console.log(`parseOTS: ${usedCount} used keys, ${unusedCount} unused keys`)
-  
+
   let ret = ''
-  
+
   k.forEach((val) => {
     let o = '<div class="p-1 sm:p-2 text-center text-xs sm:text-sm font-mono border rounded '
     if (obj[val] === 1) {
@@ -99,30 +99,30 @@ async function parseOTS(obj) {
     }
     ret = `${ret}${o}`
   })
-  
+
   console.log('parseOTS returning:', ret)
   return ret
 }
 
 async function OTS(obj) {
   console.log('OTS function called with:', obj)
-  
+
   if (!obj || typeof obj !== 'object') {
     console.error('OTS: Invalid object received:', obj)
     Session.set('OTStracker', '<div class="p-2 text-center text-xs text-red-400">No OTS data available</div>')
     return
   }
-  
+
   const k = Object.keys(obj).sort((a, b) => parseInt(a) - parseInt(b))
   console.log('OTS sorted keys:', k)
   console.log('OTS total keys:', k.length)
-  
+
   if (k.length === 0) {
     console.log('OTS: No keys found in object')
     Session.set('OTStracker', '<div class="p-2 text-center text-xs text-gray-400">No OTS keys found</div>')
     return
   }
-  
+
   // Count used vs unused keys
   let usedCount = 0
   let unusedCount = 0
@@ -133,15 +133,15 @@ async function OTS(obj) {
       unusedCount++
     }
   })
-  
+
   console.log(`OTS: ${usedCount} used keys, ${unusedCount} unused keys`)
-  
+
   // Generate clean HTML without any row breaking
   let cellsHTML = ''
   k.forEach((val) => {
     let cellClass = 'p-1 sm:p-2 text-center text-sm sm:text-base font-mono border rounded '
     let iconHTML = ''
-    
+
     let tooltip = ''
     if (obj[val] === 1) {
       cellClass += 'bg-red-500/20 border-gray-500/30 text-red-400'
@@ -152,12 +152,12 @@ async function OTS(obj) {
       iconHTML = '<i data-lucide="circle" class="w-2 h-2 sm:w-3 sm:h-3 inline-block mr-1"></i>'
       tooltip = `Key ${val}: Available`
     }
-    
+
     cellsHTML += `<div class="${cellClass}" title="${tooltip}">${iconHTML}${val}</div>\n`
   })
-  
+
   console.log('Generated cells HTML:', cellsHTML)
-  
+
   // Generate proper OTS cells with responsive grid (max 10 columns)
   const html = `
     <style>
@@ -184,7 +184,7 @@ async function OTS(obj) {
   `
   console.log('Final OTS HTML:', html)
   Session.set('OTStracker', html)
-  
+
   // Re-initialize Lucide icons for the new HTML
   if (window.reinitializeLucideIcons) {
     setTimeout(() => {
@@ -360,22 +360,22 @@ const getTokenBalances = (getAddress, callback) => {
 const otsParse = (response, totalSignatures) => {
   console.log('otsParse called with response:', response)
   console.log('otsParse totalSignatures:', totalSignatures)
-  
+
   // Parse OTS Bitfield, and grab the lowest unused key
-  let newOtsBitfield = {}
+  const newOtsBitfield = {}
   let thisOtsBitfield = []
   if (response.ots_bitfield_by_page[0].ots_bitfield !== undefined) {
     thisOtsBitfield = response.ots_bitfield_by_page[0].ots_bitfield
   }
-  
+
   console.log('thisOtsBitfield:', thisOtsBitfield)
-  
+
   thisOtsBitfield.forEach((item, index) => {
     const thisDecimal = new Uint8Array(item)[0]
     const thisBinary = decimalToBinary(thisDecimal).reverse()
     const startIndex = index * 8
     console.log(`Processing bitfield item ${index}: decimal=${thisDecimal}, binary=${thisBinary}, startIndex=${startIndex}`)
-    
+
     for (let i = 0; i < 8; i += 1) {
       const thisOtsIndex = startIndex + i
       // Add to parsed array unless we have reached the end of the signatures
@@ -385,11 +385,11 @@ const otsParse = (response, totalSignatures) => {
       }
     }
   })
-  
+
   console.log('newOtsBitfield before slice:', newOtsBitfield)
   console.log('newOtsBitfield length:', Object.keys(newOtsBitfield).length)
   console.log('totalSignatures:', totalSignatures)
-  
+
   // Don't slice the bitfield - show all available data
   // if (newOtsBitfield.length > totalSignatures) {
   //   newOtsBitfield = newOtsBitfield.slice(0, totalSignatures + 1)
@@ -410,13 +410,19 @@ const renderAddressBlock = () => {
   if (!tPage) { tPage = 1 }
   // TODO: validate aId before constructing Method call
   if (aId) {
+    // Set loading state
+    Session.set('addressLoading', true)
     const validate = qrlAddressValidator.hexString(aId)
-    if (validate.result === false) { return }
+    if (validate.result === false) {
+      Session.set('addressLoading', false)
+      return
+    }
     const req = {
       address: anyAddressToRaw(aId),
     }
     if (validate.sig.type === 'MULTISIG') {
       Meteor.call('getMultiSigAddressState', req, (err, res) => {
+        Session.set('addressLoading', false)
         if (err) {
           Session.set('address', { error: err, id: aId })
         } else {
@@ -433,6 +439,7 @@ const renderAddressBlock = () => {
     } else {
       Meteor.call('getAddressState', req, (err, res) => {
         if (err) {
+          Session.set('addressLoading', false)
           Session.set('address', { error: err, id: aId })
         } else {
           if (res) {
@@ -452,6 +459,7 @@ const renderAddressBlock = () => {
           req.unused_ots_index_from = 0
 
           Meteor.call('getOTS', req, (error, result) => {
+            Session.set('addressLoading', false)
             if (error) {
               console.error('OTS API error:', error)
               Session.set('address', { error, id: aId })
@@ -504,6 +512,20 @@ Template.address.helpers({
   },
   copySuccess() {
     return Session.get('copySuccess')
+  },
+  addressLoading() {
+    return Session.get('addressLoading')
+  },
+  qrlFormatted() {
+    try {
+      const qrl = Session.get('qrl')
+      if (qrl && typeof qrl === 'number') {
+        return qrl.toFixed(2)
+      }
+      return qrl
+    } catch (e) {
+      return Session.get('qrl')
+    }
   },
   address() {
     try {

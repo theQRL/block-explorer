@@ -10,7 +10,10 @@ const calculateEpoch = (blockNumber) => {
 }
 
 const renderBlockBlock = (blockId) => {
+  // Set loading state
+  Session.set('blockLoading', true)
   Meteor.call('block', blockId, (err, res) => {
+    Session.set('blockLoading', false)
     // The method call sets the Session variable to the callback value
     if (err) {
       Session.set('block', {
@@ -25,6 +28,9 @@ const renderBlockBlock = (blockId) => {
 }
 
 Template.block.helpers({
+  blockLoading() {
+    return Session.get('blockLoading')
+  },
   block() {
     try {
       return Session.get('block').block
@@ -50,6 +56,14 @@ Template.block.helpers({
   transactions() {
     try {
       return Session.get('block').block.transactions
+    } catch (e) {
+      return false
+    }
+  },
+  transactionsLoaded() {
+    try {
+      const block = Session.get('block')
+      return block && block.block && block.block.transactions && block.block.transactions.length > 0
     } catch (e) {
       return false
     }

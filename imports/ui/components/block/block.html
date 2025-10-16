@@ -1,7 +1,17 @@
 <template name="block">
   <div class="space-y-6">
-    <!-- Block Header -->
-    <div class="card">
+    {{#if blockLoading}}
+      <div class="card">
+        <div class="flex items-center justify-center py-12">
+          <div class="flex flex-col items-center space-y-4">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent"></div>
+            <div class="text-qrl-text-secondary">Loading block data...</div>
+          </div>
+        </div>
+      </div>
+    {{else}}
+      <!-- Block Header -->
+      <div class="card">
       <h3 class="text-2xl font-bold text-qrl-text mb-6 flex items-center">
         <svg class="w-8 h-8 mr-3 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
@@ -13,27 +23,27 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <div class="bg-qrl-primary/50 rounded-lg p-4">
           <div class="text-sm text-qrl-text-secondary mb-1">Transactions</div>
-          <div class="text-xl font-bold text-qrl-text font-mono">{{block.transactions.length}}</div>
+          <div class="text-md font-mono text-qrl-text">{{block.transactions.length}}</div>
         </div>
         <div class="bg-qrl-primary/50 rounded-lg p-4">
           <div class="text-sm text-qrl-text-secondary mb-1">Timestamp</div>
-          <div class="text-lg font-mono text-qrl-text">{{ts}}</div>
+          <div class="text-md font-mono text-qrl-text">{{ts}}</div>
         </div>
         <div class="bg-qrl-primary/50 rounded-lg p-4">
           <div class="text-sm text-qrl-text-secondary mb-1">Epoch</div>
-          <div class="text-lg font-mono text-qrl-text">{{block_epoch}}</div>
+          <div class="text-md font-mono text-qrl-text">{{block_epoch}}</div>
         </div>
         <div class="bg-qrl-primary/50 rounded-lg p-4">
           <div class="text-sm text-qrl-text-secondary mb-1">Size</div>
-          <div class="text-lg font-mono text-qrl-text">{{blockSize}}</div>
+          <div class="text-md font-mono text-qrl-text">{{blockSize}}</div>
         </div>
         <div class="bg-qrl-primary/50 rounded-lg p-4">
           <div class="text-sm text-qrl-text-secondary mb-1">Reward</div>
-          <div class="text-lg font-mono text-qrl-text">{{block_reward}} Quanta</div>
+          <div class="text-md font-mono text-qrl-text">{{block_reward}} Quanta</div>
         </div>
         <div class="bg-qrl-primary/50 rounded-lg p-4">
           <div class="text-sm text-qrl-text-secondary mb-1">Mining Nonce</div>
-          <div class="text-lg font-mono text-qrl-text">{{mining_nonce}}</div>
+          <div class="text-md font-mono text-qrl-text">{{mining_nonce}}</div>
         </div>
       </div>
     </div>
@@ -48,15 +58,17 @@
       </h2>
 
       <!-- Loading State -->
-      <div id="loadingTransactions" class="flex items-center justify-center py-12">
-        <div class="text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
-          <div class="text-qrl-text-secondary">
-            <div class="font-semibold mb-2">Just a moment</div>
-            <p id="relayingMsg">Block transactions loading ...</p>
+      {{#unless transactionsLoaded}}
+        <div id="loadingTransactions" class="flex items-center justify-center py-12">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
+            <div class="text-qrl-text-secondary">
+              <div class="font-semibold mb-2">Just a moment</div>
+              <p id="relayingMsg">Block transactions loading ...</p>
+            </div>
           </div>
         </div>
-      </div>
+      {{/unless}}
 
       <!-- Transactions Table -->
       <div class="overflow-x-auto">
@@ -127,5 +139,6 @@
         </div>
       </div>
     </div>
+    {{/if}}
   </div>
 </template>
