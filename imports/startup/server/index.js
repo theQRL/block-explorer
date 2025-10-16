@@ -21,7 +21,8 @@ import {
   bufferToHex,
 } from '../both/index.js'
 
-const PROTO_PATH = Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
+const PROTO_PATH =
+  Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
 
 // Apply BrowserPolicy
@@ -451,24 +452,24 @@ const helpersaddressTransactions = (response) => {
           address_hex: `Q${Buffer.from(txOutput).toString('hex')}`,
           amount: `${formatTokenAmount(
             tx.tx.transfer_token.amounts[index],
-            txEdited.tx.transfer_token.decimals,
+            txEdited.tx.transfer_token.decimals
           )} ${txEdited.tx.transfer_token.symbol}`,
         })
       })
       txEdited.tx.outputs = outputs
       txEdited.tx.totalTransferred = `${sumTokenTotal(
         tx.tx.transfer_token.amounts,
-        txEdited.tx.transfer_token.decimals,
+        txEdited.tx.transfer_token.decimals
       )} ${txEdited.tx.transfer_token.symbol}`
       txEdited.tx.transfer_token.addrs_to = hexlified
       if (tx.tx.transfer_token.symbol) {
         txEdited.tx.transfer_token.symbol = Buffer.from(
-          txEdited.tx.transfer_token.symbol,
+          txEdited.tx.transfer_token.symbol
         ).toString()
       }
       if (tx.tx.transfer_token.name) {
         txEdited.tx.transfer_token.name = Buffer.from(
-          txEdited.tx.transfer_token.name,
+          txEdited.tx.transfer_token.name
         ).toString()
       }
     }
@@ -565,13 +566,13 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(
           error,
           'Cannot access API/GetOptimizedAddressState',
-          '**ERROR/getAddressState** ',
+          '**ERROR/getAddressState** '
         )
         callback(myError, null)
       } else {
         if (response.state.address) {
           response.state.address = `Q${Buffer.from(
-            response.state.address,
+            response.state.address
           ).toString('hex')}`
         }
 
@@ -603,7 +604,7 @@ const getMultiSigAddressState = (request, callback) => {
           const myError = errorCallback(
             error,
             'No state returned for this address',
-            '**ERROR/getMultiSigAddressState** ',
+            '**ERROR/getMultiSigAddressState** '
           )
           callback(myError, null)
           return
@@ -1010,7 +1011,8 @@ Meteor.methods({
               )
               // adjusted.transfer.addrs_to[index] = adjusted.transfer.addrs_to[index] <-- FIXME: why was this here?
             })
-            adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
+            adjusted.transfer.totalTransferred =
+              thisTotalTransferred / SHOR_PER_QUANTA
             adjusted.transfer.totalOutputs = totalOutputs
           }
           if (adjusted.transactionType === 'transfer_token') {
@@ -1018,7 +1020,8 @@ Meteor.methods({
             const symbolRequest = {
               query: Buffer.from(adjusted.transfer_token.token_txhash, 'hex'),
             }
-            const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+            const thisSymbolResponse =
+              Meteor.wrapAsync(getObject)(symbolRequest)
             // eslint-disable-next-line
             const thisSymbol = Buffer.from(
               thisSymbolResponse.transaction.tx.token.symbol,
