@@ -3,15 +3,24 @@
   <header class="bg-qrl-secondary border-b border-qrl-border sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- First Line: Logo and Search -->
-      <div class="flex items-start justify-between py-3">
+      <div class="flex items-center justify-between pb-3">
         <!-- Logo (left) -->
-        <div class="flex flex-col items-start">
+        <div class="flex flex-col items-center">
           <a href="/" class="flex items-center">
             <div class="flex items-center justify-center">
               <img class="w-auto" style="height: 64px;" src="/img/yellow.svg" alt="QRL Explorer" />
             </div>
           </a>
-          <span class="text-sm text-qrl-text-secondary font-medium" style="margin-top: -16px; margin-left: 14px; letter-spacing: 0.16em;">EXPLORER</span>
+          <span class="text-sm text-qrl-text-secondary font-medium" style="margin-top: -8px; letter-spacing: -0.05em;">
+            <span class="explorer-letter" style="animation-delay: 0s;">E</span>
+            <span class="explorer-letter" style="animation-delay: 0.5s;">X</span>
+            <span class="explorer-letter" style="animation-delay: 1s;">P</span>
+            <span class="explorer-letter" style="animation-delay: 1.5s;">L</span>
+            <span class="explorer-letter" style="animation-delay: 2s;">O</span>
+            <span class="explorer-letter" style="animation-delay: 2.5s;">R</span>
+            <span class="explorer-letter" style="animation-delay: 3s;">E</span>
+            <span class="explorer-letter" style="animation-delay: 3.5s;">R</span>
+          </span>
         </div>
 
         <!-- Search and Mobile Menu (right) -->
@@ -124,7 +133,7 @@
   </header>
 
   <!-- Background Pattern -->
-  <div class="fixed inset-0 pointer-events-none z-0" style="background-image: url('/img/dots-light.png'); background-size: 1000px 1000px; background-repeat: repeat; background-position: 0 0; opacity: 0.3; background-attachment: fixed;"></div>
+  <div class="fixed inset-0 pointer-events-none z-0" style="background-image: url('/img/dots-light.png'); background-size: 1200px 1200px; background-repeat: no-repeat; background-position: center; opacity: 0.3; filter: blur(2px);"></div>
 
   <!-- Main Content -->
   <main class="min-h-screen relative z-10">
@@ -176,5 +185,28 @@
       </div>
     </div>
   </div>
+
+  <!-- EXPLORER Letter Animation Styles -->
+  <style>
+    .explorer-letter {
+      display: inline;
+      animation: letterPulse 4s ease-in-out infinite;
+    }
+    
+    @keyframes letterPulse {
+      0%, 90% { 
+        color: inherit;
+        text-shadow: none;
+      }
+      5% { 
+        color: #ffffff;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+      }
+      15% { 
+        color: inherit;
+        text-shadow: none;
+      }
+    }
+  </style>
 
 </template>
