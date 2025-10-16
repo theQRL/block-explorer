@@ -1,97 +1,144 @@
 <template name="block">
-
-<h3 class="ui pageHeader header">
-  <i class="block layout icon"></i>
-  <div class="content wordBreak">
-    Block {{header.block_number}}
-  </div>
-</h3>
-
-<div class="ui segment pageSegment">
-  <div class="description">
-    <div class="ui celled horizontal list">
-      <div class="item"><strong>Transactions</strong> {{block.transactions.length}}</div>
-      <div class="item"><strong>Timestamp</strong> {{ts}}</div>
-      <div class="item"><strong>Epoch</strong> {{block_epoch}}</div>
-      <div class="item"><strong>Size</strong> {{blockSize}}</div>
-      <div class="item"><strong>Reward</strong> {{block_reward}} Quanta</div>
-      <div class="item"><strong>Mining Nonce</strong> {{mining_nonce}}</div>
-    </div>
-    <div class="ui hidden divider"></div>
-  </div>
-
-  <div class="ui bottom attached tab segment active">
-    <h2 class="ui header">
-      <div class="content">
-        Transactions
-      </div>
-    </h2>
-
-    <div id="loadingTransactions" class="ui icon message">
-      <br /><br />
-      <i class="notched circle loading icon"></i>
-      <div class="content">
-        <div class="header">
-          Just a moment
+  <div class="space-y-6">
+    {{#if blockLoading}}
+      <div class="card">
+        <div class="flex items-center justify-center py-12">
+          <div class="flex flex-col items-center space-y-4">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent"></div>
+            <div class="text-qrl-text-secondary">Loading block data...</div>
+          </div>
         </div>
-        <p id="relayingMsg">Block transactions loading ...</p>
+      </div>
+    {{else}}
+      <!-- Block Header -->
+      <div class="card">
+      <h3 class="text-2xl font-bold text-qrl-text mb-6 flex items-center">
+        <svg class="w-8 h-8 mr-3 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+        </svg>
+        Block {{header.block_number}}
+      </h3>
+
+      <!-- Block Details Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div class="bg-qrl-primary/50 rounded-lg p-4">
+          <div class="text-sm text-qrl-text-secondary mb-1">Transactions</div>
+          <div class="text-md font-mono text-qrl-text">{{block.transactions.length}}</div>
+        </div>
+        <div class="bg-qrl-primary/50 rounded-lg p-4">
+          <div class="text-sm text-qrl-text-secondary mb-1">Timestamp</div>
+          <div class="text-md font-mono text-qrl-text">{{ts}}</div>
+        </div>
+        <div class="bg-qrl-primary/50 rounded-lg p-4">
+          <div class="text-sm text-qrl-text-secondary mb-1">Epoch</div>
+          <div class="text-md font-mono text-qrl-text">{{block_epoch}}</div>
+        </div>
+        <div class="bg-qrl-primary/50 rounded-lg p-4">
+          <div class="text-sm text-qrl-text-secondary mb-1">Size</div>
+          <div class="text-md font-mono text-qrl-text">{{blockSize}}</div>
+        </div>
+        <div class="bg-qrl-primary/50 rounded-lg p-4">
+          <div class="text-sm text-qrl-text-secondary mb-1">Reward</div>
+          <div class="text-md font-mono text-qrl-text">{{block_reward}} Quanta</div>
+        </div>
+        <div class="bg-qrl-primary/50 rounded-lg p-4">
+          <div class="text-sm text-qrl-text-secondary mb-1">Mining Nonce</div>
+          <div class="text-md font-mono text-qrl-text">{{mining_nonce}}</div>
+        </div>
       </div>
     </div>
 
-    <table class="ui striped table">
-      <thead>
-      <th>Type</th>
-      <th>Amount</th>
-      <th>Fee (Shor)</th>
-      <th>From</th>
-      <th>To</th>
-      <th>Txhash</th>
-      </thead>
-      <tbody>
-      {{#each transactions}}
-        <tr>
-          <td>
-            <div class="ui label {{color}}">
-              {{#if isCreateNFT}}
-              Create&nbsp;NFT
-              {{else}}
-              {{#if isTransferNFT}}
-              Transfer&nbsp;NFT
-              {{else}}
-              {{this.transactionType}}
-              {{/if}}
-              {{/if}}
+    <!-- Transactions Section -->
+    <div class="card">
+      <h2 class="text-xl font-bold text-qrl-text mb-6 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        Transactions
+      </h2>
+
+      <!-- Loading State -->
+      {{#unless transactionsLoaded}}
+        <div id="loadingTransactions" class="flex items-center justify-center py-12">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
+            <div class="text-qrl-text-secondary">
+              <div class="font-semibold mb-2">Just a moment</div>
+              <p id="relayingMsg">Block transactions loading ...</p>
             </div>
-          </td>
-          <td><div class="unbreakable">{{amount}}</div></td>
-          <td><div class="unbreakable">{{fee}}</div></td>
-          <td><a href="/a/{{render_addr_from}}">{{render_addr_from}}</a></td>
-          <td>
-          {{#if isTransfer this.transactionType}}
-            {{#if singleOutput this.transfer.totalOutputs}}
-              <a href="/a/{{render_addr_to}}">{{render_addr_to}}</a>
-            {{else}}
-              {{render_addr_to}}
-            {{/if}}
-          {{else if isTokenTransfer this.transactionType}}
-            {{#if singleOutput this.transfer_token.totalOutputs}}
-              <a href="/a/{{render_addr_to}}">{{render_addr_to}}</a>
-            {{else}}
-              {{render_addr_to}}
-            {{/if}}
-          {{else}}
-            <a href="/a/{{render_addr_to}}">{{render_addr_to}}</a>
-          {{/if}}
-          </td>
-          <td><a href="/tx/{{transaction_hash}}">{{transaction_hash}}</a></td>
-        </tr>
-      {{/each}}
-      </tbody>
-    </table>
+          </div>
+        </div>
+      {{/unless}}
+
+      <!-- Transactions Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border">
+          <thead class="bg-qrl-primary/50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Type</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Amount</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Fee (Shor)</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">From</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">To</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Txhash</th>
+            </tr>
+          </thead>
+          <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
+            {{#each transactions}}
+              <tr class="hover:bg-qrl-primary/50 transition-colors duration-200 cursor-pointer transaction-row" data-txhash="{{transaction_hash}}">
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{#if isTransfer transactionType}}bg-yellow-100 text-yellow-800{{else}}{{#if isTokenTransfer transactionType}}bg-blue-100 text-blue-800{{else}}bg-gray-100 text-gray-800{{/if}}{{/if}}">
+                    {{transactionType}}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                  {{amount}}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                  {{fee}}
+                </td>
+                <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono">
+                  <div class="max-w-xs truncate">
+                    <a href="/a/{{render_addr_from}}" class="text-qrl-accent hover:text-qrl-accent/80 hover:underline transition-colors duration-200 cursor-pointer" onclick="event.stopPropagation()">
+                      {{render_addr_from}}
+                    </a>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono">
+                  <div class="max-w-xs truncate">
+                    <a href="/a/{{render_addr_to}}" class="text-qrl-accent hover:text-qrl-accent/80 hover:underline transition-colors duration-200 cursor-pointer" onclick="event.stopPropagation()">
+                      {{render_addr_to}}
+                    </a>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono">
+                  <div class="max-w-xs truncate">
+                    <a href="/tx/{{transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80 transition-colors" onclick="event.stopPropagation()">
+                      {{transaction_hash}}
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- JSON Meta Section -->
+      <div class="mt-8 pt-6 border-t border-qrl-border">
+        <div class="card">
+          <button class="flex items-center space-x-2 text-qrl-accent hover:text-qrl-accent/80 jsonclick">
+            <span>Meta</span>
+            <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="jsonbox json p-4 bg-qrl-secondary/50 rounded overflow-auto" style="display: none">
+            <!-- JSON content will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/if}}
   </div>
-
-  <button class="ui mini button jsonclick">Meta <i class="down angle icon"></i></button>
-  <div class="ui raised segment jsonbox json" style="display: none">{{json}}</div>
-</div>
-
 </template>

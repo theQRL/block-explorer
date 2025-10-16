@@ -1,20 +1,31 @@
 <template name="notFound">
-  <div class="ui container">
-  <div id="not-found" class="ui centered stackable grid">
-    <div class="three wide column">
-      <img src="/img/404.svg" alt="" />
+  <div class="min-h-screen flex items-center justify-center bg-qrl-primary">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <div class="mb-8">
+        <img src="/img/404.svg" alt="404 Not Found" class="mx-auto h-64 w-64" />
+      </div>
+      
+      <h1 class="text-6xl font-bold text-qrl-text mb-4">:(</h1>
+      <h2 class="text-3xl font-semibold text-qrl-text mb-8">Sorry, that page doesn't exist</h2>
+      
+      <div class="mb-8">
+        <a href="/" class="btn-primary text-lg px-8 py-4">
+          <svg class="w-5 h-5 mr-2 inline" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+          </svg>
+          QRL Explorer Homepage
+        </a>
+      </div>
+      
+      <div class="text-qrl-text-secondary">
+        <p class="mb-4">The page you're looking for might have been moved, deleted, or doesn't exist.</p>
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+          <a href="/lastblocks" class="hover:text-qrl-accent transition-colors">Browse Blocks</a>
+          <a href="/lasttx" class="hover:text-qrl-accent transition-colors">Recent Transactions</a>
+          <a href="/status" class="hover:text-qrl-accent transition-colors">Network Status</a>
+          <a href="/search" class="hover:text-qrl-accent transition-colors">Search</a>
+        </div>
+      </div>
     </div>
-    <div class="two wide column">&nbsp;</div>
-    <div class="eight wide column">
-
-<div class="ui hidden divider"></div>
-
-      <h1>:(</h1>
-      <h1>Sorry, that page doesn't exist</h1>
-      <div class="ui hidden divider"></div>
-      <a href="/" class="gotohomepage ui button">QRL Explorer Homepage</a>
-    </div>
-
   </div>
-</div>
 </template>

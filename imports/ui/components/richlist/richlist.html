@@ -1,76 +1,139 @@
 <template name="richlist">
-
-<h4 class="ui pageHeader header">
-  <div class="content">
-    Richlist
-  </div>
-</h4>
-{{#if networkIsMainnet}}
-  {{#if richlistLoading}}
-    <div class="ui active dimmer">
-      <div class="ui text loader">Loading richlist data...</div>
-    </div>
-  {{else}}
-    {{#if latestBlock}}
-      <div class="ui info message">
-        <div class="content">
-          <div class="header">
-            <i class="grey info icon"></i>
-            <span class="ui grey text">
-              Data based on block {{latestBlock.number}}
-            </span>
+  <div class="space-y-6">
+    <h4 class="text-2xl font-bold text-qrl-text">Richlist</h4>
+    
+    {{#if networkIsMainnet}}
+      {{#if richlistLoading}}
+        <div class="card">
+          <div class="flex items-center justify-center py-12">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
+              <div class="text-qrl-text-secondary">Loading richlist data...</div>
+            </div>
+          </div>
+        </div>
+      {{else}}
+        {{#if latestBlock}}
+          <div class="card border-blue-500/30 bg-blue-500/10">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-blue-400 mb-2">Data Information</h3>
+                <p class="text-blue-300">
+                  Data based on block {{latestBlock.number}}
+                </p>
+              </div>
+            </div>
+          </div>
+        {{/if}}
+        
+        {{#if latestBlockError}}
+          <div class="card border-yellow-500/30 bg-yellow-500/10">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-yellow-400 mb-2">Warning</h3>
+                <p class="text-yellow-300">Unable to fetch latest block information</p>
+              </div>
+            </div>
+          </div>
+        {{/if}}
+        
+        <div class="card">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-qrl-border">
+              <thead class="bg-qrl-primary/50">
+                <tr>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-qrl-text-secondary uppercase tracking-wider w-20">Rank</th>
+                  <th class="px-6 py-3 text-center text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Address</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Balance (Quanta)</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Percentage</th>
+                </tr>
+              </thead>
+              <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
+                {{#each richlistData}}
+                  <tr class="hover:bg-qrl-primary/50 hover:shadow-[0_0_0_1px_rgb(255_167_41)] transition-all duration-200">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-qrl-text text-right">
+                      {{rank(@index)}}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text-secondary text-center">
+                      <a href="/a/{{address}}" class="font-mono break-all text-qrl-accent hover:text-qrl-accent/80 hover:underline transition-colors duration-200 cursor-pointer">{{address}}</a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                      {{shorToQuanta(balance)}}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text">
+                      {{percentage}}%
+                    </td>
+                  </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Load More Button -->
+          <div class="mt-6 flex justify-center">
+            {{#if richlistButtonLoading}}
+              <button class="btn-secondary flex items-center justify-center" disabled>
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                Loading
+              </button>
+            {{else}}
+              <button class="btn-primary" id="fetchMore">
+                Fetch more
+              </button>
+            {{/if}}
+          </div>
+          
+          <!-- Export Button -->
+          <div class="mt-4 flex justify-end">
+            <button class="btn-secondary flex items-center hover:bg-qrl-accent/20 hover:border-qrl-accent/50" id="csvExport">
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              </svg>
+              Full .csv export
+            </button>
+          </div>
+        </div>
+        
+        {{#if richlistError}}
+          <div class="card border-red-500/30 bg-red-500/10">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-red-400 mb-2">Error</h3>
+                <p class="text-red-300">{{richlistError}}</p>
+              </div>
+            </div>
+          </div>
+        {{/if}}
+      {{/if}}
+    {{else}}
+      <div class="card border-yellow-500/30 bg-yellow-500/10">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-yellow-400 mb-2">Network Warning</h3>
+            <p class="text-yellow-300">Richlist is only available on mainnet</p>
           </div>
         </div>
       </div>
     {{/if}}
-    {{#if latestBlockError}}
-      <div class="ui warning message">
-        <div class="content">
-          <div class="header">
-            <i class="warning icon"></i>
-            Unable to fetch latest block information</div>
-        </div>
-      </div>
-    {{/if}}
-    <table class="ui compact table">
-      <thead>
-        <tr>
-          <th class="two wide" style="text-align: right;">Rank</th>
-          <th class="six wide" style="text-align: center;">Address</th>
-          <th class="four wide">Balance (Quanta)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each richlistData}}
-          <tr>
-            <td style="text-align: right;">{{rank (@index)}}</td>
-            <td><a href="/a/{{address}}">{{address}}</a></td>
-            <td>{{shorToQuanta (balance)}}</td>
-          </tr>
-        {{/each}}
-      </tbody>
-    </table>
-    {{#if richlistButtonLoading}}
-    <button class="ui small loading button" id="fetchMore">Loading</button>
-    {{else}}
-    <button class="ui small button" id="fetchMore">Fetch more</button>
-    {{/if}}
-    <button class="ui small right floated button" id="csvExport">Full .csv export</button>
-  {{/if}}
-  {{#if richlistError}}
-    <div class="ui negative message">
-      <i class="close icon"></i>
-      <div class="header">
-        Richlist data not found
-      </div>
-    </div>
-  {{/if}}
-{{else}}
-  <div class="ui negative message">
-    <i class="close icon"></i>
-    <div class="header">
-      Richlist is only available on Mainnet
-    </div>
   </div>
-{{/if}}
 </template>

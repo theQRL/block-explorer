@@ -3,15 +3,16 @@
 import '/imports/startup/client'
 import '/imports/startup/both'
 
-
-let x = LocalStore.get('theme')
-if (!x) {
-  x = 'dark'
+// Theme management using Tailwind dark mode
+let theme = LocalStore.get('theme')
+if (!theme) {
+  theme = 'dark'
   LocalStore.set('theme', 'dark')
 }
 
-if (x === 'light') {
-  import '/public/light.css' /* eslint-disable-line */
+// Apply theme class to document
+if (theme === 'dark') {
+  document.documentElement.classList.add('dark')
 } else {
-  import '/public/dark.css'
+  document.documentElement.classList.remove('dark')
 }

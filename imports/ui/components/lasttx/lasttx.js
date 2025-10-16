@@ -10,9 +10,29 @@ Template.lasttx.onCreated(() => {
 })
 
 Template.lasttx.helpers({
+  multipleDestinations() {
+    if (this.explorer.outputs) {
+      if (this.explorer.outputs.length > 1) {
+        return true
+      }
+    }
+    return false
+  },
   lasttx() {
     const res = lasttx.findOne()
     return res
+  },
+  fromAddress() {
+    return this.explorer.from_hex
+  },
+  toAddress() {
+    if (this.explorer.outputs) {
+      if (this.explorer.outputs.length > 1) {
+        return `${this.explorer.outputs.length} destinations`
+      }
+      return this.explorer.outputs[0].address_hex
+    }
+    return ''
   },
   amount() {
     if (this.tx.transfer) {
@@ -24,7 +44,11 @@ Template.lasttx.helpers({
     return ''
   },
   block() {
-    return this.header.block_number
+    if (this.header) {
+      // this will be undefined for unconfirmed transactions
+      return this.header.block_number
+    }
+    return ''
   },
   ts() {
     if (this.header) {
@@ -37,8 +61,14 @@ Template.lasttx.helpers({
   zeroCheck() {
     let ret = false
     const x = lasttx.findOne()
-    if (x) { if (x.length === 0) { ret = true } }
-    if (x === undefined) { ret = true }
+    if (x) {
+      if (x.length === 0) {
+        ret = true
+      }
+    }
+    if (x === undefined) {
+      ret = true
+    }
     return ret
   },
   isTransfer(txType) {
@@ -145,18 +175,51 @@ Template.lasttx.helpers({
     }
     return false
   },
+
   isMultiSigVoteTxn(txType) {
     if (txType === 'multi_sig_vote') {
       return true
     }
     return false
   },
+  isStake(txType) {
+    if (txType === 'stake') {
+      return true
+    }
+    return false
+  },
+  isCoinbase(txType) {
+    if (txType === 'coinbase') {
+      return true
+    }
+    return false
+  },
+  isSlave(txType) {
+    if (txType === 'slave') {
+      return true
+    }
+    return false
+  },
+  isLatticePK(txType) {
+    if (txType === 'latticePK') {
+      return true
+    }
+    return false
+  },
+  isMessage(txType) {
+    if (txType === 'message') {
+      return true
+    }
+    return false
+  },
+
   isDocumentNotarisation(txType) {
     if (txType === 'DOCUMENT_NOTARISATION') {
       return true
     }
     return false
   },
+
   isKeybaseTxn(txType) {
     if (txType === 'KEYBASE') {
       return true
@@ -194,8 +257,12 @@ Template.lasttx.helpers({
 
 Template.lasttx.events({
   'click .transactionRecord': (event) => {
-    const route = event.currentTarget.childNodes[5].childNodes[1].attributes[0].nodeValue
-    FlowRouter.go(route)
+    // Find the transaction hash in the clicked element
+    const hashElement = event.currentTarget.querySelector('[data-full-text]')
+    if (hashElement) {
+      const transactionHash = hashElement.getAttribute('data-full-text')
+      FlowRouter.go(`/tx/${transactionHash}`)
+      window.scrollTo(0, 0)
+    }
   },
 })
-

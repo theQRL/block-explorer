@@ -48,6 +48,31 @@ Template.search.events({
   },
 })
 Template.search.onRendered(() => {
+  // Initialize Lucide icons for this template
+  setTimeout(() => {
+    if (window.reinitializeLucideIcons) {
+      window.reinitializeLucideIcons()
+    }
+  }, 200)
+  
+  // Handle responsive placeholder
+  const updatePlaceholder = () => {
+    const searchInput = document.getElementById('mainSearch')
+    if (searchInput) {
+      if (window.innerWidth < 670) { // where text starts to break
+        searchInput.placeholder = searchInput.getAttribute('data-placeholder-mobile')
+      } else {
+        searchInput.placeholder = 'Search by transaction, address, or block index'
+      }
+    }
+  }
+  
+  // Set initial placeholder
+  updatePlaceholder()
+  
+  // Update on resize
+  window.addEventListener('resize', updatePlaceholder)
+  
   if ($('.sidebar').hasClass('visible') && FlowRouter.getRouteName() === 'Search.home') {
     // sidebar is visible and on /find route
     this.$('.floatright').first().hide()
