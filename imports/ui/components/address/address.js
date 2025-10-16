@@ -531,12 +531,10 @@ Template.address.helpers({
     try {
       const qrl = Session.get('qrl')
       const address = Session.get('address')
-      if (qrl && typeof qrl === 'number' && address && address.state && address.state.balance !== undefined) {
-        const balance = parseFloat(address.state.balance)
-        if (!isNaN(balance)) {
-          const usdValue = qrl * balance
-          return usdValue.toFixed(2)
-        }
+      const balance = parseFloat(address.state.balance)
+      if (!isNaN(balance)) {
+        const usdValue = qrl * balance
+        return usdValue.toFixed(2)
       }
       return '0.00'
     } catch (e) {
