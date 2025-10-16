@@ -135,6 +135,22 @@ Template.tx.helpers({
       return Session.get('qrl')
     }
   },
+  transferUSD() {
+    try {
+      const qrl = Session.get('qrl')
+      const txhash = Session.get('txhash')
+      if (qrl && typeof qrl === 'number' && txhash && txhash.transaction && txhash.transaction.tx) {
+        const value = txhash.transaction.tx.amount
+        if (value && !isNaN(value)) {
+          const usdValue = qrl * value
+          return usdValue.toFixed(2)
+        }
+      }
+      return qrl
+    } catch (e) {
+      return Session.get('qrl')
+    }
+  },
   tx() {
     try {
       if (Session.get('txhash').error) {
