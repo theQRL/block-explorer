@@ -1,4 +1,5 @@
 import { Blocks } from '/imports/api/index.js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './lastblocks.html'
 import { rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import { SHOR_PER_QUANTA, hexOrB32 } from '../../../startup/both/index.js'

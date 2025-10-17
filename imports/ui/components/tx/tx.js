@@ -1,5 +1,6 @@
 /* eslint no-console: 0 */
 import JSONFormatter from 'json-formatter-js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './tx.html'
 import CryptoJS from 'crypto-js'
 import sha256 from 'sha256'

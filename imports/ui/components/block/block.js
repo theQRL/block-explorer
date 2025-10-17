@@ -1,4 +1,5 @@
 import JSONFormatter from 'json-formatter-js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './block.html'
 import {
   numberToString, SHOR_PER_QUANTA, formatBytes, hexOrB32, bufferToHex,

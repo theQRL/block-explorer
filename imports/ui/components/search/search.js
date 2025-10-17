@@ -1,4 +1,5 @@
 import './search.html'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 
 const identifySearch = (str) => {
   let adjstr = str.trim()

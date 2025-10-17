@@ -2,6 +2,7 @@ import { BigNumber } from 'bignumber.js'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
 import { lasttx } from '/imports/api/index.js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './lasttx.html'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 

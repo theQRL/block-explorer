@@ -2,6 +2,7 @@
 /* ^^^ remove once testing complete
  */
 import JSONFormatter from 'json-formatter-js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import qrlAddressValidator from '@theqrl/validate-qrl-address'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'

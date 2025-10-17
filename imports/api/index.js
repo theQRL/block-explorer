@@ -14,12 +14,12 @@ export const blockData = new Mongo.Collection('blockdata')
 if (Meteor.isServer) {
   // This code only runs on the server
   // empty cache of each collection on startup in case of breaking gRPC changes
-  Blocks.remove({})
-  lasttx.remove({})
-  homechart.remove({})
-  quantausd.remove({})
-  status.remove({})
-  peerstats.remove({})
+  Blocks.removeAsync({})
+  lasttx.removeAsync({})
+  homechart.removeAsync({})
+  quantausd.removeAsync({})
+  status.removeAsync({})
+  peerstats.removeAsync({})
 
   // then publish collections
   Meteor.publish('blocks', () => Blocks.find())
