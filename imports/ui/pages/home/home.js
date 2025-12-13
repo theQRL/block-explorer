@@ -24,7 +24,9 @@ function loadApexCharts() {
 
     console.log('Loading ApexCharts from CDN...')
     const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/apexcharts@latest'
+    script.src = 'https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.js'
+    script.integrity = 'sha384-mrR3K8Jvv+o9bZ6Yu9HWI0M8tuzo5VWNi4fWcmmbFq3NbB+WvjW/tF/wnELivEnc'
+    script.crossOrigin = 'anonymous'
     script.onload = () => {
       console.log('ApexCharts loaded successfully')
       resolve(window.ApexCharts)

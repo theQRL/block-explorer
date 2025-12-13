@@ -959,16 +959,6 @@ Meteor.methods({
       response = bufferToHex(response)
 
       if (response.block.header) {
-        response.block.header.hash_header = Buffer.from(
-          response.block.header.hash_header,
-        ).toString('hex')
-        response.block.header.hash_header_prev = Buffer.from(
-          response.block.header.hash_header_prev,
-        ).toString('hex')
-        response.block.header.merkle_root = Buffer.from(
-          response.block.header.merkle_root,
-        ).toString('hex')
-
         // transactions
         const transactions = []
         response.block.transactions.forEach((value) => {
