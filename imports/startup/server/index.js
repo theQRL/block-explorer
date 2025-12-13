@@ -40,8 +40,10 @@ BrowserPolicy.content.allowStyleOrigin('fonts.cdnfonts.com')
 BrowserPolicy.content.allowScriptOrigin('cdn.jsdelivr.net')
 BrowserPolicy.content.allowScriptOrigin('cdnjs.cloudflare.com')
 BrowserPolicy.content.allowFontDataUrl('cdnjs.cloudflare.com')
+// Allow WebSocket connections to self
+BrowserPolicy.content.allowConnectOrigin("'self'") // Allow same-origin WebSocket (Meteor DDP)
 BrowserPolicy.content.allowConnectOrigin('wss://*.theqrl.org:*')
-
+BrowserPolicy.content.allowConnectOrigin('ws://*.theqrl.org:*')
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
 // state true is connected, false is disconnected
