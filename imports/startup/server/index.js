@@ -26,7 +26,9 @@ const PROTO_PATH =
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
 
 // Apply BrowserPolicy
-BrowserPolicy.content.disallowInlineScripts()
+// cloudflare's protection needs inline scripts
+// BrowserPolicy.content.disallowInlineScripts()
+
 BrowserPolicy.content.allowStyleOrigin('cdnjs.cloudflare.com')
 BrowserPolicy.content.allowStyleOrigin('fonts.googleapis.com')
 BrowserPolicy.content.allowStyleOrigin('cdn.jsdelivr.net')
