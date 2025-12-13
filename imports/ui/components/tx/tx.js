@@ -3,17 +3,17 @@ import JSONFormatter from 'json-formatter-js'
 import './tx.html'
 import CryptoJS from 'crypto-js'
 import sha256 from 'sha256'
-import $ from 'jquery'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
-import 'fomantic-ui-css/semantic.js'
-import 'fomantic-ui-css/semantic.css'
-import { numberToString, SHOR_PER_QUANTA, formatBytes } from '../../../startup/both/index.js'
+import { numberToString, SHOR_PER_QUANTA, formatBytes, bufferToHex } from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
   if (txId) {
+    // Set loading state
+    Session.set('txLoading', true)
     Meteor.call('txhash', txId, (err, res) => {
+      Session.set('txLoading', false)
       if (err) {
         Session.set('txhash', { error: err, id: txId, found: false })
         return false
@@ -91,6 +91,9 @@ function toByteArray(hexString) {
 /* eslint-enable */
 
 Template.tx.helpers({
+  txLoading() {
+    return Session.get('txLoading')
+  },
   hasMessage() {
     try {
       if (this.tx.transfer.message_data.length > 0) {
@@ -106,6 +109,47 @@ Template.tx.helpers({
   },
   bech32() {
     return Session.equals('addressFormat', 'bech32')
+  },
+  qrlFormatted() {
+    try {
+      const qrl = Session.get('qrl')
+      if (qrl && typeof qrl === 'number') {
+        return qrl.toFixed(2)
+      }
+      return qrl
+    } catch (e) {
+      return Session.get('qrl')
+    }
+  },
+  coinbaseUSD() {
+    try {
+      const qrl = Session.get('qrl')
+      const txhash = Session.get('txhash')
+      if (qrl && typeof qrl === 'number' && txhash && txhash.transaction && txhash.transaction.tx && txhash.transaction.tx.coinbase) {
+        const coinbaseAmount = txhash.transaction.tx.coinbase.amount / SHOR_PER_QUANTA
+        const usdValue = qrl * coinbaseAmount
+        return usdValue.toFixed(2)
+      }
+      return qrl
+    } catch (e) {
+      return Session.get('qrl')
+    }
+  },
+  transferUSD() {
+    try {
+      const qrl = Session.get('qrl')
+      const txhash = Session.get('txhash')
+      if (qrl && typeof qrl === 'number' && txhash && txhash.transaction && txhash.transaction.tx) {
+        const value = txhash.transaction.tx.amount
+        if (value && !isNaN(value)) {
+          const usdValue = qrl * value
+          return usdValue.toFixed(2)
+        }
+      }
+      return qrl
+    } catch (e) {
+      return Session.get('qrl')
+    }
   },
   tx() {
     try {
@@ -133,6 +177,10 @@ Template.tx.helpers({
     try {
       if (Session.get('txhash').found) {
         const txhash = Session.get('txhash').transaction
+        // OTS key is not applicable for coinbase transactions
+        if (txhash.tx.transactionType === 'coinbase') {
+          return 'N/A'
+        }
         const otsKey = parseInt(txhash.tx.signature.substring(0, 8), 16)
         return otsKey
       }
@@ -410,28 +458,125 @@ Template.tx.helpers({
   bf(b) {
     return Buffer.from(b).toString('hex')
   },
+  copySuccess() {
+    return Session.get('copySuccess')
+  },
 })
+
+// Helper function to toggle JSON display
+function toggleJSON() {
+  const jsonBox = document.querySelector('.jsonbox')
+  const toggleButton = document.querySelector('.jsonclick')
+
+  if (jsonBox) {
+    if (jsonBox.style.display === 'none' || !jsonBox.style.display) {
+      // Always re-process the data to ensure it's up-to-date with reactive changes
+      const myJSON = bufferToHex(Session.get('txhash'))
+      const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark' })
+      jsonBox.innerHTML = ''
+      const rendered = formatter.render()
+      
+      // Find and extract from the first json-formatter-children element
+      const childrenElement = rendered.querySelector('.json-formatter-children')
+      if (childrenElement) {
+        // Move all children to the root level
+        while (childrenElement.firstChild) {
+          jsonBox.appendChild(childrenElement.firstChild)
+        }
+      } else {
+        // Fallback to full rendered content
+        jsonBox.appendChild(rendered)
+      }
+      
+      // Open the first toggler after extraction is complete
+      setTimeout(() => {
+        const firstToggler = jsonBox.querySelector('.json-formatter-toggler-link')
+        if (firstToggler) {
+          firstToggler.click()
+        }
+      }, 0)
+      
+      // Remove empty objects from DOM unless expanded
+      setTimeout(() => {
+        const emptyObjects = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-object')
+        const emptyArrays = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-array')
+        
+        emptyObjects.forEach(el => {
+          if (!el.closest('.json-formatter-open')) {
+            el.remove() // Remove from DOM entirely
+          }
+        })
+        
+        emptyArrays.forEach(el => {
+          if (!el.closest('.json-formatter-open')) {
+            el.remove() // Remove from DOM entirely
+          }
+        })
+      }, 0)
+      jsonBox.style.display = 'block'
+      // Rotate the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(180deg)'
+        }
+      }
+    } else {
+      jsonBox.style.display = 'none'
+      // Reset the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(0deg)'
+        }
+      }
+    }
+  }
+}
+
+// Helper function to hide messages
+function hideMessages() {
+  const messages = document.querySelectorAll('.message')
+  messages.forEach((msg) => { msg.style.display = 'none' })
+}
+
+// Helper function to show/hide verification results
+function showVerificationResult(elementId) {
+  const element = document.getElementById(elementId)
+  if (element) {
+    element.classList.remove('hidden')
+    element.style.display = 'block'
+  }
+}
+
+function hideVerificationResults() {
+  const verified = document.getElementById('documentVerified')
+  const failed = document.getElementById('documentVerifcationFailed')
+
+  if (verified) {
+    verified.classList.add('hidden')
+    verified.style.display = 'none'
+  }
+  if (failed) {
+    failed.classList.add('hidden')
+    failed.style.display = 'none'
+  }
+}
 
 Template.tx.events({
   'click .close': () => {
-    $('.message').hide()
+    hideMessages()
   },
   'click .jsonclick': () => {
-    if (!($('.json').html())) {
-      const myJSON = Session.get('txhash').transaction
-      const formatter = new JSONFormatter(myJSON)
-      $('.json').html(formatter.render())
-    }
-    $('.jsonbox').toggle()
+    toggleJSON()
   },
   'submit #notariseVerificationForm': (event) => {
     event.preventDefault()
     event.stopPropagation()
 
-    $('#documentVerified').hide()
-    $('#documentVerifcationFailed').hide()
+    hideVerificationResults()
 
-    const notaryDocuments = $('#notaryDocument').prop('files')
+    const notaryDocuments = document.getElementById('notaryDocument').files
     const notaryDocument = notaryDocuments[0]
 
     // Get notary details from txn
@@ -479,32 +624,100 @@ Template.tx.events({
           resulting in the hash '${txnFileHash}'.`
 
           Session.set('documentNotarisationVerificationMessage', successMessage)
-          $('#documentVerified').show()
+          showVerificationResult('documentVerified')
         } else {
           Session.set('documentNotarisationError', 'The file provided does not match the notary hash in this transaction.')
-          $('#documentVerifcationFailed').show()
+          showVerificationResult('documentVerifcationFailed')
         }
       } catch (err) {
         console.log(err)
         // Invalid file format
         Session.set('documentNotarisationError', 'Unable to open Document - Are you sure you selected a document to verify?')
-        $('#documentVerifcationFailed').show()
+        showVerificationResult('documentVerifcationFailed')
       }
     }
 
     // Verify user selected a document to notarise
     if (notaryDocument === undefined) {
       Session.set('documentNotarisationError', 'Unable to open Document - Are you sure you selected a document to verify?')
-      $('#documentVerifcationFailed').show()
+      showVerificationResult('documentVerifcationFailed')
     } else {
       console.log('reading file ', notaryDocument)
       reader.readAsArrayBuffer(notaryDocument)
     }
   },
+  'click .copy-txhash-btn': async (event) => {
+    event.preventDefault()
+    
+    // Show success feedback immediately
+    Session.set('copySuccess', true)
+    
+    const txhash = Session.get('txhash')
+    
+    if (txhash && txhash.transaction && txhash.transaction.tx && txhash.transaction.tx.transaction_hash) {
+      const transactionHash = txhash.transaction.tx.transaction_hash
+      try {
+        await navigator.clipboard.writeText(transactionHash)
+      } catch (err) {
+        // Fallback for older browsers
+        try {
+          const textArea = document.createElement('textarea')
+          textArea.value = transactionHash
+          document.body.appendChild(textArea)
+          textArea.select()
+          const success = document.execCommand('copy')
+          document.body.removeChild(textArea)
+        } catch (fallbackErr) {
+          console.error('Copy failed:', fallbackErr)
+        }
+      }
+    }
+    
+    // Clear after 3 seconds
+    setTimeout(() => {
+      Session.set('copySuccess', false)
+    }, 3000)
+  },
+  'click [data-action="dismiss-copy-feedback"]': (event) => {
+    event.preventDefault()
+    Session.set('copySuccess', false)
+  },
 })
 
 Template.tx.onRendered(() => {
-  $('.value').popup()
+  // Initialize copySuccess session variable
+  Session.set('copySuccess', false)
+  
+  // Initialize Lucide icons for this template
+  setTimeout(() => {
+    if (window.reinitializeLucideIcons) {
+      window.reinitializeLucideIcons()
+    }
+  }, 200)
+  
+  // Tooltip for values
+  document.querySelectorAll('.value').forEach((element) => {
+    element.addEventListener('mouseenter', (event) => {
+      const tooltipText = event.target.dataset.html
+      if (tooltipText) {
+        const tooltip = document.createElement('div')
+        tooltip.className = 'absolute z-50 px-3 py-2 text-sm font-medium text-qrl-text bg-qrl-secondary rounded-lg shadow-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300'
+        tooltip.innerHTML = tooltipText
+        event.target.appendChild(tooltip)
+        // Position tooltip
+        const rect = event.target.getBoundingClientRect()
+        tooltip.style.left = `${rect.width / 2 - tooltip.offsetWidth / 2}px`
+        tooltip.style.top = `${-tooltip.offsetHeight - 5}px`
+      }
+    })
+    element.addEventListener('mouseleave', (event) => {
+      const tooltip = event.target.querySelector('.absolute')
+      if (tooltip) {
+        tooltip.remove()
+      }
+    })
+  })
+
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('txhash', {})

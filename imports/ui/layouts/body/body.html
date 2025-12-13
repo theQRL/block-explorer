@@ -1,100 +1,212 @@
 <template name="appBody">
-  <!-- Main Menu -->
-  <div class="ui visible left vertical inverted sidebar labeled icon menu">
-      <a href="/" class="item logoArea">
-        <img class="main-menu-logo" src="/img/qrl-full-logo.svg" />
-      </a>
-      <a href="/lastblocks" class="item main-menu-btn {{menuBlocksActive}}">
-        <i class="block layout icon"></i>
-        Blocks
-      </a>
-      <a href="/lasttx" class="item main-menu-btn {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
-        <i class="check square icon"></i>
-        Recent<br />Transactions
-      </a>
-      <a href="/unconfirmed" class="item main-menu-btn {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
-        <i class="help circle icon"></i>
-        Unconfirmed<br />Transactions
-      </a>
-      <a href="/richlist" class="item main-menu-btn {{menuRichListActive}}">
-        <i class="list layout icon"></i>
-        Rich List
-      </a>
-      <a href="/peers" class="item main-menu-btn {{menuPeersActive}}">
-        <i class="sitemap layout icon"></i>
-        Peers
-      </a>
-      <a href="http://wallet.theqrl.org/" target="_blank" class="item main-menu-btn">
-        <i class="send outline icon"></i>
-        Wallet
-      </a>
-      <!-- 
-      Possibly too large to have here
-      <a class="item main-menu-btn themeToggle">
-        <i class="moon icon"></i>
-        Toggle theme
-      </a> -->
-      <a class="item main-menu-btn sidebarConnectionStatus">
-        <i class="{{connectionStatus.colour}} signal icon"></i>
-      </a>
-  </div>
-
-  <!-- Content Wrapper -->
-  <div class="main-content-wrapper">
-      <!-- Main Content Area -->
-      <div class="main-content">
-
-        <!-- Temporarily disable Address Format Selection so that it doesn't disturb other goings-on
-        <div class="ui toggle checkbox floatleft">
-          <input type="checkbox" id="addressFormatCheckbox" name="addressFormatCheckbox" {{ addressFormatChecked }} ><label for="addressFormatCheckbox"><strong>Address Format</strong> {{ addressFormat }} </label>
+  <!-- Top Header -->
+  <header class="bg-qrl-secondary border-b border-qrl-border sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- First Line: Logo and Search -->
+      <div class="flex items-center justify-between pb-3">
+        <!-- Logo (left) -->
+        <div class="flex flex-col items-center">
+          <a href="/" class="flex items-center">
+            <div class="flex items-center justify-center">
+              <img class="w-auto" style="height: 64px;" src="/img/yellow.svg" alt="QRL Explorer" />
+            </div>
+          </a>
+          <span class="text-sm text-qrl-text-secondary font-medium" style="margin-top: -8px; letter-spacing: -0.05em;">
+            <span class="explorer-letter" style="animation-delay: 0s;">E</span>
+            <span class="explorer-letter" style="animation-delay: 0.5s;">X</span>
+            <span class="explorer-letter" style="animation-delay: 1s;">P</span>
+            <span class="explorer-letter" style="animation-delay: 1.5s;">L</span>
+            <span class="explorer-letter" style="animation-delay: 2s;">O</span>
+            <span class="explorer-letter" style="animation-delay: 2.5s;">R</span>
+            <span class="explorer-letter" style="animation-delay: 3s;">E</span>
+            <span class="explorer-letter" style="animation-delay: 3.5s;">R</span>
+          </span>
         </div>
-         -->
 
-        {{ >search }}
-
-        <!-- Page Content -->
-        <div class="subPageContent">
-          <div class="ui">
-            {{> Template.dynamic template=main}}
-            </div>
-                    </div>
-            <!-- Footer -->
-            <div class="footer">
-              <div class="ui center aligned container">
-                <a href="/">
-                  <img class="footerLogo" src="{{logo}}">
-                </a>
-                <br />
-                <button class="ui small basic grey icon button themeToggle">
-                  <i class="ui {{theme}} icon"></i> Toggle theme
-                </button>
-                <br />
-                <div class="ui horizontal small divided link list">
-                  <a class="item" target="_blank" href="https://theqrl.org/">theQRL.org</a>
-                  <a class="item" target="_blank" href="https://github.com/theQRL">Github</a>
-                  <a class="item" target="_blank" href="https://github.com/theQRL/block-explorer/issues">Found a Problem?</a>
-                  <a class="item" target="_blank" href="https://github.com/theQRL/block-explorer">qrl-explorer v{{qrlExplorerVersion}}</a>
-                </div>
-              </div>
-            </div>
-
-            <div class="rv-vanilla-modal-overlay-fi">
-            <div id="target-modal" class="rv-vanilla-modal-fi">
-
-              <div class="rv-vanilla-modal-header group">
-                <button class="rv-vanilla-modal-close" id="reconnect-close"><span class="text">×</span></button>
-                <h2 class="rv-vanilla-modal-title">Disconnected from QRL Block Explorer</h2>
-              </div>
-              <div class="rv-vanilla-modal-body">
-                <p>Your connection to the QRL Block Explorer has timed out due to inactivity.</p>
-                <p>Close this alert to reconnect.</p>
-                <p align="center"><button class="ui red button" id="reconnect">Reconnect</button></p>
-              </div>
-            </div>
-            </div>
-
+        <!-- Search and Mobile Menu (right) -->
+        <div class="flex items-center space-x-4 flex-1 max-w-md ml-8 mt-2">
+          <!-- Search -->
+          {{> search }}
           
-
+          <!-- Mobile Menu Button -->
+          <button class="lg:hidden p-2 text-qrl-text hover:text-qrl-accent transition-colors" id="mobile-menu-toggle">
+            <i data-lucide="menu" class="w-6 h-6 pointer-events-none"></i>
+          </button>
+        </div>
       </div>
+
+      <!-- Second Line: Navigation Links -->
+      <div class="hidden lg:flex border-t border-qrl-border pt-3 pb-3">
+        <!-- Desktop Navigation (lg and up) -->
+        <nav class="hidden lg:flex items-center space-x-8">
+          <a href="/lastblocks" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuBlocksActive}}">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="box" class="w-4 h-4 pointer-events-none"></i>
+              <span>Blocks</span>
+            </div>
+          </a>
+          
+          <a href="/lasttx" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="arrow-right" class="w-4 h-4 pointer-events-none"></i>
+              <span>Transactions</span>
+            </div>
+          </a>
+          
+          <a href="/unconfirmed" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="clock" class="w-4 h-4 pointer-events-none"></i>
+              <span>Unconfirmed</span>
+            </div>
+          </a>
+          
+          <a href="/richlist" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuRichListActive}}">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="list" class="w-4 h-4 pointer-events-none"></i>
+              <span>Rich List</span>
+            </div>
+          </a>
+          
+          <a href="/peers" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuPeersActive}}">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
+              <span>Peers</span>
+            </div>
+          </a>
+          
+          <a href="http://wallet.theqrl.org/" target="_blank" class="text-qrl-text hover:text-qrl-accent transition-colors">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="wallet" class="w-4 h-4 pointer-events-none"></i>
+              <span>Wallet</span>
+            </div>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Menu (hidden by default) -->
+    <div class="lg:hidden hidden" id="mobile-menu">
+      <div class="px-2 pt-2 pb-3 space-y-1 bg-qrl-secondary border-t border-qrl-border">
+        <a href="/lastblocks" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuBlocksActive}}">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="box" class="w-4 h-4 pointer-events-none"></i>
+            <span>Blocks</span>
+          </div>
+        </a>
+        
+        <a href="/lasttx" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="arrow-right" class="w-4 h-4 pointer-events-none"></i>
+            <span>Transactions</span>
+          </div>
+        </a>
+        
+        <a href="/unconfirmed" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="clock" class="w-4 h-4 pointer-events-none"></i>
+            <span>Unconfirmed</span>
+          </div>
+        </a>
+        
+        <a href="/richlist" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuRichListActive}}">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="list" class="w-4 h-4 pointer-events-none"></i>
+            <span>Rich List</span>
+          </div>
+        </a>
+        
+        <a href="/peers" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuPeersActive}}">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
+            <span>Peers</span>
+          </div>
+        </a>
+        
+        <a href="http://wallet.theqrl.org/" target="_blank" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="wallet" class="w-4 h-4 pointer-events-none"></i>
+            <span>Wallet</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Background Pattern -->
+  <div class="fixed inset-0 pointer-events-none z-0" style="background-image: url('/img/dots-light.png'); background-size: 1200px 1200px; background-repeat: no-repeat; background-position: center; opacity: 0.3; filter: blur(2px);"></div>
+
+  <!-- Main Content -->
+  <main class="min-h-screen relative z-10">
+    <!-- Responsive container: centered on 2xl, full width on smaller -->
+    <div class="w-full 2xl:max-w-7xl 2xl:mx-auto">
+      <div class="px-4 sm:px-6 lg:px-8 py-8">
+        {{> Template.dynamic template=main}}
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-qrl-secondary border-t border-qrl-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="text-center">
+        <a href="/" class="inline-block mb-4">
+          <img class="h-8 w-auto mx-auto" src="/img/icon.svg" alt="QRL Explorer" />
+        </a>
+        <p class="text-qrl-text-secondary text-sm">
+          QRL Explorer<br>
+          version {{EXPLORER_VERSION}}
+        </p>
+        <div class="mt-4 flex justify-center space-x-6">
+          <a href="https://theqrl.org/" target="_blank" class="text-qrl-text-secondary hover:text-qrl-accent transition-colors text-sm">
+            theQRL.org
+          </a>
+          <a href="https://github.com/theQRL/block-explorer" target="_blank" class="text-qrl-text-secondary hover:text-qrl-accent transition-colors text-sm">
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Disconnect Modal -->
+  <div class="rv-vanilla-modal-overlay-fi" id="disconnect-modal-overlay">
+    <div class="rv-vanilla-modal-fi" id="disconnect-modal">
+      <div class="rv-vanilla-modal-header">
+        <h3 class="rv-vanilla-modal-title">Connection Lost</h3>
+        <button class="rv-vanilla-modal-close" id="disconnect-modal-close">&times;</button>
+      </div>
+      <div class="rv-vanilla-modal-body">
+        <p>You have been disconnected due to inactivity.</p>
+        <p>Click "Reconnect" to restore your connection to the QRL network.</p>
+        <div style="margin-top: 20px; text-align: center;">
+          <button id="reconnect-btn" class="btn-primary" style="margin-right: 10px;">Reconnect</button>
+          <button id="dismiss-btn" class="btn-secondary">Dismiss</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- EXPLORER Letter Animation Styles -->
+  <style>
+    .explorer-letter {
+      display: inline;
+      animation: letterPulse 4s ease-in-out infinite;
+    }
+    
+    @keyframes letterPulse {
+      0%, 90% { 
+        color: inherit;
+        text-shadow: none;
+      }
+      5% { 
+        color: #ffffff;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+      }
+      15% { 
+        color: inherit;
+        text-shadow: none;
+      }
+    }
+  </style>
+
 </template>

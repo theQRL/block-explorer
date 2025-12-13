@@ -6,11 +6,21 @@ import { SHA512 } from 'jscrypto/es6'
 // import helpers from '@theqrl/explorer-helpers'
 /* eslint import/no-cycle: 0 */
 import {
-  getLatestData, getObject, getStats, getPeersStat, apiCall, makeTxListHumanReadable,
+  getLatestData,
+  getObject,
+  getStats,
+  getPeersStat,
+  apiCall,
+  makeTxListHumanReadable,
 } from '/imports/startup/server/index.js'
 
 import {
-  Blocks, lasttx, homechart, quantausd, status, peerstats,
+  Blocks,
+  lasttx,
+  homechart,
+  quantausd,
+  status,
+  peerstats,
 } from '/imports/api/index.js'
 
 import { SHOR_PER_QUANTA } from '../both/index.js'
@@ -82,7 +92,9 @@ const refreshBlocks = () => {
     }
     // if there is a Glip webhook, post an alert to Glip
     try {
-      if (Meteor.settings.glip.webhook.slice(0, 23) === 'https://hooks.glip.com/') {
+      if (
+        Meteor.settings.glip.webhook.slice(0, 23) === 'https://hooks.glip.com/'
+      ) {
         const httpPostUrl = Meteor.settings.glip.webhook
         try {
           HTTP.call('POST', httpPostUrl, {
@@ -103,14 +115,25 @@ const refreshBlocks = () => {
 
 function refreshLasttx() {
   // First get confirmed transactions
-  const confirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS', offset: 0, quantity: 10 })
+  const confirmed = Meteor.wrapAsync(getLatestData)({
+    filter: 'TRANSACTIONS',
+    offset: 0,
+    quantity: 10,
+  })
 
   // Now get unconfirmed transactions
-  const unconfirmed = Meteor.wrapAsync(getLatestData)({ filter: 'TRANSACTIONS_UNCONFIRMED', offset: 0, quantity: 10 })
+  const unconfirmed = Meteor.wrapAsync(getLatestData)({
+    filter: 'TRANSACTIONS_UNCONFIRMED',
+    offset: 0,
+    quantity: 10,
+  })
 
   // Merge the two together
   const confirmedTxns = makeTxListHumanReadable(confirmed.transactions, true)
-  const unconfirmedTxns = makeTxListHumanReadable(unconfirmed.transactions_unconfirmed, false)
+  const unconfirmedTxns = makeTxListHumanReadable(
+    unconfirmed.transactions_unconfirmed,
+    false
+  )
   const merged = {}
   merged.transactions = unconfirmedTxns.concat(confirmedTxns)
 
@@ -130,10 +153,12 @@ function refreshLasttx() {
         if (currentTxn.tx.transaction_hash === newTxn.tx.transaction_hash) {
           try {
             // If they both have null header (unconfirmed) there is no change
-            if ((currentTxn.header === null) && (newTxn.header === null)) {
+            if (currentTxn.header === null && newTxn.header === null) {
               thisFound = true
-            // If they have same block number, there is also no change.
-            } else if (currentTxn.header.block_number === newTxn.header.block_number) {
+              // If they have same block number, there is also no change.
+            } else if (
+              currentTxn.header.block_number === newTxn.header.block_number
+            ) {
               thisFound = true
             }
           } catch (e) {
@@ -156,8 +181,24 @@ function refreshLasttx() {
 }
 
 function refreshStats() {
-  const res = Meteor.wrapAsync(getStats)({ include_timeseries: true })
+  let res
+  try {
+    console.log("refreshStats: Starting...")
+    res = Meteor.wrapAsync(getStats)({ include_timeseries: true })
+    console.log("refreshStats: Got data:", res ? "YES" : "NO")
+    if (res && res.block_timeseries) {
+      console.log("refreshStats: block_timeseries length:", res.block_timeseries.length)
+    } else {
+      console.log("refreshStats: No block_timeseries data")
+      return
+    }
+  } catch (error) {
+    console.error("refreshStats: Error:", error.message)
+    return
+  }
 
+  console.log("refreshStats: Processing data...")
+  
   // Save status object
   status.remove({})
   status.insert(res)
@@ -172,8 +213,8 @@ function refreshStats() {
   const labels = []
   const hashPower = {
     label: 'Hash Power (hps)',
-    borderColor: '#FFA729',
-    backgroundColor: '#FFA729',
+    borderColor: '#4AAFFF',
+    backgroundColor: '#4AAFFF',
     fill: false,
     data: [],
     yAxisID: 'y-axis-2',
@@ -182,8 +223,8 @@ function refreshStats() {
   }
   const difficulty = {
     label: 'Difficulty',
-    borderColor: '#B7DFFF',
-    backgroundColor: '#B7DFFF',
+    borderColor: '#9CA3AF',
+    backgroundColor: '#9CA3AF',
     fill: false,
     data: [],
     yAxisID: 'y-axis-2',
@@ -192,8 +233,8 @@ function refreshStats() {
   }
   const movingAverage = {
     label: 'Block Time Average (s)',
-    borderColor: '#4AAFFF',
-    backgroundColor: '#4AAFFF',
+    borderColor: '#FFA729',
+    backgroundColor: '#FFA729',
     fill: false,
     data: [],
     yAxisID: 'y-axis-1',
@@ -202,8 +243,8 @@ function refreshStats() {
   }
   const blockTime = {
     label: 'Block Time (s)',
-    borderColor: '#6D7478',
-    backgroundColor: '#6D7478',
+    borderColor: '#B2751D',
+    backgroundColor: '#B2751D',
     fill: false,
     showLine: false,
     data: [],
@@ -225,12 +266,13 @@ function refreshStats() {
   chartLineData.labels = labels
   chartLineData.datasets.push(hashPower)
   chartLineData.datasets.push(difficulty)
-  chartLineData.datasets.push(movingAverage)
   chartLineData.datasets.push(blockTime)
+  chartLineData.datasets.push(movingAverage)
 
   // Save in mongo
   homechart.remove({})
   homechart.insert(chartLineData)
+  console.log("refreshStats: Chart data inserted successfully")
 }
 
 const refreshQuantaUsd = async () => {
@@ -246,9 +288,22 @@ const refreshPeerStats = () => {
 
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
-    response.peers_stat[index].peer_ip = SHA512.hash(Buffer.from(peer.peer_ip).toString()).toString().toString('hex').slice(0, 10)
-    response.peers_stat[index].node_chain_state.header_hash = Buffer.from(peer.node_chain_state.header_hash).toString('hex')
-    response.peers_stat[index].node_chain_state.cumulative_difficulty = parseInt(Buffer.from(peer.node_chain_state.cumulative_difficulty).toString('hex'), 16)
+    response.peers_stat[index].peer_ip = SHA512.hash(
+      Buffer.from(peer.peer_ip).toString()
+    )
+      .toString()
+      .toString('hex')
+      .slice(0, 10)
+    response.peers_stat[index].node_chain_state.header_hash = Buffer.from(
+      peer.node_chain_state.header_hash
+    ).toString('hex')
+    response.peers_stat[index].node_chain_state.cumulative_difficulty =
+      parseInt(
+        Buffer.from(peer.node_chain_state.cumulative_difficulty).toString(
+          'hex'
+        ),
+        16
+      )
   })
 
   // Update mongo collection

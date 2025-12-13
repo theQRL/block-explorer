@@ -1,7 +1,7 @@
 import JSONFormatter from 'json-formatter-js'
 import './block.html'
 import {
-  numberToString, SHOR_PER_QUANTA, formatBytes, hexOrB32,
+  numberToString, SHOR_PER_QUANTA, formatBytes, hexOrB32, bufferToHex,
 } from '../../../startup/both/index.js'
 
 const calculateEpoch = (blockNumber) => {
@@ -10,7 +10,10 @@ const calculateEpoch = (blockNumber) => {
 }
 
 const renderBlockBlock = (blockId) => {
+  // Set loading state
+  Session.set('blockLoading', true)
   Meteor.call('block', blockId, (err, res) => {
+    Session.set('blockLoading', false)
     // The method call sets the Session variable to the callback value
     if (err) {
       Session.set('block', {
@@ -25,6 +28,9 @@ const renderBlockBlock = (blockId) => {
 }
 
 Template.block.helpers({
+  blockLoading() {
+    return Session.get('blockLoading')
+  },
   block() {
     try {
       return Session.get('block').block
@@ -50,6 +56,14 @@ Template.block.helpers({
   transactions() {
     try {
       return Session.get('block').block.transactions
+    } catch (e) {
+      return false
+    }
+  },
+  transactionsLoaded() {
+    try {
+      const block = Session.get('block')
+      return block && block.block && block.block.transactions && block.block.transactions.length > 0
     } catch (e) {
       return false
     }
@@ -98,19 +112,31 @@ Template.block.helpers({
     return ''
   },
   render_addr_from() {
+    if (!this.addr_from) {
+      return ''
+    }
     return hexOrB32(this.addr_from)
   },
   render_addr_to() {
     if (this.transactionType === 'coinbase') {
-      return hexOrB32(this.coinbase.addr_to)
+      if (!this.coinbase || !this.coinbase.addr_to) {
+        return ''
+      }
+      return this.coinbase.addr_to
     }
     if (this.transactionType === 'transfer') {
+      if (!this.transfer || !this.transfer.addrs_to || this.transfer.addrs_to.length === 0) {
+        return ''
+      }
       if (this.transfer.totalOutputs === 1) {
         return hexOrB32(this.transfer.addrs_to[0])
       }
       return `${this.transfer.totalOutputs} addresses`
     }
     if (this.transactionType === 'transfer_token') {
+      if (!this.transfer_token || !this.transfer_token.addrs_to || this.transfer_token.addrs_to.length === 0) {
+        return ''
+      }
       if (this.transfer_token.totalOutputs === 1) {
         return hexOrB32(this.transfer_token.addrs_to[0])
       }
@@ -185,18 +211,77 @@ Template.block.helpers({
   },
 })
 
+// Helper function to toggle JSON display
+function toggleJSON() {
+  const jsonBox = document.querySelector('.jsonbox')
+  const toggleButton = document.querySelector('.jsonclick')
+
+  if (jsonBox) {
+    if (jsonBox.style.display === 'none' || !jsonBox.style.display) {
+      // Always re-process the data to ensure it's up-to-date with reactive changes
+      const myJSON = bufferToHex(Session.get('block').block_extended)
+      const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark' })
+      jsonBox.innerHTML = ''
+      const rendered = formatter.render()
+
+      // Find and extract from the first json-formatter-children element
+      const childrenElement = rendered.querySelector(
+        '.json-formatter-children',
+      )
+      if (childrenElement) {
+        // Move all children to the root level
+        while (childrenElement.firstChild) {
+          jsonBox.appendChild(childrenElement.firstChild)
+        }
+      } else {
+        // Fallback to full rendered content
+        jsonBox.appendChild(rendered)
+      }
+
+      // Open the first toggler after extraction is complete
+      setTimeout(() => {
+        const firstToggler = jsonBox.querySelector(
+          '.json-formatter-toggler-link',
+        )
+        if (firstToggler) {
+          firstToggler.click()
+        }
+      }, 0)
+      jsonBox.style.display = 'block'
+      // Rotate the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(180deg)'
+        }
+      }
+    } else {
+      jsonBox.style.display = 'none'
+      // Reset the arrow icon
+      if (toggleButton) {
+        const arrow = toggleButton.querySelector('svg')
+        if (arrow) {
+          arrow.style.transform = 'rotate(0deg)'
+        }
+      }
+    }
+  }
+}
+
 Template.block.events({
   'click .close': () => {
-    $('.message')
-      .hide()
+    const messages = document.querySelectorAll('.message')
+    messages.forEach((msg) => { msg.style.display = 'none' })
   },
   'click .jsonclick': () => {
-    if (!($('.json').html())) {
-      const myJSON = Session.get('block').block
-      const formatter = new JSONFormatter(myJSON)
-      $('.json').html(formatter.render())
+    toggleJSON()
+  },
+  'click .transaction-row': (event) => {
+    const txhash = event.currentTarget.getAttribute('data-txhash')
+    if (txhash) {
+      window.location.href = `/tx/${txhash}`
+      window.scrollTo(0, 0)
     }
-    $('.jsonbox').toggle()
   },
 })
 

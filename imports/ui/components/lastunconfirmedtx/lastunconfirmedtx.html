@@ -1,140 +1,155 @@
 <template name="lastunconfirmedtx">
+  <div class="space-y-6">
+    <div class="flex items-center justify-between">
+      <h4 class="text-2xl font-bold text-qrl-text">Latest Unconfirmed Transactions</h4>
+    </div>
 
-<h4 class="ui pageHeader header">
-  <div class="content">
-    Latest Unconfirmed Transactions <i class="ui refresh red link icon"></i>
+    {{#with lastunconfirmedtx}} 
+      {{#if allConfirmed}}
+        <div class="card border-green-500/30 bg-green-500/10">
+          <div class="flex items-start space-x-3">
+            <div class="flex-shrink-0">
+              <svg class="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-green-400 mb-2">
+                All transactions confirmed
+              </h3>
+              <p class="text-green-300">
+                There are not any unconfirmed transactions to display.
+              </p>
+            </div>
+          </div>
+        </div>
+      {{else}}
+        {{#if hasUnconfirmedTransactions}}
+          <div class="space-y-4">
+            {{#each lastunconfirmedtx.transactions_unconfirmed}}
+              <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 h-44 flex flex-col">
+                <div class="flex items-start space-x-4 flex-1">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                      {{#if isTransfer this.tx.transactionType}}
+                        <i data-lucide="arrow-right" class="w-5 h-5 text-qrl-primary"></i>
+                      {{else}}
+                        {{#if isTokenCreation this.tx.transactionType}}
+                          <i data-lucide="coins" class="w-5 h-5 text-qrl-primary"></i>
+                        {{else}}
+                          {{#if isTokenTransfer this.tx.transactionType}}
+                            <i data-lucide="coins" class="w-5 h-5 text-qrl-primary"></i>
+                          {{else}}
+                            {{#if isSlaveTxn this.tx.transactionType}}
+                              <i data-lucide="folder-tree" class="w-5 h-5 text-qrl-primary"></i>
+                            {{else}}
+                              {{#if isMessageTxn this.explorer.type}}
+                                <i data-lucide="message-circle" class="w-5 h-5 text-qrl-primary"></i>
+                              {{else}}
+                                {{#if isDocumentNotarisation this.explorer.type}}
+                                  <i data-lucide="message-circle" class="w-5 h-5 text-qrl-primary"></i>
+                                {{else}}
+                                  {{#if isKeybaseTxn this.explorer.type}}
+                                    <i data-lucide="message-circle" class="w-5 h-5 text-qrl-primary"></i>
+                                  {{else}}
+                                    <i data-lucide="users" class="w-5 h-5 text-qrl-primary"></i>
+                                  {{/if}}
+                                {{/if}}
+                              {{/if}}
+                            {{/if}}
+                          {{/if}}
+                        {{/if}}
+                      {{/if}}
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="text-sm text-qrl-text-secondary">First Seen: {{ts}}</div>
+                      <div class="status-indicator status-warning">
+                        <div class="w-2 h-2 rounded-full bg-current mr-2"></div>
+                        <span class="text-xs">Unconfirmed</span>
+                      </div>
+                    </div>
+                    <div class="text-qrl-text font-semibold mb-2">
+                      {{#if isTransfer this.tx.transactionType}}
+                        Transfer
+                      {{else}}
+                        {{#if isTokenCreation this.tx.transactionType}}
+                          Token Creation - {{this.explorer.symbol}}
+                        {{else}}
+                          {{#if isTokenTransfer this.tx.transactionType}}
+                            Token Transfer - {{this.explorer.symbol}}
+                          {{else}}
+                            {{#if isSlaveTxn this.tx.transactionType}}
+                              Slave Transaction
+                            {{else}}
+                              {{#if isMessageTxn this.explorer.type}}
+                                Message
+                              {{else}}
+                                {{#if isDocumentNotarisation this.explorer.type}}
+                                  Document Notarisation
+                                {{else}}
+                                  {{#if isKeybaseTxn this.explorer.type}}
+                                    Keybase
+                                  {{else}}
+                                    {{this.tx.transactionType}}
+                                  {{/if}}
+                                {{/if}}
+                              {{/if}}
+                            {{/if}}
+                          {{/if}}
+                        {{/if}}
+                      {{/if}}
+                    </div>
+                    <div class="pb-1 text-qrl-text-secondary font-mono text-sm truncate-with-tooltip" data-full-text="{{this.tx.transaction_hash}}" title="{{this.tx.transaction_hash}}">
+                      {{this.tx.transaction_hash}}
+                    </div>
+                    
+                    <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs text-qrl-text-secondary">Amount</span>
+                        <span class="text-sm text-qrl-accent font-semibold">
+                          {{#if isTransfer this.tx.transactionType}}
+                            {{amount}} QRL
+                          {{else}}
+                            {{#if isTokenCreation this.tx.transactionType}}
+                              {{this.explorer.symbol}} Creation
+                            {{else}}
+                              {{#if isTokenTransfer this.tx.transactionType}}
+                                {{amount}} {{this.explorer.symbol}}
+                              {{else}}
+                                View Transaction
+                              {{/if}}
+                            {{/if}}
+                          {{/if}}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {{/each}}
+          </div>
+        {{else}}
+          <div class="card border-blue-500/30 bg-blue-500/10">
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-blue-400 mb-2">
+                  No unconfirmed transactions
+                </h3>
+                <p class="text-blue-300">
+                  There are currently no unconfirmed transactions in the network.
+                </p>
+              </div>
+            </div>
+          </div>
+        {{/if}}
+      {{/if}}
+    {{/with}}
   </div>
-</h4>
-{{#with lastunconfirmedtx}} {{#if allConfirmed}}
-<div class="ui negative message">
-  <i class="close icon"></i>
-  <div class="header">
-    All network transactions have been confirmed
-  </div>
-</div>
-{{else}}
-  {{#each lastunconfirmedtx.transactions_unconfirmed}}
-    {{#if isTransfer this.tx.transactionType}}
-    <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/send.svg" />
-      <div class="content">
-        <div class="header">
-          Transfer | Unconfirmed | First Seen: {{ts}}
-        </div>
-        <p class="transactionAddress">
-          {{this.tx.transaction_hash}}
-        </p>
-      </div>
-      <div class="floatright">
-        <a href="/tx/{{this.tx.transaction_hash}}">{{amount}} Quanta &gt;</a>
-      </div>
-    </div>
-    {{/if}}
-
-    {{#if isTokenCreation this.tx.transactionType}}
-    <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/send.svg" />
-      <div class="content">
-        <div class="header">
-          Token Creation - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
-        </div>
-        <p class="transactionAddress">
-          {{this.tx.transaction_hash}}
-        </p>
-      </div>
-      <div class="floatright">
-         <a href="/tx/{{this.tx.transaction_hash}}">{{this.explorer.symbol}} Creation &gt;</a>
-      </div>
-    </div>
-    {{/if}}
-
-    {{#if isTokenTransfer this.tx.transactionType}}
-    <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/send.svg" />
-      <div class="content">
-        <div class="header">
-          Token Transfer - ({{this.explorer.symbol}}) | Unconfirmed | First Seen: {{ts}}
-        </div>
-        <p class="transactionAddress">
-          {{this.tx.transaction_hash}}
-        </p>
-      </div>
-      <div class="floatright">
-        <a href="/tx/{{this.tx.transaction_hash}}">{{amount}} {{this.explorer.symbol}} &gt;</a>
-      </div>
-    </div>
-    {{/if}}
-
-    {{#if isSlaveTxn this.tx.transactionType}}
-    <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/receive.svg" />
-      <div class="content">
-        <div class="header">
-          Slave Transaction | Unconfirmed | First Seen: {{ts}}
-        </div>
-        <p class="transactionAddress">
-          {{this.tx.transaction_hash}}
-        </p>
-      </div>
-      <div class="floatright">
-        <a href="/tx/{{this.tx.transaction_hash}}">View Transaction &gt;</a>
-      </div>
-    </div>
-    {{/if}}
-
-    {{#if isMessageTxn this.explorer.type}}
-    <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/receive.svg" />
-      <div class="content">
-        <div class="header">
-          Message | Unconfirmed | First Seen: {{ts}}
-        </div>
-        <p class="transactionAddress">
-          {{this.tx.transaction_hash}}
-        </p>
-      </div>
-      <div class="floatright">
-        <a href="/tx/{{this.tx.transaction_hash}}">View Transaction &gt;</a>
-      </div>
-    </div>
-    {{/if}}
-
-    {{#if isDocumentNotarisation this.explorer.type}}
-    <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/receive.svg" />
-      <div class="content">
-        <div class="header">
-          Document Notarisation | Unconfirmed | First Seen: {{ts}}
-        </div>
-        <p class="transactionAddress">
-          {{this.tx.transaction_hash}}
-        </p>
-      </div>
-      <div class="floatright">
-        <a href="/tx/{{this.tx.transaction_hash}}">View Transaction &gt;</a>
-      </div>
-    </div>
-    {{/if}}
-
-    {{#if isKeybaseTxn this.explorer.type}}
-    <div class="ui icon message transactionRecord">
-      <img class="transactionTypeImage" src="/img/icons/receive.svg" />
-      <div class="content">
-        <div class="header">
-          Keybase | Unconfirmed | First Seen: {{ts}}
-        </div>
-        <p class="transactionAddress">
-          {{this.tx.transaction_hash}}
-        </p>
-      </div>
-      <div class="floatright">
-        <a href="/tx/{{this.tx.transaction_hash}}">View Transaction &gt;</a>
-      </div>
-    </div>
-    {{/if}}
-
-  {{/each}}
-{{/if}} {{/with}}
-
-
 </template>
