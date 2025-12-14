@@ -13,31 +13,6 @@ let lastDataLength = 0
 let currentViewRange = { min: 0, max: 0 }
 let lastProcessedData = null // Track the last data we processed
 
-// Load ApexCharts from CDN
-function loadApexCharts() {
-  return new Promise((resolve, reject) => {
-    if (window.ApexCharts) {
-      console.log('ApexCharts already loaded')
-      resolve(window.ApexCharts)
-      return
-    }
-
-    console.log('Loading ApexCharts from CDN...')
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.js'
-    script.integrity = 'sha384-mrR3K8Jvv+o9bZ6Yu9HWI0M8tuzo5VWNi4fWcmmbFq3NbB+WvjW/tF/wnELivEnc'
-    script.crossOrigin = 'anonymous'
-    script.onload = () => {
-      console.log('ApexCharts loaded successfully')
-      resolve(window.ApexCharts)
-    }
-    script.onerror = () => {
-      console.error('Failed to load ApexCharts')
-      reject(new Error('Failed to load ApexCharts'))
-    }
-    document.head.appendChild(script)
-  })
-}
 
 // Calculate nice increments divisible by 10
 function calculateNiceIncrement(maxValue, minValue, targetTicks = 8) {
@@ -71,11 +46,14 @@ async function initializeChart(dataToUse, isSampleData = false) {
   }
 
   try {
-    // Clear any existing chart
+    // Destroy existing chart instance first to avoid duplicate tooltips
+    if (currentChart) {
+      currentChart.destroy()
+      currentChart = null
+    }
+    
+    // Clear any remaining chart elements
     chartContainer.innerHTML = ''
-
-    // Load ApexCharts
-    const ApexCharts = await loadApexCharts()
 
     // Transform data for ApexCharts
     const series = dataToUse.datasets.map((dataset) => ({
@@ -86,7 +64,7 @@ async function initializeChart(dataToUse, isSampleData = false) {
       })),
     }))
 
-    console.log('Initializing ApexCharts with series:', series)
+    // console.log('Initializing ApexCharts with series:', series)
 
     // Start with the most zoomed out view - show all available data
     const maxBlock = Math.max(...dataToUse.labels)
@@ -124,7 +102,7 @@ async function initializeChart(dataToUse, isSampleData = false) {
         // Track user interactions
         events: {
           zoom(chartContext, { xaxis }) {
-            console.log('User zoomed chart')
+            // console.log('User zoomed chart')
             userHasInteracted = true
             // Update our tracking of current view
             currentViewRange = {
@@ -133,7 +111,7 @@ async function initializeChart(dataToUse, isSampleData = false) {
             }
           },
           pan(chartContext, { xaxis }) {
-            console.log('User panned chart')
+            // console.log('User panned chart')
             userHasInteracted = true
             // Update our tracking of current view
             currentViewRange = {
@@ -142,7 +120,7 @@ async function initializeChart(dataToUse, isSampleData = false) {
             }
           },
           selection(chartContext, { xaxis }) {
-            console.log('User selected range')
+            // console.log('User selected range')
             userHasInteracted = true
             // Update our tracking of current view
             currentViewRange = {
@@ -285,7 +263,7 @@ async function initializeChart(dataToUse, isSampleData = false) {
     currentChart = new ApexCharts(chartContainer, options)
     await currentChart.render()
 
-    console.log('ApexCharts initialized successfully')
+    // console.log('ApexCharts initialized successfully')
     isChartInitialized = true
     lastDataLength = dataToUse.labels.length
     lastProcessedData = dataToUse // Store the initial data
@@ -299,7 +277,7 @@ async function initializeChart(dataToUse, isSampleData = false) {
 // Update chart with new data (only add new points, don't change existing)
 async function updateChart(newData) {
   if (!currentChart || !isChartInitialized) {
-    console.log('Chart not initialized yet, skipping update')
+    // console.log('Chart not initialized yet, skipping update')
     return
   }
 
@@ -309,11 +287,11 @@ async function updateChart(newData) {
     const hasNewData = currentDataLength > lastDataLength
 
     if (!hasNewData) {
-      console.log('No new data to add, skipping update')
+      // console.log('No new data to add, skipping update')
       return
     }
 
-    console.log(`Adding ${currentDataLength - lastDataLength} new data points`)
+    // console.log(`Adding ${currentDataLength - lastDataLength} new data points`)
 
     // Only add the new data points, don't change existing ones
     const newSeries = newData.datasets.map((dataset, datasetIndex) => {
@@ -330,7 +308,7 @@ async function updateChart(newData) {
       }
     })
 
-    console.log('Adding new data points:', newSeries)
+    // console.log('Adding new data points:', newSeries)
 
     // Add new data points to the chart (this preserves existing data)
     await currentChart.appendData(newSeries, true) // true = animate
@@ -340,7 +318,7 @@ async function updateChart(newData) {
       const latestBlock = Math.max(...newData.labels)
       const viewWidth = currentViewRange.max - currentViewRange.min
 
-      console.log('Auto-scrolling to show latest data')
+      // console.log('Auto-scrolling to show latest data')
 
       // Calculate new view range - scroll to the right to show latest data
       const newMin = Math.max(0, latestBlock - viewWidth + 20) // Keep same width, show latest data
@@ -352,56 +330,56 @@ async function updateChart(newData) {
       // Smooth scroll to new range
       await currentChart.zoomX(newMin, newMax, true) // true = animate
     } else if (userHasInteracted) {
-      console.log('User has interacted with chart, not auto-scrolling')
+      // console.log('User has interacted with chart, not auto-scrolling')
     }
 
     // Update tracking variables
     lastDataLength = currentDataLength
     lastProcessedData = newData // Store the updated data
   } catch (error) {
-    console.error('Error updating chart:', error)
+    // console.error('Error updating chart:', error)
   }
 }
 
 function renderChart() {
-  console.log('renderChart called')
+  // console.log('renderChart called')
 
   // Get Chart data from Mongo
   const chartLineData = homechart.findOne()
 
   // Check if subscription is ready
   if (!chartLineData) {
-    console.log('No chart data found in collection')
-    console.log('Collection count:', homechart.find().count())
-    console.log('All collection data:', homechart.find().fetch())
-    console.log('Chart data not ready yet, waiting for subscription...')
+    // console.log('No chart data found in collection')
+    // console.log('Collection count:', homechart.find().count())
+    // console.log('All collection data:', homechart.find().fetch())
+    // console.log('Chart data not ready yet, waiting for subscription...')
     return
   }
-  console.log('Chart data:', chartLineData)
+  // console.log('Chart data:', chartLineData)
 
   const dataToUse = chartLineData
 
   if (dataToUse !== undefined && dataToUse.labels && dataToUse.datasets) {
-    console.log('Valid chart data found, hiding loading...')
+    // console.log('Valid chart data found, hiding loading...')
 
     // Hide loading animation
     const chartLoading = document.getElementById('chartLoading')
     if (chartLoading) {
       chartLoading.style.display = 'none'
-      console.log('Loading element hidden successfully')
+      // console.log('Loading element hidden successfully')
     }
 
     // If chart is not initialized, initialize it
     if (!isChartInitialized) {
-      console.log('Initializing chart for the first time...')
+      // console.log('Initializing chart for the first time...')
       initializeChart(dataToUse, false)
     } else {
       // Chart is already initialized, just update it smoothly
-      console.log('Updating existing chart...')
+      // console.log('Updating existing chart...')
       updateChart(dataToUse)
     }
   } else {
-    console.log('No valid chart data available yet')
+    // console.log('No valid chart data available yet')
     // Show waiting message
     const chartContainer = document.getElementById('chart-container')
     if (chartContainer) {
@@ -420,14 +398,14 @@ function renderChart() {
 
 // Subscribe to chart data
 Template.appHome.onCreated(function () {
-  console.log('Subscribing to homechart...')
+  // console.log('Subscribing to homechart...')
   this.subscribe('homechart')
-  console.log('Subscription started')
+  // console.log('Subscription started')
 })
 
 // Initialize chart when template is rendered
 Template.appHome.onRendered(() => {
-  console.log('Template rendered, initializing chart...')
+  // console.log('Template rendered, initializing chart...')
 
   // Set up reactive autorun to update chart when data changes
   Tracker.autorun(() => {

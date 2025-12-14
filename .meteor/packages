@@ -23,7 +23,6 @@ momentjs:moment
 audit-argument-checks@1.0.7
 kadira:flow-router
 force-ssl@1.1.0
-qrl:browser-policy
 oaf:moment-duration-format
 underscore@1.0.10
 simple:json-routes
