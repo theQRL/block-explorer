@@ -46,7 +46,13 @@ async function initializeChart(dataToUse, isSampleData = false) {
   }
 
   try {
-    // Clear any existing chart
+    // Destroy existing chart instance first to avoid duplicate tooltips
+    if (currentChart) {
+      currentChart.destroy()
+      currentChart = null
+    }
+    
+    // Clear any remaining chart elements
     chartContainer.innerHTML = ''
 
     // Transform data for ApexCharts
