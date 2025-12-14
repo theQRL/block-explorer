@@ -12,7 +12,6 @@ import helpers from '@theqrl/explorer-helpers'
 import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { check } from 'meteor/check'
-import { BrowserPolicy } from 'meteor/qrl:browser-policy'
 import { WebApp } from 'meteor/webapp'
 import { blockData, quantausd } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
@@ -27,7 +26,8 @@ const PROTO_PATH =
   Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
 
-// Generate and inject nonce for CSP
+// CSP nonce generation and HTML injection middleware
+// Register at module load time to ensure proper ordering
 WebApp.connectHandlers.use((req, res, next) => {
   // Generate a unique nonce for this request
   const nonce = crypto.randomBytes(16).toString('base64')
@@ -40,8 +40,8 @@ WebApp.connectHandlers.use((req, res, next) => {
   const cspHeader = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`,
-    "style-src 'self' 'unsafe-inline'",
-    "font-src 'self'",
+    `style-src 'self' 'unsafe-inline'`,
+    "font-src 'self' data:",
     "connect-src 'self' https: wss: ws: wss://*.theqrl.org:* ws://*.theqrl.org:*",
     "img-src 'self' data: https:",
     "frame-src 'self'",
@@ -49,19 +49,71 @@ WebApp.connectHandlers.use((req, res, next) => {
   
   res.setHeader('Content-Security-Policy', cspHeader)
   
-  // Make nonce available globally for Meteor to inject into HTML
-  global.currentCspNonce = nonce
-  
   next()
 })
 
-// Apply BrowserPolicy (now handled by custom CSP header above)
-// Keep these for backwards compatibility but CSP header takes precedence
-BrowserPolicy.content.disallowInlineScripts()
-BrowserPolicy.content.disallowEval()
-BrowserPolicy.content.allowOriginForAll('https://*.theqrl.org')
-BrowserPolicy.content.allowConnectOrigin('wss://*.theqrl.org:*')
-BrowserPolicy.content.allowConnectOrigin('ws://*.theqrl.org:*')
+// HTML modification middleware to inject nonce into script tags
+// Must be registered at module load time, after CSP middleware
+WebApp.connectHandlers.use((req, res, next) => {
+  // Skip if nonce not set (shouldn't happen, but safety check)
+  if (!res.locals || !res.locals.cspNonce) {
+    return next()
+  }
+  
+  const originalWrite = res.write
+  const originalEnd = res.end
+  const originalSetHeader = res.setHeader
+  const chunks = []
+  let contentType = ''
+  
+  // Intercept setHeader to capture Content-Type
+  res.setHeader = function (name, value) {
+    if (name.toLowerCase() === 'content-type') {
+      contentType = value
+    }
+    return originalSetHeader.call(this, name, value)
+  }
+  
+  res.write = function (chunk) {
+    chunks.push(Buffer.from(chunk))
+  }
+  
+  res.end = function (chunk) {
+    if (chunk) {
+      chunks.push(Buffer.from(chunk))
+    }
+    
+    // Only modify HTML responses, skip JSON/API responses
+    const isHtml = contentType.includes('text/html') || 
+                   (!contentType && chunks.length > 0)
+    
+    if (!isHtml || chunks.length === 0) {
+      // Not HTML or no content, pass through
+      res.write = originalWrite
+      res.end = originalEnd
+      res.setHeader = originalSetHeader
+      
+      chunks.forEach(c => originalWrite.call(res, c))
+      return originalEnd.call(res)
+    }
+    
+    const body = Buffer.concat(chunks).toString('utf8')
+    const nonce = res.locals.cspNonce
+    
+    // Add nonce to all script tags that don't already have one
+    const modifiedBody = body.replace(
+      /<script(?![^>]*nonce=)/g,
+      `<script nonce="${nonce}"`
+    )
+    
+    res.write = originalWrite
+    res.end = originalEnd
+    res.setHeader = originalSetHeader
+    res.end(modifiedBody)
+  }
+  
+  next()
+})
 
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
@@ -309,43 +361,6 @@ const updateAutoIncrement = () => {
 if (Meteor.isServer) {
   Meteor.startup(() => {
     console.log(`QRL Explorer Starting - Version: ${EXPLORER_VERSION}`)
-    
-    // Inject nonce into HTML for script tags
-    WebApp.addHtmlAttributeHook((request) => ({
-      'data-nonce': global.currentCspNonce || '',
-    }))
-    
-    // Modify HTML to add nonce to script tags
-    WebApp.connectHandlers.use((req, res, next) => {
-      const originalWrite = res.write
-      const originalEnd = res.end
-      const chunks = []
-      
-      res.write = function (chunk) {
-        chunks.push(Buffer.from(chunk))
-      }
-      
-      res.end = function (chunk) {
-        if (chunk) {
-          chunks.push(Buffer.from(chunk))
-        }
-        
-        const body = Buffer.concat(chunks).toString('utf8')
-        const nonce = global.currentCspNonce
-        
-        // Add nonce to all script tags
-        const modifiedBody = body.replace(
-          /<script(?![^>]*nonce=)/g,
-          `<script nonce="${nonce}"`
-        )
-        
-        res.write = originalWrite
-        res.end = originalEnd
-        res.end(modifiedBody)
-      }
-      
-      next()
-    })
     
     // Attempt to create connections with all nodes
     connectNodes()
