@@ -189,7 +189,10 @@ function loadAddressTransactions(aId, page) {
     })
 
     $('#loadingTransactions').hide()
-    $('#noTransactionsFound').show()
+    // Only show "no transactions found" if there are actually no transactions
+    if (!res || !res.transactions_detail || res.transactions_detail.length === 0) {
+      $('#noTransactionsFound').show()
+    }
   })
 }
 
@@ -1396,4 +1399,11 @@ Template.address.onRendered(() => {
       }
     })
   }
+})
+
+// Helpers for OTS Tracker Template
+Template.otsTrackerTemplate.helpers({
+  otsTrackerData() {
+    return Session.get('OTStracker')
+  },
 })
