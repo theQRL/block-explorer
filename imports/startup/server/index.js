@@ -6,12 +6,14 @@ import grpc from '@grpc/grpc-js'
 import protoloader from '@grpc/proto-loader'
 import tmp from 'tmp'
 import fs from 'fs'
+import crypto from 'crypto'
 import BigNumber from 'bignumber.js'
 import helpers from '@theqrl/explorer-helpers'
 import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { check } from 'meteor/check'
 import { BrowserPolicy } from 'meteor/qrl:browser-policy'
+import { WebApp } from 'meteor/webapp'
 import { blockData, quantausd } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
 import {
@@ -25,8 +27,39 @@ const PROTO_PATH =
   Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
 
-// Apply BrowserPolicy
+// Generate and inject nonce for CSP
+WebApp.connectHandlers.use((req, res, next) => {
+  // Generate a unique nonce for this request
+  const nonce = crypto.randomBytes(16).toString('base64')
+  
+  // Store nonce in response locals for use in templates
+  res.locals = res.locals || {}
+  res.locals.cspNonce = nonce
+  
+  // Set the nonce in the CSP header
+  const cspHeader = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}'`,
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self'",
+    "connect-src 'self' https: wss: ws: wss://*.theqrl.org:* ws://*.theqrl.org:*",
+    "img-src 'self' data: https:",
+    "frame-src 'self'",
+  ].join('; ')
+  
+  res.setHeader('Content-Security-Policy', cspHeader)
+  
+  // Make nonce available globally for Meteor to inject into HTML
+  global.currentCspNonce = nonce
+  
+  next()
+})
+
+// Apply BrowserPolicy (now handled by custom CSP header above)
+// Keep these for backwards compatibility but CSP header takes precedence
 BrowserPolicy.content.disallowInlineScripts()
+BrowserPolicy.content.disallowEval()
+BrowserPolicy.content.allowOriginForAll('https://*.theqrl.org')
 BrowserPolicy.content.allowConnectOrigin('wss://*.theqrl.org:*')
 BrowserPolicy.content.allowConnectOrigin('ws://*.theqrl.org:*')
 
@@ -276,6 +309,44 @@ const updateAutoIncrement = () => {
 if (Meteor.isServer) {
   Meteor.startup(() => {
     console.log(`QRL Explorer Starting - Version: ${EXPLORER_VERSION}`)
+    
+    // Inject nonce into HTML for script tags
+    WebApp.addHtmlAttributeHook((request) => ({
+      'data-nonce': global.currentCspNonce || '',
+    }))
+    
+    // Modify HTML to add nonce to script tags
+    WebApp.connectHandlers.use((req, res, next) => {
+      const originalWrite = res.write
+      const originalEnd = res.end
+      const chunks = []
+      
+      res.write = function (chunk) {
+        chunks.push(Buffer.from(chunk))
+      }
+      
+      res.end = function (chunk) {
+        if (chunk) {
+          chunks.push(Buffer.from(chunk))
+        }
+        
+        const body = Buffer.concat(chunks).toString('utf8')
+        const nonce = global.currentCspNonce
+        
+        // Add nonce to all script tags
+        const modifiedBody = body.replace(
+          /<script(?![^>]*nonce=)/g,
+          `<script nonce="${nonce}"`
+        )
+        
+        res.write = originalWrite
+        res.end = originalEnd
+        res.end(modifiedBody)
+      }
+      
+      next()
+    })
+    
     // Attempt to create connections with all nodes
     connectNodes()
     // remove cached data whilst cache featureset being iterated
