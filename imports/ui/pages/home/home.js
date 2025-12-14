@@ -13,31 +13,6 @@ let lastDataLength = 0
 let currentViewRange = { min: 0, max: 0 }
 let lastProcessedData = null // Track the last data we processed
 
-// Load ApexCharts from CDN
-function loadApexCharts() {
-  return new Promise((resolve, reject) => {
-    if (window.ApexCharts) {
-      console.log('ApexCharts already loaded')
-      resolve(window.ApexCharts)
-      return
-    }
-
-    console.log('Loading ApexCharts from CDN...')
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.js'
-    script.integrity = 'sha384-mrR3K8Jvv+o9bZ6Yu9HWI0M8tuzo5VWNi4fWcmmbFq3NbB+WvjW/tF/wnELivEnc'
-    script.crossOrigin = 'anonymous'
-    script.onload = () => {
-      console.log('ApexCharts loaded successfully')
-      resolve(window.ApexCharts)
-    }
-    script.onerror = () => {
-      console.error('Failed to load ApexCharts')
-      reject(new Error('Failed to load ApexCharts'))
-    }
-    document.head.appendChild(script)
-  })
-}
 
 // Calculate nice increments divisible by 10
 function calculateNiceIncrement(maxValue, minValue, targetTicks = 8) {
@@ -71,11 +46,14 @@ async function initializeChart(dataToUse, isSampleData = false) {
   }
 
   try {
-    // Clear any existing chart
+    // Destroy existing chart instance first to avoid duplicate tooltips
+    if (currentChart) {
+      currentChart.destroy()
+      currentChart = null
+    }
+    
+    // Clear any remaining chart elements
     chartContainer.innerHTML = ''
-
-    // Load ApexCharts
-    const ApexCharts = await loadApexCharts()
 
     // Transform data for ApexCharts
     const series = dataToUse.datasets.map((dataset) => ({

@@ -26,24 +26,10 @@ const PROTO_PATH =
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
 
 // Apply BrowserPolicy
-// cloudflare's protection needs inline scripts
-// BrowserPolicy.content.disallowInlineScripts()
-
-BrowserPolicy.content.allowStyleOrigin('cdnjs.cloudflare.com')
-BrowserPolicy.content.allowStyleOrigin('fonts.googleapis.com')
-BrowserPolicy.content.allowStyleOrigin('cdn.jsdelivr.net')
-BrowserPolicy.content.allowFontOrigin('fonts.gstatic.com')
-BrowserPolicy.content.allowFontOrigin('cdnjs.cloudflare.com')
-BrowserPolicy.content.allowFontOrigin('cdn.jsdelivr.net')
-BrowserPolicy.content.allowFontOrigin('fonts.cdnfonts.com')
-BrowserPolicy.content.allowStyleOrigin('fonts.cdnfonts.com')
-BrowserPolicy.content.allowScriptOrigin('cdn.jsdelivr.net')
-BrowserPolicy.content.allowScriptOrigin('cdnjs.cloudflare.com')
-BrowserPolicy.content.allowFontDataUrl('cdnjs.cloudflare.com')
-// Allow WebSocket connections to self
-BrowserPolicy.content.allowConnectOrigin("'self'") // Allow same-origin WebSocket (Meteor DDP)
+BrowserPolicy.content.disallowInlineScripts()
 BrowserPolicy.content.allowConnectOrigin('wss://*.theqrl.org:*')
 BrowserPolicy.content.allowConnectOrigin('ws://*.theqrl.org:*')
+
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
 // state true is connected, false is disconnected

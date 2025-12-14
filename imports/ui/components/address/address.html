@@ -71,11 +71,6 @@
             </div>
           </div>
           
-          <!-- Identicon Section (hidden by default) -->
-          <div class="lg:col-span-1 text-center" style="display: none;">
-            <canvas id="identicon" width="100" height="100" class="mx-auto mb-2"></canvas>
-            <div class="qr-code-container"></div>
-          </div>
         </div>
 
         <!-- Address Details -->
@@ -740,7 +735,7 @@
               </div>
             </div>
             <div class="card">
-              {{{OTStracker}}}
+              {{> otsTrackerTemplate}}
             </div>
           </div>
 
@@ -791,5 +786,53 @@
         <span>Copied!</span>
       </div>
     </div>
+  {{/if}}
+</template>
+
+<template name="otsTrackerTemplate">
+  {{#if otsTrackerData}}
+    {{#if otsTrackerData.error}}
+      <div class="p-2 text-center text-xs text-red-400">{{otsTrackerData.error}}</div>
+    {{else}}
+      {{#if otsTrackerData.empty}}
+        <div class="p-2 text-center text-xs text-gray-400">{{otsTrackerData.empty}}</div>
+      {{else}}
+        {{#if otsTrackerData.cells}}
+          <style>
+            .ots-responsive-grid {
+              display: grid;
+              grid-template-columns: repeat(5, 1fr);
+              gap: 4px;
+              width: 100%;
+            }
+            @media (min-width: 640px) {
+              .ots-responsive-grid { grid-template-columns: repeat(8, 1fr); }
+            }
+            @media (min-width: 768px) {
+              .ots-responsive-grid { grid-template-columns: repeat(10, 1fr); }
+            }
+            @media (min-width: 1024px) {
+              .ots-responsive-grid { grid-template-columns: repeat(10, 1fr); }
+            }
+            @media (min-width: 1280px) {
+              .ots-responsive-grid { grid-template-columns: repeat(10, 1fr); }
+            }
+          </style>
+          <div class="ots-responsive-grid">
+            {{#each otsTrackerData.cells}}
+              {{#if isUsed}}
+                <div class="p-1 sm:p-2 text-center text-sm sm:text-base font-mono border rounded bg-red-500/20 border-gray-500/30 text-red-400" title="Key {{key}}: {{status}}">
+                  <i data-lucide="x-circle" class="w-2 h-2 sm:w-3 sm:h-3 inline-block mr-1"></i>{{key}}
+                </div>
+              {{else}}
+                <div class="p-1 sm:p-2 text-center text-sm sm:text-base font-mono border rounded bg-green-500/20 border-gray-500/30 text-green-300" title="Key {{key}}: {{status}}">
+                  <i data-lucide="circle" class="w-2 h-2 sm:w-3 sm:h-3 inline-block mr-1"></i>{{key}}
+                </div>
+              {{/if}}
+            {{/each}}
+          </div>
+        {{/if}}
+      {{/if}}
+    {{/if}}
   {{/if}}
 </template>
