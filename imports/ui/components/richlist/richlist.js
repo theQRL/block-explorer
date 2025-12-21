@@ -118,6 +118,13 @@ Template.richlist.helpers({
     }
     return '0'
   },
+  totalShown() {
+    const data = Session.get('richlistData')
+    if (data && data.length) {
+      return data.length
+    }
+    return 0
+  }
 })
 
 Template.richlist.events({
@@ -170,5 +177,8 @@ Template.richlist.events({
       a.click()
       window.URL.revokeObjectURL(url)
     }
+  },
+  'click #csvExportAll': () => {
+    window.location.href = 'https://richlist-api.theqrl.org/richlist?csv=1'
   },
 })
