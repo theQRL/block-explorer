@@ -1347,21 +1347,6 @@ Template.address.onRendered(() => {
     }
   })
 
-  // Add window resize listener to trigger re-rendering when screen size changes
-  const handleResize = () => {
-    // Force re-render by updating a reactive variable
-    Session.set('screenWidth', window.innerWidth)
-    // Also trigger address truncation update
-    Session.set('addressTruncationUpdate', Date.now())
-  }
-
-  window.addEventListener('resize', handleResize)
-
-  // Clean up listener when template is destroyed
-  Template.address.onDestroyed(() => {
-    window.removeEventListener('resize', handleResize)
-  })
-
   tokensHeld = []
   Session.set('tokensHeld', [])
 

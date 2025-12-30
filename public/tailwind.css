@@ -4,6 +4,15 @@
 
 /* Custom QRL Explorer Styles */
 @layer base {
+  html {
+    font-size: 14px; /* Reduced from browser default 16px */
+  }
+
+  /* Keep original size for animated EXPLORER text */
+  .explorer-letter {
+    font-size: 16px;
+  }
+
   :root {
     --color-qrl-primary: #0B181E;
     --color-qrl-secondary: #1a1a1a;
@@ -167,6 +176,13 @@
 @media print {
   .no-print {
     @apply hidden;
+  }
+}
+
+/* Mobile pagination - hide numbered buttons, show only back/forward arrows */
+@media (max-width: 639px) {
+  .pagination-buttons .page-btn {
+    display: none;
   }
 }
 

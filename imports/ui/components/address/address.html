@@ -30,18 +30,28 @@
       <!-- Address Header -->
       <div class="card">
         <div class="mb-4">
-          <div class="text-xs font-medium text-qrl-text-secondary uppercase tracking-wider mb-2">ADDRESS</div>
-          <div class="flex items-center gap-3 address-container">
-            <h3 class="text-2xl font-bold text-qrl-text font-mono flex-1 min-w-0 truncate" title="{{address.state.address}}">
-              {{address.state.address}}
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">
+              ADDRESS
               {{#if knownProviderNonSpecific}}
-                <i data-lucide="check-circle" class="inline-block w-5 h-5 text-qrl-accent ml-2" title="Verified NFT Provider"></i>
+                <i data-lucide="check-circle" class="inline-block w-4 h-4 text-qrl-accent ml-2" title="Verified NFT Provider"></i>
               {{/if}}
-            </h3>
+            </div>
             <button class="copy-address-btn flex items-center gap-2 px-3 py-2 bg-qrl-accent/10 hover:bg-qrl-accent/20 text-qrl-accent rounded-lg transition-colors duration-200 text-sm font-medium min-h-[40px] cursor-pointer" title="Copy address to clipboard" style="pointer-events: auto !important;">
               <i data-lucide="copy" class="w-4 h-4 flex-shrink-0 pointer-events-none"></i>
               <span class="hidden sm:inline whitespace-nowrap pointer-events-none">Copy</span>
             </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-qrl-border">
+              <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
+                <tr>
+                  <td class="px-4 py-3 text-base sm:text-lg md:text-xl lg:text-2xl font-bold font-mono text-qrl-text whitespace-nowrap">
+                    {{address.state.address}}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -590,14 +600,14 @@
                     <input type="text" placeholder="{{currentPage}}" id="paginator" class="w-16 px-2 py-1 bg-qrl-secondary border border-qrl-border rounded text-qrl-text text-center">
                     <span class="text-sm text-qrl-text-secondary">of {{totalPages}}</span>
                   </div>
-                  <div class="flex items-center space-x-1">
+                  <div class="flex items-center space-x-1 pagination-buttons">
                     {{#if pback}}
                       <button qrl-data="back" class="px-3 py-1 text-sm border border-qrl-border rounded hover:bg-qrl-secondary text-qrl-text">
                         ←
                       </button>
                     {{/if}}
                     {{#each pages}}
-                      <button qrl-data="{{this.number}}" class="px-3 py-1 text-sm border border-qrl-border rounded hover:bg-qrl-secondary text-qrl-text {{#if isActive}}bg-qrl-accent text-qrl-primary{{/if}}">
+                      <button qrl-data="{{this.number}}" class="page-btn px-3 py-1 text-sm border border-qrl-border rounded hover:bg-qrl-secondary text-qrl-text {{#if isActive}}bg-qrl-accent text-qrl-primary{{/if}}">
                         {{this.number}}
                       </button>
                     {{/each}}
