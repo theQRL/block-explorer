@@ -133,7 +133,7 @@
   </header>
 
   <!-- Background Pattern -->
-  <div class="fixed inset-0 pointer-events-none z-0" style="background-image: url('/img/dots-light.png'); background-size: 1200px 1200px; background-repeat: no-repeat; background-position: center; opacity: 0.3; filter: blur(2px);"></div>
+  <div class="fixed inset-0 pointer-events-none z-0" style="background-image: url('/img/dots-light.png'); background-size: 1200px 1200px; background-repeat: no-repeat; background-position: center; opacity: 0.3; filter: blur(2px); transform: translateZ(0); will-change: transform; backface-visibility: hidden;"></div>
 
   <!-- Main Content -->
   <main class="min-h-screen relative z-10">
@@ -179,8 +179,7 @@
         <p>You have been disconnected due to inactivity.</p>
         <p>Click "Reconnect" to restore your connection to the QRL network.</p>
         <div style="margin-top: 20px; text-align: center;">
-          <button id="reconnect-btn" class="btn-primary" style="margin-right: 10px;">Reconnect</button>
-          <button id="dismiss-btn" class="btn-secondary">Dismiss</button>
+          <button id="reconnect-btn" class="btn-primary">Reconnect</button>
         </div>
       </div>
     </div>

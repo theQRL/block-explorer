@@ -58,12 +58,6 @@ Template.appBody.onRendered(function() {
     hideDisconnectModal()
   })
   
-  // Handle dismiss button
-  $('#dismiss-btn').on('click', function() {
-    console.log('User dismissed modal')
-    hideDisconnectModal()
-  })
-  
   // Handle close button
   $('#disconnect-modal-close').on('click', function() {
     console.log('User closed modal')
