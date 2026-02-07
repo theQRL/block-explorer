@@ -51,25 +51,16 @@
         <div class="card">
           <div class="mb-4">
             <div class="hero-label mb-3">TRANSACTION</div>
-            <div class="hash-banner flex items-center gap-3 txhash-container">
-              <span class="flex-1 min-w-0 truncate" title="{{tx.tx.transaction_hash}}">
-                {{tx.tx.transaction_hash}}
-              </span>
+            <div class="flex items-center gap-3 txhash-container">
+              <div class="flex-1 min-w-0 overflow-x-auto hash-banner">
+                <div class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold font-mono text-qrl-text whitespace-nowrap py-1">
+                  {{tx.tx.transaction_hash}}
+                </div>
+              </div>
               <button class="copy-txhash-btn flex items-center gap-2 px-3 py-2 bg-qrl-accent/10 hover:bg-qrl-accent/20 text-qrl-accent rounded-lg transition-colors duration-200 text-sm font-medium min-h-[40px] cursor-pointer flex-shrink-0" title="Copy transaction hash to clipboard" style="pointer-events: auto !important;">
                 <i data-lucide="copy" class="w-4 h-4 flex-shrink-0 pointer-events-none"></i>
                 <span class="hidden sm:inline whitespace-nowrap pointer-events-none">Copy</span>
               </button>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-qrl-border">
-                <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
-                  <tr>
-                    <td class="px-4 py-3 text-base sm:text-lg md:text-xl lg:text-2xl font-bold font-mono text-qrl-text whitespace-nowrap">
-                      {{tx.tx.transaction_hash}}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           </div>
 
