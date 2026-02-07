@@ -108,7 +108,6 @@ async function OTS(obj) {
   // console.log('OTS function called with:', obj)
 
   if (!obj || typeof obj !== 'object') {
-    // console.error('OTS: Invalid object received:', obj)
     Session.set('OTStracker', { error: 'No OTS data available' })
     return
   }
@@ -118,23 +117,16 @@ async function OTS(obj) {
   // console.log('OTS total keys:', k.length)
 
   if (k.length === 0) {
-    // console.log('OTS: No keys found in object')
     Session.set('OTStracker', { empty: 'No OTS keys found' })
     return
   }
 
-  // Count used vs unused keys
-  let usedCount = 0
-  let unusedCount = 0
-  k.forEach((val) => {
-    if (obj[val] === 1) {
-      usedCount++
-    } else {
-      unusedCount++
-    }
-  })
-
-  // console.log(`OTS: ${usedCount} used keys, ${unusedCount} unused keys`)
+  // Build structured data array instead of raw HTML
+  const otsKeys = k.map((val) => ({
+    index: val,
+    used: obj[val] === 1,
+    tooltip: obj[val] === 1 ? `Key ${val}: USED` : `Key ${val}: Available`,
+  }))
 
   // Generate structured data instead of HTML
   const cells = []
@@ -147,11 +139,9 @@ async function OTS(obj) {
     })
   })
 
-  // console.log('Generated cells data:', cells)
-
   Session.set('OTStracker', { cells: cells })
 
-  // Re-initialize Lucide icons for the new HTML
+  // Re-initialize Lucide icons for the new content
   if (window.reinitializeLucideIcons) {
     setTimeout(() => {
       window.reinitializeLucideIcons()

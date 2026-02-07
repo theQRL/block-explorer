@@ -56,8 +56,8 @@
                   
                   <div class="mt-2">
                     <div class="text-xs text-qrl-text-secondary mb-1">Mined by</div>
-                    <div class="text-sm text-white hover:text-qrl-accent/80 transition-colors font-mono truncate-with-tooltip" data-full-text="{{minerTip}}" title="{{miner}}">
-                      {{{miner}}}
+                    <div class="text-sm text-white hover:text-qrl-accent/80 transition-colors font-mono truncate-with-tooltip" data-full-text="{{minerTip}}" title="{{minerAddress}}">
+                      {{#if isKnownPool}}<a href="{{poolLink}}" target="_blank" rel="noopener noreferrer">{{poolName}}</a>{{else}}{{minerAddress}}{{/if}}
                     </div>
                   </div>
                 </div>

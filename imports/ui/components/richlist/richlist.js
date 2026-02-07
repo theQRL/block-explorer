@@ -48,6 +48,9 @@ Template.richlist.onCreated(() => {
       Session.set('richlistError', false)
       Session.set('richlistData', data)
     })
+  }).catch(() => {
+    Session.set('richlist', 'error')
+    Session.set('richlistError', true)
   })
 })
 

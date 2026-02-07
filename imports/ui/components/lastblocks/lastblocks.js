@@ -38,18 +38,42 @@ Template.lastblocks.helpers({
     const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).fromNow()
   },
-  miner() {
-    const x = this.minedBy
-    let ret = ''
-    MINING_POOLS.forEach((value) => {
-      if (value.address === rawAddressToHexAddress(x)) {
-        ret = `<a href='${value.link}' target="_blank">${value.name}</a>`
-      }
-    })
-    if (ret === '') {
-      return `${hexOrB32(x)}`
+  isKnownPool() {
+    if (!this.minedBy) return false
+    try {
+      const x = this.minedBy
+      return MINING_POOLS.some((value) => value.address === rawAddressToHexAddress(x))
+    } catch (e) {
+      return false
     }
-    return ret
+  },
+  poolName() {
+    if (!this.minedBy) return ''
+    try {
+      const x = this.minedBy
+      const pool = MINING_POOLS.find((value) => value.address === rawAddressToHexAddress(x))
+      return pool ? pool.name : ''
+    } catch (e) {
+      return ''
+    }
+  },
+  poolLink() {
+    if (!this.minedBy) return ''
+    try {
+      const x = this.minedBy
+      const pool = MINING_POOLS.find((value) => value.address === rawAddressToHexAddress(x))
+      return pool ? pool.link : ''
+    } catch (e) {
+      return ''
+    }
+  },
+  minerAddress() {
+    if (!this.minedBy) return 'Unknown'
+    try {
+      return hexOrB32(this.minedBy)
+    } catch (e) {
+      return 'Unknown'
+    }
   },
   minerTip() {
     return this.minedBy

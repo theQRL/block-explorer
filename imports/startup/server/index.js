@@ -11,7 +11,7 @@ import BigNumber from 'bignumber.js'
 import helpers from '@theqrl/explorer-helpers'
 import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { JsonRoutes } from 'meteor/simple:json-routes'
-import { check } from 'meteor/check'
+import { check, Match } from 'meteor/check'
 import { WebApp } from 'meteor/webapp'
 import { blockData, quantausd } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
@@ -21,9 +21,55 @@ import {
   anyAddressToRaw,
   bufferToHex,
 } from '../both/index.js'
-const PROTO_PATH =
-  Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
+import { DDPRateLimiter } from 'meteor/ddp-rate-limiter'
+
+const PROTO_PATH = Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
+
+// Determine gRPC credentials based on configuration.
+// Set Meteor.settings.api.grpcSecurity to "tls" to enable TLS.
+// Defaults to insecure for backward compatibility with existing QRL node deployments.
+const getGrpcCredentials = () => {
+  try {
+    if (Meteor.settings.api.grpcSecurity === 'tls') {
+      console.log('Using TLS for gRPC connections')
+      return grpc.credentials.createSsl()
+    }
+  } catch (e) {
+    // No settings or grpcSecurity not configured
+  }
+  console.log('WARNING: Using insecure gRPC credentials. Set api.grpcSecurity to "tls" in settings to enable TLS.')
+  return grpc.credentials.createInsecure()
+}
+
+// Validate that a proto file content looks like a legitimate QRL protobuf definition.
+// This prevents loading arbitrary code from a compromised node.
+const validateProtoContent = (protoContent) => {
+  if (typeof protoContent !== 'string' || protoContent.length === 0) {
+    return false
+  }
+  // Must contain proto3 syntax declaration
+  if (!protoContent.includes('syntax = "proto3"')) {
+    return false
+  }
+  // Must define the qrl package
+  if (!protoContent.includes('package qrl')) {
+    return false
+  }
+  // Must define the PublicAPI service (the service the explorer uses)
+  if (!protoContent.includes('service PublicAPI')) {
+    return false
+  }
+  // Must not contain suspicious content (import of non-proto files, shell commands, etc.)
+  if (/import\s+"[^"]*\.(js|sh|py|rb|php|exe|bat|cmd)/i.test(protoContent)) {
+    return false
+  }
+  // Size sanity check: proto files shouldn't be excessively large (max 1MB)
+  if (protoContent.length > 1024 * 1024) {
+    return false
+  }
+  return true
+}
 
 // CSP nonce generation and HTML injection middleware
 // Register at module load time to ensure proper ordering
@@ -114,6 +160,53 @@ WebApp.connectHandlers.use((req, res, next) => {
   next()
 })
 
+// Rate limit DDP methods that call gRPC to prevent abuse
+// 5 method calls per second per connection
+DDPRateLimiter.addRule({
+  type: 'method',
+  name(name) {
+    return [
+      'QRLvalue', 'status', 'lastblocks', 'lastunconfirmedtx', 'txhash', 'block',
+      'addressTransactions', 'getStats', 'getObject', 'getLatestData',
+      'getAddressState', 'getFullAddressState', 'getMultiSigAddressState',
+      'getOTS', 'getTransactionsByAddress', 'getSlavesByAddress', 'connectionStatus',
+    ].includes(name)
+  },
+}, 5, 1000)
+
+// Rate limit subscriptions: 20 per second per connection
+// (home page loads 5+ subscriptions simultaneously, plus Meteor internals)
+DDPRateLimiter.addRule({
+  type: 'subscription',
+}, 20, 1000)
+
+// Simple in-memory rate limiter for REST API routes
+const apiRateLimits = new Map()
+const API_RATE_LIMIT = 30 // requests per window
+const API_RATE_WINDOW = 60000 // 1 minute window
+
+function checkApiRateLimit(req) {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown'
+  const now = Date.now()
+  const record = apiRateLimits.get(ip)
+  if (!record || now - record.windowStart > API_RATE_WINDOW) {
+    apiRateLimits.set(ip, { windowStart: now, count: 1 })
+    return true
+  }
+  record.count++
+  return record.count <= API_RATE_LIMIT
+}
+
+// Periodically clean up stale rate limit entries
+Meteor.setInterval(() => {
+  const now = Date.now()
+  for (const [ip, record] of apiRateLimits) {
+    if (now - record.windowStart > API_RATE_WINDOW * 2) {
+      apiRateLimits.delete(ip)
+    }
+  }
+}, API_RATE_WINDOW * 2)
+
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
 // state true is connected, false is disconnected
@@ -190,29 +283,38 @@ const loadGrpcClient = (endpoint, callback) => {
     oneofs: true,
     includeDirs: [PROTO_PATH],
   }
+  const credentials = getGrpcCredentials()
   protoloader
     .load(`${PROTO_PATH}qrlbase.proto`)
     .then((packageDefinitionBase) => {
       const baseGrpcObject = grpc.loadPackageDefinition(packageDefinitionBase)
       const client = new baseGrpcObject.qrl.Base(
         endpoint,
-        grpc.credentials.createInsecure(),
+        credentials,
       )
       client.getNodeInfo({}, (err, res) => {
         if (err) {
-          console.log(`Error fetching qrl.proto from ${endpoint}`)
+          console.log(`Error fetching qrl.proto from ${endpoint}:`, err.message || err)
           callback(err, null)
         } else {
-          // Write a new temp file for this grpc connection
+          // Validate the proto content before loading it
+          if (!validateProtoContent(res.grpcProto)) {
+            console.log(`ERROR: Invalid or suspicious proto content received from ${endpoint}`)
+            callback(new Error('Proto validation failed: content does not match expected QRL proto format'), null)
+            return
+          }
+
+          // Write a new temp file for this grpc connection with restrictive permissions
           const qrlProtoFilePath = tmp.fileSync({
-            mode: '0644',
+            mode: 0o600,
             prefix: 'qrl-',
             postfix: '.proto',
           }).name
           fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
             if (fsErr) {
               console.log(fsErr)
-              throw fsErr
+              callback(fsErr, null)
+              return
             }
             protoloader
               .load(qrlProtoFilePath, options)
@@ -221,12 +323,22 @@ const loadGrpcClient = (endpoint, callback) => {
                 // Create the gRPC Connection
                 qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(
                   endpoint,
-                  grpc.credentials.createInsecure(),
+                  credentials,
                 )
                 console.log(
-                  `qrlClient loaded for ${endpoint} from ${qrlProtoFilePath}`,
+                  `qrlClient loaded for ${endpoint}`,
                 )
+                // Clean up temp file after loading
+                try {
+                  fs.unlink(qrlProtoFilePath, () => {})
+                } catch (cleanupErr) {
+                  // Non-fatal: temp file cleanup failed
+                }
                 callback(null, true)
+              })
+              .catch((loadErr) => {
+                console.log(`Error loading proto definition from ${endpoint}:`, loadErr.message)
+                callback(loadErr, null)
               })
           })
         }
@@ -375,14 +487,20 @@ const connectNodesAsync = async () => {
 }
 
 const updateAutoIncrement = async () => {
-  // update autoincrement
-  await blockData.updateAsync({ _id: 'autoincrement' }, { $inc: { value: 1 } })
-  // check cache not full
+  // Atomically increment and return the new value
+  await blockData.upsertAsync(
+    { _id: 'autoincrement' },
+    { $inc: { value: 1 } },
+  )
   const autoInc = await blockData.findOneAsync({ _id: 'autoincrement' })
   if (autoInc && autoInc.value > 2500) {
-    // empty cache and start again
-    await blockData.removeAsync({})
-    await blockData.insertAsync({ _id: 'autoincrement', value: 1 })
+    // Remove only cached data entries, not the autoincrement counter itself
+    await blockData.removeAsync({ _id: { $ne: 'autoincrement' } })
+    // Reset counter atomically
+    await blockData.updateAsync(
+      { _id: 'autoincrement' },
+      { $set: { value: 1 } },
+    )
   }
 }
 
@@ -706,7 +824,6 @@ const helpersaddressTransactions = async (response) => {
       ).toString('hex')
     }
     txEdited.addr_from = `Q${Buffer.from(tx.addr_from).toString('hex')}`
-    console.dir(txEdited, { depth: null })
     output.push(txEdited)
   }
   response.transactions_detail = output
@@ -1537,7 +1654,18 @@ Meteor.methods({
   },
 
   async addressTransactions(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ tx: [Match.ObjectIncluding({ txhash: String })] }))
+    // Cap array size to prevent resource exhaustion (UI sends pages of ~10)
+    if (request.tx.length > 20) {
+      throw new Meteor.Error(400, 'Too many transactions requested (max 20)')
+    }
+    // Validate each txhash is a 64-char hex string before making gRPC calls
+    const hexPattern = /^[0-9a-fA-F]{64}$/
+    for (const item of request.tx) {
+      if (!hexPattern.test(item.txhash)) {
+        throw new Meteor.Error(400, 'Invalid transaction hash format')
+      }
+    }
     console.log(
       `addressTransactions method called for ${request.tx.length} transactions`,
     )
@@ -1673,7 +1801,7 @@ Meteor.methods({
               output.transaction.tx.signature.substring(0, 8),
               16,
             ),
-            fee: output.transaction.tx.fe,
+            fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
           }
@@ -1759,67 +1887,65 @@ Meteor.methods({
   },
 
   async getStats(request = {}) {
-    check(request, Object)
+    check(request, Match.Optional(Object))
     this.unblock()
     const response = await getStatsAsync(request)
     return response
   },
 
   async getObject(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ query: Match.Any }))
     this.unblock()
     const response = await getObjectAsync(request)
     return response
   },
 
   async getLatestData(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ filter: String, offset: Match.Integer, quantity: Match.Integer }))
     this.unblock()
     const response = await getLatestDataAsync(request)
     return response
   },
 
   async getAddressState(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ address: Match.Any }))
     this.unblock()
     const response = await getAddressStateAsync(request)
     return response
   },
 
   async getFullAddressState(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ address: Match.Any }))
     this.unblock()
     const response = await getFullAddressStateAsync(request)
     return response
   },
 
   async getMultiSigAddressState(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ address: Match.Any }))
     this.unblock()
     const response = await getMultiSigAddressStateAsync(request)
     return response
   },
 
   async getOTS(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ address: Match.Any, page_from: Match.Integer, page_count: Match.Integer, unused_ots_index_from: Match.Integer }))
     this.unblock()
     const response = await getOTSAsync(request)
     return response
   },
 
   async getTransactionsByAddress(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ address: Match.Any, item_per_page: Match.Integer, page_number: Match.Integer }))
     this.unblock()
     const response = await getTransactionsByAddressAsync(request)
-    console.table(response)
     return await helpersaddressTransactions(response)
   },
 
   async getSlavesByAddress(request) {
-    check(request, Object)
+    check(request, Match.ObjectIncluding({ address: Match.Any }))
     this.unblock()
     const response = await getSlavesByAddressAsync(request)
-    console.log('response', response)
     const res = []
     _.forEach(response.slaves_detail, (item) => {
       const i = item
@@ -1850,6 +1976,10 @@ Meteor.methods({
 })
 
 JsonRoutes.add('get', '/api/a/:id', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
   const aId = req.params.id
   check(aId, String)
   const validate = qrlAddressValdidator.hexString(aId)
@@ -1867,7 +1997,8 @@ JsonRoutes.add('get', '/api/a/:id', async (req, res) => {
         response.isMultisig = true
       }
     } catch (e) {
-      response = e
+      console.error('API /api/a/:id error:', e)
+      response = { found: false, message: 'Error fetching address data', code: 5000 }
     }
   } else {
     response = { found: false, message: 'Invalid QRL address', code: 3000 }
@@ -1926,9 +2057,9 @@ async function apiTxList(req, res, num) {
       const processedResponse = await helpersaddressTransactions(rawResponse)
       response = bufferToHex(processedResponse)
     } catch (e) {
-      response = e
+      console.error('API /api/a/tx/:id error:', e)
       JsonRoutes.sendResult(res, {
-        data: { found: false, message: response.message, code: 3001 },
+        data: { found: false, message: 'Error fetching transaction list', code: 5003 },
       })
       return
     }
@@ -1950,6 +2081,10 @@ async function apiTxList(req, res, num) {
 }
 
 JsonRoutes.add('get', '/api/a/tx/:id/:num', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
   const num = parseInt(req.params.num, 10) || 0
   if (num === 0) {
     // return that page number, if passed, must start with a 1
@@ -1962,10 +2097,18 @@ JsonRoutes.add('get', '/api/a/tx/:id/:num', async (req, res) => {
 })
 
 JsonRoutes.add('get', '/api/a/tx/:id', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
   await apiTxList(req, res, 1)
 })
 
 JsonRoutes.add('get', '/api/tx/:id', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
   const txId = req.params.id
   check(txId, String)
   let response = {}
@@ -1981,7 +2124,8 @@ JsonRoutes.add('get', '/api/tx/:id', async (req, res) => {
       try {
         response = await getObjectAsync(request)
       } catch (e) {
-        response = e
+        console.error('API /api/tx/:id error:', e)
+        response = { found: false, message: 'Error fetching transaction data', code: 5001 }
       }
     }
   } else {
@@ -1993,6 +2137,10 @@ JsonRoutes.add('get', '/api/tx/:id', async (req, res) => {
 })
 
 JsonRoutes.add('get', '/api/block/:id', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
   const blockId = req.params.id
   check(blockId, String)
   let response = {}
@@ -2013,7 +2161,8 @@ JsonRoutes.add('get', '/api/block/:id', async (req, res) => {
           })
         })
       } catch (e) {
-        response = e
+        console.error('API /api/block/:id error:', e)
+        response = { found: false, message: 'Error fetching block data', code: 5002 }
       }
     }
   } else {

@@ -26,3 +26,4 @@ simple:json-routes
 frozeman:storage
 jquery
 qrl:browser-policy
+ddp-rate-limiter

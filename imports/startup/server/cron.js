@@ -49,7 +49,7 @@ const refreshBlocks = async () => {
   // identify miner and calculate total transacted in block
   for (const [key, value] of response.blockheaders.entries()) {
     const req = {
-      query: value.header.block_number.toString(),
+      query: Buffer.from(value.header.block_number.toString()),
     }
     let res
     try {
