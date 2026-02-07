@@ -5,6 +5,7 @@
   "api": {
     "primaryNode": "testnet-1.automated.theqrl.org:19009",
     "secondaryNode": "testnet-1.automated.theqrl.org:19009",
-    "tertiaryNode": "testnet-1.automated.theqrl.org:19009"
+    "tertiaryNode": "testnet-1.automated.theqrl.org:19009",
+    "grpcSecurity": "insecure"
   }
 }

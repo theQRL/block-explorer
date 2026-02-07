@@ -1,8 +1,8 @@
 <template name="peerstats">
   <div class="space-y-6">
     <h4 class="text-2xl font-bold text-qrl-text">Block Explorer Peers</h4>
-    
-    {{#with peerstats}} 
+
+    {{#with peerstats}}
       {{#if zeroCheck}}
         <div class="card border-red-500/30 bg-red-500/10">
           <div class="flex items-start space-x-3">
@@ -20,8 +20,8 @@
       {{else}}
         <div class="card">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-qrl-border">
-              <thead class="bg-qrl-secondary">
+            <table class="min-w-full divide-y divide-qrl-border table-zebra">
+              <thead class="bg-qrl-surface">
                 <tr>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Node</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Port</th>
@@ -32,25 +32,25 @@
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Last Update</th>
                 </tr>
               </thead>
-              <tbody class="bg-qrl-primary divide-y divide-qrl-border">
+              <tbody class="divide-y divide-qrl-border/50">
                 {{#each peerstats.peers_stat}}
-                  <tr class="hover:bg-qrl-secondary/50 transition-colors duration-200">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                  <tr class="hover:bg-qrl-accent/5 transition-colors duration-150">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm mono-value">
                       {{this.peer_ip}}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm mono-value">
                       {{this.port}}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm mono-value">
                       {{this.node_chain_state.block_number}}
                     </td>
                     <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono truncate-with-tooltip max-w-xs" data-full-text="{{this.node_chain_state.header_hash}}" title="{{this.node_chain_state.header_hash}}">
                       {{this.node_chain_state.header_hash}}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm mono-value">
                       {{this.node_chain_state.cumulative_difficulty}}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm mono-value">
                       {{this.node_chain_state.version}}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text-secondary">

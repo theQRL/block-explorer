@@ -19,7 +19,7 @@
       </div>
 {{else}}
 
-  <div class="space-y-8">
+  <div class="space-y-10">
     <!-- Status Section -->
     <div class="grid grid-cols-1 gap-8">
       <div>
@@ -28,14 +28,14 @@
     </div>
 
     <!-- Modern Network Activity Chart -->
-    <div class="card">
+    <div class="card bg-gradient-accent">
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold text-qrl-text">Network Activity</h3>
         <div></div>
       </div>
-      
+
       <!-- Chart Container -->
-      <div id="chart" class="relative w-full h-80 bg-gradient-to-br from-qrl-secondary/20 to-transparent rounded-lg overflow-hidden">
+      <div id="chart" class="relative w-full h-80 bg-qrl-surface/30 rounded-lg overflow-hidden">
         <!-- Modern Loading Animation -->
         <section id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-qrl-secondary/10 backdrop-blur-sm">
           <div class="flex flex-col items-center space-y-4">
@@ -51,7 +51,7 @@
             </div>
           </div>
         </section>
-        
+
         <div id="chart-container" class="w-full h-full"></div>
       </div>
     </div>
@@ -62,7 +62,7 @@
       <div>
         {{> lasttx}}
       </div>
-      
+
       <!-- Latest Blocks - Second on mobile, right on desktop -->
       <div>
         {{> lastblocks}}

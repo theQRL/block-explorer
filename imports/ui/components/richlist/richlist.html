@@ -49,8 +49,8 @@
         
         <div class="card">
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-qrl-border">
-              <thead class="bg-qrl-primary/50">
+            <table class="min-w-full divide-y divide-qrl-border table-zebra">
+              <thead class="bg-qrl-surface">
                 <tr>
                   <th class="px-6 py-3 text-right text-xs font-medium text-qrl-text-secondary uppercase tracking-wider w-20">Rank</th>
                   <th class="px-6 py-3 text-center text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Address</th>
@@ -58,16 +58,16 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Percentage</th>
                 </tr>
               </thead>
-              <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
+              <tbody class="divide-y divide-qrl-border/50">
                 {{#each richlistData}}
-                  <tr class="hover:bg-qrl-primary/50 hover:shadow-[0_0_0_1px_rgb(255_167_41)] transition-all duration-200">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-qrl-text text-right">
+                  <tr class="hover:bg-qrl-accent/5 transition-colors duration-150">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-qrl-text text-right mono-value">
                       {{rank(@index)}}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text-secondary text-center">
                       <a href="/a/{{address}}" class="font-mono break-all text-qrl-accent hover:text-qrl-accent/80 hover:underline transition-colors duration-200 cursor-pointer">{{address}}</a>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm mono-value">
                       {{shorToQuanta(balance)}}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text">

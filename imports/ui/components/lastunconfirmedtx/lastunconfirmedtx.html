@@ -27,7 +27,7 @@
         {{#if hasUnconfirmedTransactions}}
           <div class="space-y-4">
             {{#each lastunconfirmedtx.transactions_unconfirmed}}
-              <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 h-44 flex flex-col">
+              <div class="card hover:border-qrl-accent/50 h-44 flex flex-col {{#if isTransfer this.tx.transactionType}}border-type-transfer{{else}}{{#if isTokenCreation this.tx.transactionType}}border-type-token{{else}}{{#if isTokenTransfer this.tx.transactionType}}border-type-token{{else}}{{#if isSlaveTxn this.tx.transactionType}}border-type-slave{{else}}border-type-message{{/if}}{{/if}}{{/if}}{{/if}}">
                 <div class="flex items-start space-x-4 flex-1">
                   <div class="flex-shrink-0">
                     <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">

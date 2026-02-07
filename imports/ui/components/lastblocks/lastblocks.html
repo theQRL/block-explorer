@@ -1,8 +1,13 @@
 <template name="lastblocks">
   <div class="space-y-6">
-    <h4 class="text-2xl font-bold text-qrl-text">Latest Blocks</h4>
+    <div class="flex items-center justify-between">
+      <h4 class="text-2xl font-bold text-qrl-text">Latest Blocks</h4>
+      <a href="/lastblocks" class="text-sm text-qrl-accent hover:text-qrl-accent/80 transition-colors font-medium">
+        View All &rarr;
+      </a>
+    </div>
 
-    {{#with lastblocks}} 
+    {{#with lastblocks}}
       {{#if error}}
         <div class="card border-red-500/30 bg-red-500/10">
           <div class="flex items-start space-x-3">
@@ -18,12 +23,12 @@
           </div>
         </div>
       {{else}}
-        <div class="space-y-4">
+        <div class="space-y-3">
           {{#each lastblocks.blockheaders}}
-            <div class="card hover:bg-qrl-secondary hover:border-qrl-accent transition-colors duration-200 cursor-pointer min-h-44 sm:h-48 flex flex-col lastBlocks pt-6" 
+            <div class="card card-accent hover:border-qrl-accent/50 cursor-pointer min-h-44 sm:h-48 flex flex-col lastBlocks p-4"
                  data-dest="{{this.header.block_number}}">
-              
-              <div class="flex items-start space-x-4 flex-1">
+
+              <div class="flex items-start space-x-3 flex-1">
                 <div class="flex-shrink-0">
                   <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
                     <i data-lucide="box" class="w-5 h-5 text-qrl-primary"></i>
@@ -34,11 +39,12 @@
                     <div class="text-sm text-qrl-text-secondary">{{tsReadable}}</div>
                     <div class="text-sm text-qrl-text-secondary font-mono">{{ts}}</div>
                   </div>
-                  
-                  <div class="text-white font-semibold mb-2">
-                    Block <span class="hover:text-qrl-accent/80 transition-colors">{{this.header.block_number}}</span>
+
+                  <div class="mb-3">
+                    <div class="hero-label">Block</div>
+                    <div class="font-mono font-bold text-lg text-qrl-text hover:text-qrl-accent transition-colors">{{this.header.block_number}}</div>
                   </div>
-                  
+
                   <div class="grid grid-cols-3 gap-2 mb-2">
                     <div class="flex flex-col">
                       <span class="text-xs text-qrl-text-secondary mb-1">Transactions</span>
@@ -53,8 +59,8 @@
                       <span class="text-sm text-qrl-text font-mono">{{interval}}</span>
                     </div>
                   </div>
-                  
-                  <div class="mt-2">
+
+                  <div>
                     <div class="text-xs text-qrl-text-secondary mb-1">Mined by</div>
                     <div class="text-sm text-white hover:text-qrl-accent/80 transition-colors font-mono truncate-with-tooltip" data-full-text="{{minerTip}}" title="{{minerAddress}}">
                       {{#if isKnownPool}}<a href="{{poolLink}}" target="_blank" rel="noopener noreferrer">{{poolName}}</a>{{else}}{{minerAddress}}{{/if}}
@@ -64,6 +70,13 @@
               </div>
             </div>
           {{/each}}
+        </div>
+
+        <!-- View All Blocks Link -->
+        <div class="text-center pt-2">
+          <a href="/lastblocks" class="btn-secondary inline-flex items-center text-sm">
+            View All Blocks &rarr;
+          </a>
         </div>
       {{/if}}
     {{/with}}

@@ -1,6 +1,11 @@
 <template name="lasttx">
   <div class="space-y-6">
-    <h4 class="text-2xl font-bold text-qrl-text">Latest Transactions</h4>
+    <div class="flex items-center justify-between">
+      <h4 class="text-2xl font-bold text-qrl-text">Latest Transactions</h4>
+      <a href="/lasttx" class="text-sm text-qrl-accent hover:text-qrl-accent/80 transition-colors font-medium">
+        View All &rarr;
+      </a>
+    </div>
 
     {{#with lasttx}} {{#if zeroCheck}}
     <div class="card border-red-500/30 bg-red-500/10">
@@ -31,13 +36,13 @@
       </div>
     </div>
     {{else}}
-    <div class="space-y-4">
+    <div class="space-y-3">
       {{#each transactions}}
       <!-- All Transactions (Confirmed and Unconfirmed) -->
       <div
-        class="card hover:bg-qrl-secondary hover:border-qrl-accent transition-colors duration-200 min-h-44 sm:h-48 flex flex-col transactionRecord cursor-pointer pt-6"
+        class="card hover:border-qrl-accent/50 min-h-44 sm:h-48 flex flex-col transactionRecord cursor-pointer p-4 {{#if isTransfer this.tx.transactionType}}border-type-transfer{{else}}{{#if isCoinbase this.tx.transactionType}}border-type-coinbase{{else}}{{#if isTokenTransfer this.tx.transactionType}}border-type-token{{else}}{{#if isMessage this.tx.transactionType}}border-type-message{{else}}{{#if isSlave this.tx.transactionType}}border-type-slave{{else}}{{#if isLatticePK this.tx.transactionType}}border-type-lattice{{else}}border-type-multisig{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}"
       >
-        <div class="flex items-start space-x-4 flex-1">
+        <div class="flex items-start space-x-3 flex-1">
           <div class="flex-shrink-0">
             <div
               class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center"
@@ -122,22 +127,21 @@
             <div class="pb-1 text-white hover:text-qrl-accent/80 transition-colors font-mono text-sm truncate-with-tooltip" data-full-text="{{this.tx.transaction_hash}}" title="{{this.tx.transaction_hash}}">
               {{this.tx.transaction_hash}}
             </div>
-            
+
             {{#if isTransfer this.tx.transactionType}}
-            <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
+            <div class="mt-2 p-2 pb-1 bg-qrl-surface/50 rounded-lg">
               <div class="flex items-center justify-between mb-1">
                 <span class="text-xs text-qrl-text-secondary">From</span>
-                <span class="text-sm text-qrl-accent font-semibold">{{amount}} QRL</span>
+                <span class="text-sm text-qrl-accent font-bold mono-value">{{amount}} QRL</span>
                 <span class="text-xs text-qrl-text-secondary">To</span>
               </div>
               <div class="flex items-center justify-between">
                 <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 mr-2" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
                   <a href="/a/{{fromAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{fromAddress}}</a>
                 </div>
-                <div class="text-qrl-accent mx-2">→</div>
+                <div class="text-qrl-accent mx-2">&rarr;</div>
                 <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 ml-2" data-full-text="{{toAddress}}" title="{{toAddress}}">
                   {{#if multipleDestinations}}
-                  <!-- just txhash -->
                  <a href="/tx/{{this.tx.transaction_hash}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{toAddress}}</a>
                   {{else}}
                   <a href="/a/{{toAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{toAddress}}</a>
@@ -147,17 +151,17 @@
             </div>
             {{else}}
             {{#if isTokenTransfer this.tx.transactionType}}
-            <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
+            <div class="mt-2 p-2 pb-1 bg-qrl-surface/50 rounded-lg">
               <div class="flex items-center justify-between mb-1">
                 <span class="text-xs text-qrl-text-secondary">From</span>
-                <span class="text-sm text-qrl-accent font-semibold">{{amount}} Tokens</span>
+                <span class="text-sm text-qrl-accent font-bold mono-value">{{amount}} Tokens</span>
                 <span class="text-xs text-qrl-text-secondary">To</span>
               </div>
               <div class="flex items-center justify-between">
                 <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 mr-2" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
                   <a href="/a/{{fromAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{fromAddress}}</a>
                 </div>
-                <div class="text-qrl-accent mx-2">→</div>
+                <div class="text-qrl-accent mx-2">&rarr;</div>
                 <div class="text-sm text-qrl-text font-mono truncate-with-tooltip flex-1 ml-2" data-full-text="{{toAddress}}" title="{{toAddress}}">
                   <a href="/a/{{toAddress}}" class="text-white hover:text-qrl-accent/80 transition-colors">{{toAddress}}</a>
                 </div>
@@ -165,10 +169,10 @@
             </div>
             {{else}}
             {{#if isCoinbase this.tx.transactionType}}
-            <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
+            <div class="mt-2 p-2 pb-1 bg-qrl-surface/50 rounded-lg">
               <div class="flex items-center justify-between mb-1">
                 <span class="text-xs text-qrl-text-secondary">Miner</span>
-                <span class="text-sm text-qrl-accent font-semibold">{{amount}} QRL</span>
+                <span class="text-sm text-qrl-accent font-bold mono-value">{{amount}} QRL</span>
                 <span class="text-xs text-qrl-text-secondary">Reward</span>
               </div>
               <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
@@ -176,10 +180,10 @@
               </div>
             </div>
             {{else}}
-            <div class="mt-2 p-2 pb-1 bg-qrl-secondary/30 rounded-lg">
+            <div class="mt-2 p-2 pb-1 bg-qrl-surface/50 rounded-lg">
               <div class="flex items-center justify-between mb-1">
                 <span class="text-xs text-qrl-text-secondary">Type</span>
-                <span class="text-sm text-qrl-accent font-semibold">{{this.tx.transactionType}}</span>
+                <span class="text-sm text-qrl-accent font-bold mono-value">{{this.tx.transactionType}}</span>
                 <span class="text-xs text-qrl-text-secondary">Transaction</span>
               </div>
               <div class="text-sm text-qrl-text font-mono truncate-with-tooltip" data-full-text="{{fromAddress}}" title="{{fromAddress}}">
@@ -193,6 +197,13 @@
         </div>
       </div>
       {{/each}}
+    </div>
+
+    <!-- View All Transactions Link -->
+    <div class="text-center pt-2">
+      <a href="/lasttx" class="btn-secondary inline-flex items-center text-sm">
+        View All Transactions &rarr;
+      </a>
     </div>
     {{/if}} {{/with}}
   </div>

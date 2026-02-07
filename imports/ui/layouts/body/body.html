@@ -1,6 +1,6 @@
 <template name="appBody">
   <!-- Top Header -->
-  <header class="bg-qrl-secondary border-b border-qrl-border sticky top-0 z-50">
+  <header class="bg-qrl-secondary/80 backdrop-blur-md sticky top-0 z-50 border-gradient-bottom">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- First Line: Logo and Search -->
       <div class="flex items-center justify-between pb-3">
@@ -27,7 +27,7 @@
         <div class="flex items-center space-x-4 flex-1 max-w-md ml-8 mt-2">
           <!-- Search -->
           {{> search }}
-          
+
           <!-- Mobile Menu Button -->
           <button class="lg:hidden p-2 text-qrl-text hover:text-qrl-accent transition-colors" id="mobile-menu-toggle">
             <i data-lucide="menu" class="w-6 h-6 pointer-events-none"></i>
@@ -36,49 +36,55 @@
       </div>
 
       <!-- Second Line: Navigation Links -->
-      <div class="hidden lg:flex border-t border-qrl-border pt-3 pb-3">
+      <div class="hidden lg:flex border-t border-qrl-border/50 pt-3 pb-3">
         <!-- Desktop Navigation (lg and up) -->
-        <nav class="hidden lg:flex items-center space-x-8">
-          <a href="/lastblocks" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuBlocksActive}}">
+        <nav class="hidden lg:flex items-center space-x-6">
+          <a href="/lastblocks" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuBlocksActive}}">
             <div class="flex items-center space-x-2">
               <i data-lucide="box" class="w-4 h-4 pointer-events-none"></i>
               <span>Blocks</span>
             </div>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
           </a>
-          
-          <a href="/lasttx" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
+
+          <a href="/lasttx" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
             <div class="flex items-center space-x-2">
               <i data-lucide="arrow-right" class="w-4 h-4 pointer-events-none"></i>
               <span>Transactions</span>
             </div>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
           </a>
-          
-          <a href="/unconfirmed" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
+
+          <a href="/unconfirmed" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
             <div class="flex items-center space-x-2">
               <i data-lucide="clock" class="w-4 h-4 pointer-events-none"></i>
               <span>Unconfirmed</span>
             </div>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
           </a>
-          
-          <a href="/richlist" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuRichListActive}}">
+
+          <a href="/richlist" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuRichListActive}}">
             <div class="flex items-center space-x-2">
               <i data-lucide="list" class="w-4 h-4 pointer-events-none"></i>
               <span>Rich List</span>
             </div>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
           </a>
-          
-          <a href="/peers" class="text-qrl-text hover:text-qrl-accent transition-colors {{menuPeersActive}}">
+
+          <a href="/peers" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuPeersActive}}">
             <div class="flex items-center space-x-2">
               <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
               <span>Peers</span>
             </div>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
           </a>
-          
-          <a href="https://wallet.theqrl.org/" target="_blank" class="text-qrl-text hover:text-qrl-accent transition-colors">
+
+          <a href="https://wallet.theqrl.org/" target="_blank" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1">
             <div class="flex items-center space-x-2">
               <i data-lucide="wallet" class="w-4 h-4 pointer-events-none"></i>
               <span>Wallet</span>
             </div>
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
           </a>
         </nav>
       </div>
@@ -86,7 +92,7 @@
 
     <!-- Mobile Navigation Menu (hidden by default) -->
     <div class="lg:hidden hidden" id="mobile-menu">
-      <div class="px-2 pt-2 pb-3 space-y-1 bg-qrl-secondary border-t border-qrl-border">
+      <div class="px-2 pt-2 pb-3 space-y-1 bg-qrl-secondary/95 backdrop-blur-md border-t border-qrl-border/50">
         <a href="/lastblocks" class="block px-3 py-2 text-qrl-text hover:text-qrl-accent transition-colors {{menuBlocksActive}}">
           <div class="flex items-center space-x-2">
             <i data-lucide="box" class="w-4 h-4 pointer-events-none"></i>
@@ -133,7 +139,7 @@
   </header>
 
   <!-- Background Pattern -->
-  <div class="fixed inset-0 pointer-events-none z-0" style="background-image: url('/img/dots-light.png'); background-size: 1200px 1200px; background-repeat: no-repeat; background-position: center; opacity: 0.3; filter: blur(2px); transform: translateZ(0); will-change: transform; backface-visibility: hidden;"></div>
+  <div class="fixed inset-0 pointer-events-none z-0" style="background-image: url('/img/dots-light.png'); background-size: 1200px 1200px; background-repeat: no-repeat; background-position: center; opacity: 0.15; filter: blur(2px); transform: translateZ(0); will-change: transform; backface-visibility: hidden;"></div>
 
   <!-- Main Content -->
   <main class="min-h-screen relative z-10">
@@ -146,7 +152,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-qrl-secondary border-t border-qrl-border">
+  <footer class="bg-qrl-secondary border-t border-qrl-border border-gradient-top">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="text-center">
         <a href="/" class="inline-block mb-4">
@@ -191,17 +197,17 @@
       display: inline;
       animation: letterPulse 4s ease-in-out infinite;
     }
-    
+
     @keyframes letterPulse {
-      0%, 90% { 
+      0%, 90% {
         color: inherit;
         text-shadow: none;
       }
-      5% { 
+      5% {
         color: #ffffff;
         text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
       }
-      15% { 
+      15% {
         color: inherit;
         text-shadow: none;
       }
