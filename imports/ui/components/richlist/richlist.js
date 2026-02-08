@@ -156,7 +156,7 @@ Template.richlist.events({
   'click #csvExport': () => {
     const data = Session.get('richlistData')
     if (data && data.length > 0) {
-      let csv = 'Rank,Address,Balance (Quanta),Percentage\n'
+      let csv = 'Rank,Address,Balance (Shor),Percentage\n'
       data.forEach((item, index) => {
         // Calculate percentage using the same logic as the template
         const status = Session.get('explorer-status')
