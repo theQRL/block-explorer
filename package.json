@@ -16,7 +16,7 @@
     "@theqrl/explorer-helpers": "^2.8.0",
     "@theqrl/nft-providers": "^1.1.0",
     "@theqrl/validate-qrl-address": "^3.0.1",
-    "axios": "^0.27.2",
+    "axios": "^1.13.5",
     "babel-runtime": "^6.26.0",
     "bech32": "^2.0.0",
     "bignumber.js": "^9.3.1",
