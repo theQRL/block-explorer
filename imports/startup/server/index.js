@@ -805,7 +805,8 @@ const helpersaddressTransactions = async (response) => {
           txEdited.tx.transfer_token.token_txhash,
         ).toString('hex')
       }
-      txEdited.tx.transfer_token = await addTokenDetail(tx)
+      const tokenDetail = await addTokenDetail(tx)
+      Object.assign(txEdited.tx.transfer_token, tokenDetail)
       // now check if NFT
       const symbol = Buffer.from(txEdited.tx.transfer_token.symbol).toString(
         'hex',

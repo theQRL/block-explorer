@@ -103,7 +103,13 @@ const refreshBlocks = async () => {
     }
   }
 
-  const lastblocktime = response.blockheaders[4].header.timestamp_seconds
+  const lastHeader = response.blockheaders[
+    Math.min(4, response.blockheaders.length - 1)
+  ]
+  if (!lastHeader || !lastHeader.header) {
+    return true
+  }
+  const lastblocktime = lastHeader.header.timestamp_seconds
   const seconds = new Date().getTime() / 1000
   const timeDiff = Math.floor((seconds - lastblocktime) / 60)
   // needs refactor
