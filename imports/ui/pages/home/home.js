@@ -1,42 +1,182 @@
 import { homechart } from '/imports/api/index.js'
-import { Tracker } from 'meteor/tracker'
 
 import './home.html'
 import '../../components/status/status.js'
-/* global LocalStore */
 
-let chartIntervalHandle
+const MAX_VISUAL_POINTS = 72
+
+const compactFormatter = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+})
+
 let currentChart = null
 let isChartInitialized = false
-let userHasInteracted = false
-let lastDataLength = 0
+let isChartInitializing = false
 let currentViewRange = { min: 0, max: 0 }
-let lastProcessedData = null // Track the last data we processed
+let lastProcessedData = null
 
+function toFiniteNumber(value) {
+  const numericValue = Number(value)
+  if (!Number.isFinite(numericValue)) {
+    return 0
+  }
+  return numericValue
+}
 
-// Calculate nice increments divisible by 10
-function calculateNiceIncrement(maxValue, minValue, targetTicks = 8) {
-  const range = maxValue - minValue
-  const roughStep = range / targetTicks
+function movingAverage(values, windowSize = 3) {
+  if (!Array.isArray(values) || values.length === 0) {
+    return []
+  }
 
-  // Find the order of magnitude
-  const magnitude = 10 ** Math.floor(Math.log10(roughStep))
+  return values.map((value, index) => {
+    const startIndex = Math.max(0, index - windowSize + 1)
+    const slice = values.slice(startIndex, index + 1)
+    const total = slice.reduce((sum, current) => sum + toFiniteNumber(current), 0)
+    return total / slice.length
+  })
+}
 
-  // Normalize the rough step
-  const normalizedStep = roughStep / magnitude
+function downsampleIndices(length, maxPoints = MAX_VISUAL_POINTS) {
+  if (length <= maxPoints) {
+    return Array.from({ length }, (_, index) => index)
+  }
 
-  // Choose a nice step that's divisible by 10
-  let niceStep
-  if (normalizedStep <= 1) niceStep = 1
-  else if (normalizedStep <= 2) niceStep = 2
-  else if (normalizedStep <= 5) niceStep = 5
-  else niceStep = 10
+  const stride = (length - 1) / (maxPoints - 1)
 
-  return niceStep * magnitude
+  return Array.from({ length: maxPoints }, (_, stepIndex) => {
+    const sampledIndex = Math.round(stepIndex * stride)
+    return Math.min(length - 1, sampledIndex)
+  })
+}
+
+function findDatasetByMatchers(datasets, matchers) {
+  if (!Array.isArray(datasets) || datasets.length === 0) {
+    return null
+  }
+
+  return (
+    datasets.find((dataset) => {
+      const label = (dataset.label || '').toLowerCase()
+      return matchers.some((matcherParts) => matcherParts.every((part) => label.includes(part)))
+    }) || null
+  )
+}
+
+function formatCompactNumber(value) {
+  const numericValue = toFiniteNumber(value)
+
+  if (Math.abs(numericValue) < 1000) {
+    return numericValue.toFixed(0)
+  }
+
+  return compactFormatter.format(numericValue)
+}
+
+function formatHashPower(value) {
+  return `${formatCompactNumber(value)} h/s`
+}
+
+function formatDifficulty(value) {
+  const numericValue = Number(value)
+  if (!Number.isFinite(numericValue) || numericValue < 0) {
+    return '--'
+  }
+  return formatCompactNumber(numericValue)
+}
+
+function formatBlockTime(value) {
+  return `${toFiniteNumber(value).toFixed(2)} s`
+}
+
+function updateChartMetrics(latestMetrics) {
+  const hashStat = document.getElementById('chartStatHash')
+  const difficultyStat = document.getElementById('chartStatDifficulty')
+  const blockTimeStat = document.getElementById('chartStatBlockTime')
+
+  if (hashStat) {
+    hashStat.textContent = formatHashPower(latestMetrics.hashPower)
+  }
+
+  if (difficultyStat) {
+    difficultyStat.textContent = formatDifficulty(latestMetrics.difficulty)
+  }
+
+  if (blockTimeStat) {
+    blockTimeStat.textContent = formatBlockTime(latestMetrics.blockTime)
+  }
+}
+
+function buildVisualChartData(rawData) {
+  if (!rawData || !Array.isArray(rawData.labels) || !Array.isArray(rawData.datasets)) {
+    return null
+  }
+
+  if (rawData.labels.length === 0) {
+    return null
+  }
+
+  const hashPowerDataset = findDatasetByMatchers(rawData.datasets, [['hash', 'power']]) || rawData.datasets[0]
+  const difficultyDataset = findDatasetByMatchers(rawData.datasets, [['difficulty']])
+  const blockTimeDataset = findDatasetByMatchers(rawData.datasets, [['block', 'time', 'average'], ['block', 'time']])
+    || rawData.datasets[rawData.datasets.length - 1]
+
+  if (!hashPowerDataset || !blockTimeDataset) {
+    return null
+  }
+
+  const sampledIndices = downsampleIndices(rawData.labels.length)
+  const sampledLabels = sampledIndices.map((index) => toFiniteNumber(rawData.labels[index]))
+
+  const hashPowerRaw = sampledIndices.map((index) => toFiniteNumber(hashPowerDataset.data[index]))
+  const difficultyRaw = difficultyDataset
+    ? sampledIndices.map((index) => toFiniteNumber(difficultyDataset.data[index]))
+    : []
+  const blockTimeRaw = sampledIndices.map((index) => toFiniteNumber(blockTimeDataset.data[index]))
+
+  const hashPowerSmoothed = movingAverage(hashPowerRaw, 4)
+  const difficultySmoothed = difficultyRaw.length > 0 ? movingAverage(difficultyRaw, 4) : []
+  const blockTimeSmoothed = movingAverage(blockTimeRaw, 3)
+
+  const hashSeriesData = sampledLabels.map((blockNumber, index) => ({
+    x: blockNumber,
+    y: hashPowerSmoothed[index],
+  }))
+
+  const blockTimeSeriesData = sampledLabels.map((blockNumber, index) => ({
+    x: blockNumber,
+    y: blockTimeSmoothed[index],
+  }))
+
+  const latestRawLabel = rawData.labels[rawData.labels.length - 1]
+  const minBlock = sampledLabels.length > 0 ? Math.min(...sampledLabels) : 0
+  const maxBlock = sampledLabels.length > 0 ? Math.max(...sampledLabels) : 0
+
+  return {
+    minBlock,
+    maxBlock,
+    latestBlock: toFiniteNumber(latestRawLabel),
+    rawLength: rawData.labels.length,
+    latestMetrics: {
+      hashPower: hashPowerSmoothed[hashPowerSmoothed.length - 1] || 0,
+      difficulty: difficultySmoothed.length > 0 ? difficultySmoothed[difficultySmoothed.length - 1] : null,
+      blockTime: blockTimeSmoothed[blockTimeSmoothed.length - 1] || 0,
+    },
+    series: [
+      {
+        name: 'Hash Power',
+        data: hashSeriesData,
+      },
+      {
+        name: 'Avg Block Time',
+        data: blockTimeSeriesData,
+      },
+    ],
+  }
 }
 
 // Initialize the chart with initial data
-async function initializeChart(dataToUse, isSampleData = false) {
+async function initializeChart(dataToUse) {
   const isDark = LocalStore.get('theme') !== 'light'
   const chartContainer = document.getElementById('chart-container')
 
@@ -45,342 +185,341 @@ async function initializeChart(dataToUse, isSampleData = false) {
     return
   }
 
+  const visualData = buildVisualChartData(dataToUse)
+
+  if (!visualData) {
+    return
+  }
+
+  updateChartMetrics(visualData.latestMetrics)
+
   try {
-    // Destroy existing chart instance first to avoid duplicate tooltips
     if (currentChart) {
       currentChart.destroy()
       currentChart = null
     }
-    
-    // Clear any remaining chart elements
+
     chartContainer.innerHTML = ''
 
-    // Transform data for ApexCharts
-    const series = dataToUse.datasets.map((dataset) => ({
-      name: dataset.label,
-      data: dataset.data.map((value, index) => ({
-        x: dataToUse.labels[index],
-        y: value,
-      })),
-    }))
+    currentViewRange = {
+      min: visualData.minBlock,
+      max: visualData.maxBlock,
+    }
 
-    // console.log('Initializing ApexCharts with series:', series)
-
-    // Start with the most zoomed out view - show all available data
-    const maxBlock = Math.max(...dataToUse.labels)
-    const minBlock = Math.min(...dataToUse.labels)
-    currentViewRange = { min: minBlock, max: maxBlock }
-
-    // Calculate nice increments divisible by 10
-    const niceIncrement = calculateNiceIncrement(currentViewRange.max, currentViewRange.min)
-
-    // ApexCharts configuration for real-time updates
     const options = {
       chart: {
-        type: 'line',
-        height: 320,
+        type: 'area',
+        height: 352,
         background: 'transparent',
+        foreColor: isDark ? '#DCE3E9' : '#334155',
         toolbar: {
           show: false,
+        },
+        zoom: {
+          enabled: false,
+        },
+        selection: {
+          enabled: false,
         },
         animations: {
           enabled: true,
           easing: 'easeinout',
-          speed: 800,
+          speed: 650,
           animateGradually: {
             enabled: true,
-            delay: 150,
+            delay: 90,
           },
           dynamicAnimation: {
             enabled: true,
-            speed: 350,
+            speed: 320,
           },
         },
-        // Enable real-time updates
         redrawOnParentResize: true,
         redrawOnWindowResize: true,
-        // Track user interactions
-        events: {
-          zoom(chartContext, { xaxis }) {
-            // console.log('User zoomed chart')
-            userHasInteracted = true
-            // Update our tracking of current view
-            currentViewRange = {
-              min: xaxis.min,
-              max: xaxis.max,
-            }
-          },
-          pan(chartContext, { xaxis }) {
-            // console.log('User panned chart')
-            userHasInteracted = true
-            // Update our tracking of current view
-            currentViewRange = {
-              min: xaxis.min,
-              max: xaxis.max,
-            }
-          },
-          selection(chartContext, { xaxis }) {
-            // console.log('User selected range')
-            userHasInteracted = true
-            // Update our tracking of current view
-            currentViewRange = {
-              min: xaxis.min,
-              max: xaxis.max,
-            }
-          },
+        dropShadow: {
+          enabled: true,
+          top: 8,
+          left: 0,
+          blur: 12,
+          color: '#67B8FF',
+          opacity: 0.2,
         },
       },
-      theme: {
-        mode: isDark ? 'dark' : 'light',
-      },
-      series,
-      colors: ['#4AAFFF', '#9CA3AF', '#8B5A0F', '#FFA729'],
+      series: visualData.series,
+      colors: ['#67B8FF', '#FFB347'],
       stroke: {
         curve: 'smooth',
-        width: [3, 3, 3, 1],
+        lineCap: 'round',
+        width: [3.5, 2.5],
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: isDark ? 'dark' : 'light',
+          type: 'vertical',
+          shadeIntensity: 0.35,
+          gradientToColors: ['#2F73F8', '#FF8A45'],
+          opacityFrom: 0.35,
+          opacityTo: 0.02,
+          stops: [0, 70, 100],
+        },
+      },
+      markers: {
+        size: 0,
+        strokeWidth: 0,
+        hover: {
+          size: 5,
+          sizeOffset: 2,
+        },
+      },
+      dataLabels: {
+        enabled: false,
       },
       grid: {
         show: true,
-        borderColor: isDark ? 'rgba(234, 239, 245, 0.1)' : 'rgba(11, 24, 30, 0.1)',
+        borderColor: isDark ? 'rgba(149, 167, 184, 0.24)' : 'rgba(71, 85, 105, 0.18)',
+        strokeDashArray: 5,
+        xaxis: {
+          lines: {
+            show: false,
+          },
+        },
+        yaxis: {
+          lines: {
+            show: true,
+          },
+        },
+        padding: {
+          top: 8,
+          right: 8,
+          left: 8,
+          bottom: 0,
+        },
       },
       xaxis: {
         type: 'numeric',
         min: currentViewRange.min,
         max: currentViewRange.max,
-        title: {
-          text: 'Block Number',
-          style: {
-            color: isDark ? '#EAEFF5' : '#0B181E',
-            fontSize: '12px',
-            fontWeight: 600,
-          },
+        tickAmount: 7,
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
         },
         labels: {
           style: {
-            colors: isDark ? '#EAEFF5' : '#0B181E',
-            fontSize: '12px',
+            colors: isDark ? '#C8D2DB' : '#475569',
+            fontSize: '11px',
             fontWeight: 500,
+            fontFamily: 'Alte DIN 1451 Mittelschrift, sans-serif',
           },
           formatter(value) {
-            // Show more labels with better formatting
-            const roundedValue = Math.round(value)
-            if (roundedValue % 5 === 0) { // Show every 5th block instead of 10th
-              return roundedValue.toLocaleString()
-            }
-            return ''
+            return Math.round(value).toLocaleString()
           },
           rotate: 0,
           trim: false,
-          hideOverlappingLabels: false,
         },
-        // Show more labels
-        tickAmount: 12,
-        tickPlacement: 'between',
-        forceNiceScale: true,
       },
       yaxis: [
         {
-          // Left Y-axis for Hash Power and Difficulty
-          seriesName: ['Hash Power (hps)', 'Difficulty'],
+          seriesName: 'Hash Power',
+          forceNiceScale: true,
+          min: 0,
           title: {
-            text: 'Hash Power / Difficulty',
+            text: 'Hash Power',
             style: {
-              color: isDark ? '#EAEFF5' : '#0B181E',
-              fontSize: '12px',
+              color: isDark ? '#DCE3E9' : '#334155',
+              fontSize: '11px',
               fontWeight: 600,
+              fontFamily: 'Alte DIN 1451 Mittelschrift, sans-serif',
             },
           },
           labels: {
             style: {
-              colors: isDark ? '#EAEFF5' : '#0B181E',
+              colors: isDark ? '#C8D2DB' : '#475569',
               fontSize: '11px',
+              fontWeight: 500,
+              fontFamily: 'Alte DIN 1451 Mittelschrift, sans-serif',
             },
             formatter(value) {
-              return value.toLocaleString()
+              return formatCompactNumber(value)
             },
           },
         },
         {
-          // Right Y-axis for Block Time
-          seriesName: 'Block Time Average (s)',
+          seriesName: 'Avg Block Time',
           opposite: true,
+          min: 0,
+          forceNiceScale: true,
           title: {
-            text: 'Block Time Average (s)',
+            text: 'Avg Block Time',
             style: {
-              color: isDark ? '#EAEFF5' : '#0B181E',
-              fontSize: '12px',
+              color: isDark ? '#DCE3E9' : '#334155',
+              fontSize: '11px',
               fontWeight: 600,
+              fontFamily: 'Alte DIN 1451 Mittelschrift, sans-serif',
             },
           },
           labels: {
             style: {
-              colors: isDark ? '#EAEFF5' : '#0B181E',
+              colors: isDark ? '#C8D2DB' : '#475569',
               fontSize: '11px',
+              fontWeight: 500,
+              fontFamily: 'Alte DIN 1451 Mittelschrift, sans-serif',
             },
             formatter(value) {
-              return `${value.toFixed(1)}s`
+              return formatBlockTime(value)
             },
           },
-          min: 0,
-          max: undefined, // Let it auto-scale
         },
       ],
       tooltip: {
         theme: isDark ? 'dark' : 'light',
+        shared: true,
+        intersect: false,
         style: {
           fontSize: '12px',
-          fontFamily: 'Inter, system-ui, sans-serif',
+          fontFamily: 'Alte DIN 1451 Mittelschrift, sans-serif',
         },
         x: {
           formatter(value) {
             return `Block ${Math.round(value).toLocaleString()}`
           },
         },
-      },
-      // Enable smooth scrolling for real-time updates
-      dataLabels: {
-        enabled: false,
+        y: {
+          formatter(value, { seriesIndex }) {
+            if (seriesIndex === 0) {
+              return formatHashPower(value)
+            }
+            return formatBlockTime(value)
+          },
+        },
       },
       legend: {
         show: true,
         position: 'top',
-        horizontalAlign: 'right',
+        horizontalAlign: 'left',
+        offsetY: -2,
         fontSize: '12px',
-        fontFamily: 'Inter, system-ui, sans-serif',
+        fontFamily: 'Alte DIN 1451 Mittelschrift, sans-serif',
+        labels: {
+          colors: isDark ? '#DCE3E9' : '#334155',
+        },
         markers: {
-          width: 8,
-          height: 8,
-          radius: 2,
+          width: 10,
+          height: 10,
+          radius: 999,
         },
         itemMargin: {
-          horizontal: 10,
-          vertical: 5,
+          horizontal: 14,
+          vertical: 6,
         },
       },
     }
 
-    // Create the chart
     currentChart = new ApexCharts(chartContainer, options)
     await currentChart.render()
 
-    // console.log('ApexCharts initialized successfully')
     isChartInitialized = true
-    lastDataLength = dataToUse.labels.length
-    lastProcessedData = dataToUse // Store the initial data
+    lastProcessedData = {
+      latestBlock: visualData.latestBlock,
+      rawLength: visualData.rawLength,
+    }
   } catch (error) {
     console.error('Error initializing ApexCharts:', error)
-    chartContainer.innerHTML = `<div class="flex items-center justify-center h-full text-red-400">Error loading chart: ${error.message}</div>`
+    const errorText = `Error loading chart: ${error.message || 'Unknown error'}`
+    const errorElement = document.createElement('div')
+    errorElement.className = 'flex items-center justify-center h-full text-red-400'
+    errorElement.textContent = errorText
+    chartContainer.replaceChildren(errorElement)
+    isChartInitialized = false
     Session.set('nodeError', true)
   }
 }
 
-// Update chart with new data (only add new points, don't change existing)
+// Update chart with new data
 async function updateChart(newData) {
   if (!currentChart || !isChartInitialized) {
-    // console.log('Chart not initialized yet, skipping update')
     return
   }
 
+  const visualData = buildVisualChartData(newData)
+
+  if (!visualData) {
+    return
+  }
+
+  const hasFreshData = !lastProcessedData
+    || visualData.latestBlock !== lastProcessedData.latestBlock
+    || visualData.rawLength !== lastProcessedData.rawLength
+
+  if (!hasFreshData) {
+    return
+  }
+
+  updateChartMetrics(visualData.latestMetrics)
+
   try {
-    // Check if we have new data (more data points than before)
-    const currentDataLength = newData.labels.length
-    const hasNewData = currentDataLength > lastDataLength
-
-    if (!hasNewData) {
-      // console.log('No new data to add, skipping update')
-      return
+    currentViewRange = {
+      min: visualData.minBlock,
+      max: visualData.maxBlock,
     }
 
-    // console.log(`Adding ${currentDataLength - lastDataLength} new data points`)
+    await currentChart.updateOptions(
+      {
+        series: visualData.series,
+        xaxis: {
+          min: currentViewRange.min,
+          max: currentViewRange.max,
+        },
+      },
+      false,
+      true,
+    )
 
-    // Only add the new data points, don't change existing ones
-    const newSeries = newData.datasets.map((dataset, datasetIndex) => {
-      const existingData = lastProcessedData ? lastProcessedData.datasets[datasetIndex].data : []
-      const newDataPoints = dataset.data.slice(existingData.length)
-      const newLabels = newData.labels.slice(existingData.length)
-
-      return {
-        name: dataset.label,
-        data: newDataPoints.map((value, index) => ({
-          x: newLabels[index],
-          y: value,
-        })),
-      }
-    })
-
-    // console.log('Adding new data points:', newSeries)
-
-    // Add new data points to the chart (this preserves existing data)
-    await currentChart.appendData(newSeries, true) // true = animate
-
-    // Only auto-scroll if user hasn't interacted with the chart
-    if (!userHasInteracted && newData.labels.length > 0) {
-      const latestBlock = Math.max(...newData.labels)
-      const viewWidth = currentViewRange.max - currentViewRange.min
-
-      // console.log('Auto-scrolling to show latest data')
-
-      // Calculate new view range - scroll to the right to show latest data
-      const newMin = Math.max(0, latestBlock - viewWidth + 20) // Keep same width, show latest data
-      const newMax = latestBlock + 20 // Add some padding
-
-      // Update our tracking
-      currentViewRange = { min: newMin, max: newMax }
-
-      // Smooth scroll to new range
-      await currentChart.zoomX(newMin, newMax, true) // true = animate
-    } else if (userHasInteracted) {
-      // console.log('User has interacted with chart, not auto-scrolling')
+    lastProcessedData = {
+      latestBlock: visualData.latestBlock,
+      rawLength: visualData.rawLength,
     }
-
-    // Update tracking variables
-    lastDataLength = currentDataLength
-    lastProcessedData = newData // Store the updated data
   } catch (error) {
-    // console.error('Error updating chart:', error)
+    // Swallow transient chart update errors to keep the page responsive.
   }
 }
 
-function renderChart() {
-  // console.log('renderChart called')
-
-  // Get Chart data from Mongo
+async function renderChart() {
   const chartLineData = homechart.findOne()
 
-  // Check if subscription is ready
   if (!chartLineData) {
-    // console.log('No chart data found in collection')
-    // console.log('Collection count:', homechart.find().count())
-    // console.log('All collection data:', homechart.find().fetch())
-    // console.log('Chart data not ready yet, waiting for subscription...')
     return
   }
-  // console.log('Chart data:', chartLineData)
 
   const dataToUse = chartLineData
 
-  if (dataToUse !== undefined && dataToUse.labels && dataToUse.datasets) {
-    // console.log('Valid chart data found, hiding loading...')
-
-    // Hide loading animation
+  if (dataToUse && dataToUse.labels && dataToUse.datasets) {
     const chartLoading = document.getElementById('chartLoading')
     if (chartLoading) {
       chartLoading.style.display = 'none'
-      // console.log('Loading element hidden successfully')
     }
 
-    // If chart is not initialized, initialize it
-    if (!isChartInitialized) {
-      // console.log('Initializing chart for the first time...')
-      initializeChart(dataToUse, false)
-    } else {
-      // Chart is already initialized, just update it smoothly
-      // console.log('Updating existing chart...')
-      updateChart(dataToUse)
+    if (isChartInitialized) {
+      await updateChart(dataToUse)
+      return
+    }
+
+    if (isChartInitializing) {
+      return
+    }
+
+    isChartInitializing = true
+    try {
+      await initializeChart(dataToUse)
+    } catch (error) {
+      console.error('Error rendering chart:', error)
+    } finally {
+      isChartInitializing = false
     }
   } else {
-    // console.log('No valid chart data available yet')
-    // Show waiting message
     const chartContainer = document.getElementById('chart-container')
     if (chartContainer) {
       chartContainer.innerHTML = `
@@ -398,38 +537,25 @@ function renderChart() {
 
 // Subscribe to chart data
 Template.appHome.onCreated(function () {
-  // console.log('Subscribing to homechart...')
   this.subscribe('homechart')
-  // console.log('Subscription started')
 })
 
 // Initialize chart when template is rendered
-Template.appHome.onRendered(() => {
-  // console.log('Template rendered, initializing chart...')
-
-  // Set up reactive autorun to update chart when data changes
-  Tracker.autorun(() => {
+Template.appHome.onRendered(function () {
+  this.autorun(() => {
     renderChart()
   })
-
-  // Set up auto-refresh with shorter interval for smoother updates
-  chartIntervalHandle = Meteor.setInterval(() => {
-    renderChart()
-  }, 30000) // Refresh every 30 seconds for smoother updates
 })
 
 // Clean up when template is destroyed
 Template.appHome.onDestroyed(() => {
-  if (chartIntervalHandle) {
-    Meteor.clearInterval(chartIntervalHandle)
-  }
   if (currentChart) {
     currentChart.destroy()
     currentChart = null
   }
+
   isChartInitialized = false
-  userHasInteracted = false
-  lastDataLength = 0
+  isChartInitializing = false
   currentViewRange = { min: 0, max: 0 }
   lastProcessedData = null
 })

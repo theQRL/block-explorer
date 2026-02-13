@@ -11,10 +11,11 @@ import BigNumber from 'bignumber.js'
 import helpers from '@theqrl/explorer-helpers'
 import qrlAddressValdidator from '@theqrl/validate-qrl-address'
 import { JsonRoutes } from 'meteor/simple:json-routes'
-import { check } from 'meteor/check'
+import { check, Match } from 'meteor/check'
 import { WebApp } from 'meteor/webapp'
 import { blockData, quantausd } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
+import { DDPRateLimiter } from 'meteor/ddp-rate-limiter'
 import {
   EXPLORER_VERSION,
   SHOR_PER_QUANTA,
@@ -22,33 +23,77 @@ import {
   bufferToHex,
 } from '../both/index.js'
 
-const PROTO_PATH =
-  Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
+const PROTO_PATH = Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
+
+// Determine gRPC credentials based on configuration.
+// Set Meteor.settings.api.grpcSecurity to "tls" to enable TLS.
+// Defaults to insecure for backward compatibility with existing QRL node deployments.
+const getGrpcCredentials = () => {
+  try {
+    if (Meteor.settings.api.grpcSecurity === 'tls') {
+      console.log('Using TLS for gRPC connections')
+      return grpc.credentials.createSsl()
+    }
+  } catch (e) {
+    // No settings or grpcSecurity not configured
+  }
+  console.log('WARNING: Using insecure gRPC credentials. Set api.grpcSecurity to "tls" in settings to enable TLS.')
+  return grpc.credentials.createInsecure()
+}
+
+// Validate that a proto file content looks like a legitimate QRL protobuf definition.
+// This prevents loading arbitrary code from a compromised node.
+const validateProtoContent = (protoContent) => {
+  if (typeof protoContent !== 'string' || protoContent.length === 0) {
+    return false
+  }
+  // Must contain proto3 syntax declaration
+  if (!protoContent.includes('syntax = "proto3"')) {
+    return false
+  }
+  // Must define the qrl package
+  if (!protoContent.includes('package qrl')) {
+    return false
+  }
+  // Must define the PublicAPI service (the service the explorer uses)
+  if (!protoContent.includes('service PublicAPI')) {
+    return false
+  }
+  // Must not contain suspicious content (import of non-proto files, shell commands, etc.)
+  if (/import\s+"[^"]*\.(js|sh|py|rb|php|exe|bat|cmd)/i.test(protoContent)) {
+    return false
+  }
+  // Size sanity check: proto files shouldn't be excessively large (max 1MB)
+  if (protoContent.length > 1024 * 1024) {
+    return false
+  }
+  return true
+}
 
 // CSP nonce generation and HTML injection middleware
 // Register at module load time to ensure proper ordering
 WebApp.connectHandlers.use((req, res, next) => {
   // Generate a unique nonce for this request
   const nonce = crypto.randomBytes(16).toString('base64')
-  
+
   // Store nonce in response locals for use in templates
   res.locals = res.locals || {}
   res.locals.cspNonce = nonce
-  
+
   // Set the nonce in the CSP header
   const cspHeader = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`,
-    `style-src 'self' 'unsafe-inline'`,
+    'style-src \'self\' \'unsafe-inline\'',
     "font-src 'self' data:",
     "connect-src 'self' https: wss: ws: wss://*.theqrl.org:* ws://*.theqrl.org:*",
     "img-src 'self' data: https:",
     "frame-src 'self'",
   ].join('; ')
-  
+
   res.setHeader('Content-Security-Policy', cspHeader)
-  
+
   next()
 })
 
@@ -59,13 +104,13 @@ WebApp.connectHandlers.use((req, res, next) => {
   if (!res.locals || !res.locals.cspNonce) {
     return next()
   }
-  
+
   const originalWrite = res.write
   const originalEnd = res.end
   const originalSetHeader = res.setHeader
   const chunks = []
   let contentType = ''
-  
+
   // Intercept setHeader to capture Content-Type
   res.setHeader = function (name, value) {
     if (name.toLowerCase() === 'content-type') {
@@ -73,47 +118,134 @@ WebApp.connectHandlers.use((req, res, next) => {
     }
     return originalSetHeader.call(this, name, value)
   }
-  
+
   res.write = function (chunk) {
     chunks.push(Buffer.from(chunk))
   }
-  
+
   res.end = function (chunk) {
     if (chunk) {
       chunks.push(Buffer.from(chunk))
     }
-    
+
     // Only modify HTML responses, skip JSON/API responses
-    const isHtml = contentType.includes('text/html') || 
-                   (!contentType && chunks.length > 0)
-    
+    const isHtml = contentType.includes('text/html')
+                   || (!contentType && chunks.length > 0)
+
     if (!isHtml || chunks.length === 0) {
       // Not HTML or no content, pass through
       res.write = originalWrite
       res.end = originalEnd
       res.setHeader = originalSetHeader
-      
-      chunks.forEach(c => originalWrite.call(res, c))
+
+      chunks.forEach((c) => {
+        originalWrite.call(res, c)
+      })
       return originalEnd.call(res)
     }
-    
+
     const body = Buffer.concat(chunks).toString('utf8')
     const nonce = res.locals.cspNonce
-    
+
     // Add nonce to all script tags that don't already have one
     const modifiedBody = body.replace(
       /<script(?![^>]*nonce=)/g,
-      `<script nonce="${nonce}"`
+      `<script nonce="${nonce}"`,
     )
-    
+
     res.write = originalWrite
     res.end = originalEnd
     res.setHeader = originalSetHeader
     res.end(modifiedBody)
   }
-  
+
   next()
 })
+
+// Rate limit DDP methods that call gRPC to prevent abuse
+// 5 method calls per second per connection
+DDPRateLimiter.addRule({
+  type: 'method',
+  name(name) {
+    return [
+      'QRLvalue', 'status', 'lastblocks', 'lastunconfirmedtx', 'txhash', 'block',
+      'addressTransactions', 'getStats', 'getObject', 'getLatestData',
+      'getAddressState', 'getFullAddressState', 'getMultiSigAddressState',
+      'getOTS', 'getTransactionsByAddress', 'getSlavesByAddress', 'connectionStatus',
+    ].includes(name)
+  },
+}, 5, 1000)
+
+// Rate limit subscriptions: 20 per second per connection
+// (home page loads 5+ subscriptions simultaneously, plus Meteor internals)
+DDPRateLimiter.addRule({
+  type: 'subscription',
+}, 20, 1000)
+
+// Simple in-memory rate limiter for REST API routes
+const apiRateLimits = new Map()
+const API_RATE_LIMIT = 30 // requests per window
+const API_RATE_WINDOW = 60000 // 1 minute window
+const TRUST_PROXY = (() => {
+  try {
+    if (Meteor.settings && Meteor.settings.api && Meteor.settings.api.trustProxy === true) {
+      return true
+    }
+    if (Meteor.settings && Meteor.settings.TRUST_PROXY === true) {
+      return true
+    }
+  } catch (e) {
+    // settings not loaded
+  }
+
+  const trustProxyEnv = process.env.TRUST_PROXY || ''
+  return trustProxyEnv === 'true' || trustProxyEnv === '1'
+})()
+
+function getClientIp(req) {
+  if (TRUST_PROXY) {
+    const forwardedFor = req && req.headers ? req.headers['x-forwarded-for'] : null
+    if (typeof forwardedFor === 'string') {
+      const firstForwardedIp = forwardedFor
+        .split(',')
+        .map((entry) => entry.trim())
+        .find((entry) => entry.length > 0)
+      if (firstForwardedIp) {
+        return firstForwardedIp
+      }
+    }
+  }
+
+  if (req && req.connection && req.connection.remoteAddress) {
+    return req.connection.remoteAddress
+  }
+  if (req && req.socket && req.socket.remoteAddress) {
+    return req.socket.remoteAddress
+  }
+  return 'unknown'
+}
+
+function checkApiRateLimit(req) {
+  const ip = getClientIp(req)
+  const now = Date.now()
+  const record = apiRateLimits.get(ip)
+  if (!record || now - record.windowStart > API_RATE_WINDOW) {
+    apiRateLimits.set(ip, { windowStart: now, count: 1 })
+    return true
+  }
+  record.count++
+  return record.count <= API_RATE_LIMIT
+}
+
+// Periodically clean up stale rate limit entries
+Meteor.setInterval(() => {
+  const now = Date.now()
+  for (const [ip, record] of apiRateLimits) {
+    if (now - record.windowStart > API_RATE_WINDOW * 2) {
+      apiRateLimits.delete(ip)
+    }
+  }
+}, API_RATE_WINDOW * 2)
 
 // The addresses of the API nodes and their state
 // defaults to Testnet if run without config file
@@ -191,29 +323,38 @@ const loadGrpcClient = (endpoint, callback) => {
     oneofs: true,
     includeDirs: [PROTO_PATH],
   }
+  const credentials = getGrpcCredentials()
   protoloader
     .load(`${PROTO_PATH}qrlbase.proto`)
     .then((packageDefinitionBase) => {
       const baseGrpcObject = grpc.loadPackageDefinition(packageDefinitionBase)
       const client = new baseGrpcObject.qrl.Base(
         endpoint,
-        grpc.credentials.createInsecure(),
+        credentials,
       )
       client.getNodeInfo({}, (err, res) => {
         if (err) {
-          console.log(`Error fetching qrl.proto from ${endpoint}`)
+          console.log(`Error fetching qrl.proto from ${endpoint}:`, err.message || err)
           callback(err, null)
         } else {
-          // Write a new temp file for this grpc connection
+          // Validate the proto content before loading it
+          if (!validateProtoContent(res.grpcProto)) {
+            console.log(`ERROR: Invalid or suspicious proto content received from ${endpoint}`)
+            callback(new Error('Proto validation failed: content does not match expected QRL proto format'), null)
+            return
+          }
+
+          // Write a new temp file for this grpc connection with restrictive permissions
           const qrlProtoFilePath = tmp.fileSync({
-            mode: '0644',
+            mode: 0o600,
             prefix: 'qrl-',
             postfix: '.proto',
           }).name
           fs.writeFile(qrlProtoFilePath, res.grpcProto, (fsErr) => {
             if (fsErr) {
               console.log(fsErr)
-              throw fsErr
+              callback(fsErr, null)
+              return
             }
             protoloader
               .load(qrlProtoFilePath, options)
@@ -222,12 +363,22 @@ const loadGrpcClient = (endpoint, callback) => {
                 // Create the gRPC Connection
                 qrlClient[endpoint] = new grpcObject.qrl.PublicAPI(
                   endpoint,
-                  grpc.credentials.createInsecure(),
+                  credentials,
                 )
                 console.log(
-                  `qrlClient loaded for ${endpoint} from ${qrlProtoFilePath}`,
+                  `qrlClient loaded for ${endpoint}`,
                 )
+                // Clean up temp file after loading
+                try {
+                  fs.unlink(qrlProtoFilePath, () => {})
+                } catch (cleanupErr) {
+                  // Non-fatal: temp file cleanup failed
+                }
                 callback(null, true)
+              })
+              .catch((loadErr) => {
+                console.log(`Error loading proto definition from ${endpoint}:`, loadErr.message)
+                callback(loadErr, null)
               })
           })
         }
@@ -251,7 +402,7 @@ const errorCallback = (error, message, alert) => {
 // this function will call loadGrpcClient to establish one.
 const connectToNode = (endpoint, callback) => {
   // First check if there is an existing object to store the gRPC connection
-  if (qrlClient.hasOwnProperty(endpoint) === true) {
+  if (Object.prototype.hasOwnProperty.call(qrlClient, endpoint) === true) {
     // eslint-disable-line
     console.log(
       'Existing connection found for ',
@@ -327,7 +478,7 @@ const connectToNode = (endpoint, callback) => {
   }
 }
 
-// Connect to all nodes
+// Connect to all nodes (callback-based for backwards compatibility)
 const connectNodes = () => {
   API_NODES.forEach((node, index) => {
     const endpoint = node.address
@@ -346,29 +497,82 @@ const connectNodes = () => {
   })
 }
 
-const updateAutoIncrement = () => {
-  // update autoincrement
-  blockData.update({ _id: 'autoincrement' }, { $inc: { value: 1 } })
-  // check cache not full
-  if (blockData.findOne({ _id: 'autoincrement' }).value > 2500) {
-    // empty cache and start again
-    blockData.remove({})
-    blockData.insert({ _id: 'autoincrement', value: 1 })
+// Connect to all nodes (Promise-based)
+const connectNodesAsync = async () => {
+  const connectionPromises = API_NODES.map((node, index) => new Promise((resolve) => {
+    const endpoint = node.address
+    console.log(`Attempting to create gRPC connection to node: ${endpoint} ...`)
+    connectToNode(endpoint, (err, res) => {
+      if (err) {
+        console.log(`Failed to connect to node ${endpoint}`)
+        API_NODES[index].state = false
+        API_NODES[index].height = 0
+      } else {
+        console.log(`Connected to ${endpoint}`)
+        API_NODES[index].state = true
+        API_NODES[index].height = parseInt(res.info.block_height, 10)
+      }
+      // Always resolve, even on error, so we don't block other connections
+      resolve()
+    })
+  }))
+
+  await Promise.all(connectionPromises)
+
+  // Log connection summary
+  const activeCount = API_NODES.filter((node) => node.state === true).length
+  console.log(`Connected to ${activeCount} of ${API_NODES.length} nodes`)
+}
+
+const updateAutoIncrement = async () => {
+  const incrementResult = await blockData.rawCollection().findOneAndUpdate(
+    { _id: 'autoincrement' },
+    {
+      $inc: { value: 1 },
+      $setOnInsert: { value: 1 },
+    },
+    {
+      upsert: true,
+      returnDocument: 'after',
+      returnOriginal: false,
+    },
+  )
+  const autoIncrementValue = incrementResult && incrementResult.value
+    ? incrementResult.value.value
+    : 0
+
+  if (autoIncrementValue > 2500) {
+    const resetResult = await blockData.rawCollection().findOneAndUpdate(
+      { _id: 'autoincrement', value: { $gt: 2500 } },
+      { $set: { value: 1 } },
+      {
+        returnDocument: 'after',
+        returnOriginal: false,
+      },
+    )
+
+    if (resetResult && resetResult.value) {
+      // Remove only cached data entries, not the autoincrement counter itself.
+      await blockData.removeAsync({ _id: { $ne: 'autoincrement' } })
+    }
   }
 }
 
 // Server Startup
 if (Meteor.isServer) {
-  Meteor.startup(() => {
+  Meteor.startup(async () => {
     console.log(`QRL Explorer Starting - Version: ${EXPLORER_VERSION}`)
-    
-    // Attempt to create connections with all nodes
-    connectNodes()
+
+    // Attempt to create connections with all nodes - wait for completion
+    console.log('Establishing GRPC connections...')
+    await connectNodesAsync()
+    console.log('GRPC connection establishment complete')
+
     // remove cached data whilst cache featureset being iterated
     // (may want this to persist on restart in time)
-    blockData.remove({})
+    await blockData.removeAsync({})
     try {
-      blockData.insert({ _id: 'autoincrement', value: 0 })
+      await blockData.insertAsync({ _id: 'autoincrement', value: 0 })
     } catch (err) {
       console.log('Autoincrement active on blockData')
     }
@@ -415,20 +619,119 @@ const qrlApi = (api, request, callback) => {
     )
     callback(myError, null)
   } else {
+    // Validate client and method exist
+    if (!qrlClient[bestNode.address]) {
+      const myError = errorCallback(
+        `GRPC client not initialized for ${bestNode.address}`,
+        'GRPC client not available',
+        '**ERROR/clientNotReady**',
+      )
+      callback(myError, null)
+      return
+    }
+    if (!qrlClient[bestNode.address][api]) {
+      const myError = errorCallback(
+        `GRPC method ${api} not available on ${bestNode.address}`,
+        'GRPC method not available',
+        '**ERROR/methodNotAvailable**',
+      )
+      callback(myError, null)
+      return
+    }
     // Make the API call
-    qrlClient[bestNode.address][api](request, (error, response) => {
-      callback(error, response)
-    })
+    try {
+      qrlClient[bestNode.address][api](request, (error, response) => {
+        if (error) {
+          callback(error, null)
+        } else if (!response) {
+          const myError = errorCallback(
+            'Empty response from GRPC call',
+            'No response data',
+            '**ERROR/emptyResponse**',
+          )
+          callback(myError, null)
+        } else {
+          callback(null, response)
+        }
+      })
+    } catch (err) {
+      const myError = errorCallback(
+        err,
+        `Error calling ${api}`,
+        '**ERROR/apiCallFailed**',
+      )
+      callback(myError, null)
+    }
   }
 }
 
-function addTokenDetail(transaction) {
+// Promise-based wrapper for qrlApi
+const qrlApiAsync = (api, request) => new Promise((resolve, reject) => {
+  const activeNodes = []
+
+  // Determine current active nodes
+  API_NODES.forEach((node) => {
+    if (node.state === true) {
+      activeNodes.push(node)
+    }
+  })
+
+  // Determine node with highest block height and set as bestNode
+  const bestNode = {}
+  bestNode.address = ''
+  bestNode.height = 0
+  activeNodes.forEach((node) => {
+    if (node.height > bestNode.height) {
+      bestNode.address = node.address
+      bestNode.height = node.height
+    }
+  })
+
+  // If all nodes have gone offline, fail
+  if (activeNodes.length === 0) {
+    const myError = errorCallback(
+      'The block explorer server cannot connect to any API node',
+      'Cannot connect to API',
+      '**ERROR/noActiveNodes/b**',
+    )
+    reject(myError)
+  } else {
+    // Validate client exists
+    if (!qrlClient[bestNode.address] || !qrlClient[bestNode.address][api]) {
+      const myError = errorCallback(
+        `GRPC client not ready for ${bestNode.address}`,
+        'GRPC client not available',
+        '**ERROR/clientNotReady**',
+      )
+      reject(myError)
+      return
+    }
+
+    // Make the API call
+    qrlClient[bestNode.address][api](request, (error, response) => {
+      if (error) {
+        reject(error)
+      } else if (!response) {
+        const myError = errorCallback(
+          'Empty response from GRPC call',
+          'No response data',
+          '**ERROR/emptyResponse**',
+        )
+        reject(myError)
+      } else {
+        resolve(response)
+      }
+    })
+  }
+})
+
+async function addTokenDetail(transaction) {
   const tokenDetail = {}
   const req = {
     query: Buffer.from(transaction.tx.transfer_token.token_txhash, 'hex'),
   }
-  const response = Meteor.wrapAsync(getObject)(req) // eslint-disable-line no-use-before-define
-  const formattedData = makeTxHumanReadable(response) // eslint-disable-line no-use-before-define
+  const response = await getObjectAsync(req)
+  const formattedData = await makeTxHumanReadable(response)
   tokenDetail.name = formattedData.transaction.tx.token.name
   tokenDetail.symbol = formattedData.transaction.tx.token.symbol
   tokenDetail.decimals = formattedData.transaction.tx.token.decimals
@@ -451,10 +754,10 @@ const sumTokenTotal = (arr, decimals) => {
   return total.dividedBy(10 ** parseInt(decimals, 10)).toNumber()
 }
 
-const helpersaddressTransactions = (response) => {
+const helpersaddressTransactions = async (response) => {
   const output = []
   // console.log(response)
-  _.each(response.transactions_detail, (tx) => {
+  for (const tx of response.transactions_detail) {
     const txEdited = tx
     if (tx.tx.transfer) {
       const hexlified = []
@@ -502,7 +805,7 @@ const helpersaddressTransactions = (response) => {
           txEdited.tx.transfer_token.token_txhash,
         ).toString('hex')
       }
-      txEdited.tx.transfer_token = addTokenDetail(tx)
+      txEdited.tx.transfer_token = await addTokenDetail(tx)
       // now check if NFT
       const symbol = Buffer.from(txEdited.tx.transfer_token.symbol).toString(
         'hex',
@@ -528,59 +831,58 @@ const helpersaddressTransactions = (response) => {
           address_hex: `Q${Buffer.from(txOutput).toString('hex')}`,
           amount: `${formatTokenAmount(
             tx.tx.transfer_token.amounts[index],
-            txEdited.tx.transfer_token.decimals
+            txEdited.tx.transfer_token.decimals,
           )} ${txEdited.tx.transfer_token.symbol}`,
         })
       })
       txEdited.tx.outputs = outputs
       txEdited.tx.totalTransferred = `${sumTokenTotal(
         tx.tx.transfer_token.amounts,
-        txEdited.tx.transfer_token.decimals
+        txEdited.tx.transfer_token.decimals,
       )} ${txEdited.tx.transfer_token.symbol}`
       txEdited.tx.transfer_token.addrs_to = hexlified
       if (tx.tx.transfer_token.symbol) {
         txEdited.tx.transfer_token.symbol = Buffer.from(
-          txEdited.tx.transfer_token.symbol
+          txEdited.tx.transfer_token.symbol,
         ).toString()
       }
       if (tx.tx.transfer_token.name) {
         txEdited.tx.transfer_token.name = Buffer.from(
-          txEdited.tx.transfer_token.name
+          txEdited.tx.transfer_token.name,
         ).toString()
       }
     }
     if (tx.tx.transaction_hash) {
       txEdited.tx.transaction_hash = Buffer.from(
-        txEdited.tx.transaction_hash,
+        tx.tx.transaction_hash,
       ).toString('hex')
     }
     if (tx.tx.master_addr) {
-      txEdited.tx.master_addr = `Q${Buffer.from(txEdited.tx.master_addr).toString(
+      txEdited.tx.master_addr = `Q${Buffer.from(tx.tx.master_addr).toString(
         'hex',
       )}`
     }
     if (tx.tx.public_key) {
-      txEdited.tx.public_key = Buffer.from(txEdited.tx.public_key).toString(
+      txEdited.tx.public_key = Buffer.from(tx.tx.public_key).toString(
         'hex',
       )
     }
     if (tx.tx.signature) {
-      txEdited.tx.signature = Buffer.from(txEdited.tx.signature).toString('hex')
+      txEdited.tx.signature = Buffer.from(tx.tx.signature).toString('hex')
     }
     if (tx.block_header_hash) {
       txEdited.block_header_hash = Buffer.from(
-        txEdited.block_header_hash,
+        tx.block_header_hash,
       ).toString('hex')
     }
-    txEdited.addr_from = `Q${Buffer.from(txEdited.addr_from).toString('hex')}`
-    console.dir(txEdited, { depth: null })
+    txEdited.addr_from = `Q${Buffer.from(tx.addr_from).toString('hex')}`
     output.push(txEdited)
-  })
+  }
   response.transactions_detail = output
   return response
 }
 
-const getOTS = (request, callback) => {
+const getOTSAsync = (request) => new Promise((resolve, reject) => {
   try {
     qrlApi('GetOTS', request, (error, response) => {
       if (error) {
@@ -589,10 +891,9 @@ const getOTS = (request, callback) => {
           'Cannot access API/GetOTS',
           '**ERROR/getOTS** ',
         )
-        callback(myError, null)
+        reject(myError)
       } else {
-        // console.log(response)
-        callback(null, response)
+        resolve(response)
       }
     })
   } catch (error) {
@@ -601,9 +902,9 @@ const getOTS = (request, callback) => {
       'Cannot access API/GetOTS',
       '**ERROR/GetOTS**',
     )
-    callback(myError, null)
+    reject(myError)
   }
-}
+})
 
 const getFullAddressState = (request, callback) => {
   try {
@@ -642,13 +943,13 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(
           error,
           'Cannot access API/GetOptimizedAddressState',
-          '**ERROR/getAddressState** '
+          '**ERROR/getAddressState** ',
         )
         callback(myError, null)
       } else {
         if (response.state.address) {
           response.state.address = `Q${Buffer.from(
-            response.state.address
+            response.state.address,
           ).toString('hex')}`
         }
 
@@ -680,7 +981,7 @@ const getMultiSigAddressState = (request, callback) => {
           const myError = errorCallback(
             error,
             'No state returned for this address',
-            '**ERROR/getMultiSigAddressState** '
+            '**ERROR/getMultiSigAddressState** ',
           )
           callback(myError, null)
           return
@@ -715,6 +1016,56 @@ const getMultiSigAddressState = (request, callback) => {
   }
 }
 
+const getAddressStateAsync = (request) => new Promise((resolve, reject) => {
+  getAddressState(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
+  })
+})
+
+const getFullAddressStateAsync = (request) => new Promise((resolve, reject) => {
+  getFullAddressState(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
+  })
+})
+
+const getMultiSigAddressStateAsync = (request) => new Promise((resolve, reject) => {
+  getMultiSigAddressState(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
+  })
+})
+
+const getTransactionsByAddressAsync = (request) => new Promise((resolve, reject) => {
+  getTransactionsByAddress(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
+  })
+})
+
+const getSlavesByAddressAsync = (request) => new Promise((resolve, reject) => {
+  getSlavesByAddress(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
+  })
+})
+
 export const getLatestData = (request, callback) => {
   try {
     qrlApi('GetLatestData', request, (error, response) => {
@@ -722,7 +1073,7 @@ export const getLatestData = (request, callback) => {
         const myError = errorCallback(
           error,
           'Cannot access API/GetLatestData',
-          '**ERROR/GetLatestData** ',
+          '**ERROR/GetLatestData**',
         )
         callback(myError, null)
       } else {
@@ -735,9 +1086,34 @@ export const getLatestData = (request, callback) => {
       'Cannot access API/GetLatestData',
       '**ERROR/GetLatestData**',
     )
-    callback(myError, null)
+    throw myError
   }
 }
+
+// Promise-based version of getLatestData
+export const getLatestDataAsync = (request) => new Promise((resolve, reject) => {
+  try {
+    qrlApi('GetLatestData', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetLatestData',
+          '**ERROR/GetLatestData**',
+        )
+        reject(myError)
+      } else {
+        resolve(response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetLatestData',
+      '**ERROR/GetLatestData**',
+    )
+    reject(myError)
+  }
+})
 
 export const getStats = (request, callback) => {
   try {
@@ -763,6 +1139,30 @@ export const getStats = (request, callback) => {
   }
 }
 
+export const getStatsAsync = async (request) => new Promise((resolve, reject) => {
+  try {
+    qrlApi('GetStats', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetStats',
+          '**ERROR/GetStats**',
+        )
+        reject(myError)
+      } else {
+        resolve(response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetStats',
+      '**ERROR/GetStats**',
+    )
+    reject(myError)
+  }
+})
+
 export const getPeersStat = (request, callback) => {
   try {
     qrlApi('GetPeersStat', request, (error, response) => {
@@ -787,6 +1187,20 @@ export const getPeersStat = (request, callback) => {
   }
 }
 
+export const getPeersStatAsync = async (request) => {
+  try {
+    const response = await qrlApiAsync('GetPeersStat', request)
+    return response
+  } catch (error) {
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetPeersStat',
+      '**ERROR/GetPeersStat**',
+    )
+    throw myError
+  }
+}
+
 export const getObject = (request, callback) => {
   try {
     qrlApi('GetObject', request, (error, response) => {
@@ -797,8 +1211,14 @@ export const getObject = (request, callback) => {
           '**ERROR/GetObject**',
         )
         callback(myError, null)
+      } else if (!response) {
+        const myError = errorCallback(
+          'Empty response from API',
+          'No data returned from GetObject',
+          '**ERROR/GetObject/EmptyResponse**',
+        )
+        callback(myError, null)
       } else {
-        // console.log(response)
         callback(null, response)
       }
     })
@@ -811,6 +1231,38 @@ export const getObject = (request, callback) => {
     callback(myError, null)
   }
 }
+
+// Promise-based version of getObject
+export const getObjectAsync = (request) => new Promise((resolve, reject) => {
+  try {
+    qrlApi('GetObject', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetObject',
+          '**ERROR/GetObject**',
+        )
+        reject(myError)
+      } else if (!response) {
+        const myError = errorCallback(
+          'Empty response from API',
+          'No data returned from GetObject',
+          '**ERROR/GetObject/EmptyResponse**',
+        )
+        reject(myError)
+      } else {
+        resolve(response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetObject',
+      '**ERROR/GetObject**',
+    )
+    reject(myError)
+  }
+})
 
 export const getTransactionsByAddress = (request, callback) => {
   try {
@@ -863,80 +1315,146 @@ export const getSlavesByAddress = (request, callback) => {
 }
 
 export const apiCall = (apiUrl, callback) => {
-  try {
-    const response = HTTP.get(apiUrl).data
-    // Successful call
-    callback(null, response)
-  } catch (error) {
-    const myError = new Meteor.Error(500, 'Cannot access the API')
-    callback(myError, null)
-  }
+  fetch(apiUrl)
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        return response.json()
+      }
+
+      const textResponse = await response.text()
+      try {
+        return JSON.parse(textResponse)
+      } catch (error) {
+        return textResponse
+      }
+    })
+    .then((responseData) => {
+      callback(null, responseData)
+    })
+    .catch(() => {
+      const myError = new Meteor.Error(500, 'Cannot access the API')
+      callback(myError, null)
+    })
 }
 
-export const makeTxHumanReadable = (item) => {
-  if (item.found !== false) {
-    let output
-    if (item.transaction.tx.transactionType === 'transfer_token') {
-      try {
-        // Request Token Decimals / Symbol
+export const makeTxHumanReadable = async (item) => {
+  // Add null/undefined check for Meteor 3.x compatibility
+  if (!item) {
+    console.log('ERROR: item is null or undefined in makeTxHumanReadable')
+    return null
+  }
+
+  let output
+
+  // Check if this is a getObject response (has 'found' property) or raw transaction data
+  if (Object.prototype.hasOwnProperty.call(item, 'found')) {
+    // This is a getObject response
+    if (item.found !== false) {
+      // Add defensive checks for nested properties
+      if (item.transaction && item.transaction.tx && item.transaction.tx.transactionType === 'transfer_token') {
+        try {
+          // Request Token Decimals / Symbol
+          const symbolRequest = {
+            query: item.transaction.tx.transfer_token.token_txhash,
+          }
+          const thisSymbolResponse = await getObjectAsync(symbolRequest)
+          if (thisSymbolResponse) {
+            output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
+          } else {
+            console.log('WARNING: thisSymbolResponse is null, falling back to helpers.txhash')
+            output = helpers.txhash(item)
+          }
+        } catch (e) {
+          console.log('ERROR in makeTxHumanReadable', e)
+          output = helpers.txhash(item)
+        }
+      } else {
+        output = helpers.txhash(item)
+      }
+    } else {
+      // Transaction not found
+      return item
+    }
+  } else {
+    // This is raw transaction data (from transaction lists)
+    // Process it directly with helpers.txhash
+    try {
+      if (item.transaction && item.transaction.tx && item.transaction.tx.transactionType === 'transfer_token') {
+        // For transfer_token transactions, we need to get token details
         const symbolRequest = {
           query: item.transaction.tx.transfer_token.token_txhash,
         }
-        const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
-        output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
-      } catch (e) {
-        console.log('ERROR in makeTxHumanReadable', e)
+        const thisSymbolResponse = await getObjectAsync(symbolRequest)
+        if (thisSymbolResponse) {
+          output = helpers.parseTokenAndTransferTokenTx(thisSymbolResponse, item)
+        } else {
+          output = helpers.txhash(item)
+        }
+      } else {
+        output = helpers.txhash(item)
       }
-    } else {
+    } catch (e) {
+      console.log('ERROR processing raw transaction data:', e)
       output = helpers.txhash(item)
     }
-    return output
   }
-  return item
+
+  return output
 }
 
-export const makeTxListHumanReadable = (txList, confirmed) => {
+export const makeTxListHumanReadable = async (txList, confirmed) => {
   const outputList = []
 
-  txList.forEach((item) => {
+  for (const item of txList) {
     // Add a transaction object to the returned transaction so we can use txhash helper
-    const output = makeTxHumanReadable({ transaction: item })
+    const output = await makeTxHumanReadable({ transaction: item })
     // Now put it back
-    if (confirmed) {
-      output.transaction.tx.confirmed = 'true'
-    } else {
-      output.transaction.tx.confirmed = 'false'
+    if (output && output.transaction) {
+      if (confirmed) {
+        output.transaction.tx.confirmed = 'true'
+      } else {
+        output.transaction.tx.confirmed = 'false'
+      }
+      outputList.push(output.transaction)
     }
-    outputList.push(output.transaction)
-  })
+  }
 
   return outputList
 }
 
 Meteor.methods({
-  QRLvalue() {
+  async QRLvalue() {
     console.log('QRLvalue method called')
     this.unblock()
-    const priceData = quantausd.findOne({})
+    const priceData = await quantausd.findOneAsync({})
     console.log(priceData)
+    if (!priceData || !priceData.price) {
+      console.log('No price data available')
+      return 0
+    }
     return priceData.price
   },
 
-  status() {
+  async status() {
     console.log('status method called')
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
-    const response = Meteor.wrapAsync(getStats)({})
+    const response = await getStatsAsync({})
     return response
   },
 
-  lastblocks() {
+  async lastblocks() {
     console.log('lastblocks method called')
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
-    const response = Meteor.wrapAsync(getLatestData)({
+    const response = await getLatestDataAsync({
       filter: 'BLOCKHEADERS',
       offset: 0,
       quantity: 5,
@@ -944,17 +1462,17 @@ Meteor.methods({
     return response
   },
 
-  lastunconfirmedtx() {
+  async lastunconfirmedtx() {
     console.log('lastunconfirmedtx method called')
     // avoid blocking other method calls from same client - *may need to remove for production*
     this.unblock()
     // asynchronous call to API
-    const response = Meteor.wrapAsync(getLatestData)({
+    const response = await getLatestDataAsync({
       filter: 'TRANSACTIONS_UNCONFIRMED',
       offset: 0,
       quantity: 5,
     })
-    const unconfirmedReadable = makeTxListHumanReadable(
+    const unconfirmedReadable = await makeTxListHumanReadable(
       response.transactions_unconfirmed,
       false,
     )
@@ -962,7 +1480,7 @@ Meteor.methods({
     return response
   },
 
-  txhash(txId) {
+  async txhash(txId) {
     check(txId, String)
     console.log(`txhash method called for: ${txId}`)
     // avoid blocking other method calls from same client - *may need to remove for production*
@@ -973,7 +1491,7 @@ Meteor.methods({
       throw new Meteor.Error(errorCode, errorMessage)
     } else {
       // first check this is not cached
-      const queryResults = blockData.findOne({ txId })
+      const queryResults = await blockData.findOneAsync({ txId })
       if (queryResults !== undefined) {
         // cached transaction located
         // check if it's an unconfirmed Tx
@@ -986,13 +1504,19 @@ Meteor.methods({
       // not cached or was unconfirmed so...
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
-      const response = Meteor.wrapAsync(getObject)(req)
-      const formattedData = makeTxHumanReadable(response)
+      const response = await getObjectAsync(req)
+
+      // Handle null response
+      if (!response) {
+        throw new Meteor.Error(404, `Transaction ${txId} not found or API returned null response`)
+      }
+
+      const formattedData = await makeTxHumanReadable(response)
       try {
-        if (formattedData.transaction.header !== null) {
+        if (formattedData && formattedData.transaction && formattedData.transaction.header !== null) {
           // not unconfirmed so insert into cache
-          updateAutoIncrement()
-          blockData.insert({ txId, formattedData })
+          await updateAutoIncrement()
+          await blockData.insertAsync({ txId, formattedData })
         }
       } catch (e) {
         console.log('Null Tx ignored')
@@ -1002,7 +1526,7 @@ Meteor.methods({
     }
   },
 
-  block(blockId) {
+  async block(blockId) {
     check(blockId, Number)
     console.log(`block Method called for: ${blockId}`)
     if (!Match.test(blockId, Number) || Number.isNaN(blockId)) {
@@ -1014,30 +1538,44 @@ Meteor.methods({
       // avoid blocking other method calls from same client - *may need to remove for production*
       this.unblock()
       // first check this is not cached
-      const queryResults = blockData.findOne({ blockId })
+      const queryResults = await blockData.findOneAsync({ blockId })
       if (queryResults !== undefined) {
         // cached transaction located
         console.log(`** INFO ** Returning cached data for block ${blockId}`)
         return queryResults.formattedData
       }
 
-      // asynchronous call to API
+      // asynchronous call to API using getObjectAsync
       const req = {
         query: Buffer.from(blockId.toString()),
       }
-      let response = Meteor.wrapAsync(getObject)(req)
+      let response
+      try {
+        response = await getObjectAsync(req)
+      } catch (error) {
+        console.log(`Error fetching block ${blockId}:`, error.message)
+        throw error
+      }
+
+      // Check if response is valid
+      if (!response || !response.block_extended) {
+        const errorCode = 404
+        const errorMessage = `Block ${blockId} not found or invalid response from API`
+        console.log(`Error: ${errorMessage}`)
+        throw new Meteor.Error(errorCode, errorMessage)
+      }
 
       // Refactor for block_extended and extended_transactions
       response.block = response.block_extended
       response.block.transactions = response.block_extended.extended_transactions
-      
+
       // Process all address fields in the entire response
       response = bufferToHex(response)
 
       if (response.block.header) {
         // transactions
         const transactions = []
-        response.block.transactions.forEach((value) => {
+        for (const value of response.block.transactions) {
           const adjusted = value.tx
           // All Buffer fields are now processed by bufferToHex above
           // No need for manual conversion
@@ -1077,8 +1615,7 @@ Meteor.methods({
               )
               // adjusted.transfer.addrs_to[index] = adjusted.transfer.addrs_to[index] <-- FIXME: why was this here?
             })
-            adjusted.transfer.totalTransferred =
-              thisTotalTransferred / SHOR_PER_QUANTA
+            adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
             adjusted.transfer.totalOutputs = totalOutputs
           }
           if (adjusted.transactionType === 'transfer_token') {
@@ -1086,8 +1623,7 @@ Meteor.methods({
             const symbolRequest = {
               query: Buffer.from(adjusted.transfer_token.token_txhash, 'hex'),
             }
-            const thisSymbolResponse =
-              Meteor.wrapAsync(getObject)(symbolRequest)
+            const thisSymbolResponse = await getObjectAsync(symbolRequest)
             // eslint-disable-next-line
             const thisSymbol = Buffer.from(
               thisSymbolResponse.transaction.tx.token.symbol,
@@ -1130,28 +1666,39 @@ Meteor.methods({
             }
           }
           transactions.push(adjusted)
-        })
+        }
 
         response.block.transactions = transactions
       }
       // insert into cache
-      updateAutoIncrement()
-      blockData.insert({ blockId, formattedData: response })
+      await updateAutoIncrement()
+      await blockData.insertAsync({ blockId, formattedData: response })
       return response
     }
   },
 
-  addressTransactions(request) {
-    check(request, Object)
+  async addressTransactions(request) {
+    check(request, Match.ObjectIncluding({ tx: [Match.ObjectIncluding({ txhash: String })] }))
+    // Cap array size to prevent resource exhaustion (UI sends pages of ~10)
+    if (request.tx.length > 20) {
+      throw new Meteor.Error(400, 'Too many transactions requested (max 20)')
+    }
+    // Validate each txhash is a 64-char hex string before making gRPC calls
+    const hexPattern = /^[0-9a-fA-F]{64}$/
+    for (const item of request.tx) {
+      if (!hexPattern.test(item.txhash)) {
+        throw new Meteor.Error(400, 'Invalid transaction hash format')
+      }
+    }
     console.log(
       `addressTransactions method called for ${request.tx.length} transactions`,
     )
     const targets = request.tx
     const result = []
-    targets.forEach((arr) => {
+    for (const arr of targets) {
       const req = { query: Buffer.from(arr.txhash, 'hex') }
       try {
-        const thisTxnHashResponse = Meteor.wrapAsync(getObject)(req)
+        const thisTxnHashResponse = await getObjectAsync(req)
 
         const output = helpers.txhash(thisTxnHashResponse)
 
@@ -1227,7 +1774,7 @@ Meteor.methods({
               'hex',
             ),
           }
-          const thisSymbolResponse = Meteor.wrapAsync(getObject)(symbolRequest)
+          const thisSymbolResponse = await getObjectAsync(symbolRequest)
           const helpersResponse = helpers.parseTokenAndTransferTokenTx(
             thisSymbolResponse,
             thisTxnHashResponse,
@@ -1278,7 +1825,7 @@ Meteor.methods({
               output.transaction.tx.signature.substring(0, 8),
               16,
             ),
-            fee: output.transaction.tx.fe,
+            fee: output.transaction.tx.fee,
             block: output.transaction.header.block_number,
             timestamp: output.transaction.header.timestamp_seconds,
           }
@@ -1359,72 +1906,72 @@ Meteor.methods({
           `Error fetching transaction hash in addressTransactions '${arr.txhash}' - ${err}`,
         )
       }
-    })
+    }
     return result
   },
 
-  getStats(request = {}) {
-    check(request, Object)
+  async getStats(request = {}) {
+    check(request, Match.Optional(Object))
     this.unblock()
-    const response = Meteor.wrapAsync(getStats)(request)
+    const response = await getStatsAsync(request)
     return response
   },
 
-  getObject(request) {
-    check(request, Object)
+  async getObject(request) {
+    check(request, Match.ObjectIncluding({ query: Match.Any }))
     this.unblock()
-    const response = Meteor.wrapAsync(getObject)(request)
+    const response = await getObjectAsync(request)
     return response
   },
 
-  getLatestData(request) {
-    check(request, Object)
+  async getLatestData(request) {
+    check(request, Match.ObjectIncluding({ filter: String, offset: Match.Integer, quantity: Match.Integer }))
     this.unblock()
-    const response = Meteor.wrapAsync(getLatestData)(request)
+    const response = await getLatestDataAsync(request)
     return response
   },
 
-  getAddressState(request) {
-    check(request, Object)
+  async getAddressState(request) {
+    check(request, Match.ObjectIncluding({ address: Match.Any }))
     this.unblock()
-    const response = Meteor.wrapAsync(getAddressState)(request)
+    const response = await getAddressStateAsync(request)
     return response
   },
 
-  getFullAddressState(request) {
-    check(request, Object)
+  async getFullAddressState(request) {
+    check(request, Match.ObjectIncluding({ address: Match.Any }))
     this.unblock()
-    const response = Meteor.wrapAsync(getFullAddressState)(request)
+    const response = await getFullAddressStateAsync(request)
     return response
   },
 
-  getMultiSigAddressState(request) {
-    check(request, Object)
+  async getMultiSigAddressState(request) {
+    check(request, Match.ObjectIncluding({ address: Match.Any }))
     this.unblock()
-    const response = Meteor.wrapAsync(getMultiSigAddressState)(request)
+    const response = await getMultiSigAddressStateAsync(request)
     return response
   },
 
-  getOTS(request) {
-    check(request, Object)
+  async getOTS(request) {
+    check(request, Match.ObjectIncluding({
+      address: Match.Any, page_from: Match.Integer, page_count: Match.Integer, unused_ots_index_from: Match.Integer,
+    }))
     this.unblock()
-    const response = Meteor.wrapAsync(getOTS)(request)
+    const response = await getOTSAsync(request)
     return response
   },
 
-  getTransactionsByAddress(request) {
-    check(request, Object)
+  async getTransactionsByAddress(request) {
+    check(request, Match.ObjectIncluding({ address: Match.Any, item_per_page: Match.Integer, page_number: Match.Integer }))
     this.unblock()
-    const response = Meteor.wrapAsync(getTransactionsByAddress)(request)
-    console.table(response)
-    return helpersaddressTransactions(response)
+    const response = await getTransactionsByAddressAsync(request)
+    return await helpersaddressTransactions(response)
   },
 
-  getSlavesByAddress(request) {
-    check(request, Object)
+  async getSlavesByAddress(request) {
+    check(request, Match.ObjectIncluding({ address: Match.Any }))
     this.unblock()
-    const response = Meteor.wrapAsync(getSlavesByAddress)(request)
-    console.log('response', response)
+    const response = await getSlavesByAddressAsync(request)
     const res = []
     _.forEach(response.slaves_detail, (item) => {
       const i = item
@@ -1454,7 +2001,11 @@ Meteor.methods({
   },
 })
 
-JsonRoutes.add('get', '/api/a/:id', (req, res) => {
+JsonRoutes.add('get', '/api/a/:id', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
   const aId = req.params.id
   check(aId, String)
   const validate = qrlAddressValdidator.hexString(aId)
@@ -1465,14 +2016,15 @@ JsonRoutes.add('get', '/api/a/:id', (req, res) => {
     }
     try {
       if (validate.sig.type !== 'MULTISIG') {
-        response = Meteor.wrapAsync(getAddressState)(request)
+        response = await getAddressStateAsync(request)
         response.isMultisig = false
       } else {
-        response = Meteor.wrapAsync(getMultiSigAddressState)(request)
+        response = await getMultiSigAddressStateAsync(request)
         response.isMultisig = true
       }
     } catch (e) {
-      response = e
+      console.error('API /api/a/:id error:', e)
+      response = { found: false, message: 'Error fetching address data', code: 5000 }
     }
   } else {
     response = { found: false, message: 'Invalid QRL address', code: 3000 }
@@ -1482,7 +2034,7 @@ JsonRoutes.add('get', '/api/a/:id', (req, res) => {
   })
 })
 
-function apiTxList(req, res, num) {
+async function apiTxList(req, res, num) {
   const aId = req.params.id
   check(aId, String)
   const validate = qrlAddressValdidator.hexString(aId)
@@ -1504,19 +2056,20 @@ function apiTxList(req, res, num) {
 
       let addressState
       if (validate.sig.type !== 'MULTISIG') {
-        addressState = Meteor.wrapAsync(getAddressState)(addressStateRequest)
+        addressState = await getAddressStateAsync(addressStateRequest)
       } else {
-        addressState = Meteor.wrapAsync(getMultiSigAddressState)(
+        addressState = await getMultiSigAddressStateAsync(
           addressStateRequest,
         )
       }
 
       // Calculate total pages based on transaction count
       let totalTransactions = 0
-      if (addressState.state && addressState.state.transaction_hashes) {
+      if (addressState && addressState.state && addressState.state.transaction_hashes) {
         totalTransactions = addressState.state.transaction_hashes.length
       } else if (
-        addressState.state
+        addressState
+        && addressState.state
         && addressState.state.transaction_hash_count
       ) {
         totalTransactions = parseInt(
@@ -1526,13 +2079,13 @@ function apiTxList(req, res, num) {
       }
       totalPages = Math.ceil(totalTransactions / 10)
 
-      const rawResponse = Meteor.wrapAsync(getTransactionsByAddress)(request)
-      const processedResponse = helpersaddressTransactions(rawResponse)
+      const rawResponse = await getTransactionsByAddressAsync(request)
+      const processedResponse = await helpersaddressTransactions(rawResponse)
       response = bufferToHex(processedResponse)
     } catch (e) {
-      response = e
+      console.error('API /api/a/tx/:id error:', e)
       JsonRoutes.sendResult(res, {
-        data: { found: false, message: response.message, code: 3001 },
+        data: { found: false, message: 'Error fetching transaction list', code: 5003 },
       })
       return
     }
@@ -1553,7 +2106,11 @@ function apiTxList(req, res, num) {
   })
 }
 
-JsonRoutes.add('get', '/api/a/tx/:id/:num', (req, res) => {
+JsonRoutes.add('get', '/api/a/tx/:id/:num', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
   const num = parseInt(req.params.num, 10) || 0
   if (num === 0) {
     // return that page number, if passed, must start with a 1
@@ -1562,20 +2119,28 @@ JsonRoutes.add('get', '/api/a/tx/:id/:num', (req, res) => {
     })
     return
   }
-  apiTxList(req, res, num)
+  await apiTxList(req, res, num)
 })
 
-JsonRoutes.add('get', '/api/a/tx/:id', (req, res) => {
-  apiTxList(req, res, 1)
+JsonRoutes.add('get', '/api/a/tx/:id', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
+  await apiTxList(req, res, 1)
 })
 
-JsonRoutes.add('get', '/api/tx/:id', (req, res) => {
+JsonRoutes.add('get', '/api/tx/:id', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
   const txId = req.params.id
   check(txId, String)
   let response = {}
   if (txId.length === 64) {
     // first check this is not cached
-    const queryResults = blockData.findOne({ txId })
+    const queryResults = await blockData.findOneAsync({ txId })
     if (queryResults !== undefined) {
       // cached transaction located
       response = queryResults.formattedData
@@ -1583,9 +2148,10 @@ JsonRoutes.add('get', '/api/tx/:id', (req, res) => {
       // cache empty, query grpc
       const request = { query: Buffer.from(txId, 'hex') }
       try {
-        response = Meteor.wrapAsync(getObject)(request)
+        response = await getObjectAsync(request)
       } catch (e) {
-        response = e
+        console.error('API /api/tx/:id error:', e)
+        response = { found: false, message: 'Error fetching transaction data', code: 5001 }
       }
     }
   } else {
@@ -1596,23 +2162,33 @@ JsonRoutes.add('get', '/api/tx/:id', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/block/:id', (req, res) => {
-  const txId = req.params.id
-  check(txId, String)
+JsonRoutes.add('get', '/api/block/:id', async (req, res) => {
+  if (!checkApiRateLimit(req)) {
+    JsonRoutes.sendResult(res, { code: 429, data: { error: 'Rate limit exceeded', code: 4290 } })
+    return
+  }
+  const blockId = req.params.id
+  check(blockId, String)
   let response = {}
-  if (parseInt(txId, 10).toString() === txId) {
+  if (parseInt(blockId, 10).toString() === blockId) {
     // first check this is not cached
-    const queryResults = blockData.findOne({ txId })
+    const queryResults = await blockData.findOneAsync({ blockId: parseInt(blockId, 10) })
     if (queryResults !== undefined) {
-      // cached transaction located
+      // cached block located
       response = queryResults.formattedData
     } else {
-      // cache empty, query grpc
-      const request = { query: Buffer.from(txId) }
+      // cache empty, query grpc using Promise pattern
+      const request = { query: Buffer.from(blockId) }
       try {
-        response = Meteor.wrapAsync(getObject)(request)
+        response = await new Promise((resolve, reject) => {
+          getObject(request, (error, result) => {
+            if (error) reject(error)
+            else resolve(result)
+          })
+        })
       } catch (e) {
-        response = e
+        console.error('API /api/block/:id error:', e)
+        response = { found: false, message: 'Error fetching block data', code: 5002 }
       }
     }
   } else {

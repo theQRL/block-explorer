@@ -1,4 +1,5 @@
 import { Blocks } from '/imports/api/index.js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './lastblocks.html'
 import { rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import { SHOR_PER_QUANTA, hexOrB32 } from '../../../startup/both/index.js'
@@ -11,6 +12,19 @@ const addHex = (b) => {
 }
 
 const sumValues = (obj) => Object.values(obj).reduce((a, b) => a + b)
+
+const findMiningPool = (minedBy) => {
+  if (!minedBy) {
+    return null
+  }
+
+  try {
+    const minerHexAddress = rawAddressToHexAddress(minedBy)
+    return MINING_POOLS.find((pool) => pool.address === minerHexAddress) || null
+  } catch (e) {
+    return null
+  }
+}
 
 Template.lastblocks.onCreated(() => {
   Meteor.subscribe('blocks')
@@ -37,18 +51,24 @@ Template.lastblocks.helpers({
     const x = moment.unix(this.header.timestamp_seconds)
     return moment(x).fromNow()
   },
-  miner() {
-    const x = this.minedBy
-    let ret = ''
-    MINING_POOLS.forEach((value) => {
-      if (value.address === rawAddressToHexAddress(x)) {
-        ret = `<a href='${value.link}' target="_blank">${value.name}</a>`
-      }
-    })
-    if (ret === '') {
-      return `${hexOrB32(x)}`
+  isKnownPool() {
+    return !!findMiningPool(this.minedBy)
+  },
+  poolName() {
+    const pool = findMiningPool(this.minedBy)
+    return pool ? pool.name : ''
+  },
+  poolLink() {
+    const pool = findMiningPool(this.minedBy)
+    return pool ? pool.link : ''
+  },
+  minerAddress() {
+    if (!this.minedBy) return 'Unknown'
+    try {
+      return hexOrB32(this.minedBy)
+    } catch (e) {
+      return 'Unknown'
     }
-    return ret
   },
   minerTip() {
     return this.minedBy

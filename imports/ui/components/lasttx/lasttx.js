@@ -2,8 +2,31 @@ import { BigNumber } from 'bignumber.js'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
 import { lasttx } from '/imports/api/index.js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './lasttx.html'
-import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+
+const getLastTxBorderTypeClass = (txType) => {
+  if (txType === 'transfer') {
+    return 'border-type-transfer'
+  }
+  if (txType === 'coinbase') {
+    return 'border-type-coinbase'
+  }
+  if (txType === 'transfer_token') {
+    return 'border-type-token'
+  }
+  if (txType === 'message') {
+    return 'border-type-message'
+  }
+  if (txType === 'slave') {
+    return 'border-type-slave'
+  }
+  if (txType === 'latticePK') {
+    return 'border-type-lattice'
+  }
+  return 'border-type-multisig'
+}
 
 Template.lasttx.onCreated(() => {
   Meteor.subscribe('lasttx')
@@ -70,6 +93,9 @@ Template.lasttx.helpers({
       ret = true
     }
     return ret
+  },
+  borderTypeClass(txType) {
+    return getLastTxBorderTypeClass(txType)
   },
   isTransfer(txType) {
     if (txType === 'transfer') {

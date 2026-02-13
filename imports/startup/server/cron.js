@@ -1,16 +1,14 @@
 /* eslint max-len: 0 */
 /* global _ */
-import { HTTP } from 'meteor/http'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { SHA512 } from 'jscrypto/es6'
 // import helpers from '@theqrl/explorer-helpers'
 /* eslint import/no-cycle: 0 */
 import {
-  getLatestData,
-  getObject,
-  getStats,
-  getPeersStat,
-  apiCall,
+  getLatestDataAsync,
+  getObjectAsync,
+  getStatsAsync,
+  getPeersStatAsync,
   makeTxListHumanReadable,
 } from '/imports/startup/server/index.js'
 
@@ -23,19 +21,44 @@ import {
   peerstats,
 } from '/imports/api/index.js'
 
-import { SHOR_PER_QUANTA } from '../both/index.js'
 import axios from 'axios'
+import { SHOR_PER_QUANTA } from '../both/index.js'
 
-const refreshBlocks = () => {
-  const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 10 }
-  const response = Meteor.wrapAsync(getLatestData)(request)
+const refreshBlocks = async () => {
+  let response
+  try {
+    const request = { filter: 'BLOCKHEADERS', offset: 0, quantity: 10 }
+    response = await getLatestDataAsync(request)
+  } catch (error) {
+    console.log('refreshBlocks: ERROR =', error.message || error.reason)
+    return
+  }
+
+  // Check if response is valid
+  if (!response || !response.blockheaders) {
+    console.log('refreshBlocks: No blockheaders data received')
+    return
+  }
 
   // identify miner and calculate total transacted in block
-  response.blockheaders.forEach((value, key) => {
+  for (const [key, value] of response.blockheaders.entries()) {
     const req = {
       query: Buffer.from(value.header.block_number.toString()),
     }
-    const res = Meteor.wrapAsync(getObject)(req)
+    let res
+    try {
+      res = await getObjectAsync(req)
+    } catch (error) {
+      console.log(`refreshBlocks: Error fetching block ${value.header.block_number}:`, error.message)
+      continue
+    }
+
+    // Check if the response has the expected structure
+    if (!res || !res.block_extended || !res.block_extended.extended_transactions) {
+      console.log(`refreshBlocks: Invalid block structure for block ${value.header.block_number}`)
+      continue
+    }
+
     let totalTransacted = 0
     res.block_extended.extended_transactions.forEach((val) => {
       totalTransacted += parseInt(val.tx.fee, 10)
@@ -51,14 +74,14 @@ const refreshBlocks = () => {
       }
     })
     response.blockheaders[key].totalTransacted = totalTransacted
-  })
+  }
 
   // Fetch current data
-  const current = Blocks.findOne()
+  const current = await Blocks.findOneAsync()
 
   // On vanilla build, current will be undefined so we can just insert data
   if (current === undefined) {
-    Blocks.insert(response)
+    await Blocks.insertAsync(response)
   } else {
     // Only update if data has changed.
     let newData = false
@@ -75,8 +98,8 @@ const refreshBlocks = () => {
     })
     if (newData === true) {
       // Clear and update cache as it's changed
-      Blocks.remove({})
-      Blocks.insert(response)
+      await Blocks.removeAsync({})
+      await Blocks.insertAsync(response)
     }
   }
 
@@ -97,12 +120,19 @@ const refreshBlocks = () => {
       ) {
         const httpPostUrl = Meteor.settings.glip.webhook
         try {
-          HTTP.call('POST', httpPostUrl, {
-            params: httpPostMessage,
+          const alertResponse = await fetch(httpPostUrl, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: new URLSearchParams(httpPostMessage).toString(),
           })
+          if (!alertResponse.ok) {
+            throw new Error(`HTTP ${alertResponse.status}`)
+          }
           return true
         } catch (e) {
-          // Got a network error, timeout, or HTTP error in the 400 or 500 range.
+          console.log('refreshBlocks: Glip webhook error:', e.message || e.reason || e)
         }
       }
     } catch (er) {
@@ -113,36 +143,50 @@ const refreshBlocks = () => {
   return true
 }
 
-function refreshLasttx() {
-  // First get confirmed transactions
-  const confirmed = Meteor.wrapAsync(getLatestData)({
-    filter: 'TRANSACTIONS',
-    offset: 0,
-    quantity: 10,
-  })
+async function refreshLasttx() {
+  let confirmed; let
+    unconfirmed
 
-  // Now get unconfirmed transactions
-  const unconfirmed = Meteor.wrapAsync(getLatestData)({
-    filter: 'TRANSACTIONS_UNCONFIRMED',
-    offset: 0,
-    quantity: 10,
-  })
+  try {
+    // First get confirmed transactions
+    confirmed = await getLatestDataAsync({
+      filter: 'TRANSACTIONS',
+      offset: 0,
+      quantity: 10,
+    })
+
+    // Now get unconfirmed transactions
+    unconfirmed = await getLatestDataAsync({
+      filter: 'TRANSACTIONS_UNCONFIRMED',
+      offset: 0,
+      quantity: 10,
+    })
+  } catch (error) {
+    console.log('refreshLasttx: ERROR =', error.message || error.reason)
+    return
+  }
+
+  // Check if responses are valid
+  if (!confirmed || !confirmed.transactions || !unconfirmed || !unconfirmed.transactions_unconfirmed) {
+    console.log('refreshLasttx: Invalid response data')
+    return
+  }
 
   // Merge the two together
-  const confirmedTxns = makeTxListHumanReadable(confirmed.transactions, true)
-  const unconfirmedTxns = makeTxListHumanReadable(
+  const confirmedTxns = await makeTxListHumanReadable(confirmed.transactions, true)
+  const unconfirmedTxns = await makeTxListHumanReadable(
     unconfirmed.transactions_unconfirmed,
-    false
+    false,
   )
   const merged = {}
   merged.transactions = unconfirmedTxns.concat(confirmedTxns)
 
   // Fetch current data
-  const current = lasttx.findOne()
+  const current = await lasttx.findOneAsync()
 
   // On vanilla build, current will be undefined so we can just insert data
   if (current === undefined) {
-    lasttx.insert(merged)
+    await lasttx.insertAsync(merged)
   } else {
     // Only update if data has changed.
     let newData = false
@@ -174,34 +218,34 @@ function refreshLasttx() {
 
     if (newData === true) {
       // Clear and update cache as it's changed
-      lasttx.remove({})
-      lasttx.insert(merged)
+      await lasttx.removeAsync({})
+      await lasttx.insertAsync(merged)
     }
   }
 }
 
-function refreshStats() {
+async function refreshStats() {
   let res
   try {
-    console.log("refreshStats: Starting...")
-    res = Meteor.wrapAsync(getStats)({ include_timeseries: true })
-    console.log("refreshStats: Got data:", res ? "YES" : "NO")
+    console.log('refreshStats: Starting...')
+    res = await getStatsAsync({ include_timeseries: true })
+    console.log('refreshStats: Got data:', res ? 'YES' : 'NO')
     if (res && res.block_timeseries) {
-      console.log("refreshStats: block_timeseries length:", res.block_timeseries.length)
+      console.log('refreshStats: block_timeseries length:', res.block_timeseries.length)
     } else {
-      console.log("refreshStats: No block_timeseries data")
+      console.log('refreshStats: No block_timeseries data')
       return
     }
   } catch (error) {
-    console.error("refreshStats: Error:", error.message)
+    console.error('refreshStats: Error:', error.message)
     return
   }
 
-  console.log("refreshStats: Processing data...")
-  
+  console.log('refreshStats: Processing data...')
+
   // Save status object
-  status.remove({})
-  status.insert(res)
+  await status.removeAsync({})
+  await status.insertAsync(res)
 
   // Start modifying data for home chart object
   const chartLineData = {
@@ -270,84 +314,143 @@ function refreshStats() {
   chartLineData.datasets.push(movingAverage)
 
   // Save in mongo
-  homechart.remove({})
-  homechart.insert(chartLineData)
-  console.log("refreshStats: Chart data inserted successfully")
+  await homechart.removeAsync({})
+  await homechart.insertAsync(chartLineData)
+  console.log('refreshStats: Chart data inserted successfully')
 }
 
 const refreshQuantaUsd = async () => {
   const apiUrl = 'https://market-data.automated.theqrl.org/'
-  const response = await axios.get(apiUrl)
-  const { price } = response.data
-  quantausd.remove({})
-  quantausd.insert({ price })
+  let response
+
+  try {
+    response = await axios.get(apiUrl)
+  } catch (error) {
+    console.log('refreshQuantaUsd: ERROR =', error.message || error.reason)
+    return
+  }
+
+  const price = Number(response && response.data ? response.data.price : null)
+  if (!Number.isFinite(price)) {
+    console.log('refreshQuantaUsd: Invalid market data response')
+    return
+  }
+
+  await quantausd.removeAsync({})
+  await quantausd.insertAsync({ price })
 }
 
-const refreshPeerStats = () => {
-  const response = Meteor.wrapAsync(getPeersStat)({})
+const refreshPeerStats = async () => {
+  let response
+
+  try {
+    response = await getPeersStatAsync({})
+  } catch (error) {
+    console.log('refreshPeerStats: ERROR =', error.message || error.reason)
+    return
+  }
+
+  // Check if response is valid
+  if (!response || !response.peers_stat) {
+    console.log('refreshPeerStats: No peers_stat data received')
+    return
+  }
 
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
     response.peers_stat[index].peer_ip = SHA512.hash(
-      Buffer.from(peer.peer_ip).toString()
+      Buffer.from(peer.peer_ip).toString(),
     )
       .toString()
       .toString('hex')
       .slice(0, 10)
     response.peers_stat[index].node_chain_state.header_hash = Buffer.from(
-      peer.node_chain_state.header_hash
+      peer.node_chain_state.header_hash,
     ).toString('hex')
-    response.peers_stat[index].node_chain_state.cumulative_difficulty =
-      parseInt(
-        Buffer.from(peer.node_chain_state.cumulative_difficulty).toString(
-          'hex'
-        ),
-        16
-      )
+    response.peers_stat[index].node_chain_state.cumulative_difficulty = parseInt(
+      Buffer.from(peer.node_chain_state.cumulative_difficulty).toString(
+        'hex',
+      ),
+      16,
+    )
   })
 
   // Update mongo collection
-  peerstats.remove({})
-  peerstats.insert(response)
+  await peerstats.removeAsync({})
+  await peerstats.insertAsync(response)
 }
 
 // Refresh blocks every 20 seconds
-Meteor.setInterval(() => {
-  refreshBlocks()
+Meteor.setInterval(async () => {
+  try {
+    await refreshBlocks()
+  } catch (error) {
+    console.log('setInterval refreshBlocks error:', error.message || error.reason)
+  }
 }, 20000)
 
 // Refresh lasttx cache every 10 seconds
-Meteor.setInterval(() => {
-  refreshLasttx()
+Meteor.setInterval(async () => {
+  try {
+    await refreshLasttx()
+  } catch (error) {
+    console.log('setInterval refreshLasttx error:', error.message || error.reason)
+  }
 }, 10000)
 
 // Refresh Status / Home Chart Data 20 seconds
-Meteor.setInterval(() => {
-  refreshStats()
+Meteor.setInterval(async () => {
+  try {
+    await refreshStats()
+  } catch (error) {
+    console.log('setInterval refreshStats error:', error.message || error.reason)
+  }
 }, 20000)
 
 // Refresh Quanta/USD Value every 120 seconds
-Meteor.setInterval(() => {
-  refreshQuantaUsd()
+Meteor.setInterval(async () => {
+  try {
+    await refreshQuantaUsd()
+  } catch (error) {
+    console.log('setInterval refreshQuantaUsd error:', error.message || error.reason)
+  }
 }, 120000)
 
 // Refresh peer stats every 20 seconds
-Meteor.setInterval(() => {
-  refreshPeerStats()
+Meteor.setInterval(async () => {
+  try {
+    await refreshPeerStats()
+  } catch (error) {
+    console.log('setInterval refreshPeerStats error:', error.message || error.reason)
+  }
 }, 20000)
 
 // On first load - cache all elements.
-Meteor.setTimeout(() => {
-  refreshBlocks()
-  refreshLasttx()
-  refreshStats()
-  refreshQuantaUsd()
-  refreshPeerStats()
+Meteor.setTimeout(async () => {
+  const refreshTasks = [
+    ['refreshBlocks', refreshBlocks],
+    ['refreshLasttx', refreshLasttx],
+    ['refreshStats', refreshStats],
+    ['refreshQuantaUsd', refreshQuantaUsd],
+    ['refreshPeerStats', refreshPeerStats],
+  ]
+
+  const results = await Promise.allSettled(
+    refreshTasks.map(([, refreshFn]) => refreshFn()),
+  )
+
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const [refreshName] = refreshTasks[index]
+      const refreshError = result.reason || {}
+      console.log(`Initial ${refreshName} error:`, refreshError.message || refreshError.reason || refreshError)
+    }
+  })
 }, 5000)
 
-JsonRoutes.add('get', '/api/emission', (req, res) => {
+JsonRoutes.add('get', '/api/emission', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     const emission = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
@@ -360,9 +463,9 @@ JsonRoutes.add('get', '/api/emission', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/emission/text', (req, res) => {
+JsonRoutes.add('get', '/api/emission/text', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     const emission = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
@@ -375,9 +478,9 @@ JsonRoutes.add('get', '/api/emission/text', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/reward', (req, res) => {
+JsonRoutes.add('get', '/api/reward', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     const reward = parseFloat(queryResults.block_last_reward) / SHOR_PER_QUANTA
@@ -390,9 +493,9 @@ JsonRoutes.add('get', '/api/reward', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/reward/text', (req, res) => {
+JsonRoutes.add('get', '/api/reward/text', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     const reward = parseFloat(queryResults.block_last_reward) / SHOR_PER_QUANTA
@@ -405,9 +508,9 @@ JsonRoutes.add('get', '/api/reward/text', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/rewardshor', (req, res) => {
+JsonRoutes.add('get', '/api/rewardshor', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     const reward = parseFloat(queryResults.block_last_reward)
@@ -420,9 +523,9 @@ JsonRoutes.add('get', '/api/rewardshor', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/rewardshor/text', (req, res) => {
+JsonRoutes.add('get', '/api/rewardshor/text', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     const reward = parseFloat(queryResults.block_last_reward)
@@ -435,9 +538,9 @@ JsonRoutes.add('get', '/api/rewardshor/text', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/blockheight', (req, res) => {
+JsonRoutes.add('get', '/api/blockheight', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     const blockheight = parseInt(queryResults.node_info.block_height, 10)
@@ -450,9 +553,9 @@ JsonRoutes.add('get', '/api/blockheight', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/blockheight/text', (req, res) => {
+JsonRoutes.add('get', '/api/blockheight/text', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     const blockheight = parseInt(queryResults.node_info.block_height, 10)
@@ -465,9 +568,9 @@ JsonRoutes.add('get', '/api/blockheight/text', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/status', (req, res) => {
+JsonRoutes.add('get', '/api/status', async (req, res) => {
   let response = {}
-  const queryResults = status.findOne()
+  const queryResults = await status.findOneAsync()
   if (queryResults !== undefined) {
     // cached transaction located
     response = queryResults
@@ -479,9 +582,9 @@ JsonRoutes.add('get', '/api/status', (req, res) => {
   })
 })
 
-JsonRoutes.add('get', '/api/miningstats', (req, res) => {
+JsonRoutes.add('get', '/api/miningstats', async (req, res) => {
   let response = {}
-  const queryResults = homechart.findOne()
+  const queryResults = await homechart.findOneAsync()
   if (queryResults !== undefined) {
     response = {
       block: queryResults.labels[queryResults.labels.length - 1],
