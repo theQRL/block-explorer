@@ -22,14 +22,16 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Network Status Card -->
           <div class="card card-accent">
-            <h3 class="hero-label flex items-center mb-4">
-              <i data-lucide="activity" class="w-4 h-4 mr-2 text-qrl-accent"></i>
-              Network
-            </h3>
-            <div class="space-y-3">
+            <div class="mb-6">
+              <h3 class="hero-label flex items-center">
+                <i data-lucide="activity" class="w-4 h-4 mr-2 text-qrl-accent"></i>
+                Network
+              </h3>
+            </div>
+            <div class="space-y-4">
               <div>
                 <div class="hero-label">State</div>
-                <div class="hero-number text-2xl">{{status.node_info.state}}</div>
+                <div class="mono-value text-xl sm:text-2xl font-bold leading-tight">{{status.node_info.state}}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -41,10 +43,10 @@
                   <div class="mono-value text-sm">{{status.node_info.num_connections}}</div>
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-3">
+              <div class="space-y-3">
                 <div>
                   <div class="hero-label">Network ID</div>
-                  <div class="mono-value text-sm break-words">{{status.node_info.network_id}}</div>
+                  <div class="mono-value text-sm whitespace-nowrap overflow-x-auto pr-1">{{status.node_info.network_id}}</div>
                 </div>
                 <div>
                   <div class="hero-label">Version</div>
@@ -56,14 +58,16 @@
 
           <!-- Blocks Card -->
           <div class="card card-accent">
-            <h3 class="hero-label flex items-center mb-4">
-              <i data-lucide="box" class="w-4 h-4 mr-2 text-qrl-accent"></i>
-              Blocks
-            </h3>
-            <div class="space-y-3">
+            <div class="mb-6">
+              <h3 class="hero-label flex items-center">
+                <i data-lucide="box" class="w-4 h-4 mr-2 text-qrl-accent"></i>
+                Blocks
+              </h3>
+            </div>
+            <div class="space-y-4">
               <div>
                 <div class="hero-label">Max Block Index</div>
-                <div class="hero-number">{{max_block_index}}</div>
+                <div class="mono-value text-xl sm:text-2xl font-bold leading-tight">{{max_block_index}}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -75,29 +79,50 @@
                   <div class="mono-value text-sm">{{status.block_time_sd}}</div>
                 </div>
               </div>
+              <div>
+                <div class="hero-label">Time Since Last Block</div>
+                <div class="mono-value text-sm">{{timeSinceLastBlock}}</div>
+              </div>
             </div>
           </div>
 
           <!-- Coin Supply Card -->
           <div class="card card-accent">
-            <h3 class="hero-label flex items-center mb-4">
-              <i data-lucide="coins" class="w-4 h-4 mr-2 text-qrl-accent"></i>
-              Coin Supply
-            </h3>
-            <div class="space-y-3">
-              <div>
-                <div class="hero-label">Emission</div>
-                <div class="hero-number text-2xl">{{emission}}%</div>
-                <div class="text-sm text-qrl-text-secondary font-mono">{{emission_raw}}</div>
+            <div class="mb-6">
+              <h3 class="hero-label flex items-center">
+                <i data-lucide="coins" class="w-4 h-4 mr-2 text-qrl-accent"></i>
+                Coin Supply
+              </h3>
+            </div>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="hero-label">Emission</div>
+                  <div class="mono-value text-xl sm:text-2xl font-bold leading-tight">{{emission}}%</div>
+                </div>
+                <div>
+                  <div class="hero-label">Price</div>
+                  <div class="mono-value text-xl sm:text-2xl font-bold leading-tight">{{quantaUsd}}</div>
+                </div>
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <div class="hero-label">Unmined</div>
-                  <div class="mono-value text-sm">{{unmined}}</div>
+                  <div class="hero-label">Market Cap</div>
+                  <div class="mono-value text-sm">{{marketCap}}</div>
+                </div>
+                <div>
+                  <div class="hero-label">Max Supply</div>
+                  <div class="mono-value text-sm">{{totalSupply}} QRL</div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="hero-label">Circulating</div>
+                  <div class="mono-value text-sm">{{emission_raw}} QRL</div>
                 </div>
                 <div>
                   <div class="hero-label">Block Reward</div>
-                  <div class="mono-value text-sm">{{reward(status.block_last_reward)}}</div>
+                  <div class="mono-value text-sm">{{reward(status.block_last_reward)}} QRL</div>
                 </div>
               </div>
             </div>

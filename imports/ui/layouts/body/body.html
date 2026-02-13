@@ -1,6 +1,6 @@
 <template name="appBody">
   <!-- Top Header -->
-  <header class="bg-qrl-secondary/80 backdrop-blur-md sticky top-0 z-50 border-gradient-bottom">
+  <header class="site-header sticky top-0 z-50 border-gradient-bottom">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- First Line: Logo and Search -->
       <div class="flex items-center justify-between pb-3">
@@ -44,7 +44,7 @@
               <i data-lucide="box" class="w-4 h-4 pointer-events-none"></i>
               <span>Blocks</span>
             </div>
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
+            <span class="nav-underline-gradient absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-200 group-hover:w-full"></span>
           </a>
 
           <a href="/lasttx" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
@@ -52,7 +52,7 @@
               <i data-lucide="arrow-right" class="w-4 h-4 pointer-events-none"></i>
               <span>Transactions</span>
             </div>
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
+            <span class="nav-underline-gradient absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-200 group-hover:w-full"></span>
           </a>
 
           <a href="/unconfirmed" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuUnconfirmedTransactionsActive}}" style="{{walletStatus.menuHiddenInverse}}">
@@ -60,7 +60,7 @@
               <i data-lucide="clock" class="w-4 h-4 pointer-events-none"></i>
               <span>Unconfirmed</span>
             </div>
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
+            <span class="nav-underline-gradient absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-200 group-hover:w-full"></span>
           </a>
 
           <a href="/richlist" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuRichListActive}}">
@@ -68,7 +68,7 @@
               <i data-lucide="list" class="w-4 h-4 pointer-events-none"></i>
               <span>Rich List</span>
             </div>
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
+            <span class="nav-underline-gradient absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-200 group-hover:w-full"></span>
           </a>
 
           <a href="/peers" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1 {{menuPeersActive}}">
@@ -76,7 +76,7 @@
               <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
               <span>Peers</span>
             </div>
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
+            <span class="nav-underline-gradient absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-200 group-hover:w-full"></span>
           </a>
 
           <a href="https://wallet.theqrl.org/" target="_blank" class="group text-qrl-text hover:text-qrl-accent transition-colors relative py-1">
@@ -84,7 +84,7 @@
               <i data-lucide="wallet" class="w-4 h-4 pointer-events-none"></i>
               <span>Wallet</span>
             </div>
-            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-qrl-accent transition-all duration-200 group-hover:w-full"></span>
+            <span class="nav-underline-gradient absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-200 group-hover:w-full"></span>
           </a>
         </nav>
       </div>
@@ -152,22 +152,74 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-qrl-secondary border-t border-qrl-border border-gradient-top">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="text-center">
-        <a href="/" class="inline-block mb-4">
-          <img class="h-8 w-auto mx-auto" src="/img/icon.svg" alt="QRL Explorer" />
-        </a>
-        <p class="text-qrl-text-secondary text-sm">
-          QRL Explorer<br>
-          version {{EXPLORER_VERSION}}
-        </p>
-        <div class="mt-4 flex justify-center space-x-6">
-          <a href="https://theqrl.org/" target="_blank" class="text-qrl-text-secondary hover:text-qrl-accent transition-colors text-sm">
-            theQRL.org
+  <footer class="site-footer border-gradient-top">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-9">
+      <div class="site-footer-grid">
+        <section class="site-footer-brand">
+          <a href="/" class="site-footer-logo-wrap">
+            <img class="h-8 w-auto" src="/img/icon.svg" alt="QRL Explorer" />
+            <span class="site-footer-brand-title">QRL Explorer</span>
           </a>
-          <a href="https://github.com/theQRL/block-explorer" target="_blank" class="text-qrl-text-secondary hover:text-qrl-accent transition-colors text-sm">
-            GitHub
+          <p class="site-footer-brand-copy">
+            Quantum Resistant Ledger blockchain explorer.
+          </p>
+          <p class="site-footer-meta">
+            Version {{EXPLORER_VERSION}} · MIT License
+          </p>
+        </section>
+
+        <nav class="site-footer-nav" aria-label="Explore links">
+          <h4 class="site-footer-heading">Explore</h4>
+          <a href="/lastblocks" class="site-footer-link">
+            <i data-lucide="box" class="w-4 h-4 pointer-events-none"></i>
+            <span>Blocks</span>
+          </a>
+          <a href="/lasttx" class="site-footer-link">
+            <i data-lucide="arrow-right" class="w-4 h-4 pointer-events-none"></i>
+            <span>Transactions</span>
+          </a>
+          <a href="/unconfirmed" class="site-footer-link">
+            <i data-lucide="clock" class="w-4 h-4 pointer-events-none"></i>
+            <span>Unconfirmed</span>
+          </a>
+          <a href="/richlist" class="site-footer-link">
+            <i data-lucide="list" class="w-4 h-4 pointer-events-none"></i>
+            <span>Rich List</span>
+          </a>
+          <a href="/peers" class="site-footer-link">
+            <i data-lucide="users" class="w-4 h-4 pointer-events-none"></i>
+            <span>Peers</span>
+          </a>
+        </nav>
+
+        <nav class="site-footer-nav" aria-label="Ecosystem links">
+          <h4 class="site-footer-heading">Ecosystem</h4>
+          <a href="https://theqrl.org/" target="_blank" class="site-footer-link">
+            <i data-lucide="house" class="w-4 h-4 pointer-events-none"></i>
+            <span>theQRL.org</span>
+          </a>
+          <a href="https://wallet.theqrl.org/" target="_blank" class="site-footer-link">
+            <i data-lucide="wallet" class="w-4 h-4 pointer-events-none"></i>
+            <span>Web Wallet</span>
+          </a>
+          <a href="https://github.com/theQRL/block-explorer" target="_blank" class="site-footer-link">
+            <i data-lucide="github" class="w-4 h-4 pointer-events-none"></i>
+            <span>GitHub</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="site-footer-bottom">
+        <p class="site-footer-meta">© {{currentYear}} The QRL Foundation</p>
+        <div class="site-footer-utility">
+          <a href="https://github.com/theQRL/block-explorer/blob/master/LICENSE" target="_blank" class="site-footer-utility-link">
+            License
+          </a>
+          <a href="https://github.com/theQRL/block-explorer/issues" target="_blank" class="site-footer-utility-link">
+            Issues
+          </a>
+          <a href="https://status.theqrl.org/" target="_blank" class="site-footer-utility-link">
+            Status
           </a>
         </div>
       </div>

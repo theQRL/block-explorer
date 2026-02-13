@@ -27,32 +27,51 @@
       </div>
     </div>
 
-    <!-- Modern Network Activity Chart -->
-    <div class="card bg-gradient-accent">
-      <div class="flex items-center justify-between mb-6">
-        <h3 class="text-xl font-bold text-qrl-text">Network Activity</h3>
-        <div></div>
+    <!-- Visual-first Network Activity Chart -->
+    <div class="card network-chart-card">
+      <div class="network-chart-header">
+        <div>
+          <h3 class="text-xl font-bold text-qrl-text tracking-wide">Network Activity</h3>
+          <p class="text-sm text-qrl-text-secondary mt-1">
+            Hash power and average block-time trends across recent blocks.
+          </p>
+        </div>
+        <div class="network-chart-metrics">
+          <div class="network-metric-pill">
+            <span class="network-metric-label">Hash Power</span>
+            <span id="chartStatHash" class="network-metric-value">--</span>
+          </div>
+          <div class="network-metric-pill">
+            <span class="network-metric-label">Difficulty</span>
+            <span id="chartStatDifficulty" class="network-metric-value">--</span>
+          </div>
+          <div class="network-metric-pill">
+            <span class="network-metric-label">Avg Block Time</span>
+            <span id="chartStatBlockTime" class="network-metric-value">--</span>
+          </div>
+        </div>
       </div>
 
       <!-- Chart Container -->
-      <div id="chart" class="relative w-full h-80 bg-qrl-surface/30 rounded-lg overflow-hidden">
-        <!-- Modern Loading Animation -->
-        <section id="chartLoading" class="absolute inset-0 flex items-center justify-center bg-qrl-secondary/10 backdrop-blur-sm">
-          <div class="flex flex-col items-center space-y-4">
-            <div class="relative">
-              <div class="w-16 h-16 border-4 border-qrl-accent/20 border-t-qrl-accent rounded-full animate-spin"></div>
-              <div class="absolute top-2 left-2 w-12 h-12 border-4 border-transparent border-t-qrl-accent/60 rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 0.8s;"></div>
-            </div>
-            <div class="text-qrl-text-secondary font-medium">Loading network data...</div>
-            <div class="flex space-x-1">
-              <div class="w-2 h-2 bg-qrl-accent rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
-              <div class="w-2 h-2 bg-qrl-accent rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
-              <div class="w-2 h-2 bg-qrl-accent rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
+      <div id="chart" class="network-chart-shell">
+        <div class="network-chart-glow network-chart-glow-left" aria-hidden="true"></div>
+        <div class="network-chart-glow network-chart-glow-right" aria-hidden="true"></div>
+
+        <!-- Loading Animation -->
+        <section id="chartLoading" class="network-chart-loading absolute inset-0 flex items-center justify-center">
+          <div class="flex flex-col items-center gap-4">
+            <div class="network-loader-orb"></div>
+            <div class="text-qrl-text-secondary font-medium tracking-wide">Syncing network activity</div>
+            <div class="network-loader-bars" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
           </div>
         </section>
 
-        <div id="chart-container" class="w-full h-full"></div>
+        <div id="chart-container" class="w-full h-full px-1 pt-2 sm:px-2"></div>
       </div>
     </div>
 

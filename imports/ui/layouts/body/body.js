@@ -38,4 +38,5 @@ Template.appBody.onRendered(() => {
 })
 Template.appBody.helpers({
   EXPLORER_VERSION: () => EXPLORER_VERSION,
+  currentYear: () => new Date().getFullYear(),
 })
