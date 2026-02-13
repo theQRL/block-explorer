@@ -6,6 +6,8 @@
   "scripts": {
     "build:css": "tailwindcss -i ./public/tailwind.css -o ./public/tailwind-output.css",
     "build:css:watch": "tailwindcss -i ./public/tailwind.css -o ./public/tailwind-output.css --watch",
+    "lint": "eslint --ext .js client imports server",
+    "lint:fix": "eslint --ext .js --fix client imports server",
     "start": "meteor",
     "dev": "concurrently \"npm run build:css:watch\" \"meteor\""
   },

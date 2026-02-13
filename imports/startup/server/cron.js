@@ -5,15 +5,10 @@ import { SHA512 } from 'jscrypto/es6'
 // import helpers from '@theqrl/explorer-helpers'
 /* eslint import/no-cycle: 0 */
 import {
-  getLatestData,
   getLatestDataAsync,
-  getObject,
   getObjectAsync,
-  getStats,
   getStatsAsync,
-  getPeersStat,
   getPeersStatAsync,
-  apiCall,
   makeTxListHumanReadable,
 } from '/imports/startup/server/index.js'
 
@@ -26,8 +21,8 @@ import {
   peerstats,
 } from '/imports/api/index.js'
 
-import { SHOR_PER_QUANTA } from '../both/index.js'
 import axios from 'axios'
+import { SHOR_PER_QUANTA } from '../both/index.js'
 
 const refreshBlocks = async () => {
   let response
@@ -57,13 +52,13 @@ const refreshBlocks = async () => {
       console.log(`refreshBlocks: Error fetching block ${value.header.block_number}:`, error.message)
       continue
     }
-    
+
     // Check if the response has the expected structure
     if (!res || !res.block_extended || !res.block_extended.extended_transactions) {
       console.log(`refreshBlocks: Invalid block structure for block ${value.header.block_number}`)
       continue
     }
-    
+
     let totalTransacted = 0
     res.block_extended.extended_transactions.forEach((val) => {
       totalTransacted += parseInt(val.tx.fee, 10)
@@ -149,7 +144,8 @@ const refreshBlocks = async () => {
 }
 
 async function refreshLasttx() {
-  let confirmed, unconfirmed
+  let confirmed; let
+    unconfirmed
 
   try {
     // First get confirmed transactions
@@ -180,7 +176,7 @@ async function refreshLasttx() {
   const confirmedTxns = await makeTxListHumanReadable(confirmed.transactions, true)
   const unconfirmedTxns = await makeTxListHumanReadable(
     unconfirmed.transactions_unconfirmed,
-    false
+    false,
   )
   const merged = {}
   merged.transactions = unconfirmedTxns.concat(confirmedTxns)
@@ -231,22 +227,22 @@ async function refreshLasttx() {
 async function refreshStats() {
   let res
   try {
-    console.log("refreshStats: Starting...")
+    console.log('refreshStats: Starting...')
     res = await getStatsAsync({ include_timeseries: true })
-    console.log("refreshStats: Got data:", res ? "YES" : "NO")
+    console.log('refreshStats: Got data:', res ? 'YES' : 'NO')
     if (res && res.block_timeseries) {
-      console.log("refreshStats: block_timeseries length:", res.block_timeseries.length)
+      console.log('refreshStats: block_timeseries length:', res.block_timeseries.length)
     } else {
-      console.log("refreshStats: No block_timeseries data")
+      console.log('refreshStats: No block_timeseries data')
       return
     }
   } catch (error) {
-    console.error("refreshStats: Error:", error.message)
+    console.error('refreshStats: Error:', error.message)
     return
   }
 
-  console.log("refreshStats: Processing data...")
-  
+  console.log('refreshStats: Processing data...')
+
   // Save status object
   await status.removeAsync({})
   await status.insertAsync(res)
@@ -320,7 +316,7 @@ async function refreshStats() {
   // Save in mongo
   await homechart.removeAsync({})
   await homechart.insertAsync(chartLineData)
-  console.log("refreshStats: Chart data inserted successfully")
+  console.log('refreshStats: Chart data inserted successfully')
 }
 
 const refreshQuantaUsd = async () => {
@@ -363,21 +359,20 @@ const refreshPeerStats = async () => {
   // Convert bytes to string in response object
   _.each(response.peers_stat, (peer, index) => {
     response.peers_stat[index].peer_ip = SHA512.hash(
-      Buffer.from(peer.peer_ip).toString()
+      Buffer.from(peer.peer_ip).toString(),
     )
       .toString()
       .toString('hex')
       .slice(0, 10)
     response.peers_stat[index].node_chain_state.header_hash = Buffer.from(
-      peer.node_chain_state.header_hash
+      peer.node_chain_state.header_hash,
     ).toString('hex')
-    response.peers_stat[index].node_chain_state.cumulative_difficulty =
-      parseInt(
-        Buffer.from(peer.node_chain_state.cumulative_difficulty).toString(
-          'hex'
-        ),
-        16
-      )
+    response.peers_stat[index].node_chain_state.cumulative_difficulty = parseInt(
+      Buffer.from(peer.node_chain_state.cumulative_difficulty).toString(
+        'hex',
+      ),
+      16,
+    )
   })
 
   // Update mongo collection
@@ -441,7 +436,7 @@ Meteor.setTimeout(async () => {
   ]
 
   const results = await Promise.allSettled(
-    refreshTasks.map(([, refreshFn]) => refreshFn())
+    refreshTasks.map(([, refreshFn]) => refreshFn()),
   )
 
   results.forEach((result, index) => {

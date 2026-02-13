@@ -2,7 +2,6 @@ import { homechart } from '/imports/api/index.js'
 
 import './home.html'
 import '../../components/status/status.js'
-/* global LocalStore */
 
 const MAX_VISUAL_POINTS = 72
 
@@ -119,8 +118,7 @@ function buildVisualChartData(rawData) {
 
   const hashPowerDataset = findDatasetByMatchers(rawData.datasets, [['hash', 'power']]) || rawData.datasets[0]
   const difficultyDataset = findDatasetByMatchers(rawData.datasets, [['difficulty']])
-  const blockTimeDataset =
-    findDatasetByMatchers(rawData.datasets, [['block', 'time', 'average'], ['block', 'time']])
+  const blockTimeDataset = findDatasetByMatchers(rawData.datasets, [['block', 'time', 'average'], ['block', 'time']])
     || rawData.datasets[rawData.datasets.length - 1]
 
   if (!hashPowerDataset || !blockTimeDataset) {
@@ -452,8 +450,7 @@ async function updateChart(newData) {
     return
   }
 
-  const hasFreshData =
-    !lastProcessedData
+  const hasFreshData = !lastProcessedData
     || visualData.latestBlock !== lastProcessedData.latestBlock
     || visualData.rawLength !== lastProcessedData.rawLength
 
@@ -478,7 +475,7 @@ async function updateChart(newData) {
         },
       },
       false,
-      true
+      true,
     )
 
     lastProcessedData = {

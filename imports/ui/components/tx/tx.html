@@ -533,9 +533,13 @@
             <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
               <div class="hero-label">Block</div>
               <div class="mono-value text-lg">
-                <a href="/block/{{tx.header.block_number}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                  {{tx.header.block_number}}
-                </a>
+                {{#if isConfirmed}}
+                  <a href="/block/{{tx.header.block_number}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                    {{tx.header.block_number}}
+                  </a>
+                {{else}}
+                  Pending
+                {{/if}}
               </div>
             </div>
             <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">

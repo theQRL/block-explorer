@@ -127,7 +127,7 @@ Template.richlist.helpers({
       return data.length
     }
     return 0
-  }
+  },
 })
 
 Template.richlist.events({

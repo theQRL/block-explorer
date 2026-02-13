@@ -6,9 +6,15 @@
       {{#if richlistLoading}}
         <div class="card">
           <div class="flex items-center justify-center py-12">
-            <div class="text-center">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
-              <div class="text-qrl-text-secondary">Loading richlist data...</div>
+            <div class="flex flex-col items-center gap-4">
+              <div class="network-loader-orb"></div>
+              <div class="text-qrl-text-secondary font-medium tracking-wide">Loading richlist data...</div>
+              <div class="network-loader-bars" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
             </div>
           </div>
         </div>

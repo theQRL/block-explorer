@@ -15,13 +15,13 @@ import { check, Match } from 'meteor/check'
 import { WebApp } from 'meteor/webapp'
 import { blockData, quantausd } from '/imports/api/index.js'
 import '/imports/startup/server/cron.js' /* eslint-disable-line */
+import { DDPRateLimiter } from 'meteor/ddp-rate-limiter'
 import {
   EXPLORER_VERSION,
   SHOR_PER_QUANTA,
   anyAddressToRaw,
   bufferToHex,
 } from '../both/index.js'
-import { DDPRateLimiter } from 'meteor/ddp-rate-limiter'
 
 const PROTO_PATH = Assets.absoluteFilePath('qrlbase.proto').split('qrlbase.proto')[0]
 console.log(`Using local folder ${PROTO_PATH} for Proto files`)
@@ -85,7 +85,7 @@ WebApp.connectHandlers.use((req, res, next) => {
   const cspHeader = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`,
-    `style-src 'self' 'unsafe-inline'`,
+    'style-src \'self\' \'unsafe-inline\'',
     "font-src 'self' data:",
     "connect-src 'self' https: wss: ws: wss://*.theqrl.org:* ws://*.theqrl.org:*",
     "img-src 'self' data: https:",
@@ -129,8 +129,8 @@ WebApp.connectHandlers.use((req, res, next) => {
     }
 
     // Only modify HTML responses, skip JSON/API responses
-    const isHtml = contentType.includes('text/html') ||
-                   (!contentType && chunks.length > 0)
+    const isHtml = contentType.includes('text/html')
+                   || (!contentType && chunks.length > 0)
 
     if (!isHtml || chunks.length === 0) {
       // Not HTML or no content, pass through
@@ -150,7 +150,7 @@ WebApp.connectHandlers.use((req, res, next) => {
     // Add nonce to all script tags that don't already have one
     const modifiedBody = body.replace(
       /<script(?![^>]*nonce=)/g,
-      `<script nonce="${nonce}"`
+      `<script nonce="${nonce}"`,
     )
 
     res.write = originalWrite
@@ -402,7 +402,7 @@ const errorCallback = (error, message, alert) => {
 // this function will call loadGrpcClient to establish one.
 const connectToNode = (endpoint, callback) => {
   // First check if there is an existing object to store the gRPC connection
-  if (qrlClient.hasOwnProperty(endpoint) === true) {
+  if (Object.prototype.hasOwnProperty.call(qrlClient, endpoint) === true) {
     // eslint-disable-line
     console.log(
       'Existing connection found for ',
@@ -499,30 +499,28 @@ const connectNodes = () => {
 
 // Connect to all nodes (Promise-based)
 const connectNodesAsync = async () => {
-  const connectionPromises = API_NODES.map((node, index) => {
-    return new Promise((resolve) => {
-      const endpoint = node.address
-      console.log(`Attempting to create gRPC connection to node: ${endpoint} ...`)
-      connectToNode(endpoint, (err, res) => {
-        if (err) {
-          console.log(`Failed to connect to node ${endpoint}`)
-          API_NODES[index].state = false
-          API_NODES[index].height = 0
-        } else {
-          console.log(`Connected to ${endpoint}`)
-          API_NODES[index].state = true
-          API_NODES[index].height = parseInt(res.info.block_height, 10)
-        }
-        // Always resolve, even on error, so we don't block other connections
-        resolve()
-      })
+  const connectionPromises = API_NODES.map((node, index) => new Promise((resolve) => {
+    const endpoint = node.address
+    console.log(`Attempting to create gRPC connection to node: ${endpoint} ...`)
+    connectToNode(endpoint, (err, res) => {
+      if (err) {
+        console.log(`Failed to connect to node ${endpoint}`)
+        API_NODES[index].state = false
+        API_NODES[index].height = 0
+      } else {
+        console.log(`Connected to ${endpoint}`)
+        API_NODES[index].state = true
+        API_NODES[index].height = parseInt(res.info.block_height, 10)
+      }
+      // Always resolve, even on error, so we don't block other connections
+      resolve()
     })
-  })
+  }))
 
   await Promise.all(connectionPromises)
 
   // Log connection summary
-  const activeCount = API_NODES.filter(node => node.state === true).length
+  const activeCount = API_NODES.filter((node) => node.state === true).length
   console.log(`Connected to ${activeCount} of ${API_NODES.length} nodes`)
 }
 
@@ -537,7 +535,7 @@ const updateAutoIncrement = async () => {
       upsert: true,
       returnDocument: 'after',
       returnOriginal: false,
-    }
+    },
   )
   const autoIncrementValue = incrementResult && incrementResult.value
     ? incrementResult.value.value
@@ -550,7 +548,7 @@ const updateAutoIncrement = async () => {
       {
         returnDocument: 'after',
         returnOriginal: false,
-      }
+      },
     )
 
     if (resetResult && resetResult.value) {
@@ -668,66 +666,64 @@ const qrlApi = (api, request, callback) => {
 }
 
 // Promise-based wrapper for qrlApi
-const qrlApiAsync = (api, request) => {
-  return new Promise((resolve, reject) => {
-    const activeNodes = []
+const qrlApiAsync = (api, request) => new Promise((resolve, reject) => {
+  const activeNodes = []
 
-    // Determine current active nodes
-    API_NODES.forEach((node) => {
-      if (node.state === true) {
-        activeNodes.push(node)
-      }
-    })
-
-    // Determine node with highest block height and set as bestNode
-    const bestNode = {}
-    bestNode.address = ''
-    bestNode.height = 0
-    activeNodes.forEach((node) => {
-      if (node.height > bestNode.height) {
-        bestNode.address = node.address
-        bestNode.height = node.height
-      }
-    })
-
-    // If all nodes have gone offline, fail
-    if (activeNodes.length === 0) {
-      const myError = errorCallback(
-        'The block explorer server cannot connect to any API node',
-        'Cannot connect to API',
-        '**ERROR/noActiveNodes/b**',
-      )
-      reject(myError)
-    } else {
-      // Validate client exists
-      if (!qrlClient[bestNode.address] || !qrlClient[bestNode.address][api]) {
-        const myError = errorCallback(
-          `GRPC client not ready for ${bestNode.address}`,
-          'GRPC client not available',
-          '**ERROR/clientNotReady**',
-        )
-        reject(myError)
-        return
-      }
-
-      // Make the API call
-      qrlClient[bestNode.address][api](request, (error, response) => {
-        if (error) {
-          reject(error)
-        } else if (!response) {
-          const myError = errorCallback(
-            'Empty response from GRPC call',
-            'No response data',
-            '**ERROR/emptyResponse**',
-          )
-          reject(myError)
-        } else {
-          resolve(response)
-        }
-      })
+  // Determine current active nodes
+  API_NODES.forEach((node) => {
+    if (node.state === true) {
+      activeNodes.push(node)
     }
   })
-}
+
+  // Determine node with highest block height and set as bestNode
+  const bestNode = {}
+  bestNode.address = ''
+  bestNode.height = 0
+  activeNodes.forEach((node) => {
+    if (node.height > bestNode.height) {
+      bestNode.address = node.address
+      bestNode.height = node.height
+    }
+  })
+
+  // If all nodes have gone offline, fail
+  if (activeNodes.length === 0) {
+    const myError = errorCallback(
+      'The block explorer server cannot connect to any API node',
+      'Cannot connect to API',
+      '**ERROR/noActiveNodes/b**',
+    )
+    reject(myError)
+  } else {
+    // Validate client exists
+    if (!qrlClient[bestNode.address] || !qrlClient[bestNode.address][api]) {
+      const myError = errorCallback(
+        `GRPC client not ready for ${bestNode.address}`,
+        'GRPC client not available',
+        '**ERROR/clientNotReady**',
+      )
+      reject(myError)
+      return
+    }
+
+    // Make the API call
+    qrlClient[bestNode.address][api](request, (error, response) => {
+      if (error) {
+        reject(error)
+      } else if (!response) {
+        const myError = errorCallback(
+          'Empty response from GRPC call',
+          'No response data',
+          '**ERROR/emptyResponse**',
+        )
+        reject(myError)
+      } else {
+        resolve(response)
+      }
+    })
+  }
+})
 
 async function addTokenDetail(transaction) {
   const tokenDetail = {}
@@ -835,24 +831,24 @@ const helpersaddressTransactions = async (response) => {
           address_hex: `Q${Buffer.from(txOutput).toString('hex')}`,
           amount: `${formatTokenAmount(
             tx.tx.transfer_token.amounts[index],
-            txEdited.tx.transfer_token.decimals
+            txEdited.tx.transfer_token.decimals,
           )} ${txEdited.tx.transfer_token.symbol}`,
         })
       })
       txEdited.tx.outputs = outputs
       txEdited.tx.totalTransferred = `${sumTokenTotal(
         tx.tx.transfer_token.amounts,
-        txEdited.tx.transfer_token.decimals
+        txEdited.tx.transfer_token.decimals,
       )} ${txEdited.tx.transfer_token.symbol}`
       txEdited.tx.transfer_token.addrs_to = hexlified
       if (tx.tx.transfer_token.symbol) {
         txEdited.tx.transfer_token.symbol = Buffer.from(
-          txEdited.tx.transfer_token.symbol
+          txEdited.tx.transfer_token.symbol,
         ).toString()
       }
       if (tx.tx.transfer_token.name) {
         txEdited.tx.transfer_token.name = Buffer.from(
-          txEdited.tx.transfer_token.name
+          txEdited.tx.transfer_token.name,
         ).toString()
       }
     }
@@ -886,7 +882,7 @@ const helpersaddressTransactions = async (response) => {
   return response
 }
 
-const getOTS = (request, callback) => {
+const getOTSAsync = (request) => new Promise((resolve, reject) => {
   try {
     qrlApi('GetOTS', request, (error, response) => {
       if (error) {
@@ -895,10 +891,9 @@ const getOTS = (request, callback) => {
           'Cannot access API/GetOTS',
           '**ERROR/getOTS** ',
         )
-        callback(myError, null)
+        reject(myError)
       } else {
-        // console.log(response)
-        callback(null, response)
+        resolve(response)
       }
     })
   } catch (error) {
@@ -907,35 +902,9 @@ const getOTS = (request, callback) => {
       'Cannot access API/GetOTS',
       '**ERROR/GetOTS**',
     )
-    callback(myError, null)
+    reject(myError)
   }
-}
-
-const getOTSAsync = (request) => {
-  return new Promise((resolve, reject) => {
-    try {
-      qrlApi('GetOTS', request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(
-            error,
-            'Cannot access API/GetOTS',
-            '**ERROR/getOTS** ',
-          )
-          reject(myError)
-        } else {
-          resolve(response)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(
-        error,
-        'Cannot access API/GetOTS',
-        '**ERROR/GetOTS**',
-      )
-      reject(myError)
-    }
-  })
-}
+})
 
 const getFullAddressState = (request, callback) => {
   try {
@@ -974,13 +943,13 @@ const getAddressState = (request, callback) => {
         const myError = errorCallback(
           error,
           'Cannot access API/GetOptimizedAddressState',
-          '**ERROR/getAddressState** '
+          '**ERROR/getAddressState** ',
         )
         callback(myError, null)
       } else {
         if (response.state.address) {
           response.state.address = `Q${Buffer.from(
-            response.state.address
+            response.state.address,
           ).toString('hex')}`
         }
 
@@ -1012,7 +981,7 @@ const getMultiSigAddressState = (request, callback) => {
           const myError = errorCallback(
             error,
             'No state returned for this address',
-            '**ERROR/getMultiSigAddressState** '
+            '**ERROR/getMultiSigAddressState** ',
           )
           callback(myError, null)
           return
@@ -1047,65 +1016,55 @@ const getMultiSigAddressState = (request, callback) => {
   }
 }
 
-const getAddressStateAsync = (request) => {
-  return new Promise((resolve, reject) => {
-    getAddressState(request, (error, response) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(response)
-      }
-    })
+const getAddressStateAsync = (request) => new Promise((resolve, reject) => {
+  getAddressState(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
   })
-}
+})
 
-const getFullAddressStateAsync = (request) => {
-  return new Promise((resolve, reject) => {
-    getFullAddressState(request, (error, response) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(response)
-      }
-    })
+const getFullAddressStateAsync = (request) => new Promise((resolve, reject) => {
+  getFullAddressState(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
   })
-}
+})
 
-const getMultiSigAddressStateAsync = (request) => {
-  return new Promise((resolve, reject) => {
-    getMultiSigAddressState(request, (error, response) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(response)
-      }
-    })
+const getMultiSigAddressStateAsync = (request) => new Promise((resolve, reject) => {
+  getMultiSigAddressState(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
   })
-}
+})
 
-const getTransactionsByAddressAsync = (request) => {
-  return new Promise((resolve, reject) => {
-    getTransactionsByAddress(request, (error, response) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(response)
-      }
-    })
+const getTransactionsByAddressAsync = (request) => new Promise((resolve, reject) => {
+  getTransactionsByAddress(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
   })
-}
+})
 
-const getSlavesByAddressAsync = (request) => {
-  return new Promise((resolve, reject) => {
-    getSlavesByAddress(request, (error, response) => {
-      if (error) {
-        reject(error)
-      } else {
-        resolve(response)
-      }
-    })
+const getSlavesByAddressAsync = (request) => new Promise((resolve, reject) => {
+  getSlavesByAddress(request, (error, response) => {
+    if (error) {
+      reject(error)
+    } else {
+      resolve(response)
+    }
   })
-}
+})
 
 export const getLatestData = (request, callback) => {
   try {
@@ -1132,32 +1091,29 @@ export const getLatestData = (request, callback) => {
 }
 
 // Promise-based version of getLatestData
-export const getLatestDataAsync = (request) => {
-  return new Promise((resolve, reject) => {
-    try {
-      qrlApi('GetLatestData', request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(
-            error,
-            'Cannot access API/GetLatestData',
-            '**ERROR/GetLatestData**',
-          )
-          reject(myError)
-        } else {
-          resolve(response)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(
-        error,
-        'Cannot access API/GetLatestData',
-        '**ERROR/GetLatestData**',
-      )
-      reject(myError)
-    }
-  })
-}
-
+export const getLatestDataAsync = (request) => new Promise((resolve, reject) => {
+  try {
+    qrlApi('GetLatestData', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetLatestData',
+          '**ERROR/GetLatestData**',
+        )
+        reject(myError)
+      } else {
+        resolve(response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetLatestData',
+      '**ERROR/GetLatestData**',
+    )
+    reject(myError)
+  }
+})
 
 export const getStats = (request, callback) => {
   try {
@@ -1183,31 +1139,29 @@ export const getStats = (request, callback) => {
   }
 }
 
-export const getStatsAsync = async (request) => {
-  return new Promise((resolve, reject) => {
-    try {
-      qrlApi('GetStats', request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(
-            error,
-            'Cannot access API/GetStats',
-            '**ERROR/GetStats**',
-          )
-          reject(myError)
-        } else {
-          resolve(response)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(
-        error,
-        'Cannot access API/GetStats',
-        '**ERROR/GetStats**',
-      )
-      reject(myError)
-    }
-  })
-}
+export const getStatsAsync = async (request) => new Promise((resolve, reject) => {
+  try {
+    qrlApi('GetStats', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetStats',
+          '**ERROR/GetStats**',
+        )
+        reject(myError)
+      } else {
+        resolve(response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetStats',
+      '**ERROR/GetStats**',
+    )
+    reject(myError)
+  }
+})
 
 export const getPeersStat = (request, callback) => {
   try {
@@ -1279,38 +1233,36 @@ export const getObject = (request, callback) => {
 }
 
 // Promise-based version of getObject
-export const getObjectAsync = (request) => {
-  return new Promise((resolve, reject) => {
-    try {
-      qrlApi('GetObject', request, (error, response) => {
-        if (error) {
-          const myError = errorCallback(
-            error,
-            'Cannot access API/GetObject',
-            '**ERROR/GetObject**',
-          )
-          reject(myError)
-        } else if (!response) {
-          const myError = errorCallback(
-            'Empty response from API',
-            'No data returned from GetObject',
-            '**ERROR/GetObject/EmptyResponse**',
-          )
-          reject(myError)
-        } else {
-          resolve(response)
-        }
-      })
-    } catch (error) {
-      const myError = errorCallback(
-        error,
-        'Cannot access API/GetObject',
-        '**ERROR/GetObject**',
-      )
-      reject(myError)
-    }
-  })
-}
+export const getObjectAsync = (request) => new Promise((resolve, reject) => {
+  try {
+    qrlApi('GetObject', request, (error, response) => {
+      if (error) {
+        const myError = errorCallback(
+          error,
+          'Cannot access API/GetObject',
+          '**ERROR/GetObject**',
+        )
+        reject(myError)
+      } else if (!response) {
+        const myError = errorCallback(
+          'Empty response from API',
+          'No data returned from GetObject',
+          '**ERROR/GetObject/EmptyResponse**',
+        )
+        reject(myError)
+      } else {
+        resolve(response)
+      }
+    })
+  } catch (error) {
+    const myError = errorCallback(
+      error,
+      'Cannot access API/GetObject',
+      '**ERROR/GetObject**',
+    )
+    reject(myError)
+  }
+})
 
 export const getTransactionsByAddress = (request, callback) => {
   try {
@@ -1396,11 +1348,11 @@ export const makeTxHumanReadable = async (item) => {
     console.log('ERROR: item is null or undefined in makeTxHumanReadable')
     return null
   }
-  
+
   let output
-  
+
   // Check if this is a getObject response (has 'found' property) or raw transaction data
-  if (item.hasOwnProperty('found')) {
+  if (Object.prototype.hasOwnProperty.call(item, 'found')) {
     // This is a getObject response
     if (item.found !== false) {
       // Add defensive checks for nested properties
@@ -1451,7 +1403,7 @@ export const makeTxHumanReadable = async (item) => {
       output = helpers.txhash(item)
     }
   }
-  
+
   return output
 }
 
@@ -1553,12 +1505,12 @@ Meteor.methods({
       // asynchronous call to API
       const req = { query: Buffer.from(txId, 'hex') }
       const response = await getObjectAsync(req)
-      
+
       // Handle null response
       if (!response) {
         throw new Meteor.Error(404, `Transaction ${txId} not found or API returned null response`)
       }
-      
+
       const formattedData = await makeTxHumanReadable(response)
       try {
         if (formattedData && formattedData.transaction && formattedData.transaction.header !== null) {
@@ -1663,8 +1615,7 @@ Meteor.methods({
               )
               // adjusted.transfer.addrs_to[index] = adjusted.transfer.addrs_to[index] <-- FIXME: why was this here?
             })
-            adjusted.transfer.totalTransferred =
-              thisTotalTransferred / SHOR_PER_QUANTA
+            adjusted.transfer.totalTransferred = thisTotalTransferred / SHOR_PER_QUANTA
             adjusted.transfer.totalOutputs = totalOutputs
           }
           if (adjusted.transactionType === 'transfer_token') {
@@ -2002,7 +1953,9 @@ Meteor.methods({
   },
 
   async getOTS(request) {
-    check(request, Match.ObjectIncluding({ address: Match.Any, page_from: Match.Integer, page_count: Match.Integer, unused_ots_index_from: Match.Integer }))
+    check(request, Match.ObjectIncluding({
+      address: Match.Any, page_from: Match.Integer, page_count: Match.Integer, unused_ots_index_from: Match.Integer,
+    }))
     this.unblock()
     const response = await getOTSAsync(request)
     return response

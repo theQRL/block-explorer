@@ -7,7 +7,7 @@ Template.appBody.onRendered(() => {
       window.reinitializeLucideIcons()
     }
   }, 100)
-  
+
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')
   const mobileMenu = document.getElementById('mobile-menu')
 

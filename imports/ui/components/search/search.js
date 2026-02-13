@@ -55,7 +55,7 @@ Template.search.onRendered(() => {
       window.reinitializeLucideIcons()
     }
   }, 200)
-  
+
   // Handle responsive placeholder
   const updatePlaceholder = () => {
     const searchInput = document.getElementById('mainSearch')
@@ -67,13 +67,13 @@ Template.search.onRendered(() => {
       }
     }
   }
-  
+
   // Set initial placeholder
   updatePlaceholder()
-  
+
   // Update on resize
   window.addEventListener('resize', updatePlaceholder)
-  
+
   if ($('.sidebar').hasClass('visible') && FlowRouter.getRouteName() === 'Search.home') {
     // sidebar is visible and on /find route
     this.$('.floatright').first().hide()
