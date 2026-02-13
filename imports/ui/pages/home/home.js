@@ -74,7 +74,26 @@ function formatCompactNumber(value) {
 }
 
 function formatHashPower(value) {
-  return `${formatCompactNumber(value)} h/s`
+  const numericValue = Number(value)
+  if (!Number.isFinite(numericValue) || numericValue < 0) {
+    return '--'
+  }
+
+  const units = ['H/s', 'kH/s', 'MH/s', 'GH/s', 'TH/s', 'PH/s', 'EH/s', 'ZH/s']
+  if (numericValue === 0) {
+    return `0 ${units[0]}`
+  }
+
+  const unitIndex = Math.min(Math.floor(Math.log10(numericValue) / 3), units.length - 1)
+  const scaledValue = numericValue / (10 ** (unitIndex * 3))
+  let maximumFractionDigits = 2
+  if (scaledValue >= 100) {
+    maximumFractionDigits = 0
+  } else if (scaledValue >= 10) {
+    maximumFractionDigits = 1
+  }
+
+  return `${scaledValue.toLocaleString('en-US', { maximumFractionDigits })} ${units[unitIndex]}`
 }
 
 function formatDifficulty(value) {
@@ -343,7 +362,7 @@ async function initializeChart(dataToUse) {
               fontFamily: 'Alte DIN 1451 Mittelschrift, sans-serif',
             },
             formatter(value) {
-              return formatCompactNumber(value)
+              return formatHashPower(value)
             },
           },
         },
