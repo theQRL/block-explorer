@@ -61,21 +61,18 @@ function hideDisconnectModal() {
 Template.appBody.onRendered(() => {
   // Handle reconnect button
   $('#reconnect-btn').on('click', () => {
-    console.log('User clicked reconnect')
     Meteor.reconnect()
     hideDisconnectModal()
   })
 
   // Handle close button
   $('#disconnect-modal-close').on('click', () => {
-    console.log('User closed modal')
     hideDisconnectModal()
   })
 
   // Handle overlay click to close
   $('#disconnect-modal-overlay').on('click', function (e) {
     if (e.target === this) {
-      console.log('User clicked overlay')
       hideDisconnectModal()
     }
   })

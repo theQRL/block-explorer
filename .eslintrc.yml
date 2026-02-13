@@ -6,15 +6,8 @@ parserOptions:
   ecmaFeatures:
     jsx: true # enable React's JSX
 
-# register plugins
-plugins:
-  - meteor
-
-# use the rules of eslint-config-airbnb
-# and the recommended rules of eslint-plugin-meteor
 extends:
   - airbnb-base
-  - plugin:meteor/recommended
 
 # registerenvironments
 env:
@@ -44,10 +37,6 @@ rules:
     - off
     - never
   # import/no-extraneous-dependencies: 0
-  # eslint-plugin-meteor
-  meteor/no-session: [0] # allow Session
-  # meteor/prefer-session-equals: [2] # prefer Session.equals instead
- 
 
 globals:
   # collections
