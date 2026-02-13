@@ -13,6 +13,19 @@ const addHex = (b) => {
 
 const sumValues = (obj) => Object.values(obj).reduce((a, b) => a + b)
 
+const findMiningPool = (minedBy) => {
+  if (!minedBy) {
+    return null
+  }
+
+  try {
+    const minerHexAddress = rawAddressToHexAddress(minedBy)
+    return MINING_POOLS.find((pool) => pool.address === minerHexAddress) || null
+  } catch (e) {
+    return null
+  }
+}
+
 Template.lastblocks.onCreated(() => {
   Meteor.subscribe('blocks')
 })
@@ -39,33 +52,15 @@ Template.lastblocks.helpers({
     return moment(x).fromNow()
   },
   isKnownPool() {
-    if (!this.minedBy) return false
-    try {
-      const x = this.minedBy
-      return MINING_POOLS.some((value) => value.address === rawAddressToHexAddress(x))
-    } catch (e) {
-      return false
-    }
+    return !!findMiningPool(this.minedBy)
   },
   poolName() {
-    if (!this.minedBy) return ''
-    try {
-      const x = this.minedBy
-      const pool = MINING_POOLS.find((value) => value.address === rawAddressToHexAddress(x))
-      return pool ? pool.name : ''
-    } catch (e) {
-      return ''
-    }
+    const pool = findMiningPool(this.minedBy)
+    return pool ? pool.name : ''
   },
   poolLink() {
-    if (!this.minedBy) return ''
-    try {
-      const x = this.minedBy
-      const pool = MINING_POOLS.find((value) => value.address === rawAddressToHexAddress(x))
-      return pool ? pool.link : ''
-    } catch (e) {
-      return ''
-    }
+    const pool = findMiningPool(this.minedBy)
+    return pool ? pool.link : ''
   },
   minerAddress() {
     if (!this.minedBy) return 'Unknown'

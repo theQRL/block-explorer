@@ -40,7 +40,7 @@
       {{#each transactions}}
       <!-- All Transactions (Confirmed and Unconfirmed) -->
       <div
-        class="card hover:border-qrl-accent/50 min-h-44 sm:h-48 flex flex-col transactionRecord cursor-pointer p-4 {{#if isTransfer this.tx.transactionType}}border-type-transfer{{else}}{{#if isCoinbase this.tx.transactionType}}border-type-coinbase{{else}}{{#if isTokenTransfer this.tx.transactionType}}border-type-token{{else}}{{#if isMessage this.tx.transactionType}}border-type-message{{else}}{{#if isSlave this.tx.transactionType}}border-type-slave{{else}}{{#if isLatticePK this.tx.transactionType}}border-type-lattice{{else}}border-type-multisig{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}"
+        class="card hover:border-qrl-accent/50 min-h-44 sm:h-48 flex flex-col transactionRecord cursor-pointer p-4 {{borderTypeClass this.tx.transactionType}}"
       >
         <div class="flex items-start space-x-3 flex-1">
           <div class="flex-shrink-0">

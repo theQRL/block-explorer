@@ -1,6 +1,5 @@
 /* eslint max-len: 0 */
 /* global _ */
-import { HTTP } from 'meteor/http'
 import { JsonRoutes } from 'meteor/simple:json-routes'
 import { SHA512 } from 'jscrypto/es6'
 // import helpers from '@theqrl/explorer-helpers'
@@ -126,12 +125,19 @@ const refreshBlocks = async () => {
       ) {
         const httpPostUrl = Meteor.settings.glip.webhook
         try {
-          HTTP.call('POST', httpPostUrl, {
-            params: httpPostMessage,
+          const alertResponse = await fetch(httpPostUrl, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: new URLSearchParams(httpPostMessage).toString(),
           })
+          if (!alertResponse.ok) {
+            throw new Error(`HTTP ${alertResponse.status}`)
+          }
           return true
         } catch (e) {
-          // Got a network error, timeout, or HTTP error in the 400 or 500 range.
+          console.log('refreshBlocks: Glip webhook error:', e.message || e.reason || e)
         }
       }
     } catch (er) {
@@ -319,8 +325,21 @@ async function refreshStats() {
 
 const refreshQuantaUsd = async () => {
   const apiUrl = 'https://market-data.automated.theqrl.org/'
-  const response = await axios.get(apiUrl)
-  const { price } = response.data
+  let response
+
+  try {
+    response = await axios.get(apiUrl)
+  } catch (error) {
+    console.log('refreshQuantaUsd: ERROR =', error.message || error.reason)
+    return
+  }
+
+  const price = Number(response && response.data ? response.data.price : null)
+  if (!Number.isFinite(price)) {
+    console.log('refreshQuantaUsd: Invalid market data response')
+    return
+  }
+
   await quantausd.removeAsync({})
   await quantausd.insertAsync({ price })
 }
@@ -413,15 +432,25 @@ Meteor.setInterval(async () => {
 
 // On first load - cache all elements.
 Meteor.setTimeout(async () => {
-  try {
-    await refreshBlocks()
-    await refreshLasttx()
-    await refreshStats()
-    await refreshQuantaUsd()
-    await refreshPeerStats()
-  } catch (error) {
-    console.log('Initial refresh error:', error.message || error.reason)
-  }
+  const refreshTasks = [
+    ['refreshBlocks', refreshBlocks],
+    ['refreshLasttx', refreshLasttx],
+    ['refreshStats', refreshStats],
+    ['refreshQuantaUsd', refreshQuantaUsd],
+    ['refreshPeerStats', refreshPeerStats],
+  ]
+
+  const results = await Promise.allSettled(
+    refreshTasks.map(([, refreshFn]) => refreshFn())
+  )
+
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const [refreshName] = refreshTasks[index]
+      const refreshError = result.reason || {}
+      console.log(`Initial ${refreshName} error:`, refreshError.message || refreshError.reason || refreshError)
+    }
+  })
 }, 5000)
 
 JsonRoutes.add('get', '/api/emission', async (req, res) => {

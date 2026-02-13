@@ -1,5 +1,4 @@
 import { homechart } from '/imports/api/index.js'
-import { Tracker } from 'meteor/tracker'
 
 import './home.html'
 import '../../components/status/status.js'
@@ -12,9 +11,9 @@ const compactFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 1,
 })
 
-let chartIntervalHandle
 let currentChart = null
 let isChartInitialized = false
+let isChartInitializing = false
 let currentViewRange = { min: 0, max: 0 }
 let lastProcessedData = null
 
@@ -431,7 +430,12 @@ async function initializeChart(dataToUse) {
     }
   } catch (error) {
     console.error('Error initializing ApexCharts:', error)
-    chartContainer.innerHTML = `<div class="flex items-center justify-center h-full text-red-400">Error loading chart: ${error.message}</div>`
+    const errorText = `Error loading chart: ${error.message || 'Unknown error'}`
+    const errorElement = document.createElement('div')
+    errorElement.className = 'flex items-center justify-center h-full text-red-400'
+    errorElement.textContent = errorText
+    chartContainer.replaceChildren(errorElement)
+    isChartInitialized = false
     Session.set('nodeError', true)
   }
 }
@@ -465,9 +469,9 @@ async function updateChart(newData) {
       max: visualData.maxBlock,
     }
 
-    await currentChart.updateSeries(visualData.series, true)
     await currentChart.updateOptions(
       {
+        series: visualData.series,
         xaxis: {
           min: currentViewRange.min,
           max: currentViewRange.max,
@@ -486,7 +490,7 @@ async function updateChart(newData) {
   }
 }
 
-function renderChart() {
+async function renderChart() {
   const chartLineData = homechart.findOne()
 
   if (!chartLineData) {
@@ -501,10 +505,22 @@ function renderChart() {
       chartLoading.style.display = 'none'
     }
 
-    if (!isChartInitialized) {
-      initializeChart(dataToUse)
-    } else {
-      updateChart(dataToUse)
+    if (isChartInitialized) {
+      await updateChart(dataToUse)
+      return
+    }
+
+    if (isChartInitializing) {
+      return
+    }
+
+    isChartInitializing = true
+    try {
+      await initializeChart(dataToUse)
+    } catch (error) {
+      console.error('Error rendering chart:', error)
+    } finally {
+      isChartInitializing = false
     }
   } else {
     const chartContainer = document.getElementById('chart-container')
@@ -528,28 +544,21 @@ Template.appHome.onCreated(function () {
 })
 
 // Initialize chart when template is rendered
-Template.appHome.onRendered(() => {
-  Tracker.autorun(() => {
+Template.appHome.onRendered(function () {
+  this.autorun(() => {
     renderChart()
   })
-
-  chartIntervalHandle = Meteor.setInterval(() => {
-    renderChart()
-  }, 30000)
 })
 
 // Clean up when template is destroyed
 Template.appHome.onDestroyed(() => {
-  if (chartIntervalHandle) {
-    Meteor.clearInterval(chartIntervalHandle)
-  }
-
   if (currentChart) {
     currentChart.destroy()
     currentChart = null
   }
 
   isChartInitialized = false
+  isChartInitializing = false
   currentViewRange = { min: 0, max: 0 }
   lastProcessedData = null
 })

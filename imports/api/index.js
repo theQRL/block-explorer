@@ -13,21 +13,29 @@ export const blockData = new Mongo.Collection('blockdata')
 
 if (Meteor.isServer) {
   // This code only runs on the server
-  // empty cache of each collection on startup in case of breaking gRPC changes
-  Blocks.removeAsync({})
-  lasttx.removeAsync({})
-  homechart.removeAsync({})
-  quantausd.removeAsync({})
-  status.removeAsync({})
-  peerstats.removeAsync({})
+  // Empty cache of each collection on startup in case of breaking gRPC changes,
+  // then register publications after cleanup completes or is handled.
+  (async () => {
+    try {
+      await Promise.all([
+        Blocks.removeAsync({}),
+        lasttx.removeAsync({}),
+        homechart.removeAsync({}),
+        quantausd.removeAsync({}),
+        status.removeAsync({}),
+        peerstats.removeAsync({}),
+      ])
+    } catch (error) {
+      Meteor._debug('Cache cleanup error during startup:', error.message || error.reason || error) // eslint-disable-line no-underscore-dangle
+    }
 
-  // then publish collections
-  Meteor.publish('blocks', () => Blocks.find())
-  Meteor.publish('lasttx', () => lasttx.find())
-  Meteor.publish('homechart', () => homechart.find())
-  Meteor.publish('quantausd', () => quantausd.find())
-  Meteor.publish('status', () => status.find())
-  Meteor.publish('peerstats', () => peerstats.find())
+    Meteor.publish('blocks', () => Blocks.find())
+    Meteor.publish('lasttx', () => lasttx.find())
+    Meteor.publish('homechart', () => homechart.find())
+    Meteor.publish('quantausd', () => quantausd.find())
+    Meteor.publish('status', () => status.find())
+    Meteor.publish('peerstats', () => peerstats.find())
+  })()
 }
 
 if (Meteor.isClient) {

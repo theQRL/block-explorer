@@ -2,6 +2,19 @@ import './lastunconfirmedtx.html'
 import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 import { lasttx } from '/imports/api/index.js'
 
+const getUnconfirmedBorderTypeClass = (txType) => {
+  if (txType === 'transfer') {
+    return 'border-type-transfer'
+  }
+  if (txType === 'token' || txType === 'transfer_token') {
+    return 'border-type-token'
+  }
+  if (txType === 'slave') {
+    return 'border-type-slave'
+  }
+  return 'border-type-message'
+}
+
 Template.lastunconfirmedtx.onCreated(() => {
   Meteor.subscribe('lasttx')
 })
@@ -52,6 +65,9 @@ Template.lastunconfirmedtx.helpers({
     const x = Session.get('lasttx').transactions
     if (x) { if (x.length === 0) { ret = true } }
     return ret
+  },
+  borderTypeClass(txType) {
+    return getUnconfirmedBorderTypeClass(txType)
   },
   isTransfer(txType) {
     if (txType === 'transfer') {

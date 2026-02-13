@@ -138,7 +138,9 @@ WebApp.connectHandlers.use((req, res, next) => {
       res.end = originalEnd
       res.setHeader = originalSetHeader
 
-      chunks.forEach(c => originalWrite.call(res, c))
+      chunks.forEach((c) => {
+        originalWrite.call(res, c)
+      })
       return originalEnd.call(res)
     }
 
@@ -184,9 +186,47 @@ DDPRateLimiter.addRule({
 const apiRateLimits = new Map()
 const API_RATE_LIMIT = 30 // requests per window
 const API_RATE_WINDOW = 60000 // 1 minute window
+const TRUST_PROXY = (() => {
+  try {
+    if (Meteor.settings && Meteor.settings.api && Meteor.settings.api.trustProxy === true) {
+      return true
+    }
+    if (Meteor.settings && Meteor.settings.TRUST_PROXY === true) {
+      return true
+    }
+  } catch (e) {
+    // settings not loaded
+  }
+
+  const trustProxyEnv = process.env.TRUST_PROXY || ''
+  return trustProxyEnv === 'true' || trustProxyEnv === '1'
+})()
+
+function getClientIp(req) {
+  if (TRUST_PROXY) {
+    const forwardedFor = req && req.headers ? req.headers['x-forwarded-for'] : null
+    if (typeof forwardedFor === 'string') {
+      const firstForwardedIp = forwardedFor
+        .split(',')
+        .map((entry) => entry.trim())
+        .find((entry) => entry.length > 0)
+      if (firstForwardedIp) {
+        return firstForwardedIp
+      }
+    }
+  }
+
+  if (req && req.connection && req.connection.remoteAddress) {
+    return req.connection.remoteAddress
+  }
+  if (req && req.socket && req.socket.remoteAddress) {
+    return req.socket.remoteAddress
+  }
+  return 'unknown'
+}
 
 function checkApiRateLimit(req) {
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown'
+  const ip = getClientIp(req)
   const now = Date.now()
   const record = apiRateLimits.get(ip)
   if (!record || now - record.windowStart > API_RATE_WINDOW) {
@@ -487,20 +527,36 @@ const connectNodesAsync = async () => {
 }
 
 const updateAutoIncrement = async () => {
-  // Atomically increment and return the new value
-  await blockData.upsertAsync(
+  const incrementResult = await blockData.rawCollection().findOneAndUpdate(
     { _id: 'autoincrement' },
-    { $inc: { value: 1 } },
+    {
+      $inc: { value: 1 },
+      $setOnInsert: { value: 1 },
+    },
+    {
+      upsert: true,
+      returnDocument: 'after',
+      returnOriginal: false,
+    }
   )
-  const autoInc = await blockData.findOneAsync({ _id: 'autoincrement' })
-  if (autoInc && autoInc.value > 2500) {
-    // Remove only cached data entries, not the autoincrement counter itself
-    await blockData.removeAsync({ _id: { $ne: 'autoincrement' } })
-    // Reset counter atomically
-    await blockData.updateAsync(
-      { _id: 'autoincrement' },
+  const autoIncrementValue = incrementResult && incrementResult.value
+    ? incrementResult.value.value
+    : 0
+
+  if (autoIncrementValue > 2500) {
+    const resetResult = await blockData.rawCollection().findOneAndUpdate(
+      { _id: 'autoincrement', value: { $gt: 2500 } },
       { $set: { value: 1 } },
+      {
+        returnDocument: 'after',
+        returnOriginal: false,
+      }
     )
+
+    if (resetResult && resetResult.value) {
+      // Remove only cached data entries, not the autoincrement counter itself.
+      await blockData.removeAsync({ _id: { $ne: 'autoincrement' } })
+    }
   }
 }
 
@@ -1307,14 +1363,31 @@ export const getSlavesByAddress = (request, callback) => {
 }
 
 export const apiCall = (apiUrl, callback) => {
-  try {
-    const response = HTTP.get(apiUrl).data
-    // Successful call
-    callback(null, response)
-  } catch (error) {
-    const myError = new Meteor.Error(500, 'Cannot access the API')
-    callback(myError, null)
-  }
+  fetch(apiUrl)
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        return response.json()
+      }
+
+      const textResponse = await response.text()
+      try {
+        return JSON.parse(textResponse)
+      } catch (error) {
+        return textResponse
+      }
+    })
+    .then((responseData) => {
+      callback(null, responseData)
+    })
+    .catch(() => {
+      const myError = new Meteor.Error(500, 'Cannot access the API')
+      callback(myError, null)
+    })
 }
 
 export const makeTxHumanReadable = async (item) => {

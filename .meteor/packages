@@ -13,7 +13,6 @@ standard-minifier-js@3.2.0    # JS minifier run for production mode
 es5-shim@4.8.1                # ECMAScript 5 compatibility for older browsers
 ecmascript@0.17.0              # Enable ECMAScript2015+ syntax in app code
 pwix:blaze-layout     # Layout manager for blaze (works well with FlowRouter)
-http
 session@1.2.2
 check@1.5.0
 momentjs:moment

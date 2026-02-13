@@ -39,6 +39,7 @@ function initializeLucideIcons() {
 // Initialize Lucide icons when DOM is ready
 Meteor.startup(() => {
   initializeLucideIcons();
+  let reinitializeTimeout = null;
   
   // Watch for DOM changes and re-initialize icons
   const observer = new MutationObserver((mutations) => {
@@ -59,8 +60,12 @@ Meteor.startup(() => {
     });
     
     if (shouldReinitialize) {
-      setTimeout(() => {
+      if (reinitializeTimeout) {
+        clearTimeout(reinitializeTimeout);
+      }
+      reinitializeTimeout = setTimeout(() => {
         initializeLucideIcons();
+        reinitializeTimeout = null;
       }, 100);
     }
   });
