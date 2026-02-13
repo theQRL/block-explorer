@@ -4,25 +4,25 @@
 # 'meteor add' and 'meteor remove' will edit this file for you,
 # but you can also edit it by hand.
 
-meteor-base             # Packages every Meteor app needs to have
-mobile-experience       # Packages for a great mobile UX
-mongo                   # The database Meteor supports right now
+meteor-base@1.5.2             # Packages every Meteor app needs to have
+mobile-experience@1.1.2       # Packages for a great mobile UX
+mongo@2.2.0                   # The database Meteor supports right now
 blaze-html-templates    # Compile .html files into Meteor Blaze views
-tracker                 # Meteor's client-side reactive programming library
-standard-minifier-js    # JS minifier run for production mode
-es5-shim                # ECMAScript 5 compatibility for older browsers
-ecmascript              # Enable ECMAScript2015+ syntax in app code
+tracker@1.3.4                 # Meteor's client-side reactive programming library
+standard-minifier-js@3.2.0    # JS minifier run for production mode
+es5-shim@4.8.1                # ECMAScript 5 compatibility for older browsers
+ecmascript@0.17.0              # Enable ECMAScript2015+ syntax in app code
 pwix:blaze-layout     # Layout manager for blaze (works well with FlowRouter)
 http
-session
-check
+session@1.2.2
+check@1.5.0
 momentjs:moment
-audit-argument-checks
+audit-argument-checks@1.0.8
 ostrio:flow-router-extra
-force-ssl
+force-ssl@1.1.1
 oaf:moment-duration-format
 underscore
 simple:json-routes
 frozeman:storage
 jquery
-ddp-rate-limiter
+ddp-rate-limiter@1.2.2
