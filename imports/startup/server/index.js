@@ -525,29 +525,17 @@ const connectNodesAsync = async () => {
 }
 
 const updateAutoIncrement = async () => {
-  const incrementResult = await blockData.rawCollection().findOneAndUpdate(
+  await blockData.upsertAsync(
     { _id: 'autoincrement' },
     { $inc: { value: 1 } },
-    {
-      upsert: true,
-      returnDocument: 'after',
-    },
   )
-  const autoIncrementValue = incrementResult && incrementResult.value
-    ? incrementResult.value
-    : 0
+  const counter = await blockData.findOneAsync({ _id: 'autoincrement' })
+  const autoIncrementValue = (counter && counter.value) || 0
 
   if (autoIncrementValue > 2500) {
-    const resetResult = await blockData.rawCollection().findOneAndUpdate(
-      { _id: 'autoincrement', value: { $gt: 2500 } },
-      { $set: { value: 1 } },
-      { returnDocument: 'after' },
-    )
-
-    if (resetResult) {
-      // Remove only cached data entries, not the autoincrement counter itself.
-      await blockData.removeAsync({ _id: { $ne: 'autoincrement' } })
-    }
+    await blockData.updateAsync({ _id: 'autoincrement' }, { $set: { value: 1 } })
+    // Remove only cached data entries, not the autoincrement counter itself.
+    await blockData.removeAsync({ _id: { $ne: 'autoincrement' } })
   }
 }
 
