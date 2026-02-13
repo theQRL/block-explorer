@@ -527,31 +527,24 @@ const connectNodesAsync = async () => {
 const updateAutoIncrement = async () => {
   const incrementResult = await blockData.rawCollection().findOneAndUpdate(
     { _id: 'autoincrement' },
-    {
-      $inc: { value: 1 },
-      $setOnInsert: { value: 1 },
-    },
+    { $inc: { value: 1 } },
     {
       upsert: true,
       returnDocument: 'after',
-      returnOriginal: false,
     },
   )
   const autoIncrementValue = incrementResult && incrementResult.value
-    ? incrementResult.value.value
+    ? incrementResult.value
     : 0
 
   if (autoIncrementValue > 2500) {
     const resetResult = await blockData.rawCollection().findOneAndUpdate(
       { _id: 'autoincrement', value: { $gt: 2500 } },
       { $set: { value: 1 } },
-      {
-        returnDocument: 'after',
-        returnOriginal: false,
-      },
+      { returnDocument: 'after' },
     )
 
-    if (resetResult && resetResult.value) {
+    if (resetResult) {
       // Remove only cached data entries, not the autoincrement counter itself.
       await blockData.removeAsync({ _id: { $ne: 'autoincrement' } })
     }
@@ -805,7 +798,8 @@ const helpersaddressTransactions = async (response) => {
           txEdited.tx.transfer_token.token_txhash,
         ).toString('hex')
       }
-      txEdited.tx.transfer_token = await addTokenDetail(tx)
+      const tokenDetail = await addTokenDetail(tx)
+      Object.assign(txEdited.tx.transfer_token, tokenDetail)
       // now check if NFT
       const symbol = Buffer.from(txEdited.tx.transfer_token.symbol).toString(
         'hex',
@@ -1577,6 +1571,8 @@ Meteor.methods({
         const transactions = []
         for (const value of response.block.transactions) {
           const adjusted = value.tx
+          // Copy addr_from from TransactionExtended wrapper to the tx object
+          adjusted.addr_from = value.addr_from
           // All Buffer fields are now processed by bufferToHex above
           // No need for manual conversion
           if (adjusted.transactionType === 'coinbase') {
@@ -1619,16 +1615,35 @@ Meteor.methods({
             adjusted.transfer.totalOutputs = totalOutputs
           }
           if (adjusted.transactionType === 'transfer_token') {
-            // Request Token Decimals / Symbol
-            const symbolRequest = {
-              query: Buffer.from(adjusted.transfer_token.token_txhash, 'hex'),
+            let thisSymbol = 'TOKEN'
+            let thisDecimals = 0
+            let thisSymbolResponse = null
+
+            // Request token decimals/symbol, but do not fail the entire block if lookup errors
+            try {
+              const symbolRequest = {
+                query: Buffer.from(adjusted.transfer_token.token_txhash, 'hex'),
+              }
+              thisSymbolResponse = await getObjectAsync(symbolRequest)
+              if (
+                thisSymbolResponse
+                && thisSymbolResponse.transaction
+                && thisSymbolResponse.transaction.tx
+                && thisSymbolResponse.transaction.tx.token
+              ) {
+                // eslint-disable-next-line
+                thisSymbol = Buffer.from(
+                  thisSymbolResponse.transaction.tx.token.symbol,
+                ).toString()
+                thisDecimals = Number(thisSymbolResponse.transaction.tx.token.decimals) || 0
+              }
+            } catch (error) {
+              console.log(
+                `Error fetching token metadata for block ${blockId}:`,
+                error.reason || error.message || error,
+              )
             }
-            const thisSymbolResponse = await getObjectAsync(symbolRequest)
-            // eslint-disable-next-line
-            const thisSymbol = Buffer.from(
-              thisSymbolResponse.transaction.tx.token.symbol,
-            ).toString()
-            const thisDecimals = thisSymbolResponse.transaction.tx.token.decimals
+
             // Calculate total transferred, and generate a clean structure to display outputs from
             let thisTotalTransferred = 0
             let totalOutputs = 0
@@ -1646,23 +1661,29 @@ Meteor.methods({
             adjusted.transfer_token.totalOutputs = totalOutputs
             adjusted.transfer_token.tokenSymbol = thisSymbol
             let nft = {}
-            console.log(thisSymbolResponse)
-            const symbol = Buffer.from(
-              thisSymbolResponse.transaction.tx.token.symbol,
-            ).toString('hex')
-            if (symbol.slice(0, 8) === '00ff00ff') {
-              const nftBytes = Buffer.concat([
-                Buffer.from(thisSymbolResponse.transaction.tx.token.symbol),
-                Buffer.from(thisSymbolResponse.transaction.tx.token.name),
-              ])
-              const idBytes = Buffer.from(nftBytes.slice(4, 8))
-              const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
-              nft = {
-                type: 'TRANSFER NFT',
-                id: Buffer.from(idBytes).toString('hex'),
-                hash: Buffer.from(cryptoHashBytes).toString('hex'),
+            if (
+              thisSymbolResponse
+              && thisSymbolResponse.transaction
+              && thisSymbolResponse.transaction.tx
+              && thisSymbolResponse.transaction.tx.token
+            ) {
+              const symbol = Buffer.from(
+                thisSymbolResponse.transaction.tx.token.symbol,
+              ).toString('hex')
+              if (symbol.slice(0, 8) === '00ff00ff') {
+                const nftBytes = Buffer.concat([
+                  Buffer.from(thisSymbolResponse.transaction.tx.token.symbol),
+                  Buffer.from(thisSymbolResponse.transaction.tx.token.name),
+                ])
+                const idBytes = Buffer.from(nftBytes.slice(4, 8))
+                const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+                nft = {
+                  type: 'TRANSFER NFT',
+                  id: Buffer.from(idBytes).toString('hex'),
+                  hash: Buffer.from(cryptoHashBytes).toString('hex'),
+                }
+                adjusted.nft = nft
               }
-              adjusted.nft = nft
             }
           }
           transactions.push(adjusted)

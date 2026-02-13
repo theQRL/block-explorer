@@ -7,25 +7,21 @@ import './lasttx.html'
 import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
 
 const getLastTxBorderTypeClass = (txType) => {
-  if (txType === 'transfer') {
-    return 'border-type-transfer'
+  const normalizedType = String(txType || '').toLowerCase()
+  const borderClassByType = {
+    transfer: 'border-type-transfer',
+    coinbase: 'border-type-coinbase',
+    transfer_token: 'border-type-token',
+    token: 'border-type-token',
+    message: 'border-type-message',
+    document_notarisation: 'border-type-message',
+    keybase: 'border-type-message',
+    slave: 'border-type-slave',
+    latticepk: 'border-type-lattice',
+    // No dedicated stake class currently; keep stake with the multisig fallback.
+    stake: 'border-type-multisig',
   }
-  if (txType === 'coinbase') {
-    return 'border-type-coinbase'
-  }
-  if (txType === 'transfer_token') {
-    return 'border-type-token'
-  }
-  if (txType === 'message') {
-    return 'border-type-message'
-  }
-  if (txType === 'slave') {
-    return 'border-type-slave'
-  }
-  if (txType === 'latticePK') {
-    return 'border-type-lattice'
-  }
-  return 'border-type-multisig'
+  return borderClassByType[normalizedType] || 'border-type-multisig'
 }
 
 Template.lasttx.onCreated(() => {
