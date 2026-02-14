@@ -2,8 +2,27 @@ import { BigNumber } from 'bignumber.js'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
 import { lasttx } from '/imports/api/index.js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './lasttx.html'
-import { numberToString, SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+import { SHOR_PER_QUANTA } from '../../../startup/both/index.js'
+
+const getLastTxBorderTypeClass = (txType) => {
+  const normalizedType = String(txType || '').toLowerCase()
+  const borderClassByType = {
+    transfer: 'border-type-transfer',
+    coinbase: 'border-type-coinbase',
+    transfer_token: 'border-type-token',
+    token: 'border-type-token',
+    message: 'border-type-message',
+    document_notarisation: 'border-type-message',
+    keybase: 'border-type-message',
+    slave: 'border-type-slave',
+    latticepk: 'border-type-lattice',
+    // No dedicated stake class currently; keep stake with the multisig fallback.
+    stake: 'border-type-multisig',
+  }
+  return borderClassByType[normalizedType] || 'border-type-multisig'
+}
 
 Template.lasttx.onCreated(() => {
   Meteor.subscribe('lasttx')
@@ -70,6 +89,9 @@ Template.lasttx.helpers({
       ret = true
     }
     return ret
+  },
+  borderTypeClass(txType) {
+    return getLastTxBorderTypeClass(txType)
   },
   isTransfer(txType) {
     if (txType === 'transfer') {

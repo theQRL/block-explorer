@@ -1,4 +1,5 @@
 import JSONFormatter from 'json-formatter-js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './block.html'
 import {
   numberToString, SHOR_PER_QUANTA, formatBytes, hexOrB32, bufferToHex,
@@ -12,24 +13,48 @@ const calculateEpoch = (blockNumber) => {
 const renderBlockBlock = (blockId) => {
   // Set loading state
   Session.set('blockLoading', true)
+  Session.set('activeBlock', blockId)
   Meteor.call('block', blockId, (err, res) => {
     Session.set('blockLoading', false)
-    // The method call sets the Session variable to the callback value
     if (err) {
+      const errorText = err.reason || err.message || 'Error loading block data'
       Session.set('block', {
-        error: err,
+        error: errorText,
         id: blockId,
+        found: false,
       })
-    } else {
-      if (res.found) { Session.set('block', res) }
-      $('#loadingTransactions').hide()
+      return
     }
+
+    if (!res || (!res.block && res.found === false)) {
+      Session.set('block', {
+        id: blockId,
+        found: false,
+        error: `Block ${blockId} not found`,
+      })
+      return
+    }
+
+    Session.set('block', res)
   })
 }
 
 Template.block.helpers({
   blockLoading() {
     return Session.get('blockLoading')
+  },
+  blockError() {
+    const block = Session.get('block')
+    if (!block) {
+      return false
+    }
+    if (block.error) {
+      return block.error
+    }
+    if (block.found === false && !block.block) {
+      return `Block ${block.id || ''} not found`
+    }
+    return false
   },
   block() {
     try {
@@ -63,7 +88,10 @@ Template.block.helpers({
   transactionsLoaded() {
     try {
       const block = Session.get('block')
-      return block && block.block && block.block.transactions && block.block.transactions.length > 0
+      return block
+        && block.block
+        && Array.isArray(block.block.transactions)
+        && block.block.transactions.length > 0
     } catch (e) {
       return false
     }

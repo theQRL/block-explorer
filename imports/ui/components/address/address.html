@@ -30,37 +30,27 @@
       <!-- Address Header -->
       <div class="card">
         <div class="mb-4">
-          <div class="flex items-center justify-between mb-2">
-            <div class="text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">
-              ADDRESS
+          <div class="hero-label mb-3">ADDRESS</div>
+          <div class="hash-banner flex items-center gap-3 address-container">
+            <span class="flex-1 min-w-0 truncate" title="{{address.state.address}}">
+              {{address.state.address}}
               {{#if knownProviderNonSpecific}}
                 <i data-lucide="check-circle" class="inline-block w-4 h-4 text-qrl-accent ml-2" title="Verified NFT Provider"></i>
               {{/if}}
-            </div>
-            <button class="copy-address-btn flex items-center gap-2 px-3 py-2 bg-qrl-accent/10 hover:bg-qrl-accent/20 text-qrl-accent rounded-lg transition-colors duration-200 text-sm font-medium min-h-[40px] cursor-pointer" title="Copy address to clipboard" style="pointer-events: auto !important;">
+            </span>
+            <button class="copy-address-btn flex items-center gap-2 px-3 py-2 bg-qrl-accent/10 hover:bg-qrl-accent/20 text-qrl-accent rounded-lg transition-colors duration-200 text-sm font-medium min-h-[40px] cursor-pointer flex-shrink-0" title="Copy address to clipboard" style="pointer-events: auto !important;">
               <i data-lucide="copy" class="w-4 h-4 flex-shrink-0 pointer-events-none"></i>
               <span class="hidden sm:inline whitespace-nowrap pointer-events-none">Copy</span>
             </button>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-qrl-border">
-              <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
-                <tr>
-                  <td class="px-4 py-3 text-base sm:text-lg md:text-xl lg:text-2xl font-bold font-mono text-qrl-text whitespace-nowrap">
-                    {{address.state.address}}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
 
         <!-- Balance Section -->
         <div class="flex justify-center mb-6">
           <div class="w-full max-w-md">
-            <div class="text-center bg-qrl-secondary/50 rounded-lg p-6">
+            <div class="text-center bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
               <div class="mb-2">
-                <span class="inline-block px-3 py-1 text-sm font-medium bg-qrl-accent text-qrl-primary rounded-full">
+                <span class="badge-pill badge-pill-transfer">
                   {{#if isMultiSig}}
                     MultiSig Balance
                   {{else}}
@@ -68,54 +58,55 @@
                   {{/if}}
                 </span>
               </div>
-              <div class="text-2xl sm:text-4xl font-bold font-mono text-qrl-text relative group cursor-help" data-tooltip="USD ${{balanceUSD}}">
+              <div class="hero-number text-gradient relative group cursor-help" data-tooltip="USD ${{balanceUSD}}">
                 {{address.state.balance}}
-                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-qrl-primary text-qrl-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-qrl-accent text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
                   USD ${{balanceUSD}}
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-qrl-primary"></div>
+                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-qrl-accent"></div>
                 </div>
               </div>
-              <div class="text-qrl-text-secondary">
+              <div class="text-qrl-text-secondary mt-1">
                 Quanta
               </div>
             </div>
           </div>
-          
+
+
         </div>
 
         <!-- Address Details -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="bg-qrl-primary/50 rounded-lg p-4">
-            <div class="text-sm text-qrl-text-secondary mb-1">Transactions</div>
-            <div class="text-md font-mono text-qrl-text">{{address.state.transaction_hash_count}}</div>
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Transactions</div>
+            <div class="mono-value text-lg">{{address.state.transaction_hash_count}}</div>
           </div>
           {{#unless isMultiSig}}
-            <div class="bg-qrl-primary/50 rounded-lg p-4">
-              <div class="text-sm text-qrl-text-secondary mb-1">Nonce</div>
-              <div class="text-md font-mono text-qrl-text">{{address.state.nonce}}</div>
+            <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+              <div class="hero-label">Nonce</div>
+              <div class="mono-value text-lg">{{address.state.nonce}}</div>
             </div>
           {{/unless}}
-          <div class="bg-qrl-primary/50 rounded-lg p-4">
-            <div class="text-sm text-qrl-text-secondary mb-1">Signature Scheme</div>
-            <div class="text-md font-mono text-qrl-text">{{addressValidation.signatureScheme}}</div>
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Signature Scheme</div>
+            <div class="mono-value text-lg">{{addressValidation.signatureScheme}}</div>
           </div>
           {{#unless isMultiSig}}
-            <div class="bg-qrl-primary/50 rounded-lg p-4">
-              <div class="text-sm text-qrl-text-secondary mb-1">Tree Height</div>
-              <div class="text-md font-mono text-qrl-text">{{addressValidation.height}}</div>
+            <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+              <div class="hero-label">Tree Height</div>
+              <div class="mono-value text-lg">{{addressValidation.height}}</div>
             </div>
-            <div class="bg-qrl-primary/50 rounded-lg p-4">
-              <div class="text-sm text-qrl-text-secondary mb-1">Total Signatures</div>
-              <div class="text-md font-mono text-qrl-text">{{addressValidation.totalSignatures}}</div>
+            <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+              <div class="hero-label">Total Signatures</div>
+              <div class="mono-value text-lg">{{addressValidation.totalSignatures}}</div>
             </div>
-            <div class="bg-qrl-primary/50 rounded-lg p-4">
-              <div class="text-sm text-qrl-text-secondary mb-1">Signatures Remaining</div>
-              <div class="text-md font-mono text-qrl-text">{{addressValidation.keysRemaining}}</div>
+            <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+              <div class="hero-label">Signatures Remaining</div>
+              <div class="mono-value text-lg">{{addressValidation.keysRemaining}}</div>
             </div>
           {{/unless}}
-          <div class="bg-qrl-primary/50 rounded-lg p-4">
-            <div class="text-sm text-qrl-text-secondary mb-1">Hash Function</div>
-            <div class="text-md font-mono text-qrl-text">{{addressValidation.hashFunction}}</div>
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Hash Function</div>
+            <div class="mono-value text-lg">{{addressValidation.hashFunction}}</div>
           </div>
         </div>
       </div>
@@ -156,7 +147,7 @@
       {{else}}
         <!-- Tabs Section -->
         <div class="card">
-          <div id="addressTabs" class="flex border-b border-qrl-border mb-6">
+          <div id="addressTabs" class="flex border-b border-qrl-border mb-6 border-gradient-bottom">
             <button class="tab-button active" data-tab="transactions">Quanta</button>
             <button class="tab-button" data-tab="tokenBalances">Tokens</button>
             <button class="tab-button" data-tab="nftBalances">NFTs</button>
@@ -185,7 +176,7 @@
               <div class="space-y-4">
                 {{#each addressTransactions}}
                   {{#if isTransfer this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-transfer transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -227,7 +218,7 @@
                   {{/if}}
 
                   {{#if isTokenCreation this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-token transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -281,7 +272,7 @@
                   {{/if}}
 
                   {{#if isTokenTransfer this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-token transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -345,7 +336,7 @@
                   {{/if}}
 
                   {{#if isCoinbaseTxn this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-coinbase transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -373,7 +364,7 @@
                   {{/if}}
 
                   {{#if isSlaveTxn this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-slave transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -399,7 +390,7 @@
                   {{/if}}
 
                   {{#if isMultiSigCreateTxn this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-multisig transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -425,7 +416,7 @@
                   {{/if}}
 
                   {{#if isMultiSigSpendTxn this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-multisig transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -451,7 +442,7 @@
                   {{/if}}
 
                   {{#if isMultiSigVoteTxn this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-multisig transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -477,7 +468,7 @@
                   {{/if}}
 
                   {{#if isLatticePKTxn this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-lattice transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -503,7 +494,7 @@
                   {{/if}}
 
                   {{#if isMessageTxn this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-message transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -529,7 +520,7 @@
                   {{/if}}
 
                   {{#if isKeybaseTxn this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-message transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
@@ -555,7 +546,7 @@
                   {{/if}}
 
                   {{#if isDocumentNotarisation this.transactionType}}
-                    <div class="card hover:bg-qrl-secondary/80 hover:border-qrl-accent transition-colors duration-200 transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 border-type-message transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                           <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">

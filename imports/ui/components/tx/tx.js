@@ -1,11 +1,14 @@
 /* eslint no-console: 0 */
 import JSONFormatter from 'json-formatter-js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import './tx.html'
 import CryptoJS from 'crypto-js'
 import sha256 from 'sha256'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
-import { numberToString, SHOR_PER_QUANTA, formatBytes, bufferToHex } from '../../../startup/both/index.js'
+import {
+  numberToString, SHOR_PER_QUANTA, formatBytes, bufferToHex,
+} from '../../../startup/both/index.js'
 
 const renderTxBlock = () => {
   const txId = FlowRouter.getParam('txId')
@@ -140,8 +143,8 @@ Template.tx.helpers({
       const qrl = Session.get('qrl')
       const txhash = Session.get('txhash')
       if (qrl && typeof qrl === 'number' && txhash && txhash.transaction && txhash.transaction.tx) {
-        const value = txhash.transaction.tx.amount
-        if (value && !isNaN(value)) {
+        const value = Number(txhash.transaction.tx.amount)
+        if (!Number.isNaN(value)) {
           const usdValue = qrl * value
           return usdValue.toFixed(2)
         }
@@ -475,7 +478,7 @@ function toggleJSON() {
       const formatter = new JSONFormatter(myJSON, 1, { theme: 'dark' })
       jsonBox.innerHTML = ''
       const rendered = formatter.render()
-      
+
       // Find and extract from the first json-formatter-children element
       const childrenElement = rendered.querySelector('.json-formatter-children')
       if (childrenElement) {
@@ -487,7 +490,7 @@ function toggleJSON() {
         // Fallback to full rendered content
         jsonBox.appendChild(rendered)
       }
-      
+
       // Open the first toggler after extraction is complete
       setTimeout(() => {
         const firstToggler = jsonBox.querySelector('.json-formatter-toggler-link')
@@ -495,19 +498,19 @@ function toggleJSON() {
           firstToggler.click()
         }
       }, 0)
-      
+
       // Remove empty objects from DOM unless expanded
       setTimeout(() => {
         const emptyObjects = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-object')
         const emptyArrays = jsonBox.querySelectorAll('.json-formatter-children.json-formatter-empty.json-formatter-array')
-        
-        emptyObjects.forEach(el => {
+
+        emptyObjects.forEach((el) => {
           if (!el.closest('.json-formatter-open')) {
             el.remove() // Remove from DOM entirely
           }
         })
-        
-        emptyArrays.forEach(el => {
+
+        emptyArrays.forEach((el) => {
           if (!el.closest('.json-formatter-open')) {
             el.remove() // Remove from DOM entirely
           }
@@ -648,12 +651,12 @@ Template.tx.events({
   },
   'click .copy-txhash-btn': async (event) => {
     event.preventDefault()
-    
+
     // Show success feedback immediately
     Session.set('copySuccess', true)
-    
+
     const txhash = Session.get('txhash')
-    
+
     if (txhash && txhash.transaction && txhash.transaction.tx && txhash.transaction.tx.transaction_hash) {
       const transactionHash = txhash.transaction.tx.transaction_hash
       try {
@@ -665,14 +668,14 @@ Template.tx.events({
           textArea.value = transactionHash
           document.body.appendChild(textArea)
           textArea.select()
-          const success = document.execCommand('copy')
+          document.execCommand('copy')
           document.body.removeChild(textArea)
         } catch (fallbackErr) {
           console.error('Copy failed:', fallbackErr)
         }
       }
     }
-    
+
     // Clear after 3 seconds
     setTimeout(() => {
       Session.set('copySuccess', false)
@@ -687,14 +690,14 @@ Template.tx.events({
 Template.tx.onRendered(() => {
   // Initialize copySuccess session variable
   Session.set('copySuccess', false)
-  
+
   // Initialize Lucide icons for this template
   setTimeout(() => {
     if (window.reinitializeLucideIcons) {
       window.reinitializeLucideIcons()
     }
   }, 200)
-  
+
   // Tooltip for values
   document.querySelectorAll('.value').forEach((element) => {
     element.addEventListener('mouseenter', (event) => {

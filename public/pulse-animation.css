@@ -1,51 +1,51 @@
-/* Unconfirmed transaction pulsing animation */
+/* Unconfirmed transaction pulsing animation - QRL Accent Orange */
 .status-warning {
-  animation: pulse-yellow 2s ease-in-out infinite !important;
-  background-color: rgba(245, 158, 11, 0.2) !important;
-  border-color: rgba(245, 158, 11, 0.3) !important;
-  color: #f59e0b !important;
+  animation: pulse-accent 2.5s ease-in-out infinite !important;
+  background-color: rgba(255, 167, 41, 0.15) !important;
+  border-color: rgba(255, 167, 41, 0.25) !important;
+  color: #FFA729 !important;
 }
 
-@keyframes pulse-yellow {
+@keyframes pulse-accent {
   0% {
-    background-color: rgba(245, 158, 11, 0.2) !important;
-    border-color: rgba(245, 158, 11, 0.3) !important;
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    background-color: rgba(255, 167, 41, 0.15);
+    border-color: rgba(255, 167, 41, 0.25);
+    box-shadow: 0 0 0 0 rgba(255, 167, 41, 0.2);
   }
   50% {
-    background-color: rgba(245, 158, 11, 0.4) !important;
-    border-color: rgba(245, 158, 11, 0.6) !important;
-    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+    background-color: rgba(255, 167, 41, 0.25);
+    border-color: rgba(255, 167, 41, 0.4);
+    box-shadow: 0 0 0 3px rgba(255, 167, 41, 0.05);
   }
   100% {
-    background-color: rgba(245, 158, 11, 0.2) !important;
-    border-color: rgba(245, 158, 11, 0.3) !important;
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    background-color: rgba(255, 167, 41, 0.15);
+    border-color: rgba(255, 167, 41, 0.25);
+    box-shadow: 0 0 0 0 rgba(255, 167, 41, 0.2);
   }
 }
 
 /* Light theme unconfirmed animation */
 .light-theme .status-warning {
-  animation: pulse-yellow-light 2s ease-in-out infinite !important;
-  background-color: rgba(245, 158, 11, 0.1) !important;
-  border-color: rgba(245, 158, 11, 0.2) !important;
-  color: #d97706 !important;
+  animation: pulse-accent-light 2.5s ease-in-out infinite !important;
+  background-color: rgba(255, 167, 41, 0.08) !important;
+  border-color: rgba(255, 167, 41, 0.15) !important;
+  color: #E8920A !important;
 }
 
-@keyframes pulse-yellow-light {
+@keyframes pulse-accent-light {
   0% {
-    background-color: rgba(245, 158, 11, 0.1) !important;
-    border-color: rgba(245, 158, 11, 0.2) !important;
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2);
+    background-color: rgba(255, 167, 41, 0.08);
+    border-color: rgba(255, 167, 41, 0.15);
+    box-shadow: 0 0 0 0 rgba(255, 167, 41, 0.1);
   }
   50% {
-    background-color: rgba(245, 158, 11, 0.3) !important;
-    border-color: rgba(245, 158, 11, 0.5) !important;
-    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.05);
+    background-color: rgba(255, 167, 41, 0.18);
+    border-color: rgba(255, 167, 41, 0.3);
+    box-shadow: 0 0 0 3px rgba(255, 167, 41, 0.03);
   }
   100% {
-    background-color: rgba(245, 158, 11, 0.1) !important;
-    border-color: rgba(245, 158, 11, 0.2) !important;
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2);
+    background-color: rgba(255, 167, 41, 0.08);
+    border-color: rgba(255, 167, 41, 0.15);
+    box-shadow: 0 0 0 0 rgba(255, 167, 41, 0.1);
   }
 }

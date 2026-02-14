@@ -54,7 +54,6 @@ Meteor.call('getAddressState', req, (err, res) => {
   }
 })
 
-
 const addresstx = anyAddressToRaw('Q0105005a4749998aa0eb1b7125e5100bcbc8048b583eb582853db7451d005ed850f2d0fd52cd7c')
 req = {
   address: addresstx,

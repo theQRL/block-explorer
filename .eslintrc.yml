@@ -1,4 +1,4 @@
-# root: true
+root: true
 # enable ES6
 parserOptions:
   ecmaVersion: 2017
@@ -6,15 +6,8 @@ parserOptions:
   ecmaFeatures:
     jsx: true # enable React's JSX
 
-# register plugins
-plugins:
-  - meteor
-
-# use the rules of eslint-config-airbnb
-# and the recommended rules of eslint-plugin-meteor
 extends:
   - airbnb-base
-  - plugin:meteor/recommended
 
 # registerenvironments
 env:
@@ -28,18 +21,22 @@ rules:
   semi: [2, 'never']
   no-unexpected-multiline: 2
   no-throw-literal: 0
+  no-console: 0
+  func-names: 0
+  no-plusplus: 0
+  no-param-reassign:
+    - 2
+    - props: false
   max-len: 0
+  import/prefer-default-export: 0
   import/no-extraneous-dependencies: 0
   import/no-absolute-path: 0
+  import/no-cycle: 0
   # import/no-unresolved: 0
   import/extensions:
     - off
     - never
   # import/no-extraneous-dependencies: 0
-  # eslint-plugin-meteor
-  meteor/no-session: [0] # allow Session
-  # meteor/prefer-session-equals: [2] # prefer Session.equals instead
- 
 
 globals:
   # collections
@@ -50,6 +47,19 @@ globals:
   FlowRouter: false # kadira:flow-router
   moment: false # momentjs:moment
   BlazeLayout: false
+  LocalStore: false # frozeman:storage
+  ApexCharts: false # loaded via public/apexcharts.min.js
+
+overrides:
+  - files:
+      - imports/startup/server/*.js
+    rules:
+      no-use-before-define: 0
+      no-restricted-syntax: 0
+      no-await-in-loop: 0
+      no-continue: 0
+      consistent-return: 0
+      no-return-await: 0
   
 settings:
   import/core-modules: [ meteor ]

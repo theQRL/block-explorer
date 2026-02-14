@@ -1,11 +1,13 @@
 {
   "name": "block-explorer",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "QRL block explorer",
   "main": "index.js",
   "scripts": {
     "build:css": "tailwindcss -i ./public/tailwind.css -o ./public/tailwind-output.css",
     "build:css:watch": "tailwindcss -i ./public/tailwind.css -o ./public/tailwind-output.css --watch",
+    "lint": "eslint --ext .js client imports server",
+    "lint:fix": "eslint --ext .js --fix client imports server",
     "start": "meteor",
     "dev": "concurrently \"npm run build:css:watch\" \"meteor\""
   },
@@ -16,7 +18,7 @@
     "@theqrl/explorer-helpers": "^2.8.0",
     "@theqrl/nft-providers": "^1.1.0",
     "@theqrl/validate-qrl-address": "^3.0.1",
-    "axios": "^0.27.2",
+    "axios": "^1.13.5",
     "babel-runtime": "^6.26.0",
     "bech32": "^2.0.0",
     "bignumber.js": "^9.3.1",
@@ -30,7 +32,6 @@
     "jquery-qrcode": "^1.0.0",
     "jscrypto": "^1.0.3",
     "json-formatter-js": "^2.5.23",
-    "lodash": "^4.17.21",
     "lucide": "^0.545.0",
     "mathjs": "^10.6.4",
     "meteor-babel-helpers": "0.0.3",
@@ -62,7 +63,6 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-import-resolver-meteor": "^0.4.0",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-meteor": "^7.3.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.18"
   },

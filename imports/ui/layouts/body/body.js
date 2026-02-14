@@ -7,7 +7,7 @@ Template.appBody.onRendered(() => {
       window.reinitializeLucideIcons()
     }
   }, 100)
-  
+
   const mobileMenuToggle = document.getElementById('mobile-menu-toggle')
   const mobileMenu = document.getElementById('mobile-menu')
 
@@ -38,4 +38,5 @@ Template.appBody.onRendered(() => {
 })
 Template.appBody.helpers({
   EXPLORER_VERSION: () => EXPLORER_VERSION,
+  currentYear: () => new Date().getFullYear(),
 })

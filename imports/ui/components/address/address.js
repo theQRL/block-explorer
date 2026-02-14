@@ -2,6 +2,7 @@
 /* ^^^ remove once testing complete
  */
 import JSONFormatter from 'json-formatter-js'
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import qrlAddressValidator from '@theqrl/validate-qrl-address'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
@@ -55,85 +56,22 @@ const addressResultsRefactor = (res) => {
   return output
 }
 
-async function parseOTS(obj) {
-  // console.log('parseOTS called with:', obj)
-
-  if (!obj || typeof obj !== 'object') {
-    console.error('parseOTS: Invalid object received:', obj)
-    return '<div class="p-2 text-center text-xs text-red-400">No OTS data available</div>'
-  }
-
-  const k = Object.keys(obj).sort((a, b) => parseInt(a) - parseInt(b))
-  // console.log('parseOTS sorted keys:', k)
-  // console.log('parseOTS total keys:', k.length)
-
-  if (k.length === 0) {
-    // console.log('parseOTS: No keys found in object')
-    return '<div class="p-2 text-center text-xs text-gray-400">No OTS keys found</div>'
-  }
-
-  // Count used vs unused keys
-  let usedCount = 0
-  let unusedCount = 0
-  k.forEach((val) => {
-    if (obj[val] === 1) {
-      usedCount++
-    } else {
-      unusedCount++
-    }
-  })
-
-  // console.log(`parseOTS: ${usedCount} used keys, ${unusedCount} unused keys`)
-
-  let ret = ''
-
-  k.forEach((val) => {
-    let o = '<div class="p-1 sm:p-2 text-center text-xs sm:text-sm font-mono border rounded '
-    if (obj[val] === 1) {
-      o = `${o}bg-red-500/20 border-red-500/50 text-red-400`
-      o = `${o}"><i data-lucide="x-circle" class="w-4 h-4 sm:w-4 sm:h-4 inline-block mr-1"></i>${val}</div>`
-    } else {
-      o = `${o}bg-green-500/20 border-green-500/50 text-green-400`
-      o = `${o}"><i data-lucide="circle" class="w-4 h-4 sm:w-4 sm:h-4 inline-block mr-1"></i>${val}</div>`
-    }
-    ret = `${ret}${o}`
-  })
-
-  // console.log('parseOTS returning:', ret)
-  return ret
-}
-
 async function OTS(obj) {
   // console.log('OTS function called with:', obj)
 
   if (!obj || typeof obj !== 'object') {
-    // console.error('OTS: Invalid object received:', obj)
     Session.set('OTStracker', { error: 'No OTS data available' })
     return
   }
 
-  const k = Object.keys(obj).sort((a, b) => parseInt(a) - parseInt(b))
+  const k = Object.keys(obj).sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
   // console.log('OTS sorted keys:', k)
   // console.log('OTS total keys:', k.length)
 
   if (k.length === 0) {
-    // console.log('OTS: No keys found in object')
     Session.set('OTStracker', { empty: 'No OTS keys found' })
     return
   }
-
-  // Count used vs unused keys
-  let usedCount = 0
-  let unusedCount = 0
-  k.forEach((val) => {
-    if (obj[val] === 1) {
-      usedCount++
-    } else {
-      unusedCount++
-    }
-  })
-
-  // console.log(`OTS: ${usedCount} used keys, ${unusedCount} unused keys`)
 
   // Generate structured data instead of HTML
   const cells = []
@@ -141,16 +79,14 @@ async function OTS(obj) {
     const isUsed = obj[val] === 1
     cells.push({
       key: val,
-      isUsed: isUsed,
-      status: isUsed ? 'USED' : 'Available'
+      isUsed,
+      status: isUsed ? 'USED' : 'Available',
     })
   })
 
-  // console.log('Generated cells data:', cells)
+  Session.set('OTStracker', { cells })
 
-  Session.set('OTStracker', { cells: cells })
-
-  // Re-initialize Lucide icons for the new HTML
+  // Re-initialize Lucide icons for the new content
   if (window.reinitializeLucideIcons) {
     setTimeout(() => {
       window.reinitializeLucideIcons()
@@ -500,7 +436,7 @@ Template.address.helpers({
       const qrl = Session.get('qrl')
       const address = Session.get('address')
       const balance = parseFloat(address.state.balance)
-      if (!isNaN(balance)) {
+      if (!Number.isNaN(balance)) {
         const usdValue = qrl * balance
         return usdValue.toFixed(2)
       }

@@ -1,8 +1,8 @@
 <template name="status">
   <div class="space-y-6">
     <h4 class="text-2xl font-bold text-qrl-text">Network Status</h4>
-    
-    {{#with status}} 
+
+    {{#with status}}
       {{#if error}}
         <div class="card border-red-500/30 bg-red-500/10">
           <div class="flex items-start space-x-3">
@@ -21,80 +21,114 @@
       {{else}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Network Status Card -->
-          <div class="card">
-            <h3 class="text-lg font-semibold text-qrl-text mb-4 flex items-center">
-              <i data-lucide="activity" class="w-5 h-5 mr-2 text-qrl-accent"></i>
-              Network Status
-            </h3>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">State:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{status.node_info.state}}</span>
+          <div class="card card-accent">
+            <div class="mb-6">
+              <h3 class="hero-label flex items-center">
+                <i data-lucide="activity" class="w-4 h-4 mr-2 text-qrl-accent"></i>
+                Network
+              </h3>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <div class="hero-label">State</div>
+                <div class="mono-value text-xl sm:text-2xl font-bold leading-tight">{{status.node_info.state}}</div>
               </div>
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Uptime:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{uptime}}</span>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="hero-label">Uptime</div>
+                  <div class="mono-value text-sm">{{uptime}}</div>
+                </div>
+                <div>
+                  <div class="hero-label">Peers</div>
+                  <div class="mono-value text-sm">{{status.node_info.num_connections}}</div>
+                </div>
               </div>
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Network ID:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{status.node_info.network_id}}</span>
-              </div>
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Peers:</span>
-                <span class="text-qrl-text font-mono text-right">{{status.node_info.num_connections}}</span>
-              </div>
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Version:</span>
-                <span class="text-qrl-text font-mono text-right break-all">{{status.node_info.version}}</span>
+              <div class="space-y-3">
+                <div>
+                  <div class="hero-label">Network ID</div>
+                  <div class="mono-value text-sm whitespace-nowrap overflow-x-auto pr-1">{{status.node_info.network_id}}</div>
+                </div>
+                <div>
+                  <div class="hero-label">Version</div>
+                  <div class="mono-value text-sm break-all">{{status.node_info.version}}</div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Blocks Card -->
-          <div class="card">
-            <h3 class="text-lg font-semibold text-qrl-text mb-4 flex items-center">
-              <i data-lucide="box" class="w-5 h-5 mr-2 text-qrl-accent"></i>
-              Blocks
-            </h3>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Max Index:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{max_block_index}}</span>
+          <div class="card card-accent">
+            <div class="mb-6">
+              <h3 class="hero-label flex items-center">
+                <i data-lucide="box" class="w-4 h-4 mr-2 text-qrl-accent"></i>
+                Blocks
+              </h3>
+            </div>
+            <div class="space-y-4">
+              <div>
+                <div class="hero-label">Max Block Index</div>
+                <div class="mono-value text-xl sm:text-2xl font-bold leading-tight">{{max_block_index}}</div>
               </div>
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Block Time:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{status.block_time_mean}}</span>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="hero-label">Block Time</div>
+                  <div class="mono-value text-sm">{{status.block_time_mean}}</div>
+                </div>
+                <div>
+                  <div class="hero-label">Std Dev</div>
+                  <div class="mono-value text-sm">{{status.block_time_sd}}</div>
+                </div>
               </div>
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Std Dev:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{status.block_time_sd}}</span>
+              <div>
+                <div class="hero-label">Time Since Last Block</div>
+                <div class="mono-value text-sm">{{timeSinceLastBlock}}</div>
               </div>
             </div>
           </div>
 
           <!-- Coin Supply Card -->
-          <div class="card">
-            <h3 class="text-lg font-semibold text-qrl-text mb-4 flex items-center">
-              <i data-lucide="coins" class="w-5 h-5 mr-2 text-qrl-accent"></i>
-              Coin Supply
-            </h3>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Emission:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{emission}}% ({{emission_raw}})</span>
+          <div class="card card-accent">
+            <div class="mb-6">
+              <h3 class="hero-label flex items-center">
+                <i data-lucide="coins" class="w-4 h-4 mr-2 text-qrl-accent"></i>
+                Coin Supply
+              </h3>
+            </div>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="hero-label">Emission</div>
+                  <div class="mono-value text-xl sm:text-2xl font-bold leading-tight">{{emission}}%</div>
+                </div>
+                <div>
+                  <div class="hero-label">Price</div>
+                  <div class="mono-value text-xl sm:text-2xl font-bold leading-tight">{{quantaUsd}}</div>
+                </div>
               </div>
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Unmined:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{unmined}}</span>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="hero-label">Market Cap</div>
+                  <div class="mono-value text-sm">{{marketCap}}</div>
+                </div>
+                <div>
+                  <div class="hero-label">Max Supply</div>
+                  <div class="mono-value text-sm">{{totalSupply}} QRL</div>
+                </div>
               </div>
-              <div class="flex justify-between items-start">
-                <span class="text-qrl-text-secondary flex-shrink-0 mr-2">Block Reward:</span>
-                <span class="text-qrl-text font-mono text-right break-words">{{reward(status.block_last_reward)}}</span>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <div class="hero-label">Circulating</div>
+                  <div class="mono-value text-sm">{{emission_raw}} QRL</div>
+                </div>
+                <div>
+                  <div class="hero-label">Block Reward</div>
+                  <div class="mono-value text-sm">{{reward(status.block_last_reward)}} QRL</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      {{/if}} 
+      {{/if}}
     {{/with}}
   </div>
 </template>

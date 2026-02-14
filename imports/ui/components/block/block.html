@@ -9,44 +9,63 @@
           </div>
         </div>
       </div>
+    {{else if blockError}}
+      <div class="card border-red-500/30 bg-red-500/10">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-red-400 mb-2">
+              Error loading block
+            </h3>
+            <p class="text-red-300">{{blockError}}</p>
+          </div>
+        </div>
+      </div>
     {{else}}
       <!-- Block Header -->
       <div class="card">
-      <h3 class="text-2xl font-bold text-qrl-text mb-6 flex items-center">
-        <svg class="w-8 h-8 mr-3 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-        </svg>
-        Block {{header.block_number}}
-      </h3>
+        <div class="flex items-center mb-6">
+          <svg class="w-8 h-8 mr-3 text-qrl-accent" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+          </svg>
+          <div>
+            <div class="hero-label">Block</div>
+            <div class="font-mono font-bold text-xl text-qrl-text">{{header.block_number}}</div>
+          </div>
+        </div>
 
-      <!-- Block Details Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <div class="bg-qrl-primary/50 rounded-lg p-4">
-          <div class="text-sm text-qrl-text-secondary mb-1">Transactions</div>
-          <div class="text-md font-mono text-qrl-text">{{block.transactions.length}}</div>
-        </div>
-        <div class="bg-qrl-primary/50 rounded-lg p-4">
-          <div class="text-sm text-qrl-text-secondary mb-1">Timestamp</div>
-          <div class="text-md font-mono text-qrl-text">{{ts}}</div>
-        </div>
-        <div class="bg-qrl-primary/50 rounded-lg p-4">
-          <div class="text-sm text-qrl-text-secondary mb-1">Epoch</div>
-          <div class="text-md font-mono text-qrl-text">{{block_epoch}}</div>
-        </div>
-        <div class="bg-qrl-primary/50 rounded-lg p-4">
-          <div class="text-sm text-qrl-text-secondary mb-1">Size</div>
-          <div class="text-md font-mono text-qrl-text">{{blockSize}}</div>
-        </div>
-        <div class="bg-qrl-primary/50 rounded-lg p-4">
-          <div class="text-sm text-qrl-text-secondary mb-1">Reward</div>
-          <div class="text-md font-mono text-qrl-text">{{block_reward}} Quanta</div>
-        </div>
-        <div class="bg-qrl-primary/50 rounded-lg p-4">
-          <div class="text-sm text-qrl-text-secondary mb-1">Mining Nonce</div>
-          <div class="text-md font-mono text-qrl-text">{{mining_nonce}}</div>
+        <!-- Block Details Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Transactions</div>
+            <div class="mono-value text-lg">{{block.transactions.length}}</div>
+          </div>
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Timestamp</div>
+            <div class="mono-value text-lg">{{ts}}</div>
+          </div>
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Epoch</div>
+            <div class="mono-value text-lg">{{block_epoch}}</div>
+          </div>
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Size</div>
+            <div class="mono-value text-lg">{{blockSize}}</div>
+          </div>
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Reward</div>
+            <div class="mono-value text-lg">{{block_reward}} Quanta</div>
+          </div>
+          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+            <div class="hero-label">Mining Nonce</div>
+            <div class="mono-value text-lg">{{mining_nonce}}</div>
+          </div>
         </div>
       </div>
-    </div>
 
     <!-- Transactions Section -->
     <div class="card">
@@ -72,8 +91,8 @@
 
       <!-- Transactions Table -->
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-qrl-border">
-          <thead class="bg-qrl-primary/50">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Type</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Amount</th>
@@ -83,18 +102,18 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase tracking-wider">Txhash</th>
             </tr>
           </thead>
-          <tbody class="bg-qrl-secondary divide-y divide-qrl-border">
+          <tbody class="divide-y divide-qrl-border/50">
             {{#each transactions}}
-              <tr class="hover:bg-qrl-primary/50 transition-colors duration-200 cursor-pointer transaction-row" data-txhash="{{transaction_hash}}">
+              <tr class="hover:bg-qrl-accent/5 transition-colors duration-150 cursor-pointer transaction-row" data-txhash="{{transaction_hash}}">
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{#if isTransfer transactionType}}bg-yellow-100 text-yellow-800{{else}}{{#if isTokenTransfer transactionType}}bg-blue-100 text-blue-800{{else}}bg-gray-100 text-gray-800{{/if}}{{/if}}">
+                  <span class="badge-pill {{#if isTransfer transactionType}}badge-pill-transfer{{else}}{{#if isTokenTransfer transactionType}}badge-pill-token{{else}}badge-pill-default{{/if}}{{/if}}">
                     {{transactionType}}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                <td class="px-6 py-4 whitespace-nowrap text-sm mono-value">
                   {{amount}}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-qrl-text font-mono">
+                <td class="px-6 py-4 whitespace-nowrap text-sm mono-value">
                   {{fee}}
                 </td>
                 <td class="px-6 py-4 text-sm text-qrl-text-secondary font-mono">
