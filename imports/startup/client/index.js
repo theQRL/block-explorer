@@ -67,6 +67,7 @@ Template.appBody.onRendered(() => {
 
   // Handle close button
   $('#disconnect-modal-close').on('click', () => {
+    Meteor.reconnect()
     hideDisconnectModal()
   })
 

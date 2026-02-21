@@ -7,10 +7,10 @@ import qrlAddressValidator from '@theqrl/validate-qrl-address'
 import _ from 'underscore'
 import qrlNft from '@theqrl/nft-providers'
 import { BigNumber } from 'bignumber.js'
-import { rawAddressToB32Address, rawAddressToHexAddress } from '@theqrl/explorer-helpers'
+import { rawAddressToHexAddress } from '@theqrl/explorer-helpers'
 import {
   bufferToHex,
-  bytesToString, anyAddressToRaw, hexOrB32, numberToString, SHOR_PER_QUANTA, upperCaseFirst, decimalToBinary,
+  bytesToString, anyAddressToRaw, hexOrB32, SHOR_PER_QUANTA, upperCaseFirst, decimalToBinary,
 } from '../../../startup/both/index.js'
 import './address.html'
 
@@ -96,40 +96,62 @@ async function OTS(obj) {
 
 function loadAddressTransactions(aId, page) {
   Session.set('addressTransactions', [])
-  $('#loadingTransactions').show()
-  // console.log('Getting transactions for page ', page)
+  Session.set('loadingTransactions', true)
   const addresstx = anyAddressToRaw(aId)
-  const request = {
-    address: addresstx,
-    item_per_page: 10,
-    page_number: page,
+
+  const setTransactions = (transactions) => {
+    Session.set('addressTransactions', transactions)
+    const a = Session.get('address')
+    if (a && typeof a === 'object') {
+      a.transactions = transactions
+      Session.set('address', a)
+    }
+    Session.set('fetchedTx', true)
   }
 
-  Meteor.call('getTransactionsByAddress', request, (err, res) => {
-    if (err) {
-      Session.set('addressTransactions', { error: err })
-    } else {
-      Session.set('addressTransactions', res.transactions_detail)
-      const a = Session.get('address')
-      a.transactions = res.transactions_detail
-      Session.set('address', a)
-      Session.set('fetchedTx', true)
-    }
-
-    Meteor.call('getSlavesByAddress', request, (errSlaves, resSlaves) => {
-      if (errSlaves) {
-        // error handling
-      } else {
+  const finish = (requestForSlaves) => {
+    Meteor.call('getSlavesByAddress', requestForSlaves, (errSlaves, resSlaves) => {
+      if (!errSlaves) {
         Session.set('slaves', resSlaves)
       }
     })
+    Session.set('loadingTransactions', false)
+  }
 
-    $('#loadingTransactions').hide()
-    // Only show "no transactions found" if there are actually no transactions
-    if (!res || !res.transactions_detail || res.transactions_detail.length === 0) {
-      $('#noTransactionsFound').show()
+  const fetchPage = (pageNumber, allowFallback) => {
+    const request = {
+      address: addresstx,
+      item_per_page: 10,
+      page_number: pageNumber,
     }
-  })
+
+    Meteor.call('getTransactionsByAddress', request, (err, res) => {
+      const txList = (res && Array.isArray(res.transactions_detail)) ? res.transactions_detail : []
+      const addressState = Session.get('address')
+      const txCount = addressState && addressState.state
+        ? parseInt(addressState.state.transaction_hash_count, 10)
+        : 0
+      const shouldFallbackToZeroIndexedFirstPage = allowFallback
+        && page === 1
+        && pageNumber === 1
+        && txCount > 0
+        && (err || txList.length === 0)
+
+      if (shouldFallbackToZeroIndexedFirstPage) {
+        fetchPage(0, false)
+        return
+      }
+
+      if (err) {
+        Session.set('addressTransactions', { error: err })
+      } else {
+        setTransactions(txList)
+      }
+      finish(request)
+    })
+  }
+
+  fetchPage(page, true)
 }
 
 const getTokenBalances = (getAddress, callback) => {
@@ -382,10 +404,11 @@ const renderAddressBlock = () => {
               const numPages = Math.ceil(res.state.transaction_hash_count / 10)
               const pages = []
               while (pages.length !== numPages) {
+                const pageNumber = pages.length + 1
                 pages.push({
-                  number: pages.length + 1,
-                  from: ((pages.length + 1) * 10) + 1,
-                  to: ((pages.length + 1) * 10) + 10,
+                  number: pageNumber,
+                  from: ((pageNumber - 1) * 10) + 1,
+                  to: pageNumber * 10,
                 })
               }
               // let txArray = null
@@ -394,6 +417,7 @@ const renderAddressBlock = () => {
               // const startIndex = (tPage - 1) * 10
               // txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
               Session.set('fetchedTx', false)
+              Session.set('loadingTransactions', true)
               loadAddressTransactions(aId, tPage)
             }
           })
@@ -595,7 +619,10 @@ Template.address.helpers({
     return ret
   },
   coinbaseValue() {
-    return this.coinbase.amount / SHOR_PER_QUANTA
+    if (this.tx && this.tx.coinbase) {
+      return this.tx.coinbase.amount / SHOR_PER_QUANTA
+    }
+    return 0
   },
   // timestampToDateTime(ts) {
   //   console.log('ts', ts)
@@ -605,54 +632,30 @@ Template.address.helpers({
   //   return 'Unconfirmed Tx'
   // },
   addressTx() {
-    let ret = []
-    if (Session.get('addressTransactions').length > 0) {
-      ret = Session.get('addressTransactions')
+    const tx = Session.get('addressTransactions')
+    if (tx && Array.isArray(tx)) {
+      return tx
     }
-    return ret
+    return []
+  },
+  loadingTransactions() {
+    return Session.get('loadingTransactions')
   },
   addressTransactions() {
-    try {
-      const transactions = []
-      const thisAddress = rawAddressToB32Address(
-        Session.get('address').state.address,
-      )
-      _.each(Session.get('addressTransactions'), (transaction) => {
-        // Store modified transaction
-        const y = transaction.tx
-
-        // Update timestamp from unix epoch to human readable time/date.
-        if (moment.unix(transaction.timestamp).isValid()) {
-          y.timestamp = moment
-            .unix(transaction.timestamp)
-            .format('HH:mm D MMM YYYY')
-        } else {
-          y.timestamp = 'Unconfirmed Tx'
-        }
-
-        y.addr_from = transaction.addr_from
-
-        // Set total received amount if sent to this address
-        let thisReceivedAmount = 0
-        if (
-          transaction.type === 'transfer'
-          || transaction.type === 'transfer_token'
-        ) {
-          _.each(transaction.outputs, (output) => {
-            if (output.address_b32 === thisAddress) {
-              thisReceivedAmount += parseFloat(output.amount)
-            }
-          })
-        }
-        y.thisReceivedAmount = numberToString(thisReceivedAmount)
-
-        transactions.push(y)
-      })
-      // console.log('transactions', transactions)
-      return transactions
-    } catch (e) {
-      return false
+    const tx = Session.get('addressTransactions')
+    if (tx && Array.isArray(tx)) {
+      return tx
     }
+    return []
+  },
+  ts() {
+    if (this.header) {
+      return moment.unix(this.header.timestamp_seconds).format('HH:mm D MMM YYYY')
+    }
+    if (this.timestamp) {
+      return moment.unix(this.timestamp).format('HH:mm D MMM YYYY')
+    }
+    return 'Unconfirmed Tx'
   },
   receivedAmount(tx) {
     if (tx.transfer_token) {
@@ -678,11 +681,11 @@ Template.address.helpers({
     }
   },
   receivedTokens(tx) {
-    if (tx.transfer_token.nft) {
+    if (tx.transfer_token && tx.transfer_token.nft) {
       return ''
     }
     const a = Session.get('address').state.address
-    const outputs = tx.transfer_token.addrs_to
+    const outputs = tx.transfer_token ? tx.transfer_token.addrs_to : null
     let amount = 0
     if (outputs) {
       _.each(outputs, (element, key) => {
@@ -697,16 +700,16 @@ Template.address.helpers({
     return ''
   },
   sendingOutputs(outputs) {
-    // console.log('outputs', outputs)
     const result = []
-    _.each(outputs.transfer.addrs_to, (element, key) => {
-      const a = new BigNumber(outputs.transfer.amounts[key])
-      result.push({
-        to: element,
-        amount: a.dividedBy(SHOR_PER_QUANTA).toString(),
+    if (outputs.transfer) {
+      _.each(outputs.transfer.addrs_to, (element, key) => {
+        const a = new BigNumber(outputs.transfer.amounts[key])
+        result.push({
+          to: element,
+          amount: a.dividedBy(SHOR_PER_QUANTA).toString(),
+        })
       })
-    })
-    // console.log('return in sendingOutputs', result)
+    }
     return result
   },
   totalTransferred(tx) {
@@ -721,14 +724,8 @@ Template.address.helpers({
     return ''
   },
   addressHasTransactions() {
-    try {
-      if (Session.get('addressTransactions').length > 0) {
-        return true
-      }
-      return false
-    } catch (e) {
-      return false
-    }
+    const tx = Session.get('addressTransactions')
+    return tx && Array.isArray(tx) && tx.length > 0
   },
   notFound() {
     try {
@@ -1149,7 +1146,7 @@ Template.address.events({
   },
   'click button[qrl-data]': (event) => {
     let b = 0
-    Session.set('addressTransactions', {})
+    Session.set('addressTransactions', [])
     if (parseInt(event.target.textContent, 10)) {
       b = parseInt(event.target.textContent, 10)
       Session.set('active', b)
@@ -1272,7 +1269,7 @@ Template.address.onRendered(() => {
   Tracker.autorun(() => {
     FlowRouter.watchPathChange()
     Session.set('address', {})
-    Session.set('addressTransactions', {})
+    Session.set('addressTransactions', [])
     Session.set('qrl', 0)
     Session.set('pages', [])
     Session.set('active', 1)
