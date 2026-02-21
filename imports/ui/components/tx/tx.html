@@ -75,7 +75,7 @@
                 Unconfirmed
               {{/if}}
             </span>
-            <span class="badge-pill {{#if isTransfer}}badge-pill-transfer{{else}}{{#if isTokenTransfer}}badge-pill-token{{else}}{{#if isCoinbase}}badge-pill-coinbase{{else}}{{#if isMessage}}badge-pill-message{{else}}{{#if isSlave}}badge-pill-slave{{else}}{{#if isLattice}}badge-pill-lattice{{else}}badge-pill-multisig{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}{{/if}}">
+            <span class="badge-pill {{badgeClass}}">
               {{explorer.type}}{{#if isTokenTransfer}}{{#if isTransferNFT}}{{else}}: {{explorer.symbol}} {{/if}}{{/if}}
             </span>
             {{#if isConfirmed}}
@@ -83,447 +83,24 @@
             {{/if}}
           </div>
 
-          <!-- Transaction Type and Amount - Full Width -->
-          <div class="text-center mb-6">
-            <div class="bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
-                {{#if isNotMultiSig}}
-                  {{#if isNotMessage}}
-                    {{#if isNotLattice}}
-                      {{#if isToken}}
-                        <div class="text-lg font-semibold text-qrl-text mb-2">
-                          <strong>{{explorer.name}} ({{explorer.symbol}})</strong>
-                        </div>
-                        <div class="text-qrl-text-secondary mb-2">owned by:</div>
-                        <div class="font-mono text-qrl-accent">
-                           <a href="/a/{{#if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}" class="hover:text-qrl-accent/80">
-                             {{#if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}
-                          </a>
-                        </div>
-                      {{else}}
-                        {{#if isTokenTransfer}}
-                          {{#if isTransferNFT}}
-                            {{#if knownProvider}}
-                              <div class="mb-4">
-                                <svg class="inline-block w-5 h-5 text-qrl-accent mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                </svg>
-                                Verified provider:
-                                <a href="{{providerURL}}/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{providerName}}</a> ({{providerID}})
-                              </div>
-                            {{else}}
-                              <div class="mb-4">
-                                <i data-lucide="alert-triangle" class="inline-block w-5 h-5 text-yellow-400 mr-1"></i>
-                                Unverified provider: {{providerID}}
-                              </div>
-                            {{/if}}
-
-                            <div class="hero-number mb-2">{{explorer.totalTransferred}}</div>
-                            <div class="text-qrl-text-secondary mb-4">NFT transferred</div>
-
-                            <div class="text-sm text-qrl-text-secondary mb-2">NFT creation transaction:</div>
-                            <div class="font-mono text-sm break-all mb-4">
-                              <a href="/tx/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{explorer.token_txhash}}</a>
-                            </div>
-
-                            {{#if knownProvider}}
-                              <a href="{{providerURL}}/{{explorer.token_txhash}}" class="btn-primary">
-                                <i data-lucide="external-link" class="w-4 h-4 mr-2"></i>
-                                View at {{providerName}}
-                              </a>
-                            {{/if}}
-                          {{else}}
-                            <div class="hero-number mb-2">{{explorer.totalTransferred}}</div>
-                            <div class="text-qrl-text-secondary mb-2">{{explorer.symbol}} ({{explorer.name}}) tokens transferred</div>
-
-                            <div class="text-sm text-qrl-text-secondary mb-2">Token creation transaction:</div>
-                            <div class="font-mono text-sm break-all">
-                              <a href="/tx/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{explorer.token_txhash}}</a>
-                            </div>
-                          {{/if}}
-                        {{else}}
-                          {{#if isCreateNFT}}
-                            <!-- NFT Creation -->
-                          {{else}}
-                            <div class="hero-number mb-2 relative group cursor-help" data-tooltip="USD ${{#if tx.tx.coinbase}}{{coinbaseUSD}}{{else if tx.tx.transfer}}{{transferUSD}}{{else}}{{qrl}}{{/if}}">
-                              {{tx.tx.amount}}
-                              <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-qrl-primary text-qrl-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-                                USD ${{#if tx.tx.coinbase}}{{coinbaseUSD}}{{else if tx.tx.transfer}}{{transferUSD}}{{else}}{{qrlFormatted}}{{/if}}
-                                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-qrl-primary"></div>
-                              </div>
-                            </div>
-                            <div class="text-qrl-text-secondary">
-                              Quanta
-                            </div>
-                          {{/if}}
-                        {{/if}}
-                      {{/if}}
-                    {{/if}}
-                  {{else}}
-                    {{#if isMultiSigSpend}}
-                      <div class="text-lg font-mono text-qrl-accent break-all">
-                        <a href="/a/{{multiSigSpendAddress}}" class="hover:text-qrl-accent/80">{{multiSigSpendAddress}}</a>
-                      </div>
-                    {{else}}
-                      {{#if isMultiSigVote}}
-                        <!-- MultiSig Vote -->
-                      {{else}}
-                        <div class="text-lg font-mono text-qrl-accent break-all">
-                          <a href="/a/{{multiSigAddress}}" class="hover:text-qrl-accent/80">{{multiSigAddress}}</a>
-                        </div>
-                      {{/if}}
-                    {{/if}}
-                  {{/if}}
-                {{/if}}
-              </div>
-
-            <!-- Transaction Details -->
-            <div class="space-y-6">
-              {{#if isToken}}
-                <!-- Token Initial Balances -->
-                <div>
-                  <h4 class="text-lg font-semibold text-qrl-text mb-4">Initial Balances</h4>
-                  <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-qrl-border table-zebra">
-                      <thead class="bg-qrl-surface">
-                        <tr>
-                          <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
-                          <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Balance</th>
-                        </tr>
-                      </thead>
-                      <tbody class="divide-y divide-qrl-border/50">
-                        {{#each explorer.initialBalances}}
-                          <tr>
-                            <td class="px-4 py-3 text-sm font-mono text-left">
-                               <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                 {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
-                              </a>
-                            </td>
-                            <td class="px-4 py-3 text-sm mono-value">{{this.amount}}</td>
-                          </tr>
-                        {{/each}}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              {{else}}
-                {{#if isNotCoinbase}}
-                  <!-- From Address -->
-                  <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                    <div class="flex items-center justify-center mb-2">
-                      <h3 class="text-lg font-semibold text-qrl-text mb-4">
-                        <span>
-                          {{#if isMultiSigSpend}}initiated by{{else}}From{{/if}}
-                        </span>
-                        <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
-                      </h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                      <table class="min-w-full divide-y divide-qrl-border table-zebra">
-                        <thead class="bg-qrl-surface">
-                          <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
-                          </tr>
-                        </thead>
-                        <tbody class="divide-y divide-qrl-border/50">
-                          <tr>
-                            <td class="px-4 py-3 text-sm font-mono text-left">
-                              <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
-                              </a>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                {{/if}}
-
-                {{#if isMessage}}
-                  <!-- Message Content -->
-                  <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                    <h3 class="text-lg font-semibold text-qrl-text mb-3">Message</h3>
-                    <pre class="text-sm text-qrl-text font-mono whitespace-pre-wrap">{{explorer.message}}</pre>
-                  </div>
-                {{else}}
-                  {{#if isDocumentNotarisation}}
-                    <!-- Document Notarisation -->
-                    <div class="space-y-6">
-                      <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                        <h3 class="text-lg font-semibold text-qrl-text mb-4">Document Notarisation</h3>
-                        <div class="space-y-3 text-sm">
-                          <div>
-                            <span class="font-medium text-qrl-text-secondary">Notary:</span>
-                             <span class="font-mono text-qrl-text">{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}</span>
-                          </div>
-                          <div>
-                            <span class="font-medium text-qrl-text-secondary">Hash Function:</span>
-                            <span class="font-mono text-qrl-text">{{explorer.hash_function}}</span>
-                          </div>
-                          <div>
-                            <span class="font-medium text-qrl-text-secondary">File Hash:</span>
-                            <span class="font-mono text-qrl-text break-all">{{explorer.hash}}</span>
-                          </div>
-                          <div>
-                            <span class="font-medium text-qrl-text-secondary">Additional Text:</span>
-                            <span class="font-mono text-qrl-text">{{explorer.text}}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Verification Form -->
-                      <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                        <h3 class="text-lg font-semibold text-qrl-text mb-4">Verify Notarisation</h3>
-                        <form id="notariseVerificationForm" class="space-y-4">
-                          <div>
-                            <label class="block text-sm font-medium text-qrl-text-secondary mb-2">Select Document</label>
-                            <input type="file" id="notaryDocument" accept="text/json" name="notaryDocument[]" class="w-full px-3 py-2 bg-qrl-secondary border border-qrl-border rounded text-qrl-text" />
-                          </div>
-                          <div>
-                            <button id="verifyNotarisation" class="btn-primary">
-                              <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
-                              Verify Notarisation
-                            </button>
-                          </div>
-                        </form>
-
-                        <!-- Verification Results -->
-                        <div id="documentVerified" class="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg hidden">
-                          <h4 class="text-lg font-semibold text-green-400 mb-2">Document Verified</h4>
-                          <p class="text-green-300 break-all">{{documentNotarisationVerificationMessage}}</p>
-                        </div>
-                        <div id="documentVerifcationFailed" class="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg hidden">
-                          <h4 class="text-lg font-semibold text-red-400 mb-2">Document Verification Failed</h4>
-                          <p class="text-red-300 break-all">Error: {{documentNotarisationError}}</p>
-                        </div>
-                      </div>
-                    </div>
-                  {{else}}
-                    {{#if isKeybase}}
-                      <!-- Keybase Message -->
-                      <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                        <h4 class="text-lg font-semibold text-qrl-text mb-4">Keybase Message Transaction</h4>
-                        <div class="overflow-x-auto">
-                          <table class="min-w-full divide-y divide-qrl-border table-zebra">
-                            <thead class="bg-qrl-surface">
-                              <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Action</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Keybase User ID</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Keybase Hash</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td class="px-4 py-3 text-sm text-qrl-text">{{this.explorer.keybaseType}}</td>
-                                <td class="px-4 py-3 text-sm text-qrl-text">{{this.explorer.keybaseUser}}</td>
-                                <td class="px-4 py-3 text-sm text-qrl-text font-mono">{{this.explorer.keybaseHex}}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    {{else}}
-                      {{#if isMultiSigCreate}}
-                        <!-- MultiSig Signatories -->
-                        <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                          <h4 class="text-lg font-semibold text-qrl-text mb-4">Signatories</h4>
-                          <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-qrl-border table-zebra">
-                              <thead class="bg-qrl-surface">
-                                <tr>
-                                  <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
-                                  <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Weight</th>
-                                </tr>
-                              </thead>
-                              <tbody class="divide-y divide-qrl-border/50">
-                                {{#each multiSigSignatories this.tx.multi_sig_create}}
-                                  <tr>
-                                     <td class="px-4 py-3 text-sm font-mono text-left text-qrl-text">{{this.address_hex}}</td>
-                                     <td class="px-4 py-3 text-sm text-qrl-text">{{this.weight}}</td>
-                                  </tr>
-                                {{/each}}
-                              </tbody>
-                              <tfoot class="bg-qrl-surface">
-                                <tr>
-                                  <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary">Threshold for spend</th>
-                                   <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text">{{this.tx.multi_sig_create.threshold}}</th>
-                                </tr>
-                              </tfoot>
-                            </table>
-                          </div>
-                        </div>
-                      {{else}}
-                        {{#if isMultiSigVote}}
-                          <!-- MultiSig Vote -->
-                          <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                            <div class="space-y-3">
-                              <div>
-                                <span class="font-medium text-qrl-text-secondary">Spend transaction:</span>
-                                <div class="font-mono text-sm text-qrl-text break-all">
-                                   <a href="/tx/{{this.tx.multi_sig_vote.shared_key}}" class="text-qrl-accent hover:text-qrl-accent/80">{{this.tx.multi_sig_vote.shared_key}}</a>
-                                </div>
-                              </div>
-                              <div>
-                                <span class="font-medium text-qrl-text-secondary">Vote status:</span>
-                                <span class="text-qrl-text">
-                                   {{#if this.tx.multi_sig_vote.unvote}}Vote REJECT spend{{else}}Vote APPROVE spend{{/if}}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        {{else}}
-                          {{#if isLattice}}
-                            <!-- Lattice Public Key -->
-                            <div class="space-y-4">
-                              <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                                <h4 class="text-lg font-semibold text-qrl-text mb-4">Lattice Public Key</h4>
-                                <div class="space-y-3 text-sm">
-                                  <div>
-                                    <span class="font-medium text-qrl-text-secondary">PK1:</span>
-                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.latticePK.pk1}}</div>
-                                  </div>
-                                  <div>
-                                    <span class="font-medium text-qrl-text-secondary">PK2:</span>
-                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.latticePK.pk2}}</div>
-                                  </div>
-                                  <div>
-                                    <span class="font-medium text-qrl-text-secondary">PK3:</span>
-                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.latticePK.pk3}}</div>
-                                  </div>
-                                </div>
-                              </div>
-                              <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                                <div class="space-y-3 text-sm">
-                                  <div>
-                                    <span class="font-medium text-qrl-text-secondary">Public Key:</span>
-                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.public_key}}</div>
-                                  </div>
-                                  <div>
-                                    <span class="font-medium text-qrl-text-secondary">Signature:</span>
-                                    <div class="font-mono text-qrl-text break-all">{{bf this.tx.signature}}</div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          {{else}}
-                            {{#if isCreateNFT}}
-                              <!-- NFT Creation -->
-                              <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                                <div class="flex items-center mb-4">
-                                  {{#if knownProvider}}
-                                    <i data-lucide="check-circle" class="w-5 h-5 text-green-400 mr-2"></i>
-                                    Verified
-                                  {{else}}
-                                    <svg class="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    Unverified
-                                  {{/if}}
-                                  <span class="text-qrl-text">provider:</span>
-                                </div>
-                                <div class="text-sm text-qrl-text-secondary mb-2">
-                                  {{#if knownProvider}}
-                                    <a href="{{providerURL}}/{{tx.tx.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{providerName}}</a> ({{providerID}})
-                                  {{else}}
-                                    {{providerID}}
-                                  {{/if}}
-                                </div>
-                                <div class="text-sm text-qrl-text-secondary mb-2">Hash: <span class="font-mono break-all">{{nftHash}}</span></div>
-                                <div class="mt-4">
-                                  {{#if knownProvider}}
-                                    <a href="{{providerURL}}/{{tx.tx.transaction_hash}}" class="btn-primary">
-                                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                                      </svg>
-                                      View at {{providerName}}
-                                    </a>
-                                  {{else}}
-                                    <span class="text-qrl-text-secondary">Contact your NFT provider</span>
-                                  {{/if}}
-                                </div>
-                              </div>
-                            {{else}}
-                              <!-- Transaction Outputs -->
-                              <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                                <h3 class="text-lg font-semibold text-qrl-text mb-4">
-                                  <i data-lucide="arrow-right" class="inline w-5 h-5 text-green-400 mr-1"></i>
-                                  To
-                                </h3>
-                                <div class="overflow-x-auto">
-                                  <table class="min-w-full divide-y divide-qrl-border table-zebra">
-                                    <thead class="bg-qrl-surface">
-                                      <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Amount</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-qrl-border/50">
-                                       {{#if isTransfer}}
-                                         {{#each explorer.outputs}}
-                                           <tr>
-                                             <td class="px-4 py-3 text-sm mono-value text-left">{{this.amount}}</td>
-                                             <td class="px-4 py-3 text-sm font-mono text-left">
-                                               <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                                 {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
-                                               </a>
-                                             </td>
-                                           </tr>
-                                         {{/each}}
-                                      {{else if isTokenTransfer}}
-                                        {{#each explorer.outputs}}
-                                          <tr>
-                                            <td class="px-4 py-3 text-sm mono-value text-left">{{this.amount}}</td>
-                                            <td class="px-4 py-3 text-sm font-mono text-left">
-                                              <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                                {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
-                                              </a>
-                                            </td>
-                                          </tr>
-                                        {{/each}}
-                                      {{else if isMultiSigSpend}}
-                                        {{#each mso this.tx.multi_sig_spend}}
-                                          <tr>
-                                            <td class="px-4 py-3 text-sm mono-value text-left">{{this.amount}} Quanta</td>
-                                            <td class="px-4 py-3 text-sm font-mono text-left">
-                                              <a href="/a/{{this.address}}" class="text-qrl-accent hover:text-qrl-accent/80">{{this.address}}</a>
-                                            </td>
-                                          </tr>
-                                        {{/each}}
-                                      {{else}}
-                                        <tr>
-                                          <td class="px-4 py-3 text-sm mono-value text-left">{{tx.tx.amount}}</td>
-                                          <td class="px-4 py-3 text-sm font-mono text-left">
-                                            <a href="/a/{{#if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
-                                              {{#if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}
-                                            </a>
-                                          </td>
-                                        </tr>
-                                      {{/if}}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-                            {{/if}}
-                          {{/if}}
-                        {{/if}}
-                      {{/if}}
-                    {{/if}}
-                  {{/if}}
-                {{/if}}
-              {{/if}}
-
-              {{#if hasMessage}}
-                <!-- Transfer Message -->
-                <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
-                  <h3 class="text-lg font-semibold text-qrl-text mb-3">Message</h3>
-                  <div class="text-sm text-qrl-text font-mono whitespace-pre-wrap">{{tfMessage}}</div>
-                </div>
-              {{/if}}
-            </div>
-          </div>
+          <!-- Transaction Content -->
+          {{#if isTransfer}}{{> tx_transfer}}{{/if}}
+          {{#if isCoinbase}}{{> tx_coinbase}}{{/if}}
+          {{#if isToken}}{{> tx_token_create}}{{/if}}
+          {{#if isTokenTransfer}}
+            {{#if isTransferNFT}}{{> tx_nft_transfer}}{{else}}{{> tx_token_transfer}}{{/if}}
+          {{/if}}
+          {{#if isMessage}}{{> tx_message}}{{/if}}
+          {{#if isDocumentNotarisation}}{{> tx_document_notarisation}}{{/if}}
+          {{#if isKeybase}}{{> tx_keybase}}{{/if}}
+          {{#if isMultiSigCreate}}{{> tx_multisig_create}}{{/if}}
+          {{#if isMultiSigSpend}}{{> tx_multisig_spend}}{{/if}}
+          {{#if isMultiSigVote}}{{> tx_multisig_vote}}{{/if}}
+          {{#if isLattice}}{{> tx_lattice}}{{/if}}
+          {{#if isCreateNFT}}{{> tx_nft_create}}{{/if}}
 
           <!-- Transaction Details Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
             <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
               <div class="hero-label">Confirmations</div>
               <div class="mono-value text-lg">
@@ -585,5 +162,912 @@
         </div>
       </div>
     {{/if}}
+  </div>
+</template>
+
+<!-- SUBTEMPLATES -->
+
+<template name="tx_transfer">
+  <div class="text-center mb-6">
+    <div class="bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
+      <div class="hero-number mb-2 relative group cursor-help" data-tooltip="USD ${{transferUSD}}">
+        {{explorer.totalTransferred}}
+        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-qrl-primary text-qrl-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+          USD ${{transferUSD}}
+          <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-qrl-primary"></div>
+        </div>
+      </div>
+      <div class="text-qrl-text-secondary">Quanta</div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>From</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Transaction Outputs -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h3 class="text-lg font-semibold text-qrl-text mb-4">
+        <i data-lucide="arrow-right" class="inline w-5 h-5 text-green-400 mr-1"></i>To
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Amount</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            {{#each explorer.outputs}}
+              <tr>
+                <td class="px-4 py-3 text-sm mono-value text-left">{{this.amount}}</td>
+                <td class="px-4 py-3 text-sm font-mono text-left">
+                  <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                    {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                  </a>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {{#if hasMessage}}
+      <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+        <h3 class="text-lg font-semibold text-qrl-text mb-3">Message</h3>
+        <div class="text-sm text-qrl-text font-mono whitespace-pre-wrap">{{tfMessage}}</div>
+      </div>
+    {{/if}}
+  </div>
+</template>
+
+<template name="tx_coinbase">
+  <div class="text-center mb-6">
+    <div class="bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
+      <div class="hero-number mb-2 relative group cursor-help" data-tooltip="USD ${{coinbaseUSD}}">
+        {{amount}}
+        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-qrl-primary text-qrl-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+          USD ${{coinbaseUSD}}
+          <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-qrl-primary"></div>
+        </div>
+      </div>
+      <div class="text-qrl-text-secondary">Quanta</div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <!-- Transaction Outputs -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h3 class="text-lg font-semibold text-qrl-text mb-4">
+        <i data-lucide="arrow-right" class="inline w-5 h-5 text-green-400 mr-1"></i>To
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Amount</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm mono-value text-left">{{amount}}</td>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.to_b32}}{{else}}{{explorer.to_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_token_create">
+  <div class="text-center mb-6">
+    <div class="bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
+      <div class="text-lg font-semibold text-qrl-text mb-2">
+        <strong>{{explorer.name}} ({{explorer.symbol}})</strong>
+      </div>
+      <div class="text-qrl-text-secondary mb-2">owned by:</div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-zebra">
+          <tbody>
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-center">
+                 <a href="/a/{{#if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                   {{#if bech32}}{{explorer.owner_b32}}{{else}}{{explorer.owner_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <div>
+      <h4 class="text-lg font-semibold text-qrl-text mb-4">Initial Balances</h4>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Balance</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            {{#each explorer.initialBalances}}
+              <tr>
+                <td class="px-4 py-3 text-sm font-mono text-left">
+                   <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                     {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                  </a>
+                </td>
+                <td class="px-4 py-3 text-sm mono-value">{{this.amount}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_token_transfer">
+  <div class="text-center mb-6">
+    <div class="bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
+      <div class="hero-number mb-2">{{explorer.totalTransferred}}</div>
+      <div class="text-qrl-text-secondary mb-2">{{explorer.symbol}} ({{explorer.name}}) tokens transferred</div>
+      <div class="text-sm text-qrl-text-secondary mb-2">Token creation transaction:</div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-zebra">
+          <tbody>
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-center">
+                <a href="/tx/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{explorer.token_txhash}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>From</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Transaction Outputs -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h3 class="text-lg font-semibold text-qrl-text mb-4">
+        <i data-lucide="arrow-right" class="inline w-5 h-5 text-green-400 mr-1"></i>To
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Amount</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            {{#each explorer.outputs}}
+              <tr>
+                <td class="px-4 py-3 text-sm mono-value text-left">{{this.amount}}</td>
+                <td class="px-4 py-3 text-sm font-mono text-left">
+                  <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                    {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                  </a>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_nft_transfer">
+  <div class="text-center mb-6">
+    <div class="bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
+      {{#if knownProvider}}
+        <div class="mb-4">
+          <svg class="inline-block w-5 h-5 text-qrl-accent mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          Verified provider:
+          <a href="{{providerURL}}/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{providerName}}</a> ({{providerID}})
+        </div>
+      {{else}}
+        <div class="mb-4">
+          <i data-lucide="alert-triangle" class="inline-block w-5 h-5 text-yellow-400 mr-1"></i>
+          Unverified provider: {{providerID}}
+        </div>
+      {{/if}}
+
+      <div class="hero-number mb-2">{{explorer.totalTransferred}}</div>
+      <div class="text-qrl-text-secondary mb-4">NFT transferred</div>
+
+      <div class="text-sm text-qrl-text-secondary mb-2">NFT creation transaction:</div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-zebra mb-4">
+          <tbody>
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-center">
+                <a href="/tx/{{explorer.token_txhash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{explorer.token_txhash}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {{#if knownProvider}}
+        <a href="{{providerURL}}/{{explorer.token_txhash}}" class="btn-primary inline-flex items-center justify-center">
+          <i data-lucide="external-link" class="w-4 h-4 mr-2"></i>
+          View at {{providerName}}
+        </a>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>From</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Transaction Outputs -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h3 class="text-lg font-semibold text-qrl-text mb-4">
+        <i data-lucide="arrow-right" class="inline w-5 h-5 text-green-400 mr-1"></i>To
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Amount</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            {{#each explorer.outputs}}
+              <tr>
+                <td class="px-4 py-3 text-sm mono-value text-left">{{this.amount}}</td>
+                <td class="px-4 py-3 text-sm font-mono text-left">
+                  <a href="/a/{{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                    {{#if bech32}}{{this.address_b32}}{{else}}{{this.address_hex}}{{/if}}
+                  </a>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_nft_create">
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>NFT Creation by</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NFT Creation Details -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center mb-4">
+        {{#if knownProvider}}
+          <i data-lucide="check-circle" class="w-5 h-5 text-green-400 mr-2"></i>
+          Verified
+        {{else}}
+          <svg class="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          Unverified
+        {{/if}}
+        <span class="text-qrl-text">&nbsp;provider:</span>
+      </div>
+      <div class="text-sm text-qrl-text-secondary mb-2">
+        {{#if knownProvider}}
+          <a href="{{providerURL}}/{{tx.tx.transaction_hash}}" class="text-qrl-accent hover:text-qrl-accent/80">{{providerName}}</a> ({{providerID}})
+        {{else}}
+          {{providerID}}
+        {{/if}}
+      </div>
+      <div class="text-sm text-qrl-text-secondary mb-2">Hash: <span class="font-mono break-all">{{nftHash}}</span></div>
+      <div class="mt-4">
+        {{#if knownProvider}}
+          <a href="{{providerURL}}/{{tx.tx.transaction_hash}}" class="btn-primary inline-flex items-center justify-center">
+            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+            </svg>
+            View at {{providerName}}
+          </a>
+        {{else}}
+          <span class="text-qrl-text-secondary">Contact your NFT provider</span>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_message">
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>From</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Message Content -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h3 class="text-lg font-semibold text-qrl-text mb-3">Message</h3>
+      <pre class="text-sm text-qrl-text font-mono whitespace-pre-wrap break-all">{{explorer.message}}</pre>
+    </div>
+  </div>
+</template>
+
+<template name="tx_document_notarisation">
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>Document Notarised by</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Document Notarisation Details -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h3 class="text-lg font-semibold text-qrl-text mb-4">Document Details</h3>
+      <div class="space-y-3 text-sm">
+        <div>
+          <span class="font-medium text-qrl-text-secondary">Hash Function:</span>
+          <span class="font-mono text-qrl-text">{{explorer.hash_function}}</span>
+        </div>
+        <div>
+          <span class="font-medium text-qrl-text-secondary">File Hash:</span>
+          <span class="font-mono text-qrl-text break-all">{{explorer.hash}}</span>
+        </div>
+        <div>
+          <span class="font-medium text-qrl-text-secondary">Additional Text:</span>
+          <span class="font-mono text-qrl-text">{{explorer.text}}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Form -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h3 class="text-lg font-semibold text-qrl-text mb-4">Verify Notarisation</h3>
+      <form id="notariseVerificationForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-qrl-text-secondary mb-2">Select Document</label>
+          <input type="file" id="notaryDocument" accept="text/json" name="notaryDocument[]" class="w-full px-3 py-2 bg-qrl-secondary border border-qrl-border rounded text-qrl-text" />
+        </div>
+        <div>
+          <button id="verifyNotarisation" class="btn-primary inline-flex items-center justify-center">
+            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+            Verify Notarisation
+          </button>
+        </div>
+      </form>
+
+      <!-- Verification Results -->
+      <div id="documentVerified" class="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg hidden">
+        <h4 class="text-lg font-semibold text-green-400 mb-2">Document Verified</h4>
+        <p class="text-green-300 break-all">{{documentNotarisationVerificationMessage}}</p>
+      </div>
+      <div id="documentVerifcationFailed" class="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg hidden">
+        <h4 class="text-lg font-semibold text-red-400 mb-2">Document Verification Failed</h4>
+        <p class="text-green-300 break-all">Error: {{documentNotarisationError}}</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_keybase">
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>From</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Keybase Message -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h4 class="text-lg font-semibold text-qrl-text mb-4">Keybase Message Transaction</h4>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Action</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Keybase User ID</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Keybase Hash</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="px-4 py-3 text-sm text-qrl-text">{{explorer.keybaseType}}</td>
+              <td class="px-4 py-3 text-sm text-qrl-text">{{explorer.keybaseUser}}</td>
+              <td class="px-4 py-3 text-sm text-qrl-text font-mono">{{explorer.keybaseHex}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_multisig_create">
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>From</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MultiSig Signatories -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h4 class="text-lg font-semibold text-qrl-text mb-4">Signatories</h4>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Weight</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            {{#each multiSigSignatories tx.tx.multi_sig_create}}
+              <tr>
+                 <td class="px-4 py-3 text-sm font-mono text-left text-qrl-text">{{this.address_hex}}</td>
+                 <td class="px-4 py-3 text-sm text-qrl-text">{{this.weight}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+          <tfoot class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary">Threshold for spend</th>
+               <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text">{{tx.tx.multi_sig_create.threshold}}</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_multisig_spend">
+  <div class="text-center mb-6">
+    <div class="bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
+      <div class="text-qrl-text-secondary mb-2">MultiSig Spend from:</div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-zebra">
+          <tbody>
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-center">
+                <a href="/a/{{multiSigSpendAddress}}" class="hover:text-qrl-accent/80">{{multiSigSpendAddress}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>initiated by</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Transaction Outputs -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <h3 class="text-lg font-semibold text-qrl-text mb-4">
+        <i data-lucide="arrow-right" class="inline w-5 h-5 text-green-400 mr-1"></i>To
+      </h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Amount</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            {{#each mso tx.tx.multi_sig_spend}}
+              <tr>
+                <td class="px-4 py-3 text-sm mono-value text-left">{{this.amount}} Quanta</td>
+                <td class="px-4 py-3 text-sm font-mono text-left">
+                  <a href="/a/{{this.address}}" class="text-qrl-accent hover:text-qrl-accent/80">{{this.address}}</a>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_multisig_vote">
+  <div class="text-center mb-6">
+    <div class="bg-qrl-surface/50 rounded-xl p-6 shadow-inner-glow">
+      <div class="text-qrl-text-secondary mb-2">MultiSig Vote for:</div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-zebra">
+          <tbody>
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-center">
+                 <a href="/a/{{multiSigAddress}}" class="hover:text-qrl-accent/80">{{multiSigAddress}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>From</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MultiSig Vote Details -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="space-y-3">
+        <div>
+          <span class="font-medium text-qrl-text-secondary">Spend transaction:</span>
+          <div class="overflow-x-auto">
+            <table class="min-w-full table-zebra">
+              <tbody>
+                <tr>
+                  <td class="px-4 py-3 text-sm font-mono text-left">
+                     <a href="/tx/{{tx.tx.multi_sig_vote.shared_key}}" class="text-qrl-accent hover:text-qrl-accent/80">{{tx.tx.multi_sig_vote.shared_key}}</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <span class="font-medium text-qrl-text-secondary">Vote status:</span>
+          <span class="text-qrl-text">
+             {{#if tx.tx.multi_sig_vote.unvote}}Vote REJECT spend{{else}}Vote APPROVE spend{{/if}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="tx_lattice">
+  <div class="space-y-6">
+    <!-- From Address -->
+    <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+      <div class="flex items-center justify-center mb-2">
+        <h3 class="text-lg font-semibold text-qrl-text mb-4">
+          <span>From</span>
+          <i data-lucide="arrow-right" class="inline w-5 h-5 text-red-400 mr-2"></i>
+        </h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-qrl-border table-zebra">
+          <thead class="bg-qrl-surface">
+            <tr><th class="px-4 py-3 text-left text-xs font-medium text-qrl-text-secondary uppercase">Address</th></tr>
+          </thead>
+          <tbody class="divide-y divide-qrl-border/50">
+            <tr>
+              <td class="px-4 py-3 text-sm font-mono text-left">
+                <a href="/a/{{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}" class="text-qrl-accent hover:text-qrl-accent/80">
+                  {{#if bech32}}{{explorer.from_b32}}{{else}}{{explorer.from_hex}}{{/if}}
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Lattice Public Key -->
+    <div class="space-y-4">
+      <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+        <h4 class="text-lg font-semibold text-qrl-text mb-4">Lattice Public Key</h4>
+        <div class="space-y-3 text-sm">
+          <div>
+            <span class="font-medium text-qrl-text-secondary">PK1:</span>
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-zebra">
+                <tbody>
+                  <tr>
+                    <td class="px-4 py-3 text-sm font-mono text-left">
+                      <div class="font-mono text-qrl-text">{{bf tx.tx.latticePK.pk1}}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <span class="font-medium text-qrl-text-secondary">PK2:</span>
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-zebra">
+                <tbody>
+                  <tr>
+                    <td class="px-4 py-3 text-sm font-mono text-left">
+                      <div class="font-mono text-qrl-text">{{bf tx.tx.latticePK.pk2}}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <span class="font-medium text-qrl-text-secondary">PK3:</span>
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-zebra">
+                <tbody>
+                  <tr>
+                    <td class="px-4 py-3 text-sm font-mono text-left">
+                      <div class="font-mono text-qrl-text">{{bf tx.tx.latticePK.pk3}}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-qrl-surface/50 rounded-xl p-4 shadow-inner-glow">
+        <div class="space-y-3 text-sm">
+          <div>
+            <span class="font-medium text-qrl-text-secondary">Public Key:</span>
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-zebra">
+                <tbody>
+                  <tr>
+                    <td class="px-4 py-3 text-sm font-mono text-left">
+                      <div class="font-mono text-qrl-text">{{bf tx.tx.public_key}}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <span class="font-medium text-qrl-text-secondary">Signature:</span>
+            <div class="overflow-x-auto">
+              <table class="min-w-full table-zebra">
+                <tbody>
+                  <tr>
+                    <td class="px-4 py-3 text-sm font-mono text-left">
+                      <div class="font-mono text-qrl-text">{{bf tx.tx.signature}}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

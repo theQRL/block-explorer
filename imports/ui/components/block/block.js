@@ -10,11 +10,32 @@ const calculateEpoch = (blockNumber) => {
   return Math.floor(blockNumber / blocksPerEpoch)
 }
 
+let blockCallTimeout = null
+
 const renderBlockBlock = (blockId) => {
   // Set loading state
   Session.set('blockLoading', true)
   Session.set('activeBlock', blockId)
+
+  // Clear any previous timeout
+  if (blockCallTimeout) {
+    clearTimeout(blockCallTimeout)
+  }
+
+  // Client-side timeout: if the server method hangs, show an error after 60s
+  blockCallTimeout = setTimeout(() => {
+    if (Session.get('blockLoading')) {
+      Session.set('blockLoading', false)
+      Session.set('block', {
+        error: 'Request timed out. The explorer node may be experiencing connectivity issues. Please try again.',
+        id: blockId,
+        found: false,
+      })
+    }
+  }, 60000)
+
   Meteor.call('block', blockId, (err, res) => {
+    clearTimeout(blockCallTimeout)
     Session.set('blockLoading', false)
     if (err) {
       const errorText = err.reason || err.message || 'Error loading block data'
@@ -91,7 +112,6 @@ Template.block.helpers({
       return block
         && block.block
         && Array.isArray(block.block.transactions)
-        && block.block.transactions.length > 0
     } catch (e) {
       return false
     }
