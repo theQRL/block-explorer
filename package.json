@@ -15,7 +15,7 @@
     "@babel/runtime": "^7.28.4",
     "@grpc/grpc-js": "^1.14.0",
     "@grpc/proto-loader": "^0.6.13",
-    "@theqrl/explorer-helpers": "^2.8.0",
+    "@theqrl/explorer-helpers": "^2.8.2",
     "@theqrl/nft-providers": "^1.1.0",
     "@theqrl/validate-qrl-address": "^3.0.1",
     "axios": "^1.13.5",

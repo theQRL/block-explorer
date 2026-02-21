@@ -93,7 +93,7 @@ function toByteArray(hexString) {
 }
 /* eslint-enable */
 
-Template.tx.helpers({
+const txHelpers = {
   txLoading() {
     return Session.get('txLoading')
   },
@@ -461,10 +461,27 @@ Template.tx.helpers({
   bf(b) {
     return Buffer.from(b).toString('hex')
   },
+  isCoinbase() {
+    if (this.explorer.type === 'COINBASE') {
+      return true
+    }
+    return false
+  },
+  badgeClass() {
+    if (this.explorer.type === 'TRANSFER') return 'badge-pill-transfer'
+    if (this.explorer.type === 'TRANSFER TOKEN' || this.explorer.type === 'TRANSFER NFT') return 'badge-pill-token'
+    if (this.explorer.type === 'COINBASE') return 'badge-pill-coinbase'
+    if (this.explorer.type === 'MESSAGE' || this.explorer.type === 'DOCUMENT_NOTARISATION') return 'badge-pill-message'
+    if (this.explorer.type === 'SLAVE') return 'badge-pill-slave'
+    if (this.explorer.type === 'LATTICE PK') return 'badge-pill-lattice'
+    return 'badge-pill-multisig'
+  },
   copySuccess() {
     return Session.get('copySuccess')
   },
-})
+}
+
+Template.tx.helpers(txHelpers)
 
 // Helper function to toggle JSON display
 function toggleJSON() {
@@ -566,7 +583,7 @@ function hideVerificationResults() {
   }
 }
 
-Template.tx.events({
+const txEvents = {
   'click .close': () => {
     hideMessages()
   },
@@ -685,7 +702,9 @@ Template.tx.events({
     event.preventDefault()
     Session.set('copySuccess', false)
   },
-})
+}
+
+Template.tx.events(txEvents)
 
 Template.tx.onRendered(() => {
   // Initialize copySuccess session variable
@@ -728,4 +747,58 @@ Template.tx.onRendered(() => {
     Session.set('status', {})
     renderTxBlock()
   })
+})
+
+const subTemplates = [
+  'tx_transfer',
+  'tx_coinbase',
+  'tx_token_create',
+  'tx_token_transfer',
+  'tx_nft_create',
+  'tx_nft_transfer',
+  'tx_message',
+  'tx_document_notarisation',
+  'tx_keybase',
+  'tx_multisig_create',
+  'tx_multisig_spend',
+  'tx_multisig_vote',
+  'tx_lattice',
+]
+
+const txOnRendered = () => {
+  // Initialize Lucide icons for this template
+  setTimeout(() => {
+    if (window.reinitializeLucideIcons) {
+      window.reinitializeLucideIcons()
+    }
+  }, 200)
+
+  // Tooltip for values
+  document.querySelectorAll('.value').forEach((element) => {
+    element.addEventListener('mouseenter', (event) => {
+      const tooltipText = event.target.dataset.html
+      if (tooltipText) {
+        const tooltip = document.createElement('div')
+        tooltip.className = 'absolute z-50 px-3 py-2 text-sm font-medium text-qrl-text bg-qrl-secondary rounded-lg shadow-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300'
+        tooltip.innerHTML = tooltipText
+        event.target.appendChild(tooltip)
+        // Position tooltip
+        const rect = event.target.getBoundingClientRect()
+        tooltip.style.left = `${rect.width / 2 - tooltip.offsetWidth / 2}px`
+        tooltip.style.top = `${-tooltip.offsetHeight - 5}px`
+      }
+    })
+    element.addEventListener('mouseleave', (event) => {
+      const tooltip = event.target.querySelector('.absolute')
+      if (tooltip) {
+        tooltip.remove()
+      }
+    })
+  })
+}
+
+subTemplates.forEach((tmpl) => {
+  Template[tmpl].helpers(txHelpers)
+  Template[tmpl].events(txEvents)
+  Template[tmpl].onRendered(txOnRendered)
 })
