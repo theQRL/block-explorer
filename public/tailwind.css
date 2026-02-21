@@ -492,39 +492,118 @@
 }
 
 /* Transaction type left-border colors */
-.border-type-transfer {
-  @apply border-l-4;
-  border-left-color: #FFA729;
+.transactionRecord {
+  border-top-width: 1px !important;
+  background-image: none !important; /* Remove card gradient to keep borders plain grey */
+}
+
+.border-type-transfer, .border-type-sent {
+  @apply border-l-4 !important;
+  border-left-color: #FFA729 !important;
+}
+.border-type-transfer:hover, .border-type-sent:hover {
+  border-color: #FFA729 !important;
+}
+
+.border-type-received {
+  @apply border-l-4 !important;
+  border-left-color: #4AAFFF !important;
+}
+.border-type-received:hover {
+  border-color: #4AAFFF !important;
 }
 
 .border-type-coinbase {
-  @apply border-l-4;
-  border-left-color: #10B981;
+  @apply border-l-4 !important;
+  border-left-color: #10B981 !important;
+}
+.border-type-coinbase:hover {
+  border-color: #10B981 !important;
 }
 
 .border-type-token {
-  @apply border-l-4;
-  border-left-color: #4AAFFF;
+  @apply border-l-4 !important;
+  border-left-color: #4AAFFF !important;
+}
+.border-type-token:hover {
+  border-color: #4AAFFF !important;
 }
 
 .border-type-message {
-  @apply border-l-4;
-  border-left-color: #A78BFA;
+  @apply border-l-4 !important;
+  border-left-color: #A78BFA !important;
+}
+.border-type-message:hover {
+  border-color: #A78BFA !important;
 }
 
 .border-type-slave {
-  @apply border-l-4;
-  border-left-color: #F472B6;
+  @apply border-l-4 !important;
+  border-left-color: #F472B6 !important;
+}
+.border-type-slave:hover {
+  border-color: #F472B6 !important;
 }
 
 .border-type-lattice {
-  @apply border-l-4;
-  border-left-color: #34D399;
+  @apply border-l-4 !important;
+  border-left-color: #34D399 !important;
+}
+.border-type-lattice:hover {
+  border-color: #34D399 !important;
 }
 
 .border-type-multisig {
-  @apply border-l-4;
-  border-left-color: #FB923C;
+  @apply border-l-4 !important;
+  border-left-color: #FB923C !important;
+}
+.border-type-multisig:hover {
+  border-color: #FB923C !important;
+}
+
+/* Wallet-style Transaction Icons */
+.tx-icon-container {
+  @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border;
+}
+
+.tx-icon-transfer {
+  @apply border-[#FFA729]/35 bg-[#FFA729]/15 text-[#FFA729];
+}
+
+.tx-icon-sent {
+  @apply border-[#FFA729]/35 bg-[#FFA729]/15 text-[#FFA729];
+}
+
+.tx-icon-received {
+  @apply border-[#4AAFFF]/35 bg-[#4AAFFF]/15 text-[#4AAFFF];
+}
+
+.tx-icon-coinbase {
+  @apply border-[#10B981]/35 bg-[#10B981]/15 text-[#10B981];
+}
+
+.tx-icon-block {
+  @apply border-[#FFA729]/35 bg-[#FFA729]/15 text-[#FFA729];
+}
+
+.tx-icon-token {
+  @apply border-[#4AAFFF]/35 bg-[#4AAFFF]/15 text-[#4AAFFF];
+}
+
+.tx-icon-message {
+  @apply border-[#A78BFA]/35 bg-[#A78BFA]/15 text-[#A78BFA];
+}
+
+.tx-icon-slave {
+  @apply border-[#F472B6]/35 bg-[#F472B6]/15 text-[#F472B6];
+}
+
+.tx-icon-lattice {
+  @apply border-[#34D399]/35 bg-[#34D399]/15 text-[#34D399];
+}
+
+.tx-icon-multisig {
+  @apply border-[#FB923C]/35 bg-[#FB923C]/15 text-[#FB923C];
 }
 
 /* Table zebra striping */
@@ -686,25 +765,26 @@
   position: absolute;
   top: -100%;
   left: 50%;
-  width: 45%;
-  min-height: 300px;
-  margin: -300px 0 0 -22.5%;
+  transform: translateX(-50%);
+  width: 450px;
+  max-width: 90%;
   background: var(--color-qrl-secondary);
   z-index: 1001;
   transition: 0.3s all ease-out;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
   border: 1px solid var(--color-qrl-border);
 }
 
 .rv-vanilla-modal-fi.rv-vanilla-modal-is-open {
   top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .rv-vanilla-modal-header {
-  padding: 20px;
+  padding: 16px 20px;
   background: var(--color-qrl-primary);
-  border-radius: 8px 8px 0 0;
+  border-radius: 12px 12px 0 0;
   border-bottom: 1px solid var(--color-qrl-border);
   display: flex;
   justify-content: space-between;
@@ -721,19 +801,20 @@
 
 .rv-vanilla-modal-close {
   color: var(--color-qrl-accent);
-  font-family: 'Alte DIN 1451 Mittelschrift', sans-serif;
-  font-size: 20px;
-  display: inline-block;
-  width: 26px;
-  height: 26px;
-  line-height: 26px;
-  text-align: center;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 0;
   cursor: pointer;
   background: var(--color-qrl-secondary);
-  transition: all 0.2s linear;
+  transition: all 0.2s ease;
   border: 1px solid var(--color-qrl-border);
+  padding: 0;
+  padding-bottom: 4px;
 }
 
 .rv-vanilla-modal-close:hover {

@@ -739,92 +739,140 @@ const sumTokenTotal = (arr, decimals) => {
 
 const helpersaddressTransactions = async (response) => {
   const output = []
+  if (!response) {
+    return { transactions_detail: [] }
+  }
+  if (!Array.isArray(response.transactions_detail)) {
+    response.transactions_detail = []
+    return response
+  }
   // console.log(response)
   for (const tx of response.transactions_detail) {
-    const txEdited = tx
-    if (tx.tx.transfer) {
-      const hexlified = []
-      _.each(tx.tx.transfer.addrs_to, (txOutput) => {
-        // console.log('formatting: ', txOutput)
-        hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
-      })
-      txEdited.tx.transfer.addrs_to = hexlified
-    }
-    if (tx.tx.coinbase) {
-      if (tx.tx.coinbase.addr_to) {
-        txEdited.tx.coinbase.addr_to = `Q${Buffer.from(
-          txEdited.tx.coinbase.addr_to,
-        ).toString('hex')}`
+    try {
+      if (!tx || !tx.tx) {
+        // Skip malformed entries instead of failing the whole page.
+        continue
       }
-    }
-    if (tx.tx.transactionType === 'token') {
-      const output = helpers.txhash({ transaction: tx })
-      Object.assign(txEdited, output.transaction)
-    }
-    if (tx.tx.transactionType === 'transfer_token') {
-      if (tx.tx.transfer_token.token_txhash) {
-        txEdited.tx.transfer_token.token_txhash = Buffer.from(
-          txEdited.tx.transfer_token.token_txhash,
+
+      const txEdited = tx
+      if (tx.tx.transfer) {
+        const hexlified = []
+        _.each(tx.tx.transfer.addrs_to, (txOutput) => {
+          // console.log('formatting: ', txOutput)
+          hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
+        })
+        txEdited.tx.transfer.addrs_to = hexlified
+      }
+      if (tx.tx.coinbase) {
+        if (tx.tx.coinbase.addr_to) {
+          txEdited.tx.coinbase.addr_to = `Q${Buffer.from(
+            txEdited.tx.coinbase.addr_to,
+          ).toString('hex')}`
+        }
+      }
+      if (tx.tx.transactionType === 'token') {
+        const txhashOutput = helpers.txhash({ transaction: tx })
+        Object.assign(txEdited, txhashOutput.transaction)
+        // Convert token name and symbol from Buffer to string
+        if (tx.tx.token.name) {
+          txEdited.tx.token.name = Buffer.from(tx.tx.token.name).toString()
+        }
+        if (tx.tx.token.symbol) {
+          txEdited.tx.token.symbol = Buffer.from(tx.tx.token.symbol).toString()
+        }
+      }
+      if (tx.tx.transactionType === 'transfer_token') {
+        if (tx.tx.transfer_token.token_txhash) {
+          txEdited.tx.transfer_token.token_txhash = Buffer.from(
+            txEdited.tx.transfer_token.token_txhash,
+          ).toString('hex')
+        }
+        const tokenDetail = await addTokenDetail(tx)
+        // Convert token details to strings
+        if (tokenDetail.name) {
+          tokenDetail.name = Buffer.from(tokenDetail.name).toString()
+        }
+        if (tokenDetail.symbol) {
+          tokenDetail.symbol = Buffer.from(tokenDetail.symbol).toString()
+        }
+        Object.assign(txEdited.tx.transfer_token, tokenDetail)
+
+        // Request Token Symbol
+        const symbolRequest = {
+          query: Buffer.from(txEdited.tx.transfer_token.token_txhash, 'hex'),
+        }
+        const thisSymbolResponse = await getObjectAsync(symbolRequest)
+        const helpersResponse = helpers.parseTokenAndTransferTokenTx(
+          thisSymbolResponse,
+          { transaction: tx },
+        )
+        Object.assign(txEdited, helpersResponse.transaction)
+
+        // Ensure token name and symbol are strings in the edited transaction
+        if (txEdited.tx.token && txEdited.tx.token.name) {
+          txEdited.tx.token.name = Buffer.from(txEdited.tx.token.name).toString()
+        }
+        if (txEdited.tx.token && txEdited.tx.token.symbol) {
+          txEdited.tx.token.symbol = Buffer.from(txEdited.tx.token.symbol).toString()
+        }
+        if (txEdited.tx.transfer_token && txEdited.tx.transfer_token.symbol) {
+          txEdited.tx.transfer_token.symbol = Buffer.from(txEdited.tx.transfer_token.symbol).toString()
+        }
+        if (txEdited.tx.transfer_token && txEdited.tx.transfer_token.name) {
+          txEdited.tx.transfer_token.name = Buffer.from(txEdited.tx.transfer_token.name).toString()
+        }
+
+        const hexlified = []
+        const outputs = []
+        _.each(tx.tx.transfer_token.addrs_to, (txOutput, index) => {
+          hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
+          outputs.push({
+            address_hex: `Q${Buffer.from(txOutput).toString('hex')}`,
+            amount: `${formatTokenAmount(
+              tx.tx.transfer_token.amounts[index],
+              txEdited.tx.transfer_token.decimals,
+            )} ${txEdited.tx.transfer_token.symbol}`,
+          })
+        })
+        txEdited.tx.outputs = outputs
+        txEdited.tx.totalTransferred = `${sumTokenTotal(
+          tx.tx.transfer_token.amounts,
+          txEdited.tx.transfer_token.decimals,
+        )} ${txEdited.tx.transfer_token.symbol}`
+        txEdited.tx.transfer_token.addrs_to = hexlified
+      }
+      if (tx.tx.transaction_hash) {
+        txEdited.tx.transaction_hash = Buffer.from(
+          tx.tx.transaction_hash,
         ).toString('hex')
       }
-      const tokenDetail = await addTokenDetail(tx)
-      Object.assign(txEdited.tx.transfer_token, tokenDetail)
-
-      // Request Token Symbol
-      const symbolRequest = {
-        query: Buffer.from(txEdited.tx.transfer_token.token_txhash, 'hex'),
+      if (tx.tx.master_addr) {
+        txEdited.tx.master_addr = `Q${Buffer.from(tx.tx.master_addr).toString(
+          'hex',
+        )}`
       }
-      const thisSymbolResponse = await getObjectAsync(symbolRequest)
-      const helpersResponse = helpers.parseTokenAndTransferTokenTx(
-        thisSymbolResponse,
-        { transaction: tx },
-      )
-      Object.assign(txEdited, helpersResponse.transaction)
-
-      const hexlified = []
-      const outputs = []
-      _.each(tx.tx.transfer_token.addrs_to, (txOutput, index) => {
-        hexlified.push(`Q${Buffer.from(txOutput).toString('hex')}`)
-        outputs.push({
-          address_hex: `Q${Buffer.from(txOutput).toString('hex')}`,
-          amount: `${formatTokenAmount(
-            tx.tx.transfer_token.amounts[index],
-            txEdited.tx.transfer_token.decimals,
-          )} ${txEdited.tx.transfer_token.symbol}`,
-        })
-      })
-      txEdited.tx.outputs = outputs
-      txEdited.tx.totalTransferred = `${sumTokenTotal(
-        tx.tx.transfer_token.amounts,
-        txEdited.tx.transfer_token.decimals,
-      )} ${txEdited.tx.transfer_token.symbol}`
-      txEdited.tx.transfer_token.addrs_to = hexlified
+      if (tx.tx.public_key) {
+        txEdited.tx.public_key = Buffer.from(tx.tx.public_key).toString(
+          'hex',
+        )
+      }
+      if (tx.tx.signature) {
+        txEdited.tx.signature = Buffer.from(tx.tx.signature).toString('hex')
+      }
+      if (tx.block_header_hash) {
+        txEdited.block_header_hash = Buffer.from(
+          tx.block_header_hash,
+        ).toString('hex')
+      }
+      if (tx.addr_from) {
+        txEdited.addr_from = `Q${Buffer.from(tx.addr_from).toString('hex')}`
+      } else {
+        txEdited.addr_from = ''
+      }
+      output.push(txEdited)
+    } catch (txParseError) {
+      console.log('Skipping malformed transaction in helpersaddressTransactions:', txParseError)
     }
-    if (tx.tx.transaction_hash) {
-      txEdited.tx.transaction_hash = Buffer.from(
-        tx.tx.transaction_hash,
-      ).toString('hex')
-    }
-    if (tx.tx.master_addr) {
-      txEdited.tx.master_addr = `Q${Buffer.from(tx.tx.master_addr).toString(
-        'hex',
-      )}`
-    }
-    if (tx.tx.public_key) {
-      txEdited.tx.public_key = Buffer.from(tx.tx.public_key).toString(
-        'hex',
-      )
-    }
-    if (tx.tx.signature) {
-      txEdited.tx.signature = Buffer.from(tx.tx.signature).toString('hex')
-    }
-    if (tx.block_header_hash) {
-      txEdited.block_header_hash = Buffer.from(
-        tx.block_header_hash,
-      ).toString('hex')
-    }
-    txEdited.addr_from = `Q${Buffer.from(tx.addr_from).toString('hex')}`
-    output.push(txEdited)
   }
   response.transactions_detail = output
   return response
@@ -1352,6 +1400,16 @@ export const makeTxHumanReadable = async (item) => {
     }
   }
 
+  // Convert explorer name and symbol from Buffer to string if they exist
+  if (output && output.transaction && output.transaction.explorer) {
+    if (output.transaction.explorer.name && Buffer.isBuffer(output.transaction.explorer.name)) {
+      output.transaction.explorer.name = output.transaction.explorer.name.toString()
+    }
+    if (output.transaction.explorer.symbol && Buffer.isBuffer(output.transaction.explorer.symbol)) {
+      output.transaction.explorer.symbol = output.transaction.explorer.symbol.toString()
+    }
+  }
+
   return output
 }
 
@@ -1538,6 +1596,13 @@ Meteor.methods({
             const item = { transaction: { tx: adjusted } }
             const output = helpers.txhash(item)
             Object.assign(adjusted, output.transaction.tx)
+            // Convert token name and symbol from Buffer to string
+            if (adjusted.name && Buffer.isBuffer(adjusted.name)) {
+              adjusted.name = adjusted.name.toString()
+            }
+            if (adjusted.symbol && Buffer.isBuffer(adjusted.symbol)) {
+              adjusted.symbol = adjusted.symbol.toString()
+            }
             adjusted.nft = output.transaction.explorer.nft
           }
           if (adjusted.transactionType === 'transfer') {
@@ -1606,6 +1671,13 @@ Meteor.methods({
               { transaction: { tx: adjusted } },
             )
             Object.assign(adjusted, helpersResponse.transaction.tx)
+            // Convert token name and symbol from Buffer to string
+            if (adjusted.name && Buffer.isBuffer(adjusted.name)) {
+              adjusted.name = adjusted.name.toString()
+            }
+            if (adjusted.symbol && Buffer.isBuffer(adjusted.symbol)) {
+              adjusted.symbol = adjusted.symbol.toString()
+            }
             adjusted.nft = helpersResponse.transaction.explorer.nft
             adjusted.transfer_token.tokenSymbol = helpersResponse.transaction.explorer.symbol
           }
@@ -1672,8 +1744,8 @@ Meteor.methods({
             nft: output.transaction.explorer.nft,
             from_hex: output.transaction.explorer.from_hex,
             from_b32: output.transaction.explorer.from_b32,
-            symbol: output.transaction.explorer.symbol,
-            name: output.transaction.explorer.name,
+            symbol: output.transaction.explorer.symbol && Buffer.isBuffer(output.transaction.explorer.symbol) ? output.transaction.explorer.symbol.toString() : output.transaction.explorer.symbol,
+            name: output.transaction.explorer.name && Buffer.isBuffer(output.transaction.explorer.name) ? output.transaction.explorer.name.toString() : output.transaction.explorer.name,
             decimals: output.transaction.tx.token.decimals,
             ots_key: parseInt(
               output.transaction.tx.signature.substring(0, 8),
@@ -1708,7 +1780,7 @@ Meteor.methods({
             type: helpersResponse.transaction.explorer.type,
             txhash: arr.txhash,
             nft: helpersResponse.transaction.explorer.nft,
-            symbol: helpersResponse.transaction.explorer.symbol,
+            symbol: helpersResponse.transaction.explorer.symbol && Buffer.isBuffer(helpersResponse.transaction.explorer.symbol) ? helpersResponse.transaction.explorer.symbol.toString() : helpersResponse.transaction.explorer.symbol,
             // eslint-disable-next-line
             totalTransferred:
               helpersResponse.transaction.explorer.totalTransferred,

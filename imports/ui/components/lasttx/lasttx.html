@@ -44,39 +44,51 @@
       >
         <div class="flex items-start space-x-3 flex-1">
           <div class="flex-shrink-0">
-            <div
-              class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center"
-            >
-              {{#if isTransfer this.tx.transactionType}}
-                <i data-lucide="arrow-right" class="w-5 h-5 text-qrl-primary"></i>
+            {{#if isTransfer this.tx.transactionType}}
+              <div class="tx-icon-container tx-icon-transfer">
+                <i data-lucide="arrow-right" class="w-5 h-5"></i>
+              </div>
+            {{else}}
+              {{#if isTokenTransfer this.tx.transactionType}}
+                <div class="tx-icon-container tx-icon-token">
+                  <i data-lucide="coins" class="w-5 h-5"></i>
+                </div>
               {{else}}
-                {{#if isTokenTransfer this.tx.transactionType}}
-                  <i data-lucide="coins" class="w-5 h-5 text-qrl-primary"></i>
+                {{#if isCoinbase this.tx.transactionType}}
+                  <div class="tx-icon-container tx-icon-coinbase">
+                    <i data-lucide="star" class="w-5 h-5"></i>
+                  </div>
                 {{else}}
-                  {{#if isCoinbase this.tx.transactionType}}
-                    <i data-lucide="star" class="w-5 h-5 text-qrl-primary"></i>
+                  {{#if isStake this.tx.transactionType}}
+                    <div class="tx-icon-container tx-icon-multisig">
+                      <i data-lucide="vote" class="w-5 h-5"></i>
+                    </div>
                   {{else}}
-                    {{#if isStake this.tx.transactionType}}
-                      <i data-lucide="vote" class="w-5 h-5 text-qrl-primary"></i>
+                    {{#if isSlave this.tx.transactionType}}
+                      <div class="tx-icon-container tx-icon-slave">
+                        <i data-lucide="folder-tree" class="w-5 h-5"></i>
+                      </div>
                     {{else}}
-                      {{#if isSlave this.tx.transactionType}}
-                        <i data-lucide="folder-tree" class="w-5 h-5 text-qrl-primary"></i>
+                      {{#if isLatticePK this.tx.transactionType}}
+                        <div class="tx-icon-container tx-icon-lattice">
+                          <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                        </div>
                       {{else}}
-                        {{#if isLatticePK this.tx.transactionType}}
-                          <i data-lucide="grid-3x3" class="w-5 h-5 text-qrl-primary"></i>
+                        {{#if isMessage this.tx.transactionType}}
+                          <div class="tx-icon-container tx-icon-message">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                          </div>
                         {{else}}
-                          {{#if isMessage this.tx.transactionType}}
-                            <i data-lucide="message-circle" class="w-5 h-5 text-qrl-primary"></i>
-                          {{else}}
-                            <i data-lucide="users" class="w-5 h-5 text-qrl-primary"></i>
-                          {{/if}}
+                          <div class="tx-icon-container tx-icon-multisig">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                          </div>
                         {{/if}}
                       {{/if}}
                     {{/if}}
                   {{/if}}
                 {{/if}}
               {{/if}}
-            </div>
+            {{/if}}
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-2">
