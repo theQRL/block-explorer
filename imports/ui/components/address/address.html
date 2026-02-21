@@ -176,16 +176,18 @@
               <div class="space-y-4">
                 {{#each addressTransactions}}
                   {{#if isTransfer this.transactionType}}
-                    <div class="card hover:border-qrl-accent/50 border-type-transfer transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 {{#if isThisAddress this.addr_from}}border-type-sent{{else}}border-type-received{{/if}} transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            {{#if isThisAddress this.addr_from}}
-                              <i data-lucide="arrow-right" class="w-6 h-6 text-qrl-primary"></i>
-                            {{else}}
-                              <i data-lucide="arrow-up" class="w-6 h-6 text-qrl-primary"></i>
-                            {{/if}}
-                          </div>
+                          {{#if isThisAddress this.addr_from}}
+                            <div class="tx-icon-container tx-icon-sent">
+                              <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                            </div>
+                          {{else}}
+                            <div class="tx-icon-container tx-icon-received">
+                              <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+                            </div>
+                          {{/if}}
                         </div>
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center justify-between">
@@ -209,7 +211,7 @@
                                 <div class="min-w-0 flex-1 flex items-center gap-1"><span class="whitespace-nowrap">{{this.amount}} →</span><a href="/a/{{this.to}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate min-w-0">{{this.to}}</a></div>
                               {{/each}}
                             {{else}}
-                              <div class="min-w-0 flex-1"><a href="/a/{{this.addr_from}}" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate block">{{#if bech32}}{{this.addr_from}}{{else}}{{this.addr_from}}{{/if}}</a></div>
+                              <div class="min-w-0 flex-1"><a href="/a/this.addr_from" class="text-qrl-accent hover:text-qrl-accent/80 font-mono truncate block">{{this.addr_from}}</a></div>
                             {{/if}}
                           </div>
                         </div>
@@ -221,11 +223,11 @@
                     <div class="card hover:border-qrl-accent/50 border-type-token transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
+                          <div class="tx-icon-container tx-icon-token">
                             {{#if isCreateNFT}}
-                              <i data-lucide="image" class="w-6 h-6 text-qrl-primary"></i>
+                              <i data-lucide="image" class="w-5 h-5"></i>
                             {{else}}
-                              <i data-lucide="coins" class="w-6 h-6 text-qrl-primary"></i>
+                              <i data-lucide="plus-circle" class="w-5 h-5"></i>
                             {{/if}}
                           </div>
                         </div>
@@ -272,16 +274,18 @@
                   {{/if}}
 
                   {{#if isTokenTransfer this.transactionType}}
-                    <div class="card hover:border-qrl-accent/50 border-type-token transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 {{#if isThisAddress this.addr_from}}border-type-sent{{else}}border-type-received{{/if}} transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            {{#if isThisAddress this.addr_from}}
-                              <i data-lucide="arrow-right" class="w-6 h-6 text-qrl-primary"></i>
-                            {{else}}
-                              <i data-lucide="arrow-up" class="w-6 h-6 text-qrl-primary"></i>
-                            {{/if}}
-                          </div>
+                          {{#if isThisAddress this.addr_from}}
+                            <div class="tx-icon-container tx-icon-sent">
+                              <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                            </div>
+                          {{else}}
+                            <div class="tx-icon-container tx-icon-received">
+                              <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+                            </div>
+                          {{/if}}
                         </div>
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center justify-between">
@@ -339,8 +343,8 @@
                     <div class="card hover:border-qrl-accent/50 border-type-coinbase transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="star" class="w-6 h-6 text-qrl-primary"></i>
+                          <div class="tx-icon-container tx-icon-coinbase">
+                            <i data-lucide="star" class="w-5 h-5"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -367,8 +371,8 @@
                     <div class="card hover:border-qrl-accent/50 border-type-slave transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="folder-tree" class="w-6 h-6 text-qrl-primary"></i>
+                          <div class="tx-icon-container tx-icon-slave">
+                            <i data-lucide="folder-tree" class="w-5 h-5"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -393,8 +397,8 @@
                     <div class="card hover:border-qrl-accent/50 border-type-multisig transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="users" class="w-6 h-6 text-qrl-primary"></i>
+                          <div class="tx-icon-container tx-icon-multisig">
+                            <i data-lucide="plus-circle" class="w-5 h-5"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -416,12 +420,18 @@
                   {{/if}}
 
                   {{#if isMultiSigSpendTxn this.transactionType}}
-                    <div class="card hover:border-qrl-accent/50 border-type-multisig transactionRecord cursor-pointer">
+                    <div class="card hover:border-qrl-accent/50 {{#if isThisAddress this.addr_from}}border-type-sent{{else}}border-type-received{{/if}} transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="users" class="w-6 h-6 text-qrl-primary"></i>
-                          </div>
+                          {{#if isThisAddress this.addr_from}}
+                            <div class="tx-icon-container tx-icon-sent">
+                              <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                            </div>
+                          {{else}}
+                            <div class="tx-icon-container tx-icon-received">
+                              <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+                            </div>
+                          {{/if}}
                         </div>
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center justify-between">
@@ -445,8 +455,8 @@
                     <div class="card hover:border-qrl-accent/50 border-type-multisig transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="users" class="w-6 h-6 text-qrl-primary"></i>
+                          <div class="tx-icon-container tx-icon-multisig">
+                            <i data-lucide="vote" class="w-5 h-5"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -471,8 +481,8 @@
                     <div class="card hover:border-qrl-accent/50 border-type-lattice transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="grid-3x3" class="w-6 h-6 text-qrl-primary"></i>
+                          <div class="tx-icon-container tx-icon-lattice">
+                            <i data-lucide="grid-3x3" class="w-5 h-5"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -497,8 +507,8 @@
                     <div class="card hover:border-qrl-accent/50 border-type-message transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="message-circle" class="w-6 h-6 text-qrl-primary"></i>
+                          <div class="tx-icon-container tx-icon-message">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -523,8 +533,8 @@
                     <div class="card hover:border-qrl-accent/50 border-type-message transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="message-circle" class="w-6 h-6 text-qrl-primary"></i>
+                          <div class="tx-icon-container tx-icon-message">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
@@ -549,8 +559,8 @@
                     <div class="card hover:border-qrl-accent/50 border-type-message transactionRecord cursor-pointer">
                       <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
-                          <div class="w-8 h-8 bg-qrl-accent rounded-lg flex items-center justify-center">
-                            <i data-lucide="message-circle" class="w-6 h-6 text-qrl-primary"></i>
+                          <div class="tx-icon-container tx-icon-message">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
                           </div>
                         </div>
                         <div class="flex-1 min-w-0">
