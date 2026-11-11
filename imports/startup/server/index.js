@@ -1537,7 +1537,7 @@ Meteor.methods({
       console.log('Throwing invalid block number error')
       throw new Meteor.Error(errorCode, errorMessage)
     } else {
-        this.unblock()
+      this.unblock()
       // first check this is not cached
       const queryResults = await blockData.findOneAsync({ blockId })
       if (queryResults !== undefined) {

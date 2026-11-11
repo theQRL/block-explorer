@@ -12,32 +12,31 @@
     "dev": "concurrently \"npm run build:css:watch\" \"meteor\""
   },
   "dependencies": {
-    "@babel/runtime": "7.28.4",
-    "@grpc/grpc-js": "1.14.0",
-    "@grpc/proto-loader": "0.8.0",
+    "@babel/runtime": "7.29.13",
+    "@grpc/grpc-js": "1.14.7",
+    "@grpc/proto-loader": "0.8.1",
     "@theqrl/explorer-helpers": "2.8.2",
     "@theqrl/nft-providers": "1.1.0",
     "@theqrl/validate-qrl-address": "3.0.1",
-    "axios": "1.15.0",
+    "axios": "1.21.1",
     "babel-runtime": "6.26.0",
     "bech32": "2.0.0",
     "bignumber.js": "9.3.1",
-    "crypto": "1.0.1",
     "crypto-js": "4.2.0",
-    "elliptic": "6.6.1",
     "es5-shim": "4.6.7",
-    "fs": "0.0.1-security",
     "ini": "3.0.1",
     "jquery": "3.7.1",
     "jquery-qrcode": "1.0.0",
     "jscrypto": "1.0.3",
     "json-formatter-js": "2.5.23",
-    "lucide": "0.545.0",
+    "lodash": "4.18.1",
+    "lucide": "0.577.0",
     "mathjs": "10.6.4",
     "meteor-babel-helpers": "0.0.3",
-    "meteor-node-stubs": "1.2.24",
-    "path": "0.12.7",
-    "tmp": "0.2.5",
+    "meteor-node-stubs": "1.2.32",
+    "pino": "10.4.0",
+    "pino-pretty": "13.2.0",
+    "tmp": "0.2.7",
     "underscore": "1.13.8",
     "y18n": "5.0.8"
   },
@@ -57,14 +56,14 @@
   },
   "homepage": "https://github.com/theQRL/block-explorer#readme",
   "devDependencies": {
-    "autoprefixer": "10.4.21",
+    "autoprefixer": "10.6.2",
     "concurrently": "7.6.0",
     "eslint": "8.57.1",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-import-resolver-meteor": "0.4.0",
     "eslint-plugin-import": "2.32.0",
-    "postcss": "8.5.6",
-    "tailwindcss": "3.4.18"
+    "postcss": "8.5.32",
+    "tailwindcss": "3.4.19"
   },
   "postcss": {
     "plugins": {
@@ -74,5 +73,8 @@
         ]
       }
     }
+  },
+  "engines": {
+    "node": "26.x"
   }
 }

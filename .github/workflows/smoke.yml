@@ -16,7 +16,10 @@ jobs:
     timeout-minutes: 30
     services:
       mongo:
-        image: mongo:7.0@sha256:8bb4442761a63a8dda452744082cdac9644b429807eb977b42324a63cef59ca4
+        image: mongo:8.0@sha256:b9924c330a8bbc5800fe9c69f04a84e221eca7b28fd049a0354147d9908fa142
+        # Avoid the TCMalloc/rseq incompatibility on newer Linux kernels (SERVER-121912).
+        env:
+          GLIBC_TUNABLES: glibc.pthread.rseq=1
         ports:
           - 27017:27017
         options: >-
@@ -36,23 +39,36 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '22'
+          node-version: '26'
+      # The npm installer version is separate from INSTALL_METEOR_VERSION.
       # Meteor requires a global installer; app and browser dependencies use lockfiles.
       - name: Install Meteor # zizmor: ignore[adhoc-packages]
+        env:
+          INSTALL_METEOR_VERSION: '3.6'
         run: |
-          npm install --global meteor@3.4.0
+          npm install --global --allow-scripts=meteor meteor@3.5.4
           echo "$HOME/.meteor" >> "$GITHUB_PATH"
+          "$HOME/.meteor/meteor" --version
+          "$HOME/.meteor/meteor" node --version
       - name: Install locked dependencies
         run: |
           npm ci
           npm ci --prefix tests/smoke
+      - name: Audit dependencies
+        run: |
+          npm audit
+          npm audit --prefix tests/smoke
+      - name: Lint app
+        run: npm run lint
       - name: Build production app
         run: |
           npm run build:css
           meteor build ../block-explorer-build --directory --server-only
+          node .github/scripts/prepare-meteor-bundle.cjs "$SMOKE_BUNDLE/programs/server"
           cd "$SMOKE_BUNDLE/programs/server"
           # Install Meteor's generated server bundle (its shrinkwrap is not npm-ci compatible).
           npm install --omit=dev
+          npm audit --omit=dev
       - name: Install Chromium
         run: npm exec --prefix tests/smoke -- playwright install --with-deps chromium
       - name: Check live testnet in Chromium
