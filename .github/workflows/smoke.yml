@@ -14,14 +14,16 @@ jobs:
     name: Build and live testnet smoke test
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    # Match tests/smoke/package-lock.json; browsers and OS libraries are preinstalled.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d
+      options: --init --shm-size=1gb
     services:
       mongo:
         image: mongo:8.0@sha256:b9924c330a8bbc5800fe9c69f04a84e221eca7b28fd049a0354147d9908fa142
         # Avoid the TCMalloc/rseq incompatibility on newer Linux kernels (SERVER-121912).
         env:
           GLIBC_TUNABLES: glibc.pthread.rseq=1
-        ports:
-          - 27017:27017
         options: >-
           --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1})'"
           --health-interval 10s
@@ -30,6 +32,7 @@ jobs:
     env:
       METEOR_ALLOW_SUPERUSER: 'true'
       METEOR_NO_RELEASE_CHECK: 'true'
+      MONGO_URL: mongodb://mongo:27017/explorer-smoke
       SMOKE_BUNDLE: ${{ github.workspace }}/../block-explorer-build/bundle
     steps:
       - name: Checkout
@@ -69,8 +72,6 @@ jobs:
           # Install Meteor's generated server bundle (its shrinkwrap is not npm-ci compatible).
           npm install --omit=dev
           npm audit --omit=dev
-      - name: Install Chromium
-        run: npm exec --prefix tests/smoke -- playwright install --with-deps chromium
       - name: Check live testnet in Chromium
         run: npm test --prefix tests/smoke
       - name: Upload failure diagnostics

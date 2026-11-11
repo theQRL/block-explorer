@@ -35,7 +35,9 @@ or
 
 The `Smoke test` workflow installs the existing lockfile, builds CSS and a Meteor
 production bundle, then runs that bundle against a fresh MongoDB. It also runs
-ESLint and audits both npm lockfiles. Chromium checks
+ESLint and audits both npm lockfiles. CI uses a digest-pinned Playwright image
+with browsers and OS libraries preinstalled. Keep its version aligned with
+`tests/smoke/package-lock.json`. Chromium checks
 that the default public **testnet** nodes return synced status and a positive
 height, and that `/status` and `/lastblocks` render that data without browser
 exceptions. No credentials or private settings are needed. This is a live network
