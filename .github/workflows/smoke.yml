@@ -1,0 +1,67 @@
+name: Smoke test
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Build and live testnet smoke test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      mongo:
+        image: mongo:7.0@sha256:8bb4442761a63a8dda452744082cdac9644b429807eb977b42324a63cef59ca4
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd 'mongosh --quiet --eval "db.adminCommand({ping: 1})"'
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      METEOR_ALLOW_SUPERUSER: 'true'
+      METEOR_NO_RELEASE_CHECK: 'true'
+      SMOKE_BUNDLE: ${{ github.workspace }}/../block-explorer-build/bundle
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      # Meteor requires a global installer; app and browser dependencies use lockfiles.
+      - name: Install Meteor # zizmor: ignore[adhoc-packages]
+        run: |
+          npm install --global meteor@3.4.0
+          echo "$HOME/.meteor" >> "$GITHUB_PATH"
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          npm ci --prefix tests/smoke
+      - name: Build production app
+        run: |
+          npm run build:css
+          meteor build ../block-explorer-build --directory --server-only
+          cd "$SMOKE_BUNDLE/programs/server"
+          # Install Meteor's generated server bundle (its shrinkwrap is not npm-ci compatible).
+          npm install --omit=dev
+      - name: Install Chromium
+        run: npm exec --prefix tests/smoke -- playwright install --with-deps chromium
+      - name: Check live testnet in Chromium
+        run: npm test --prefix tests/smoke
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: smoke-failure
+          path: smoke-results/
+          retention-days: 7
+          if-no-files-found: ignore
