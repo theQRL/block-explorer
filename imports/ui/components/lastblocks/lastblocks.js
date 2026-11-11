@@ -45,19 +45,19 @@ Template.lastblocks.helpers({
     const res = Blocks.findOne({ _id: 'blocks_singleton' })
     if (res && res.blockheaders) {
       let { blockheaders } = res
-      
+
       // Filter out invalid entries
-      blockheaders = blockheaders.filter(bh => bh && bh.header)
+      blockheaders = blockheaders.filter((bh) => bh && bh.header)
 
       if (FlowRouter.getRouteName() === 'App.home') {
-        return blockheaders.slice(0, 10).map(bh => addHex(bh))
+        return blockheaders.slice(0, 10).map((bh) => addHex(bh))
       }
 
       // Pagination for /lastblocks using query params
       const itemsPerPage = 10
       const activePage = parseInt(FlowRouter.getQueryParam('page'), 10) || 1
       const startIndex = (activePage - 1) * itemsPerPage
-      return blockheaders.slice(startIndex, startIndex + itemsPerPage).map(bh => addHex(bh))
+      return blockheaders.slice(startIndex, startIndex + itemsPerPage).map((bh) => addHex(bh))
     }
     return []
   },
@@ -68,7 +68,7 @@ Template.lastblocks.helpers({
   totalPages() {
     const res = Blocks.findOne({ _id: 'blocks_singleton' })
     if (res && res.blockheaders) {
-      const filteredHeaders = res.blockheaders.filter(bh => bh && bh.header)
+      const filteredHeaders = res.blockheaders.filter((bh) => bh && bh.header)
       return Math.ceil(filteredHeaders.length / 10) || 1
     }
     return 1
@@ -76,7 +76,7 @@ Template.lastblocks.helpers({
   pages() {
     const res = Blocks.findOne({ _id: 'blocks_singleton' })
     if (res && res.blockheaders) {
-      const filteredHeaders = res.blockheaders.filter(bh => bh && bh.header)
+      const filteredHeaders = res.blockheaders.filter((bh) => bh && bh.header)
       const totalPages = Math.ceil(filteredHeaders.length / 10)
       const pages = []
       for (let i = 1; i <= totalPages; i += 1) {
@@ -85,7 +85,7 @@ Template.lastblocks.helpers({
           isActive: (parseInt(FlowRouter.getQueryParam('page'), 10) || 1) === i,
         })
       }
-      
+
       const currentPage = parseInt(FlowRouter.getQueryParam('page'), 10) || 1
       if (pages.length <= 10) {
         return pages
@@ -107,7 +107,7 @@ Template.lastblocks.helpers({
   pforward() {
     const res = Blocks.findOne({ _id: 'blocks_singleton' })
     if (res && res.blockheaders) {
-      const filteredHeaders = res.blockheaders.filter(bh => bh && bh.header)
+      const filteredHeaders = res.blockheaders.filter((bh) => bh && bh.header)
       const totalPages = Math.ceil(filteredHeaders.length / 10)
       const currentPage = parseInt(FlowRouter.getQueryParam('page'), 10) || 1
       return currentPage < totalPages
@@ -218,7 +218,7 @@ Template.lastblocks.events({
     const currentPage = parseInt(FlowRouter.getQueryParam('page'), 10) || 1
     const res = Blocks.findOne({ _id: 'blocks_singleton' })
     if (res && res.blockheaders) {
-      const filteredHeaders = res.blockheaders.filter(bh => bh && bh.header)
+      const filteredHeaders = res.blockheaders.filter((bh) => bh && bh.header)
       const totalPages = Math.ceil(filteredHeaders.length / 10) || 1
       let newPage = currentPage
       if (action === 'forward') {
@@ -237,7 +237,7 @@ Template.lastblocks.events({
       let page = parseInt(event.target.value, 10)
       const res = Blocks.findOne({ _id: 'blocks_singleton' })
       if (res && res.blockheaders) {
-        const filteredHeaders = res.blockheaders.filter(bh => bh && bh.header)
+        const filteredHeaders = res.blockheaders.filter((bh) => bh && bh.header)
         const totalPages = Math.ceil(filteredHeaders.length / 10) || 1
         if (page < 1) page = 1
         if (page > totalPages) page = totalPages

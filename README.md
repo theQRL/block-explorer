@@ -34,21 +34,28 @@ or
 ## CI smoke test
 
 The `Smoke test` workflow installs the existing lockfile, builds CSS and a Meteor
-production bundle, then runs that bundle against a fresh MongoDB. Chromium checks
+production bundle, then runs that bundle against a fresh MongoDB. It also runs
+ESLint and audits both npm lockfiles. CI uses a digest-pinned Playwright image
+with browsers and OS libraries preinstalled. Keep its version aligned with
+`tests/smoke/package-lock.json`. Chromium checks
 that the default public **testnet** nodes return synced status and a positive
 height, and that `/status` and `/lastblocks` render that data without browser
 exceptions. No credentials or private settings are needed. This is a live network
 test: a testnet outage or blocked outbound gRPC can fail it. Failed runs retain
 browser screenshots and traces for seven days.
 
-Run the same checks locally (Node 22, Meteor 3.4, and MongoDB on port 27017):
+Run the same checks locally (Node 26, Meteor 3.6, and MongoDB 8 on port 27017):
 
 ```sh
 npm ci
 npm ci --prefix tests/smoke
+npm audit
+npm audit --prefix tests/smoke
+npm run lint
 npm run build:css
 meteor build ../block-explorer-build --directory --server-only
-(cd ../block-explorer-build/bundle/programs/server && npm install --omit=dev)
+node .github/scripts/prepare-meteor-bundle.cjs ../block-explorer-build/bundle/programs/server
+(cd ../block-explorer-build/bundle/programs/server && npm install --omit=dev && npm audit --omit=dev)
 npm exec --prefix tests/smoke -- playwright install --with-deps chromium
 npm test --prefix tests/smoke
 actionlint
@@ -74,3 +81,15 @@ On an ARM Linux VM, add `--container-architecture linux/arm64` to act. The
 `Lint GitHub Actions` workflow uses actionlint and zizmor's pedantic audits, with
 SHA-pinned actions, read-only repository permissions, and disabled checkout
 credentials, following the same gates as `go-qrllib`.
+
+The npm packages `lodash`, `pino`, and `pino-pretty` are production dependencies
+required by the logger used by `pwix:blaze-layout` 2.4. Keep them in `dependencies`
+so the production bundle can start. The npm Meteor installer version differs from
+the framework release; CI explicitly installs the release in `.meteor/release`.
+
+After `meteor build`, run the bundle preparation command above before installing
+server dependencies. Meteor 3.6 generates separate bootstrap pins for Underscore
+1.13.7 and Node-gyp 10.2.0, including vulnerable Tar dependencies. The preparation
+script updates them to 1.13.8 and 13.1.0 respectively; CI audits and browser-tests
+the resulting production bundle. The script rejects unfamiliar pins to avoid
+silently downgrading a future Meteor release.

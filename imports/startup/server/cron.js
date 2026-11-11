@@ -113,11 +113,9 @@ const refreshBlocks = async () => {
   let hasChanged = false
   if (!currentDoc || !currentDoc.blockheaders || currentDoc.blockheaders.length !== merged.blockheaders.length) {
     hasChanged = true
-  } else {
+  } else if (currentDoc.blockheaders[0].header.block_number !== merged.blockheaders[0].header.block_number) {
     // Check if newest block number changed
-    if (currentDoc.blockheaders[0].header.block_number !== merged.blockheaders[0].header.block_number) {
-      hasChanged = true
-    }
+    hasChanged = true
   }
 
   if (hasChanged) {
@@ -212,7 +210,7 @@ async function refreshLasttx() {
   const existingTransactions = (currentDoc && currentDoc.transactions) || []
 
   // Filter out existing confirmed transactions
-  let existingConfirmed = existingTransactions.filter((tx) => tx.tx.confirmed === 'true')
+  const existingConfirmed = existingTransactions.filter((tx) => tx.tx.confirmed === 'true')
 
   // Merge new confirmed with existing, deduplicating by hash
   let allConfirmed = [...newConfirmedTxns, ...existingConfirmed]
