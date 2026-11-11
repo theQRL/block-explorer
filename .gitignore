@@ -13,3 +13,7 @@ jsconfig.json
 /testnet.json
 /mainnet.json
 /development.json
+
+# Browser smoke-test artifacts
+/smoke-results/
+/tests/smoke/node_modules/
