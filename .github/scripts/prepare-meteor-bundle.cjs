@@ -26,6 +26,10 @@ for (const [name, { previous, version }] of Object.entries(updates)) {
 // shared file, and let npm reconcile its generated shrinkwrap during install.
 const temporary = `${filename}.prepared`;
 fs.writeFileSync(temporary, `${JSON.stringify(pkg, null, 2)}\n`);
+// Windows cannot replace a read-only destination, even via rename.
+if (process.platform === 'win32') {
+  fs.chmodSync(filename, fs.statSync(filename).mode | 0o200);
+}
 fs.renameSync(temporary, filename);
 const shrinkwrap = path.join(serverDir, 'npm-shrinkwrap.json');
 fs.chmodSync(shrinkwrap, fs.statSync(shrinkwrap).mode | 0o200);
