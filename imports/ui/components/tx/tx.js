@@ -706,6 +706,13 @@ const txEvents = {
 
 Template.tx.events(txEvents)
 
+Template.tx.onCreated(() => {
+  Session.set('txhash', {})
+  if (FlowRouter.getParam('txId')) {
+    Session.set('txLoading', true)
+  }
+})
+
 Template.tx.onRendered(() => {
   // Initialize copySuccess session variable
   Session.set('copySuccess', false)

@@ -105,6 +105,19 @@ Template.status.helpers({
     }
     return r
   },
+  circulatingSupply() {
+    const x = status.findOne({ _id: 'status_singleton' })
+    if (!x) return '--'
+    try {
+      const total = parseFloat(x.coins_emitted) / SHOR_PER_QUANTA
+      const reserved = x.foundation_reserved || 0
+      let r = (total - reserved).toFixed(2)
+      r = r.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,')
+      return r
+    } catch (e) {
+      return 'Error parsing API results'
+    }
+  },
   emission_raw() {
     const x = status.findOne({ _id: 'status_singleton' })
     if (!x) return '--'

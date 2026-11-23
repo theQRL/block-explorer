@@ -10,6 +10,7 @@ import {
   getStatsAsync,
   getPeersStatAsync,
   makeTxListHumanReadable,
+  getAddressStateAsync,
 } from '/imports/startup/server/index.js'
 
 import {
@@ -22,7 +23,13 @@ import {
 } from '/imports/api/index.js'
 
 import axios from 'axios'
-import { SHOR_PER_QUANTA } from '../both/index.js'
+import { SHOR_PER_QUANTA, anyAddressToRaw } from '../both/index.js'
+
+// Foundation addresses whose balances are excluded from circulating supply
+const FOUNDATION_ADDRESSES = [
+  'Q000500997c93dec6039f0fb6008bbf034bc4f9252f6cfd41a7e01c8cf934036deaa4a832c4f240',
+  'Q010500e587fd07bb1c5ace98956d9aa6c347e7114ccb4ec7183baa54804cc8b974e91cc3b5617e',
+]
 
 const refreshBlocks = async () => {
   let response
@@ -106,11 +113,9 @@ const refreshBlocks = async () => {
   let hasChanged = false
   if (!currentDoc || !currentDoc.blockheaders || currentDoc.blockheaders.length !== merged.blockheaders.length) {
     hasChanged = true
-  } else {
+  } else if (currentDoc.blockheaders[0].header.block_number !== merged.blockheaders[0].header.block_number) {
     // Check if newest block number changed
-    if (currentDoc.blockheaders[0].header.block_number !== merged.blockheaders[0].header.block_number) {
-      hasChanged = true
-    }
+    hasChanged = true
   }
 
   if (hasChanged) {
@@ -205,7 +210,7 @@ async function refreshLasttx() {
   const existingTransactions = (currentDoc && currentDoc.transactions) || []
 
   // Filter out existing confirmed transactions
-  let existingConfirmed = existingTransactions.filter((tx) => tx.tx.confirmed === 'true')
+  const existingConfirmed = existingTransactions.filter((tx) => tx.tx.confirmed === 'true')
 
   // Merge new confirmed with existing, deduplicating by hash
   let allConfirmed = [...newConfirmedTxns, ...existingConfirmed]
@@ -403,6 +408,27 @@ const refreshPeerStats = async () => {
   await peerstats.upsertAsync({ _id: 'peerstats_singleton' }, { $set: response })
 }
 
+// Fetch foundation address balances and cache the total reserved amount
+async function refreshFoundationBalances() {
+  try {
+    const balances = await Promise.all(
+      FOUNDATION_ADDRESSES.map(async (addr) => {
+        const request = { address: anyAddressToRaw(addr) }
+        const response = await getAddressStateAsync(request)
+        return parseInt(response.state.balance, 10) || 0
+      }),
+    )
+    const totalReservedShor = balances.reduce((sum, b) => sum + b, 0)
+    const totalReserved = totalReservedShor / SHOR_PER_QUANTA
+    await status.upsertAsync(
+      { _id: 'status_singleton' },
+      { $set: { foundation_reserved: totalReserved } },
+    )
+  } catch (error) {
+    console.error('refreshFoundationBalances error:', error.message || error)
+  }
+}
+
 // Refresh blocks every 20 seconds
 Meteor.setInterval(async () => {
   try {
@@ -448,6 +474,15 @@ Meteor.setInterval(async () => {
   }
 }, 20000)
 
+// Refresh foundation balances every hour
+Meteor.setInterval(async () => {
+  try {
+    await refreshFoundationBalances()
+  } catch (error) {
+    console.log('setInterval refreshFoundationBalances error:', error.message || error.reason)
+  }
+}, 3600000)
+
 // On first load - cache all elements.
 Meteor.setTimeout(async () => {
   const refreshTasks = [
@@ -456,6 +491,7 @@ Meteor.setTimeout(async () => {
     ['refreshStats', refreshStats],
     ['refreshQuantaUsd', refreshQuantaUsd],
     ['refreshPeerStats', refreshPeerStats],
+    ['refreshFoundationBalances', refreshFoundationBalances],
   ]
 
   const results = await Promise.allSettled(
@@ -493,6 +529,68 @@ JsonRoutes.add('get', '/api/emission/text', async (req, res) => {
     // cached transaction located
     const emission = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
     response = emission
+  } else {
+    response = 'Error'
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+// Total supply (alias for emission)
+JsonRoutes.add('get', '/api/total', async (req, res) => {
+  let response = {}
+  const queryResults = await status.findOneAsync()
+  if (queryResults !== undefined) {
+    const total = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
+    response = { found: true, total }
+  } else {
+    response = { found: false, message: 'API error', code: 5001 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/total/text', async (req, res) => {
+  let response = {}
+  const queryResults = await status.findOneAsync()
+  if (queryResults !== undefined) {
+    const total = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
+    response = total
+  } else {
+    response = 'Error'
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+// Circulating supply = total emitted minus foundation reserved balances
+JsonRoutes.add('get', '/api/circulating', async (req, res) => {
+  let response = {}
+  const queryResults = await status.findOneAsync()
+  if (queryResults !== undefined) {
+    const total = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
+    const reserved = queryResults.foundation_reserved || 0
+    const circulating = total - reserved
+    response = { found: true, circulating }
+  } else {
+    response = { found: false, message: 'API error', code: 5001 }
+  }
+  JsonRoutes.sendResult(res, {
+    data: response,
+  })
+})
+
+JsonRoutes.add('get', '/api/circulating/text', async (req, res) => {
+  let response = {}
+  const queryResults = await status.findOneAsync()
+  if (queryResults !== undefined) {
+    const total = parseInt(queryResults.coins_emitted, 10) / SHOR_PER_QUANTA
+    const reserved = queryResults.foundation_reserved || 0
+    const circulating = total - reserved
+    response = circulating
   } else {
     response = 'Error'
   }

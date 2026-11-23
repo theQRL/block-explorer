@@ -600,6 +600,18 @@ Template.address.helpers({
       return false
     }
   },
+  isFoundationAddress() {
+    try {
+      const aId = upperCaseFirst(FlowRouter.getParam('aId'))
+      const foundationAddresses = [
+        'Q000500997c93dec6039f0fb6008bbf034bc4f9252f6cfd41a7e01c8cf934036deaa4a832c4f240',
+        'Q010500e587fd07bb1c5ace98956d9aa6c347e7114ccb4ec7183baa54804cc8b974e91cc3b5617e',
+      ]
+      return foundationAddresses.includes(aId)
+    } catch (error) {
+      return false
+    }
+  },
   pages() {
     let ret = []
     const active = Session.get('active')
@@ -1253,6 +1265,13 @@ Template.address.events({
     event.preventDefault()
     Session.set('copySuccess', false)
   },
+})
+
+Template.address.onCreated(() => {
+  Session.set('address', {})
+  if (FlowRouter.getParam('aId')) {
+    Session.set('addressLoading', true)
+  }
 })
 
 Template.address.onRendered(() => {
