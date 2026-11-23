@@ -1570,13 +1570,14 @@ Meteor.methods({
       response.block = response.block_extended
       response.block.transactions = response.block_extended.extended_transactions
 
-      // Process all address fields in the entire response
+      // Transaction helpers expect the original protobuf byte fields.
+      const rawTransactions = response.block.transactions
       response = bufferToHex(response)
 
       if (response.block.header) {
         // transactions
         const transactions = []
-        for (const value of response.block.transactions) {
+        for (const [transactionIndex, value] of response.block.transactions.entries()) {
           const adjusted = value.tx
           // Copy addr_from from TransactionExtended wrapper to the tx object
           adjusted.addr_from = value.addr_from
@@ -1588,17 +1589,11 @@ Meteor.methods({
             adjusted.transfer = adjusted.coinbase
           }
           if (adjusted.transactionType === 'token') {
-            const item = { transaction: { tx: adjusted } }
-            const output = helpers.txhash(item)
-            Object.assign(adjusted, output.transaction.tx)
-            // Convert token name and symbol from Buffer to string
-            if (adjusted.name && Buffer.isBuffer(adjusted.name)) {
-              adjusted.name = adjusted.name.toString()
+            const { transaction } = helpers.txhash({ transaction: rawTransactions[transactionIndex] })
+            if (transaction.explorer) {
+              Object.assign(adjusted, bufferToHex(transaction.tx))
+              adjusted.nft = transaction.explorer.nft
             }
-            if (adjusted.symbol && Buffer.isBuffer(adjusted.symbol)) {
-              adjusted.symbol = adjusted.symbol.toString()
-            }
-            adjusted.nft = output.transaction.explorer.nft
           }
           if (adjusted.transactionType === 'transfer') {
             // Calculate total transferred, and generate a clean structure to display outputs from
