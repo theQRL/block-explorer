@@ -724,17 +724,16 @@ async function addTokenDetail(transaction) {
   return tokenDetail
 }
 
-const formatTokenAmount = (quantity, decimals) => {
-  const num = new BigNumber(parseInt(quantity, 10))
-  return num.dividedBy(10 ** parseInt(decimals, 10))
-}
+const formatTokenAmount = (quantity, decimals) => (
+  new BigNumber(quantity).shiftedBy(-Number(decimals)).toFixed()
+)
 
 const sumTokenTotal = (arr, decimals) => {
   let total = new BigNumber(0)
   _.each(arr, (item) => {
-    total = total.plus(parseInt(item, 10))
+    total = total.plus(item)
   })
-  return total.dividedBy(10 ** parseInt(decimals, 10)).toNumber()
+  return formatTokenAmount(total, decimals)
 }
 
 const helpersaddressTransactions = async (response) => {

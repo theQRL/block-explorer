@@ -2,6 +2,7 @@
 /* ^^^ remove once testing complete
  */
 import JSONFormatter from 'json-formatter-js'
+import { Tracker } from 'meteor/tracker'
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import qrlAddressValidator from '@theqrl/validate-qrl-address'
 import _ from 'underscore'
@@ -14,47 +15,26 @@ import {
 } from '../../../startup/both/index.js'
 import './address.html'
 
-BigNumber.config({ EXPONENTIAL_AT: 1e+9 })
-let tokensHeld = []
+// Ignore work from invalidated routes, including retries queued before navigation.
+function callForAddress(computation, method, args, callback) {
+  let cancelled = false
+  computation.onInvalidate(() => { cancelled = true })
+  const call = (canRetry) => {
+    if (cancelled) return
+    Meteor.call(method, ...args, (error, result) => {
+      if (cancelled) return
+      if (canRetry && error && error.error === 'too-many-requests') {
+        const delay = Number(error.details && error.details.timeToReset) || 1000
+        Meteor.setTimeout(() => call(false), delay + 50)
+        return
+      }
+      callback(error, result)
+    })
+  }
+  call(true)
+}
 
 // const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
-
-const addressResultsRefactor = (res) => {
-  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
-  const output = res
-  /*
-  if (res.state) {
-    // output.state.address = ab2str(output.state.address)
-    output.state.txcount = output.state.transaction_hashes.length
-
-    // transactions
-    const transactions = []
-    output.state.transaction_hashes.forEach((value) => {
-      transactions.push({ txhash: Buffer.from(value).toString('hex') })
-    })
-    output.state.transactions = transactions
-
-    // pubhashes
-    const pubhashes = []
-    if (output.state.pubhashes) {
-      output.state.pubhashes.forEach((value) => {
-        const adjusted = Buffer.from(value).toString('hex')
-        pubhashes.push(adjusted)
-      })
-      output.state.pubhashes = pubhashes
-    }
-
-    // txhashes
-    const transactionHashes = []
-    output.state.transaction_hashes.forEach((value) => {
-      const adjusted = Buffer.from(value).toString('hex')
-      transactionHashes.push(adjusted)
-    })
-    output.state.transaction_hashes = transactionHashes
-  }
-  */
-  return output
-}
 
 async function OTS(obj) {
   // console.log('OTS function called with:', obj)
@@ -94,7 +74,7 @@ async function OTS(obj) {
   }
 }
 
-function loadAddressTransactions(aId, page) {
+function loadAddressTransactions(aId, page, computation) {
   Session.set('addressTransactions', [])
   Session.set('loadingTransactions', true)
   const addresstx = anyAddressToRaw(aId)
@@ -110,7 +90,7 @@ function loadAddressTransactions(aId, page) {
   }
 
   const finish = (requestForSlaves) => {
-    Meteor.call('getSlavesByAddress', requestForSlaves, (errSlaves, resSlaves) => {
+    callForAddress(computation, 'getSlavesByAddress', [requestForSlaves], (errSlaves, resSlaves) => {
       if (!errSlaves) {
         Session.set('slaves', resSlaves)
       }
@@ -125,7 +105,7 @@ function loadAddressTransactions(aId, page) {
       page_number: pageNumber,
     }
 
-    Meteor.call('getTransactionsByAddress', request, (err, res) => {
+    callForAddress(computation, 'getTransactionsByAddress', [request], (err, res) => {
       const txList = (res && Array.isArray(res.transactions_detail)) ? res.transactions_detail : []
       const addressState = Session.get('address')
       const txCount = addressState && addressState.state
@@ -154,131 +134,100 @@ function loadAddressTransactions(aId, page) {
   fetchPage(page, true)
 }
 
-const getTokenBalances = (getAddress, callback) => {
-  const request = {
-    address: anyAddressToRaw(getAddress),
-  }
+const getTokenBalances = (aId, cachedTokens, computation, callback) => {
+  const request = { address: anyAddressToRaw(aId) }
+  callForAddress(computation, 'getFullAddressState', [request], (error, result) => {
+    if (error || !result || !result.state) {
+      callback(error || new Error('Missing address state'))
+      return
+    }
 
-  Meteor.call('getFullAddressState', request, (err, res) => {
-    if (err) {
-      // TODO - Error handling
-    } else {
-      // Now for each res.state.token we find, go discover token name and symbol
-      // eslint-disable-next-line
-      if (res.state.address !== '') {
-        const tokenKeys = Object.keys(res.state.tokens)
+    const balances = result.state.address === '' ? {} : (result.state.tokens || {})
+    const tokens = cachedTokens.filter(({ hash }) => Object.prototype.hasOwnProperty.call(balances, hash))
+    tokens.forEach((token) => {
+      token.balance = new BigNumber(balances[token.hash]).shiftedBy(-token.decimals).toFixed()
+    })
+    const resolvedHashes = new Set(tokens.map(({ hash }) => hash))
+    const hashes = Object.keys(balances).filter((hash) => !resolvedHashes.has(hash))
+    Session.set('tokensHeld', tokens)
+    const unresolved = []
+    let nextIndex = 0
+    let remaining = hashes.length
+    if (remaining === 0) {
+      callback(null, unresolved)
+      return
+    }
 
-        // Limit the number of concurrent getObject calls to prevent backend overload
-        const maxConcurrentCalls = 5
-        let activeCalls = 0
-        let processedTokens = 0
-        const tokensToProcess = []
+    const loadNext = () => {
+      if (nextIndex >= hashes.length) return
+      const hash = hashes[nextIndex]
+      nextIndex += 1
+      const requestByHash = { query: Buffer.from(hash, 'hex') }
+      callForAddress(computation, 'getObject', [requestByHash], (lookupError, lookupResult) => {
+        const transaction = lookupResult && lookupResult.transaction
+        const tx = transaction && transaction.tx
+        if (lookupError || !tx || tx.transactionType !== 'token' || !tx.token) {
+          unresolved.push({ hash, balance: balances[hash] })
+        } else {
+          const tokenDetails = tx.token
+          const thisToken = {}
+          thisToken.hash = hash
+          thisToken.name = bytesToString(tokenDetails.name)
+          thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
+          thisToken.decimals = Number(tokenDetails.decimals)
+          thisToken.balance = new BigNumber(balances[hash]).shiftedBy(-thisToken.decimals).toFixed()
 
-        // Queue all tokens for processing
-        tokenKeys.forEach((key) => {
-          tokensToProcess.push({
-            tokenHash: key,
-            tokenBalance: res.state.tokens[key],
-          })
-        })
-
-        const processNextToken = () => {
-          if (tokensToProcess.length === 0 || activeCalls >= maxConcurrentCalls) {
-            return
-          }
-
-          const tokenData = tokensToProcess.shift()
-          activeCalls++
-
-          const req = {
-            query: Buffer.from(tokenData.tokenHash, 'hex'),
-          }
-
-          Meteor.call('getObject', req, (objErr, objRes) => {
-            activeCalls--
-            processedTokens++
-
-            if (objErr) {
-              console.log('getObject error:', objErr)
-            } else {
-              // Check if this is a token hash.
-              // eslint-disable-next-line
-              if (objRes.transaction.tx.transactionType !== 'token') {
-                // TODO - Error handling here
-              } else {
-                const tokenDetails = objRes.transaction.tx.token
-                const thisToken = {}
-                thisToken.hash = tokenData.tokenHash
-                thisToken.name = bytesToString(tokenDetails.name)
-                thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
-                thisToken.balance = tokenData.tokenBalance / Math.pow(10, tokenDetails.decimals)
-                let nft = {}
-                const symbol = Buffer.from(tokenDetails.symbol).toString(
-                  'hex',
-                )
-                if (symbol.slice(0, 8) === '00ff00ff') {
-                  const nftBytes = Buffer.concat([
-                    Buffer.from(tokenDetails.symbol),
-                    Buffer.from(tokenDetails.name),
-                  ])
-                  const idBytes = Buffer.from(nftBytes.slice(4, 8))
-                  const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
-                  const id = Buffer.from(idBytes).toString('hex')
-                  const provider = `Q${Buffer.from(objRes.transaction.addr_from).toString('hex')}`
-                  const providerDetails = {
-                    known: false,
+          const symbol = Buffer.from(tokenDetails.symbol).toString(
+            'hex',
+          )
+          if (symbol.slice(0, 8) === '00ff00ff') {
+            const nftBytes = Buffer.concat([
+              Buffer.from(tokenDetails.symbol),
+              Buffer.from(tokenDetails.name),
+            ])
+            const idBytes = Buffer.from(nftBytes.slice(4, 8))
+            const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+            const id = Buffer.from(idBytes).toString('hex')
+            const provider = `Q${Buffer.from(transaction.addr_from).toString('hex')}`
+            const providerDetails = {
+              known: false,
+            }
+            _.each(qrlNft.providers, (providerList) => {
+              if (providerList.id.slice(2, 10) === id) {
+                _.each(providerList.addresses, (address) => {
+                  if (address === provider) {
+                    providerDetails.known = true
+                    providerDetails.name = providerList.name
+                    providerDetails.url = providerList.url
                   }
-                  _.each(qrlNft.providers, (providerList) => {
-                    if (providerList.id.slice(2, 10) === id) {
-                      _.each(providerList.addresses, (address) => {
-                        if (address === provider) {
-                          providerDetails.known = true
-                          providerDetails.name = providerList.name
-                          providerDetails.url = providerList.url
-                        }
-                      })
-                    }
-                  })
-                  nft = {
-                    provider,
-                    providerDetails,
-                    txhash: Buffer.from(objRes.transaction.tx.transaction_hash).toString('hex'),
-                    type: 'CREATE NFT',
-                    id,
-                    hash: Buffer.from(cryptoHashBytes).toString('hex'),
-                  }
-                  thisToken.nft = nft
-                }
-                tokensHeld.push(thisToken)
-                Session.set('tokensHeld', tokensHeld)
+                })
               }
+            })
+            thisToken.nft = {
+              provider,
+              providerDetails,
+              txhash: Buffer.from(tx.transaction_hash).toString('hex'),
+              type: 'CREATE NFT',
+              id,
+              hash: Buffer.from(cryptoHashBytes).toString('hex'),
             }
-
-            // Process next token if there are more in queue
-            if (tokensToProcess.length > 0) {
-              processNextToken()
-            }
-
-            // Check if all tokens have been processed
-            if (processedTokens === tokenKeys.length) {
-              callback()
-              // When done hide loading section
-              $('#loading').hide()
-            }
-          })
-
-          // Start processing the next token
-          processNextToken()
+          }
+          tokens.push(thisToken)
+          Session.set('tokensHeld', tokens)
         }
 
-        // Start processing tokens
-        for (let i = 0; i < Math.min(maxConcurrentCalls, tokensToProcess.length); i++) {
-          processNextToken()
+        remaining -= 1
+        if (remaining === 0) {
+          callback(null, unresolved)
+        } else {
+          loadNext()
         }
-      } else {
-        // Wallet not found, put together an empty response
-        callback()
-      }
+      })
+    }
+
+    // Keep at most five metadata requests in flight.
+    for (let i = 0; i < Math.min(5, hashes.length); i += 1) {
+      loadNext()
     }
   })
 }
@@ -289,10 +238,8 @@ const otsParse = (response, totalSignatures) => {
 
   // Parse OTS Bitfield, and grab the lowest unused key
   const newOtsBitfield = {}
-  let thisOtsBitfield = []
-  if (response.ots_bitfield_by_page[0].ots_bitfield !== undefined) {
-    thisOtsBitfield = response.ots_bitfield_by_page[0].ots_bitfield
-  }
+  const firstPage = response.ots_bitfield_by_page && response.ots_bitfield_by_page[0]
+  const thisOtsBitfield = (firstPage && firstPage.ots_bitfield) || []
 
   // console.log('thisOtsBitfield:', thisOtsBitfield)
 
@@ -329,108 +276,71 @@ const otsParse = (response, totalSignatures) => {
   return ots
 }
 
-const renderAddressBlock = () => {
-  const aId = upperCaseFirst(FlowRouter.getParam('aId'))
-  let tPage = FlowRouter.getParam('tPage')
-  tPage = parseInt(tPage, 10)
-  if (!tPage) { tPage = 1 }
-  // TODO: validate aId before constructing Method call
-  if (aId) {
-    // Set loading state
-    Session.set('addressLoading', true)
-    const validate = qrlAddressValidator.hexString(aId)
-    if (validate.result === false) {
+const requestedAddressPage = () => Math.max(1, parseInt(FlowRouter.getParam('tPage'), 10) || 1)
+
+const renderAddressBlock = (aId, page, computation) => {
+  Session.set('addressLoading', true)
+  const validation = qrlAddressValidator.hexString(aId)
+  if (!validation.result) {
+    Session.set('address', { error: 'Invalid address', id: aId })
+    Session.set('addressLoading', false)
+    return
+  }
+
+  const request = { address: anyAddressToRaw(aId) }
+  const isMultiSig = validation.sig.type === 'MULTISIG'
+  const method = isMultiSig ? 'getMultiSigAddressState' : 'getAddressState'
+  callForAddress(computation, method, [request], (error, result) => {
+    if (error || !result || !result.state) {
+      Session.set('address', { error: error || 'Missing address state', id: aId })
       Session.set('addressLoading', false)
       return
     }
-    const req = {
-      address: anyAddressToRaw(aId),
+
+    const { state } = result
+    const balance = new BigNumber(state.balance).dividedBy(SHOR_PER_QUANTA)
+    state.balance = isMultiSig ? balance.toFixed() : balance.toFixed(9)
+    state.address = state.address || aId
+    if (isMultiSig) {
+      Session.set('address', result)
+      Session.set('addressLoading', false)
+      return
     }
-    if (validate.sig.type === 'MULTISIG') {
-      Meteor.call('getMultiSigAddressState', req, (err, res) => {
-        Session.set('addressLoading', false)
-        if (err) {
-          Session.set('address', { error: err, id: aId })
-        } else {
-          // console.log(res)
-          if (!(res.state.address)) {
-            res.state.address = aId
-          }
-          let bal = new BigNumber(res.state.balance)
-          bal = bal.div(SHOR_PER_QUANTA)
-          res.state.balance = bal.toString()
-          Session.set('address', addressResultsRefactor(res))
-        }
-      })
-    } else {
-      Meteor.call('getAddressState', req, (err, res) => {
-        if (err) {
-          Session.set('addressLoading', false)
-          Session.set('address', { error: err, id: aId })
-        } else {
-          if (res) {
-            res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(9)
-            if (!(res.state.address)) {
-              res.state.address = aId
-            }
-            if (parseInt(res.state.txcount, 10) === 0 && parseInt(res.state.nonce, 10) === 0) {
-              res.state.empty_warning = true
-            } else {
-              res.state.empty_warning = false
-            }
-          }
 
-          req.page_from = 1
-          req.page_count = 1
-          req.unused_ots_index_from = 0
-
-          Meteor.call('getOTS', req, (error, result) => {
-            Session.set('addressLoading', false)
-            if (error) {
-              console.error('OTS API error:', error)
-              Session.set('address', { error, id: aId })
-            } else {
-              // console.log('OTS API result:', result)
-              const ots = otsParse(result, qrlAddressValidator.hexString(res.state.address).sig.number)
-              // console.log('Parsed OTS:', ots)
-              res.ots = ots
-              res.ots.keysConsumed = res.state.used_ots_key_count
-
-              // generate OTS tracker HTML
-              OTS(res.ots.keys)
-
-              Session.set('address', addressResultsRefactor(res))
-              Session.set('fetchedTx', false)
-              const numPages = Math.ceil(res.state.transaction_hash_count / 10)
-              const pages = []
-              while (pages.length !== numPages) {
-                const pageNumber = pages.length + 1
-                pages.push({
-                  number: pageNumber,
-                  from: ((pageNumber - 1) * 10) + 1,
-                  to: pageNumber * 10,
-                })
-              }
-              // let txArray = null
-              Session.set('pages', pages)
-              Session.set('active', tPage)
-              // const startIndex = (tPage - 1) * 10
-              // txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
-              Session.set('fetchedTx', false)
-              Session.set('loadingTransactions', true)
-              loadAddressTransactions(aId, tPage)
-            }
-          })
-        }
-      })
+    state.empty_warning = parseInt(state.txcount, 10) === 0 && parseInt(state.nonce, 10) === 0
+    const numPages = Math.ceil(state.transaction_hash_count / 10)
+    const pages = Array.from({ length: numPages }, (_unused, index) => ({
+      number: index + 1,
+      from: (index * 10) + 1,
+      to: (index + 1) * 10,
+    }))
+    const activePage = Math.min(page, Math.max(1, pages.length))
+    const usedKeys = parseInt(state.used_ots_key_count, 10)
+    if (Number.isFinite(usedKeys)) {
+      result.keysRemaining = validation.sig.number - usedKeys
     }
-  }
-  Meteor.call('QRLvalue', (err, res) => {
-    if (err) {
-      Session.set('qrl', 'Error getting value from API')
-    } else {
-      Session.set('qrl', res)
+    Session.set('address', result)
+    Session.set('pages', pages)
+    Session.set('active', activePage)
+    loadAddressTransactions(aId, activePage, computation)
+    Session.set('addressLoading', false)
+
+    const otsRequest = {
+      address: request.address, page_from: 1, page_count: 1, unused_ots_index_from: 0,
     }
+    callForAddress(computation, 'getOTS', [otsRequest], (otsError, otsResult) => {
+      if (otsError) {
+        console.error('OTS API error:', otsError)
+        Session.set('OTStracker', { error: 'Unable to load OTS data' })
+        return
+      }
+      const ots = otsParse(otsResult, validation.sig.number)
+      const address = Session.get('address')
+      ots.keysConsumed = state.used_ots_key_count
+      address.ots = ots
+      Session.set('address', address)
+      OTS(ots.keys)
+    })
   })
 }
 
@@ -473,7 +383,7 @@ Template.address.helpers({
     try {
       const address = Session.get('address')
       if (Session.get('address').error) {
-        return { found: false, parameter: FlowRouter.getParam('aId') }
+        return { found: false, parameter: address.id }
       }
       if (address !== undefined) {
         if (address.state !== undefined) {
@@ -632,7 +542,7 @@ Template.address.helpers({
   },
   coinbaseValue() {
     if (this.tx && this.tx.coinbase) {
-      return this.tx.coinbase.amount / SHOR_PER_QUANTA
+      return new BigNumber(this.tx.coinbase.amount).dividedBy(SHOR_PER_QUANTA).toFixed()
     }
     return 0
   },
@@ -679,13 +589,13 @@ Template.address.helpers({
       const a = Session.get('address').state.address
       const outputs = tx.transfer
       if (outputs) {
-        let amount = 0
+        let amount = new BigNumber(0)
         _.each(outputs.addrs_to, (element, key) => {
           if (element === a) {
-            amount += outputs.amounts[key] / SHOR_PER_QUANTA
+            amount = amount.plus(outputs.amounts[key])
           }
         })
-        return amount
+        return amount.dividedBy(SHOR_PER_QUANTA).toFixed()
       }
       return ''
     } catch (e) {
@@ -698,16 +608,14 @@ Template.address.helpers({
     }
     const a = Session.get('address').state.address
     const outputs = tx.transfer_token ? tx.transfer_token.addrs_to : null
-    let amount = 0
+    let amount = new BigNumber(0)
     if (outputs) {
       _.each(outputs, (element, key) => {
         if (element === a) {
-          amount
-          += tx.transfer_token.amounts[key]
-          / 10 ** parseInt(tx.token.decimals, 10)
+          amount = amount.plus(tx.transfer_token.amounts[key])
         }
       })
-      return `${amount} ${tx.token.symbol}`
+      return `${amount.shiftedBy(-Number(tx.token.decimals)).toFixed()} ${tx.token.symbol}`
     }
     return ''
   },
@@ -718,7 +626,7 @@ Template.address.helpers({
         const a = new BigNumber(outputs.transfer.amounts[key])
         result.push({
           to: element,
-          amount: a.dividedBy(SHOR_PER_QUANTA).toString(),
+          amount: a.dividedBy(SHOR_PER_QUANTA).toFixed(),
         })
       })
     }
@@ -731,7 +639,7 @@ Template.address.helpers({
       _.each(outputs.amounts, (element) => {
         amount = amount.plus(element)
       })
-      return amount.dividedBy(SHOR_PER_QUANTA).toString()
+      return amount.dividedBy(SHOR_PER_QUANTA).toFixed()
     }
     return ''
   },
@@ -802,7 +710,7 @@ Template.address.helpers({
   },
   pback() {
     let ret = false
-    if (Session.get('active') !== 1) {
+    if (requestedAddressPage() > 1) {
       ret = true
     }
     return ret
@@ -817,7 +725,8 @@ Template.address.helpers({
   pagination() {
     let ret = false
     if (Session.get('pages')) {
-      if (Session.get('pages').length > 1) {
+      const { length } = Session.get('pages')
+      if (length > 1 || (length === 1 && requestedAddressPage() > 1)) {
         ret = true
       }
     }
@@ -898,6 +807,15 @@ Template.address.helpers({
     }
     return false
   },
+  tokenBalancesLoading() {
+    return Session.equals('tokenBalancesStatus', 'loading')
+  },
+  tokenBalancesLoaded() {
+    return Session.equals('tokenBalancesStatus', 'loaded')
+  },
+  tokenBalancesIssue() {
+    return Session.get('tokenBalancesIssue')
+  },
   tokensHeld() {
     return Session.get('tokensHeld')
   },
@@ -954,10 +872,7 @@ Template.address.helpers({
 
         result.signatureScheme = validationResult.sig.type
         result.hashFunction = validationResult.hash.function
-        if (Session.get('address').ots) {
-          const { keysConsumed } = Session.get('address').ots
-          result.keysRemaining = parseInt(result.totalSignatures, 10) - parseInt(keysConsumed, 10)
-        }
+        result.keysRemaining = Session.get('address').keysRemaining
         return result
       }
       return false
@@ -1001,7 +916,7 @@ Template.address.helpers({
       _.each(i.multi_sig_spend.amounts, (a) => {
         sum = sum.plus(a)
       })
-      return sum.dividedBy(SHOR_PER_QUANTA).toNumber()
+      return sum.dividedBy(SHOR_PER_QUANTA).toFixed()
     } catch (error) {
       return null
     }
@@ -1142,9 +1057,8 @@ Template.address.events({
       }
     }
   },
-  'click .refresh': () => {
-    Session.set('address', {})
-    renderAddressBlock()
+  'click .refresh': (event, instance) => {
+    instance.addressRefresh.changed()
   },
   'click .close': () => {
     const messages = document.querySelectorAll('.message')
@@ -1157,39 +1071,21 @@ Template.address.events({
     switchToTransactionsTab()
   },
   'click button[qrl-data]': (event) => {
-    let b = 0
-    Session.set('addressTransactions', [])
-    if (parseInt(event.target.textContent, 10)) {
-      b = parseInt(event.target.textContent, 10)
-      Session.set('active', b)
-    } else {
-      const a = event.target.getAttribute('qrl-data')
-      b = Session.get('active')
-      const c = Session.get('pages').length
-      if (a === 'forward') {
-        b += 1
-      }
-      if (a === 'back') {
-        b -= 1
-      }
-      if (b > c) {
-        b = c
-      }
-      if (b < 1) {
-        b = 1
-      }
+    const button = event.currentTarget
+    const direction = button.getAttribute('qrl-data')
+    let page = parseInt(direction, 10)
+    if (direction === 'forward') page = Session.get('active') + 1
+    const lastPage = Session.get('pages').length
+    if (direction === 'back') page = Math.min(requestedAddressPage() - 1, lastPage)
+    if (page >= 1 && page <= lastPage) {
+      FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${page}`)
     }
-    Session.set('active', b)
-    Session.set('fetchedTx', false)
-    const loading = document.getElementById('loadingTransactions')
-    if (loading) loading.style.display = 'block'
-    FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${b}`)
-    window.scrollTo(0, 0)
   },
   'click #clickHelp': () => {
     window.open('https://docs.theqrl.org', '_blank')
   },
   'click .transactionRecord': (event) => {
+    if (event.target.closest('a')) return
     let route = ''
     const links = event.currentTarget.querySelectorAll('a[href^="/tx/"]')
     if (links.length > 0) {
@@ -1215,16 +1111,9 @@ Template.address.events({
     if (targetContent) {
       targetContent.classList.add('active')
     }
-
-    // Hide loading spinners when tab is clicked
-    if (tabId === 'nftBalances') {
-      const nftLoading = document.getElementById('nftBalancesLoading')
-      if (nftLoading) nftLoading.style.display = 'none'
-    }
-    if (tabId === 'tokenBalances') {
-      const tokenLoading = document.getElementById('tokenBalancesLoading')
-      if (tokenLoading) tokenLoading.style.display = 'none'
-    }
+  },
+  'click .retry-token-balances': (event, instance) => {
+    instance.tokenBalancesRefresh.changed()
   },
   'click .copy-address-btn': async (event) => {
     event.preventDefault()
@@ -1267,48 +1156,89 @@ Template.address.events({
   },
 })
 
-Template.address.onCreated(() => {
-  Session.set('address', {})
-  if (FlowRouter.getParam('aId')) {
-    Session.set('addressLoading', true)
-  }
+Template.address.onCreated(function addressCreated() {
+  this.addressRefresh = new Tracker.Dependency()
+  this.tokenBalancesRefresh = new Tracker.Dependency()
+
+  this.autorun((computation) => {
+    if (!FlowRouter.getParam('aId')) return
+    this.addressRefresh.depend()
+    Session.set('qrl', 0)
+    callForAddress(computation, 'QRLvalue', [], (err, res) => {
+      if (err) {
+        Session.set('qrl', 'Error getting value from API')
+      } else {
+        Session.set('qrl', res)
+      }
+    })
+  })
+
+  this.autorun((computation) => {
+    const address = FlowRouter.getParam('aId')
+    if (!address) return
+    const aId = upperCaseFirst(address)
+    const page = requestedAddressPage()
+    this.addressRefresh.depend()
+
+    Session.set('address', {})
+    Session.set('addressTransactions', [])
+    Session.set('pages', [])
+    Session.set('active', page)
+    Session.set('fetchedTx', false)
+    Session.set('loadingTransactions', false)
+    Session.set('slaves', [])
+    Session.set('OTStracker', {})
+    renderAddressBlock(aId, page, computation)
+  })
+
+  let holdingsAddress
+  let hasBalanceSnapshot = false
+  let unresolved = []
+  this.autorun((computation) => {
+    const address = FlowRouter.getParam('aId')
+    if (!address) return
+    const aId = upperCaseFirst(address)
+    if (!qrlAddressValidator.hexString(aId).result) return
+    this.tokenBalancesRefresh.depend()
+    if (holdingsAddress !== aId) {
+      holdingsAddress = aId
+      hasBalanceSnapshot = false
+      unresolved = []
+      Session.set('tokensHeld', [])
+    }
+    const cachedTokens = Tracker.nonreactive(() => Session.get('tokensHeld'))
+    Session.set('tokenBalancesIssue', null)
+    Session.set('tokenBalancesStatus', 'loading')
+
+    getTokenBalances(aId, cachedTokens, computation, (error, missingMetadata) => {
+      if (!error) {
+        hasBalanceSnapshot = true
+        unresolved = missingMetadata
+      }
+      if (error || unresolved.length > 0) {
+        let message = 'Some token details could not be loaded.'
+        if (error) {
+          message = hasBalanceSnapshot
+            ? 'Unable to refresh token balances. Previously loaded balances may be out of date.'
+            : 'Unable to load token balances.'
+        }
+        Session.set('tokenBalancesIssue', { message, unresolved })
+        Session.set('tokenBalancesStatus', 'failed')
+        return
+      }
+      Session.set('tokenBalancesStatus', 'loaded')
+    })
+  })
 })
 
 Template.address.onRendered(() => {
-  // Initialize copySuccess session variable
   Session.set('copySuccess', false)
 
-  // Initialize Lucide icons for this template
   setTimeout(() => {
     if (window.reinitializeLucideIcons) {
       window.reinitializeLucideIcons()
     }
   }, 200)
-
-  Tracker.autorun(() => {
-    FlowRouter.watchPathChange()
-    Session.set('address', {})
-    Session.set('addressTransactions', [])
-    Session.set('qrl', 0)
-    Session.set('pages', [])
-    Session.set('active', 1)
-    Session.set('fetchedTx', false)
-    Session.set('slaves', [])
-    if (FlowRouter.getParam('aId')) {
-      renderAddressBlock()
-    }
-  })
-
-  tokensHeld = []
-  Session.set('tokensHeld', [])
-
-  // Get Tokens and Balances
-  getTokenBalances(upperCaseFirst(FlowRouter.getParam('aId')), () => {
-    const tokenLoading = document.getElementById('tokenBalancesLoading')
-    const nftLoading = document.getElementById('nftBalancesLoading')
-    if (tokenLoading) tokenLoading.style.display = 'none'
-    if (nftLoading) nftLoading.style.display = 'none'
-  })
 
   // Mobile touch tooltip functionality
   const balanceElement = document.querySelector('[data-tooltip]')
