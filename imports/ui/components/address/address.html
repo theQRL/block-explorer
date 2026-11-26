@@ -632,17 +632,22 @@
           <div class="tab-content" data-tab="tokenBalances">
             <h2 class="text-xl font-bold text-qrl-text mb-4">Token Balances</h2>
 
-            <div id="tokenBalancesLoading" class="card">
-              <div class="flex items-center justify-center py-12">
-                <div class="text-center">
-                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
-                  <div class="text-qrl-text-secondary">
-                    <div class="font-semibold mb-2">Just a moment</div>
-                    <p>Token balances are loading...</p>
+            {{#if tokenBalancesLoading}}
+              <div id="tokenBalancesLoading" class="card">
+                <div class="flex items-center justify-center py-12">
+                  <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
+                    <div class="text-qrl-text-secondary">
+                      <div class="font-semibold mb-2">Just a moment</div>
+                      <p>Token balances are loading...</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            {{/if}}
+            {{#if tokenBalancesIssue}}
+              {{> tokenBalancesProblem tokenBalancesIssue}}
+            {{/if}}
 
             <div class="space-y-4">
               {{#if ownTokens}}
@@ -667,7 +672,7 @@
                     </div>
                   {{/unless}}
                 {{/each}}
-              {{else}}
+              {{else if tokenBalancesLoaded}}
                 <div class="text-center py-8 text-qrl-text-secondary">
                   No tokens owned
                 </div>
@@ -679,17 +684,22 @@
           <div class="tab-content" data-tab="nftBalances">
             <h2 class="text-xl font-bold text-qrl-text mb-4">NFTs</h2>
 
-            <div id="nftBalancesLoading" class="card">
-              <div class="flex items-center justify-center py-12">
-                <div class="text-center">
-                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
-                  <div class="text-qrl-text-secondary">
-                    <div class="font-semibold mb-2">Just a moment</div>
-                    <p>NFTs are loading...</p>
+            {{#if tokenBalancesLoading}}
+              <div id="nftBalancesLoading" class="card">
+                <div class="flex items-center justify-center py-12">
+                  <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-qrl-accent mx-auto mb-4"></div>
+                    <div class="text-qrl-text-secondary">
+                      <div class="font-semibold mb-2">Just a moment</div>
+                      <p>NFTs are loading...</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            {{/if}}
+            {{#if tokenBalancesIssue}}
+              {{> tokenBalancesProblem tokenBalancesIssue}}
+            {{/if}}
 
             <div class="space-y-4">
               {{#if ownNFTs}}
@@ -727,7 +737,7 @@
                     </div>
                   {{/if}}
                 {{/each}}
-              {{else}}
+              {{else if tokenBalancesLoaded}}
                 <div class="text-center py-8 text-qrl-text-secondary">
                   No NFTs owned
                 </div>
@@ -851,4 +861,21 @@
       {{/if}}
     {{/if}}
   {{/if}}
+</template>
+
+<template name="tokenBalancesProblem">
+  <div class="card mb-4" role="status">
+    <p class="text-red-300">{{message}}</p>
+    {{#if unresolved}}
+      <ul class="my-2 space-y-1">
+        {{#each unresolved}}
+          <li class="break-all text-sm text-qrl-text-secondary">
+            <a href="/tx/{{hash}}" class="text-qrl-accent hover:underline">{{hash}}</a>
+            ({{balance}} base units)
+          </li>
+        {{/each}}
+      </ul>
+    {{/if}}
+    <button type="button" class="retry-token-balances mt-2 text-qrl-accent hover:underline">Retry</button>
+  </div>
 </template>
