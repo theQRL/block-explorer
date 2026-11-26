@@ -134,7 +134,7 @@ function loadAddressTransactions(aId, page, computation) {
   fetchPage(page, true)
 }
 
-const getTokenBalances = (aId, computation, callback) => {
+const getTokenBalances = (aId, cachedTokens, computation, callback) => {
   const request = { address: anyAddressToRaw(aId) }
   callForAddress(computation, 'getFullAddressState', [request], (error, result) => {
     if (error || !result || !result.state) {
@@ -143,8 +143,13 @@ const getTokenBalances = (aId, computation, callback) => {
     }
 
     const balances = result.state.address === '' ? {} : (result.state.tokens || {})
-    const hashes = Object.keys(balances)
-    const tokens = []
+    const tokens = cachedTokens.filter(({ hash }) => Object.prototype.hasOwnProperty.call(balances, hash))
+    tokens.forEach((token) => {
+      token.balance = new BigNumber(balances[token.hash]).shiftedBy(-token.decimals).toFixed()
+    })
+    const resolvedHashes = new Set(tokens.map(({ hash }) => hash))
+    const hashes = Object.keys(balances).filter((hash) => !resolvedHashes.has(hash))
+    Session.set('tokensHeld', tokens)
     const unresolved = []
     let nextIndex = 0
     let remaining = hashes.length
@@ -169,8 +174,8 @@ const getTokenBalances = (aId, computation, callback) => {
           thisToken.hash = hash
           thisToken.name = bytesToString(tokenDetails.name)
           thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
-          thisToken.balance = new BigNumber(balances[hash])
-            .shiftedBy(-Number(tokenDetails.decimals)).toFixed()
+          thisToken.decimals = Number(tokenDetails.decimals)
+          thisToken.balance = new BigNumber(balances[hash]).shiftedBy(-thisToken.decimals).toFixed()
 
           const symbol = Buffer.from(tokenDetails.symbol).toString(
             'hex',
@@ -1186,22 +1191,38 @@ Template.address.onCreated(function addressCreated() {
     renderAddressBlock(aId, page, computation)
   })
 
+  let holdingsAddress
+  let hasBalanceSnapshot = false
+  let unresolved = []
   this.autorun((computation) => {
     const address = FlowRouter.getParam('aId')
     if (!address) return
     const aId = upperCaseFirst(address)
     if (!qrlAddressValidator.hexString(aId).result) return
     this.tokenBalancesRefresh.depend()
-    Session.set('tokensHeld', [])
+    if (holdingsAddress !== aId) {
+      holdingsAddress = aId
+      hasBalanceSnapshot = false
+      unresolved = []
+      Session.set('tokensHeld', [])
+    }
+    const cachedTokens = Tracker.nonreactive(() => Session.get('tokensHeld'))
     Session.set('tokenBalancesIssue', null)
     Session.set('tokenBalancesStatus', 'loading')
 
-    getTokenBalances(aId, computation, (error, unresolved) => {
+    getTokenBalances(aId, cachedTokens, computation, (error, missingMetadata) => {
+      if (!error) {
+        hasBalanceSnapshot = true
+        unresolved = missingMetadata
+      }
       if (error || unresolved.length > 0) {
-        Session.set('tokenBalancesIssue', {
-          message: error ? 'Unable to load token balances.' : 'Some token details could not be loaded.',
-          unresolved,
-        })
+        let message = 'Some token details could not be loaded.'
+        if (error) {
+          message = hasBalanceSnapshot
+            ? 'Unable to refresh token balances. Previously loaded balances may be out of date.'
+            : 'Unable to load token balances.'
+        }
+        Session.set('tokenBalancesIssue', { message, unresolved })
         Session.set('tokenBalancesStatus', 'failed')
         return
       }
