@@ -17,10 +17,12 @@ import './address.html'
 
 // Ignore work from invalidated routes, including retries queued before navigation.
 function callForAddress(computation, method, args, callback) {
+  let cancelled = false
+  computation.onInvalidate(() => { cancelled = true })
   const call = (canRetry) => {
-    if (computation.invalidated) return
+    if (cancelled) return
     Meteor.call(method, ...args, (error, result) => {
-      if (computation.invalidated) return
+      if (cancelled) return
       if (canRetry && error && error.error === 'too-many-requests') {
         const delay = Number(error.details && error.details.timeToReset) || 1000
         Meteor.setTimeout(() => call(false), delay + 50)
@@ -132,135 +134,95 @@ function loadAddressTransactions(aId, page, computation) {
   fetchPage(page, true)
 }
 
-const getTokenBalances = (getAddress, computation, callback) => {
-  const tokensHeld = []
-  const request = {
-    address: anyAddressToRaw(getAddress),
-  }
+const getTokenBalances = (aId, computation, callback) => {
+  const request = { address: anyAddressToRaw(aId) }
+  callForAddress(computation, 'getFullAddressState', [request], (error, result) => {
+    if (error || !result || !result.state) {
+      callback(error || new Error('Missing address state'))
+      return
+    }
 
-  callForAddress(computation, 'getFullAddressState', [request], (err, res) => {
-    if (err) {
-      // TODO - Error handling
-    } else {
-      // Now for each res.state.token we find, go discover token name and symbol
-      // eslint-disable-next-line
-      if (res.state.address !== '') {
-        const tokenKeys = Object.keys(res.state.tokens)
+    const balances = result.state.address === '' ? {} : (result.state.tokens || {})
+    const hashes = Object.keys(balances)
+    const tokens = []
+    const unresolved = []
+    let nextIndex = 0
+    let remaining = hashes.length
+    if (remaining === 0) {
+      callback(null, unresolved)
+      return
+    }
 
-        if (tokenKeys.length === 0) callback()
+    const loadNext = () => {
+      if (nextIndex >= hashes.length) return
+      const hash = hashes[nextIndex]
+      nextIndex += 1
+      const requestByHash = { query: Buffer.from(hash, 'hex') }
+      callForAddress(computation, 'getObject', [requestByHash], (lookupError, lookupResult) => {
+        const transaction = lookupResult && lookupResult.transaction
+        const tx = transaction && transaction.tx
+        if (lookupError || !tx || tx.transactionType !== 'token' || !tx.token) {
+          unresolved.push({ hash, balance: balances[hash] })
+        } else {
+          const tokenDetails = tx.token
+          const thisToken = {}
+          thisToken.hash = hash
+          thisToken.name = bytesToString(tokenDetails.name)
+          thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
+          thisToken.balance = new BigNumber(balances[hash])
+            .shiftedBy(-Number(tokenDetails.decimals)).toFixed()
 
-        // Limit the number of concurrent getObject calls to prevent backend overload
-        const maxConcurrentCalls = 5
-        let activeCalls = 0
-        let processedTokens = 0
-        const tokensToProcess = []
-
-        // Queue all tokens for processing
-        tokenKeys.forEach((key) => {
-          tokensToProcess.push({
-            tokenHash: key,
-            tokenBalance: res.state.tokens[key],
-          })
-        })
-
-        const processNextToken = () => {
-          if (tokensToProcess.length === 0 || activeCalls >= maxConcurrentCalls) {
-            return
-          }
-
-          const tokenData = tokensToProcess.shift()
-          activeCalls++
-
-          const req = {
-            query: Buffer.from(tokenData.tokenHash, 'hex'),
-          }
-
-          callForAddress(computation, 'getObject', [req], (objErr, objRes) => {
-            activeCalls--
-            processedTokens++
-
-            if (objErr) {
-              console.log('getObject error:', objErr)
-            } else {
-              // Check if this is a token hash.
-              // eslint-disable-next-line
-              if (objRes.transaction.tx.transactionType !== 'token') {
-                // TODO - Error handling here
-              } else {
-                const tokenDetails = objRes.transaction.tx.token
-                const thisToken = {}
-                thisToken.hash = tokenData.tokenHash
-                thisToken.name = bytesToString(tokenDetails.name)
-                thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
-                thisToken.balance = new BigNumber(tokenData.tokenBalance)
-                  .shiftedBy(-Number(tokenDetails.decimals)).toFixed()
-                let nft = {}
-                const symbol = Buffer.from(tokenDetails.symbol).toString(
-                  'hex',
-                )
-                if (symbol.slice(0, 8) === '00ff00ff') {
-                  const nftBytes = Buffer.concat([
-                    Buffer.from(tokenDetails.symbol),
-                    Buffer.from(tokenDetails.name),
-                  ])
-                  const idBytes = Buffer.from(nftBytes.slice(4, 8))
-                  const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
-                  const id = Buffer.from(idBytes).toString('hex')
-                  const provider = `Q${Buffer.from(objRes.transaction.addr_from).toString('hex')}`
-                  const providerDetails = {
-                    known: false,
+          const symbol = Buffer.from(tokenDetails.symbol).toString(
+            'hex',
+          )
+          if (symbol.slice(0, 8) === '00ff00ff') {
+            const nftBytes = Buffer.concat([
+              Buffer.from(tokenDetails.symbol),
+              Buffer.from(tokenDetails.name),
+            ])
+            const idBytes = Buffer.from(nftBytes.slice(4, 8))
+            const cryptoHashBytes = Buffer.from(nftBytes.slice(8, 40))
+            const id = Buffer.from(idBytes).toString('hex')
+            const provider = `Q${Buffer.from(transaction.addr_from).toString('hex')}`
+            const providerDetails = {
+              known: false,
+            }
+            _.each(qrlNft.providers, (providerList) => {
+              if (providerList.id.slice(2, 10) === id) {
+                _.each(providerList.addresses, (address) => {
+                  if (address === provider) {
+                    providerDetails.known = true
+                    providerDetails.name = providerList.name
+                    providerDetails.url = providerList.url
                   }
-                  _.each(qrlNft.providers, (providerList) => {
-                    if (providerList.id.slice(2, 10) === id) {
-                      _.each(providerList.addresses, (address) => {
-                        if (address === provider) {
-                          providerDetails.known = true
-                          providerDetails.name = providerList.name
-                          providerDetails.url = providerList.url
-                        }
-                      })
-                    }
-                  })
-                  nft = {
-                    provider,
-                    providerDetails,
-                    txhash: Buffer.from(objRes.transaction.tx.transaction_hash).toString('hex'),
-                    type: 'CREATE NFT',
-                    id,
-                    hash: Buffer.from(cryptoHashBytes).toString('hex'),
-                  }
-                  thisToken.nft = nft
-                }
-                tokensHeld.push(thisToken)
-                Session.set('tokensHeld', tokensHeld)
+                })
               }
+            })
+            thisToken.nft = {
+              provider,
+              providerDetails,
+              txhash: Buffer.from(tx.transaction_hash).toString('hex'),
+              type: 'CREATE NFT',
+              id,
+              hash: Buffer.from(cryptoHashBytes).toString('hex'),
             }
-
-            // Process next token if there are more in queue
-            if (tokensToProcess.length > 0) {
-              processNextToken()
-            }
-
-            // Check if all tokens have been processed
-            if (processedTokens === tokenKeys.length) {
-              callback()
-              // When done hide loading section
-              $('#loading').hide()
-            }
-          })
-
-          // Start processing the next token
-          processNextToken()
+          }
+          tokens.push(thisToken)
+          Session.set('tokensHeld', tokens)
         }
 
-        // Start processing tokens
-        for (let i = 0; i < Math.min(maxConcurrentCalls, tokensToProcess.length); i++) {
-          processNextToken()
+        remaining -= 1
+        if (remaining === 0) {
+          callback(null, unresolved)
+        } else {
+          loadNext()
         }
-      } else {
-        // Wallet not found, put together an empty response
-        callback()
-      }
+      })
+    }
+
+    // Keep at most five metadata requests in flight.
+    for (let i = 0; i < Math.min(5, hashes.length); i += 1) {
+      loadNext()
     }
   })
 }
@@ -309,6 +271,8 @@ const otsParse = (response, totalSignatures) => {
   return ots
 }
 
+const requestedAddressPage = () => Math.max(1, parseInt(FlowRouter.getParam('tPage'), 10) || 1)
+
 const renderAddressBlock = (aId, page, computation) => {
   Session.set('addressLoading', true)
   const validation = qrlAddressValidator.hexString(aId)
@@ -345,9 +309,15 @@ const renderAddressBlock = (aId, page, computation) => {
       from: (index * 10) + 1,
       to: (index + 1) * 10,
     }))
+    const activePage = Math.min(page, Math.max(1, pages.length))
+    const usedKeys = parseInt(state.used_ots_key_count, 10)
+    if (Number.isFinite(usedKeys)) {
+      result.keysRemaining = validation.sig.number - usedKeys
+    }
     Session.set('address', result)
     Session.set('pages', pages)
-    loadAddressTransactions(aId, page, computation)
+    Session.set('active', activePage)
+    loadAddressTransactions(aId, activePage, computation)
     Session.set('addressLoading', false)
 
     const otsRequest = {
@@ -735,7 +705,7 @@ Template.address.helpers({
   },
   pback() {
     let ret = false
-    if (Session.get('active') !== 1) {
+    if (requestedAddressPage() > 1) {
       ret = true
     }
     return ret
@@ -750,7 +720,8 @@ Template.address.helpers({
   pagination() {
     let ret = false
     if (Session.get('pages')) {
-      if (Session.get('pages').length > 1) {
+      const { length } = Session.get('pages')
+      if (length > 1 || (length === 1 && requestedAddressPage() > 1)) {
         ret = true
       }
     }
@@ -831,6 +802,15 @@ Template.address.helpers({
     }
     return false
   },
+  tokenBalancesLoading() {
+    return Session.equals('tokenBalancesStatus', 'loading')
+  },
+  tokenBalancesLoaded() {
+    return Session.equals('tokenBalancesStatus', 'loaded')
+  },
+  tokenBalancesIssue() {
+    return Session.get('tokenBalancesIssue')
+  },
   tokensHeld() {
     return Session.get('tokensHeld')
   },
@@ -887,10 +867,7 @@ Template.address.helpers({
 
         result.signatureScheme = validationResult.sig.type
         result.hashFunction = validationResult.hash.function
-        if (Session.get('address').ots) {
-          const { keysConsumed } = Session.get('address').ots
-          result.keysRemaining = parseInt(result.totalSignatures, 10) - parseInt(keysConsumed, 10)
-        }
+        result.keysRemaining = Session.get('address').keysRemaining
         return result
       }
       return false
@@ -1093,8 +1070,9 @@ Template.address.events({
     const direction = button.getAttribute('qrl-data')
     let page = parseInt(direction, 10)
     if (direction === 'forward') page = Session.get('active') + 1
-    if (direction === 'back') page = Session.get('active') - 1
-    if (page >= 1 && page <= Session.get('pages').length) {
+    const lastPage = Session.get('pages').length
+    if (direction === 'back') page = Math.min(requestedAddressPage() - 1, lastPage)
+    if (page >= 1 && page <= lastPage) {
       FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${page}`)
     }
   },
@@ -1128,16 +1106,9 @@ Template.address.events({
     if (targetContent) {
       targetContent.classList.add('active')
     }
-
-    // Hide loading spinners when tab is clicked
-    if (tabId === 'nftBalances') {
-      const nftLoading = document.getElementById('nftBalancesLoading')
-      if (nftLoading) nftLoading.style.display = 'none'
-    }
-    if (tabId === 'tokenBalances') {
-      const tokenLoading = document.getElementById('tokenBalancesLoading')
-      if (tokenLoading) tokenLoading.style.display = 'none'
-    }
+  },
+  'click .retry-token-balances': (event, instance) => {
+    instance.tokenBalancesRefresh.changed()
   },
   'click .copy-address-btn': async (event) => {
     event.preventDefault()
@@ -1182,9 +1153,12 @@ Template.address.events({
 
 Template.address.onCreated(function addressCreated() {
   this.addressRefresh = new Tracker.Dependency()
-  Session.set('qrl', 0)
+  this.tokenBalancesRefresh = new Tracker.Dependency()
 
   this.autorun((computation) => {
+    if (!FlowRouter.getParam('aId')) return
+    this.addressRefresh.depend()
+    Session.set('qrl', 0)
     callForAddress(computation, 'QRLvalue', [], (err, res) => {
       if (err) {
         Session.set('qrl', 'Error getting value from API')
@@ -1198,7 +1172,7 @@ Template.address.onCreated(function addressCreated() {
     const address = FlowRouter.getParam('aId')
     if (!address) return
     const aId = upperCaseFirst(address)
-    const page = Math.max(1, parseInt(FlowRouter.getParam('tPage'), 10) || 1)
+    const page = requestedAddressPage()
     this.addressRefresh.depend()
 
     Session.set('address', {})
@@ -1216,14 +1190,22 @@ Template.address.onCreated(function addressCreated() {
     const address = FlowRouter.getParam('aId')
     if (!address) return
     const aId = upperCaseFirst(address)
-    Session.set('tokensHeld', [])
     if (!qrlAddressValidator.hexString(aId).result) return
+    this.tokenBalancesRefresh.depend()
+    Session.set('tokensHeld', [])
+    Session.set('tokenBalancesIssue', null)
+    Session.set('tokenBalancesStatus', 'loading')
 
-    getTokenBalances(aId, computation, () => {
-      const tokenLoading = document.getElementById('tokenBalancesLoading')
-      const nftLoading = document.getElementById('nftBalancesLoading')
-      if (tokenLoading) tokenLoading.style.display = 'none'
-      if (nftLoading) nftLoading.style.display = 'none'
+    getTokenBalances(aId, computation, (error, unresolved) => {
+      if (error || unresolved.length > 0) {
+        Session.set('tokenBalancesIssue', {
+          message: error ? 'Unable to load token balances.' : 'Some token details could not be loaded.',
+          unresolved,
+        })
+        Session.set('tokenBalancesStatus', 'failed')
+        return
+      }
+      Session.set('tokenBalancesStatus', 'loaded')
     })
   })
 })
