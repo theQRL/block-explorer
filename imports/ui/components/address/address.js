@@ -2,6 +2,7 @@
 /* ^^^ remove once testing complete
  */
 import JSONFormatter from 'json-formatter-js'
+import { Tracker } from 'meteor/tracker'
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra'
 import qrlAddressValidator from '@theqrl/validate-qrl-address'
 import _ from 'underscore'
@@ -14,47 +15,24 @@ import {
 } from '../../../startup/both/index.js'
 import './address.html'
 
-BigNumber.config({ EXPONENTIAL_AT: 1e+9 })
-let tokensHeld = []
+// Ignore work from invalidated routes, including retries queued before navigation.
+function callForAddress(computation, method, args, callback) {
+  const call = (canRetry) => {
+    if (computation.invalidated) return
+    Meteor.call(method, ...args, (error, result) => {
+      if (computation.invalidated) return
+      if (canRetry && error && error.error === 'too-many-requests') {
+        const delay = Number(error.details && error.details.timeToReset) || 1000
+        Meteor.setTimeout(() => call(false), delay + 50)
+        return
+      }
+      callback(error, result)
+    })
+  }
+  call(true)
+}
 
 // const ab2str = buf => String.fromCharCode.apply(null, new Uint16Array(buf))
-
-const addressResultsRefactor = (res) => {
-  // rewrite all arrays as strings (Q-addresses) or hex (hashes)
-  const output = res
-  /*
-  if (res.state) {
-    // output.state.address = ab2str(output.state.address)
-    output.state.txcount = output.state.transaction_hashes.length
-
-    // transactions
-    const transactions = []
-    output.state.transaction_hashes.forEach((value) => {
-      transactions.push({ txhash: Buffer.from(value).toString('hex') })
-    })
-    output.state.transactions = transactions
-
-    // pubhashes
-    const pubhashes = []
-    if (output.state.pubhashes) {
-      output.state.pubhashes.forEach((value) => {
-        const adjusted = Buffer.from(value).toString('hex')
-        pubhashes.push(adjusted)
-      })
-      output.state.pubhashes = pubhashes
-    }
-
-    // txhashes
-    const transactionHashes = []
-    output.state.transaction_hashes.forEach((value) => {
-      const adjusted = Buffer.from(value).toString('hex')
-      transactionHashes.push(adjusted)
-    })
-    output.state.transaction_hashes = transactionHashes
-  }
-  */
-  return output
-}
 
 async function OTS(obj) {
   // console.log('OTS function called with:', obj)
@@ -94,7 +72,7 @@ async function OTS(obj) {
   }
 }
 
-function loadAddressTransactions(aId, page) {
+function loadAddressTransactions(aId, page, computation) {
   Session.set('addressTransactions', [])
   Session.set('loadingTransactions', true)
   const addresstx = anyAddressToRaw(aId)
@@ -110,7 +88,7 @@ function loadAddressTransactions(aId, page) {
   }
 
   const finish = (requestForSlaves) => {
-    Meteor.call('getSlavesByAddress', requestForSlaves, (errSlaves, resSlaves) => {
+    callForAddress(computation, 'getSlavesByAddress', [requestForSlaves], (errSlaves, resSlaves) => {
       if (!errSlaves) {
         Session.set('slaves', resSlaves)
       }
@@ -125,7 +103,7 @@ function loadAddressTransactions(aId, page) {
       page_number: pageNumber,
     }
 
-    Meteor.call('getTransactionsByAddress', request, (err, res) => {
+    callForAddress(computation, 'getTransactionsByAddress', [request], (err, res) => {
       const txList = (res && Array.isArray(res.transactions_detail)) ? res.transactions_detail : []
       const addressState = Session.get('address')
       const txCount = addressState && addressState.state
@@ -154,12 +132,13 @@ function loadAddressTransactions(aId, page) {
   fetchPage(page, true)
 }
 
-const getTokenBalances = (getAddress, callback) => {
+const getTokenBalances = (getAddress, computation, callback) => {
+  const tokensHeld = []
   const request = {
     address: anyAddressToRaw(getAddress),
   }
 
-  Meteor.call('getFullAddressState', request, (err, res) => {
+  callForAddress(computation, 'getFullAddressState', [request], (err, res) => {
     if (err) {
       // TODO - Error handling
     } else {
@@ -167,6 +146,8 @@ const getTokenBalances = (getAddress, callback) => {
       // eslint-disable-next-line
       if (res.state.address !== '') {
         const tokenKeys = Object.keys(res.state.tokens)
+
+        if (tokenKeys.length === 0) callback()
 
         // Limit the number of concurrent getObject calls to prevent backend overload
         const maxConcurrentCalls = 5
@@ -194,7 +175,7 @@ const getTokenBalances = (getAddress, callback) => {
             query: Buffer.from(tokenData.tokenHash, 'hex'),
           }
 
-          Meteor.call('getObject', req, (objErr, objRes) => {
+          callForAddress(computation, 'getObject', [req], (objErr, objRes) => {
             activeCalls--
             processedTokens++
 
@@ -211,7 +192,8 @@ const getTokenBalances = (getAddress, callback) => {
                 thisToken.hash = tokenData.tokenHash
                 thisToken.name = bytesToString(tokenDetails.name)
                 thisToken.symbol = bytesToString(tokenDetails.symbol) // eslint-disable-next-line
-                thisToken.balance = tokenData.tokenBalance / Math.pow(10, tokenDetails.decimals)
+                thisToken.balance = new BigNumber(tokenData.tokenBalance)
+                  .shiftedBy(-Number(tokenDetails.decimals)).toFixed()
                 let nft = {}
                 const symbol = Buffer.from(tokenDetails.symbol).toString(
                   'hex',
@@ -289,10 +271,8 @@ const otsParse = (response, totalSignatures) => {
 
   // Parse OTS Bitfield, and grab the lowest unused key
   const newOtsBitfield = {}
-  let thisOtsBitfield = []
-  if (response.ots_bitfield_by_page[0].ots_bitfield !== undefined) {
-    thisOtsBitfield = response.ots_bitfield_by_page[0].ots_bitfield
-  }
+  const firstPage = response.ots_bitfield_by_page && response.ots_bitfield_by_page[0]
+  const thisOtsBitfield = (firstPage && firstPage.ots_bitfield) || []
 
   // console.log('thisOtsBitfield:', thisOtsBitfield)
 
@@ -329,108 +309,63 @@ const otsParse = (response, totalSignatures) => {
   return ots
 }
 
-const renderAddressBlock = () => {
-  const aId = upperCaseFirst(FlowRouter.getParam('aId'))
-  let tPage = FlowRouter.getParam('tPage')
-  tPage = parseInt(tPage, 10)
-  if (!tPage) { tPage = 1 }
-  // TODO: validate aId before constructing Method call
-  if (aId) {
-    // Set loading state
-    Session.set('addressLoading', true)
-    const validate = qrlAddressValidator.hexString(aId)
-    if (validate.result === false) {
+const renderAddressBlock = (aId, page, computation) => {
+  Session.set('addressLoading', true)
+  const validation = qrlAddressValidator.hexString(aId)
+  if (!validation.result) {
+    Session.set('address', { error: 'Invalid address', id: aId })
+    Session.set('addressLoading', false)
+    return
+  }
+
+  const request = { address: anyAddressToRaw(aId) }
+  const isMultiSig = validation.sig.type === 'MULTISIG'
+  const method = isMultiSig ? 'getMultiSigAddressState' : 'getAddressState'
+  callForAddress(computation, method, [request], (error, result) => {
+    if (error || !result || !result.state) {
+      Session.set('address', { error: error || 'Missing address state', id: aId })
       Session.set('addressLoading', false)
       return
     }
-    const req = {
-      address: anyAddressToRaw(aId),
+
+    const { state } = result
+    const balance = new BigNumber(state.balance).dividedBy(SHOR_PER_QUANTA)
+    state.balance = isMultiSig ? balance.toFixed() : balance.toFixed(9)
+    state.address = state.address || aId
+    if (isMultiSig) {
+      Session.set('address', result)
+      Session.set('addressLoading', false)
+      return
     }
-    if (validate.sig.type === 'MULTISIG') {
-      Meteor.call('getMultiSigAddressState', req, (err, res) => {
-        Session.set('addressLoading', false)
-        if (err) {
-          Session.set('address', { error: err, id: aId })
-        } else {
-          // console.log(res)
-          if (!(res.state.address)) {
-            res.state.address = aId
-          }
-          let bal = new BigNumber(res.state.balance)
-          bal = bal.div(SHOR_PER_QUANTA)
-          res.state.balance = bal.toString()
-          Session.set('address', addressResultsRefactor(res))
-        }
-      })
-    } else {
-      Meteor.call('getAddressState', req, (err, res) => {
-        if (err) {
-          Session.set('addressLoading', false)
-          Session.set('address', { error: err, id: aId })
-        } else {
-          if (res) {
-            res.state.balance = (parseInt(res.state.balance, 10) / SHOR_PER_QUANTA).toFixed(9)
-            if (!(res.state.address)) {
-              res.state.address = aId
-            }
-            if (parseInt(res.state.txcount, 10) === 0 && parseInt(res.state.nonce, 10) === 0) {
-              res.state.empty_warning = true
-            } else {
-              res.state.empty_warning = false
-            }
-          }
 
-          req.page_from = 1
-          req.page_count = 1
-          req.unused_ots_index_from = 0
+    state.empty_warning = parseInt(state.txcount, 10) === 0 && parseInt(state.nonce, 10) === 0
+    const numPages = Math.ceil(state.transaction_hash_count / 10)
+    const pages = Array.from({ length: numPages }, (_unused, index) => ({
+      number: index + 1,
+      from: (index * 10) + 1,
+      to: (index + 1) * 10,
+    }))
+    Session.set('address', result)
+    Session.set('pages', pages)
+    loadAddressTransactions(aId, page, computation)
+    Session.set('addressLoading', false)
 
-          Meteor.call('getOTS', req, (error, result) => {
-            Session.set('addressLoading', false)
-            if (error) {
-              console.error('OTS API error:', error)
-              Session.set('address', { error, id: aId })
-            } else {
-              // console.log('OTS API result:', result)
-              const ots = otsParse(result, qrlAddressValidator.hexString(res.state.address).sig.number)
-              // console.log('Parsed OTS:', ots)
-              res.ots = ots
-              res.ots.keysConsumed = res.state.used_ots_key_count
-
-              // generate OTS tracker HTML
-              OTS(res.ots.keys)
-
-              Session.set('address', addressResultsRefactor(res))
-              Session.set('fetchedTx', false)
-              const numPages = Math.ceil(res.state.transaction_hash_count / 10)
-              const pages = []
-              while (pages.length !== numPages) {
-                const pageNumber = pages.length + 1
-                pages.push({
-                  number: pageNumber,
-                  from: ((pageNumber - 1) * 10) + 1,
-                  to: pageNumber * 10,
-                })
-              }
-              // let txArray = null
-              Session.set('pages', pages)
-              Session.set('active', tPage)
-              // const startIndex = (tPage - 1) * 10
-              // txArray = res.state.transactions.reverse().slice(startIndex, startIndex + 10)
-              Session.set('fetchedTx', false)
-              Session.set('loadingTransactions', true)
-              loadAddressTransactions(aId, tPage)
-            }
-          })
-        }
-      })
+    const otsRequest = {
+      address: request.address, page_from: 1, page_count: 1, unused_ots_index_from: 0,
     }
-  }
-  Meteor.call('QRLvalue', (err, res) => {
-    if (err) {
-      Session.set('qrl', 'Error getting value from API')
-    } else {
-      Session.set('qrl', res)
-    }
+    callForAddress(computation, 'getOTS', [otsRequest], (otsError, otsResult) => {
+      if (otsError) {
+        console.error('OTS API error:', otsError)
+        Session.set('OTStracker', { error: 'Unable to load OTS data' })
+        return
+      }
+      const ots = otsParse(otsResult, validation.sig.number)
+      const address = Session.get('address')
+      ots.keysConsumed = state.used_ots_key_count
+      address.ots = ots
+      Session.set('address', address)
+      OTS(ots.keys)
+    })
   })
 }
 
@@ -473,7 +408,7 @@ Template.address.helpers({
     try {
       const address = Session.get('address')
       if (Session.get('address').error) {
-        return { found: false, parameter: FlowRouter.getParam('aId') }
+        return { found: false, parameter: address.id }
       }
       if (address !== undefined) {
         if (address.state !== undefined) {
@@ -632,7 +567,7 @@ Template.address.helpers({
   },
   coinbaseValue() {
     if (this.tx && this.tx.coinbase) {
-      return this.tx.coinbase.amount / SHOR_PER_QUANTA
+      return new BigNumber(this.tx.coinbase.amount).dividedBy(SHOR_PER_QUANTA).toFixed()
     }
     return 0
   },
@@ -679,13 +614,13 @@ Template.address.helpers({
       const a = Session.get('address').state.address
       const outputs = tx.transfer
       if (outputs) {
-        let amount = 0
+        let amount = new BigNumber(0)
         _.each(outputs.addrs_to, (element, key) => {
           if (element === a) {
-            amount += outputs.amounts[key] / SHOR_PER_QUANTA
+            amount = amount.plus(outputs.amounts[key])
           }
         })
-        return amount
+        return amount.dividedBy(SHOR_PER_QUANTA).toFixed()
       }
       return ''
     } catch (e) {
@@ -698,16 +633,14 @@ Template.address.helpers({
     }
     const a = Session.get('address').state.address
     const outputs = tx.transfer_token ? tx.transfer_token.addrs_to : null
-    let amount = 0
+    let amount = new BigNumber(0)
     if (outputs) {
       _.each(outputs, (element, key) => {
         if (element === a) {
-          amount
-          += tx.transfer_token.amounts[key]
-          / 10 ** parseInt(tx.token.decimals, 10)
+          amount = amount.plus(tx.transfer_token.amounts[key])
         }
       })
-      return `${amount} ${tx.token.symbol}`
+      return `${amount.shiftedBy(-Number(tx.token.decimals)).toFixed()} ${tx.token.symbol}`
     }
     return ''
   },
@@ -718,7 +651,7 @@ Template.address.helpers({
         const a = new BigNumber(outputs.transfer.amounts[key])
         result.push({
           to: element,
-          amount: a.dividedBy(SHOR_PER_QUANTA).toString(),
+          amount: a.dividedBy(SHOR_PER_QUANTA).toFixed(),
         })
       })
     }
@@ -731,7 +664,7 @@ Template.address.helpers({
       _.each(outputs.amounts, (element) => {
         amount = amount.plus(element)
       })
-      return amount.dividedBy(SHOR_PER_QUANTA).toString()
+      return amount.dividedBy(SHOR_PER_QUANTA).toFixed()
     }
     return ''
   },
@@ -1001,7 +934,7 @@ Template.address.helpers({
       _.each(i.multi_sig_spend.amounts, (a) => {
         sum = sum.plus(a)
       })
-      return sum.dividedBy(SHOR_PER_QUANTA).toNumber()
+      return sum.dividedBy(SHOR_PER_QUANTA).toFixed()
     } catch (error) {
       return null
     }
@@ -1142,9 +1075,8 @@ Template.address.events({
       }
     }
   },
-  'click .refresh': () => {
-    Session.set('address', {})
-    renderAddressBlock()
+  'click .refresh': (event, instance) => {
+    instance.addressRefresh.changed()
   },
   'click .close': () => {
     const messages = document.querySelectorAll('.message')
@@ -1157,39 +1089,20 @@ Template.address.events({
     switchToTransactionsTab()
   },
   'click button[qrl-data]': (event) => {
-    let b = 0
-    Session.set('addressTransactions', [])
-    if (parseInt(event.target.textContent, 10)) {
-      b = parseInt(event.target.textContent, 10)
-      Session.set('active', b)
-    } else {
-      const a = event.target.getAttribute('qrl-data')
-      b = Session.get('active')
-      const c = Session.get('pages').length
-      if (a === 'forward') {
-        b += 1
-      }
-      if (a === 'back') {
-        b -= 1
-      }
-      if (b > c) {
-        b = c
-      }
-      if (b < 1) {
-        b = 1
-      }
+    const button = event.currentTarget
+    const direction = button.getAttribute('qrl-data')
+    let page = parseInt(direction, 10)
+    if (direction === 'forward') page = Session.get('active') + 1
+    if (direction === 'back') page = Session.get('active') - 1
+    if (page >= 1 && page <= Session.get('pages').length) {
+      FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${page}`)
     }
-    Session.set('active', b)
-    Session.set('fetchedTx', false)
-    const loading = document.getElementById('loadingTransactions')
-    if (loading) loading.style.display = 'block'
-    FlowRouter.go(`/a/${FlowRouter.getParam('aId')}/${b}`)
-    window.scrollTo(0, 0)
   },
   'click #clickHelp': () => {
     window.open('https://docs.theqrl.org', '_blank')
   },
   'click .transactionRecord': (event) => {
+    if (event.target.closest('a')) return
     let route = ''
     const links = event.currentTarget.querySelectorAll('a[href^="/tx/"]')
     if (links.length > 0) {
@@ -1267,48 +1180,62 @@ Template.address.events({
   },
 })
 
-Template.address.onCreated(() => {
-  Session.set('address', {})
-  if (FlowRouter.getParam('aId')) {
-    Session.set('addressLoading', true)
-  }
+Template.address.onCreated(function addressCreated() {
+  this.addressRefresh = new Tracker.Dependency()
+  Session.set('qrl', 0)
+
+  this.autorun((computation) => {
+    callForAddress(computation, 'QRLvalue', [], (err, res) => {
+      if (err) {
+        Session.set('qrl', 'Error getting value from API')
+      } else {
+        Session.set('qrl', res)
+      }
+    })
+  })
+
+  this.autorun((computation) => {
+    const address = FlowRouter.getParam('aId')
+    if (!address) return
+    const aId = upperCaseFirst(address)
+    const page = Math.max(1, parseInt(FlowRouter.getParam('tPage'), 10) || 1)
+    this.addressRefresh.depend()
+
+    Session.set('address', {})
+    Session.set('addressTransactions', [])
+    Session.set('pages', [])
+    Session.set('active', page)
+    Session.set('fetchedTx', false)
+    Session.set('loadingTransactions', false)
+    Session.set('slaves', [])
+    Session.set('OTStracker', {})
+    renderAddressBlock(aId, page, computation)
+  })
+
+  this.autorun((computation) => {
+    const address = FlowRouter.getParam('aId')
+    if (!address) return
+    const aId = upperCaseFirst(address)
+    Session.set('tokensHeld', [])
+    if (!qrlAddressValidator.hexString(aId).result) return
+
+    getTokenBalances(aId, computation, () => {
+      const tokenLoading = document.getElementById('tokenBalancesLoading')
+      const nftLoading = document.getElementById('nftBalancesLoading')
+      if (tokenLoading) tokenLoading.style.display = 'none'
+      if (nftLoading) nftLoading.style.display = 'none'
+    })
+  })
 })
 
 Template.address.onRendered(() => {
-  // Initialize copySuccess session variable
   Session.set('copySuccess', false)
 
-  // Initialize Lucide icons for this template
   setTimeout(() => {
     if (window.reinitializeLucideIcons) {
       window.reinitializeLucideIcons()
     }
   }, 200)
-
-  Tracker.autorun(() => {
-    FlowRouter.watchPathChange()
-    Session.set('address', {})
-    Session.set('addressTransactions', [])
-    Session.set('qrl', 0)
-    Session.set('pages', [])
-    Session.set('active', 1)
-    Session.set('fetchedTx', false)
-    Session.set('slaves', [])
-    if (FlowRouter.getParam('aId')) {
-      renderAddressBlock()
-    }
-  })
-
-  tokensHeld = []
-  Session.set('tokensHeld', [])
-
-  // Get Tokens and Balances
-  getTokenBalances(upperCaseFirst(FlowRouter.getParam('aId')), () => {
-    const tokenLoading = document.getElementById('tokenBalancesLoading')
-    const nftLoading = document.getElementById('nftBalancesLoading')
-    if (tokenLoading) tokenLoading.style.display = 'none'
-    if (nftLoading) nftLoading.style.display = 'none'
-  })
 
   // Mobile touch tooltip functionality
   const balanceElement = document.querySelector('[data-tooltip]')
